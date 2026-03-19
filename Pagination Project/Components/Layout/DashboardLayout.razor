@@ -1,0 +1,114 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage SessionStorage
+
+<div class="dashboard-layout">
+    <div class="sidebar-overlay @(sidebarOpen ? "show" : "")" @onclick="CerrarSidebar"></div>
+
+    <aside class="sidebar @(sidebarOpen ? "open" : "closed")">
+        <div class="sidebar-header">
+            <div class="brand-block">
+                <h3>📚 BibliotecaApp</h3>
+                <p>Panel de Control</p>
+            </div>
+
+            <button type="button" class="sidebar-close" @onclick="CerrarSidebar" title="Cerrar menú">
+                ✕
+            </button>
+        </div>
+
+        <nav class="sidebar-menu">
+            <NavLink href="/dashboard" Match="NavLinkMatch.All" class="menu-link">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">Dashboard</span>
+            </NavLink>
+
+            <NavLink href="/usuarios" class="menu-link">
+                <span class="menu-icon">👥</span>
+                <span class="menu-text">Usuarios</span>
+            </NavLink>
+
+            <NavLink href="/empleados" class="menu-link">
+                <span class="menu-icon">👤</span>
+                <span class="menu-text">Empleados</span>
+            </NavLink>
+
+            <NavLink href="/libros" class="menu-link">
+                <span class="menu-icon">📖</span>
+                <span class="menu-text">Libros</span>
+            </NavLink>
+
+            <NavLink href="/evaluaciones" class="menu-link">
+                <span class="menu-icon">⭐</span>
+                <span class="menu-text">Evaluaciones</span>
+            </NavLink>
+
+            <NavLink href="/asignaciones" class="menu-link">
+                <span class="menu-icon">📌</span>
+                <span class="menu-text">Asignaciones</span>
+            </NavLink>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-left">
+                <button type="button" class="menu-toggle" @onclick="ToggleSidebar" title="Mostrar u ocultar menú">
+                    ☰
+                </button>
+
+                <div class="header-title">
+                    <h1>BibliotecaApp</h1>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <span class="user-name">@nombreUsuario</span>
+                <button type="button" class="logout-btn" @onclick="CerrarSesion">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <section class="page-content">
+            @Body
+        </section>
+    </main>
+</div>
+
+@code {
+    private string nombreUsuario = "Administrador";
+    private bool sidebarOpen = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await SessionStorage.GetAsync<string>("Name");
+
+            if (result.Success && !string.IsNullOrWhiteSpace(result.Value))
+                nombreUsuario = result.Value;
+        }
+        catch
+        {
+            nombreUsuario = "Administrador";
+        }
+    }
+
+    private void ToggleSidebar()
+    {
+        sidebarOpen = !sidebarOpen;
+    }
+
+    private void CerrarSidebar()
+    {
+        sidebarOpen = false;
+    }
+
+    private async Task CerrarSesion()
+    {
+        await SessionStorage.DeleteAsync("UsuarioId");
+        await SessionStorage.DeleteAsync("Username");
+        await SessionStorage.DeleteAsync("Name");
+
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

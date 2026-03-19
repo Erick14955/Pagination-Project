@@ -61,11 +61,14 @@ namespace Pagination_Project.Controllers
                 });
             }
 
+            // ✅ LOGIN OK
             return Ok(new LoginResponse
             {
                 Success = true,
                 Message = "Successful login.",
-                Username = user.Username
+                UsuarioId = user.ID,        // 🔥 UUID
+                Username = user.Username,
+                Name = user.Name            // 🔥 Nombre real
             });
         }
     }

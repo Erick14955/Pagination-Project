@@ -24,7 +24,7 @@ namespace Pagination_Project.Services
             if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
                 throw new InvalidOperationException("Supabase configuration is not defined.");
 
-            var url = $"{baseUrl}/rest/v1/Users?Username=eq.{Uri.EscapeDataString(username)}&select=Username,Password";
+            var url = $"{baseUrl}/rest/v1/Users?Username=eq.{Uri.EscapeDataString(username)}&select=Username,Password, ID, Name&limit=1";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("apikey", apiKey);
