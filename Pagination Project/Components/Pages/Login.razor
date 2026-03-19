@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 @layout Pagination_Project.Components.Layout.LoginLayout
 @rendermode InteractiveServer
+@inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage SessionStorage
 
 <PageTitle>Iniciar Sesión</PageTitle>
 
@@ -65,7 +66,11 @@
 
                 if (result?.Success == true)
                 {
-                    Navigation.NavigateTo("/Home");
+                    await SessionStorage.SetAsync("UsuarioId", result.UsuarioId);
+                    await SessionStorage.SetAsync("Username", result.Username);
+                    await SessionStorage.SetAsync("Name", result.Name);
+
+                    Navigation.NavigateTo("/dashboard", forceLoad: true);
                     return;
                 }
 

@@ -4,6 +4,8 @@
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public string? Username { get; set; }
+        public Guid UsuarioId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
     }
 }

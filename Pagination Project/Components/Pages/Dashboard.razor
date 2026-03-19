@@ -1,0 +1,184 @@
+﻿@page "/dashboard"
+@layout Pagination_Project.Components.Layout.DashboardLayout
+@rendermode InteractiveServer
+@using Pagination_Project.Models
+
+<PageTitle>Dashboard - BibliotecaApp</PageTitle>
+
+<div class="dashboard-page">
+    <div class="dashboard-header">
+        <div>
+            <h2 class="dashboard-title">Dashboard General</h2>
+            <p class="dashboard-subtitle">Resumen rápido del sistema y listado actual de libros asignados.</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">Total Usuarios</span>
+                <div class="stat-number">@stats.TotalUsers</div>
+            </div>
+            <div class="stat-icon blue">👥</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">Total Empleados</span>
+                <div class="stat-number">@stats.TotalEmployees</div>
+            </div>
+            <div class="stat-icon indigo">👤</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">Total Libros</span>
+                <div class="stat-number">@stats.TotalBooks</div>
+            </div>
+            <div class="stat-icon amber">📚</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">Total Evaluaciones</span>
+                <div class="stat-number">@stats.TotalEvaluations</div>
+            </div>
+            <div class="stat-icon purple">⭐</div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <div>
+                <h3>Libros Asignados</h3>
+                <p>Vista preliminar del listado de asignaciones activas.</p>
+            </div>
+
+            <div class="section-badge">
+                @assignedBooks.Count registros
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>KGEN Code</th>
+                        <th>LSA Code</th>
+                        <th>Libro</th>
+                        <th>Fecha Asignación</th>
+                        <th>Next Stage</th>
+                        <th>Etapa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (assignedBooks.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="empty-row">
+                                No hay libros asignados para mostrar.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in assignedBooks)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="employee-cell">
+                                        <div class="employee-avatar">👤</div>
+                                        <div>
+                                            <div class="employee-name">@item.EmployeeName</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="code-pill">@item.KgenCode</span>
+                                </td>
+                                <td>
+                                    <span class="code-pill secondary">@item.LsaCode</span>
+                                </td>
+                                <td>@item.BookName</td>
+                                <td>@item.AssignmentDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.NextStageDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <span class="stage-badge @GetStageClass(item.Stage)">
+                                        @item.Stage
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private DashboardStatsDto stats = new()
+    {
+        TotalUsers = 24,
+        TotalEmployees = 18,
+        TotalBooks = 126,
+        TotalEvaluations = 42
+    };
+
+    private List<AssignedBookViewModel> assignedBooks = new()
+    {
+        new AssignedBookViewModel
+        {
+            EmployeeName = "Juan Pérez",
+            KgenCode = "KGEN-00125",
+            LsaCode = "LSA-7781",
+            BookName = "Matemática Básica I",
+            AssignmentDate = DateTime.Today.AddDays(-10),
+            NextStageDate = DateTime.Today.AddDays(5),
+            Stage = "Activa"
+        },
+        new AssignedBookViewModel
+        {
+            EmployeeName = "María Rodríguez",
+            KgenCode = "KGEN-00218",
+            LsaCode = "LSA-8894",
+            BookName = "Lengua Española Avanzada",
+            AssignmentDate = DateTime.Today.AddDays(-20),
+            NextStageDate = DateTime.Today.AddDays(-1),
+            Stage = "Vencida"
+        },
+        new AssignedBookViewModel
+        {
+            EmployeeName = "Carlos Martínez",
+            KgenCode = "KGEN-00402",
+            LsaCode = "LSA-9910",
+            BookName = "Ciencias Naturales",
+            AssignmentDate = DateTime.Today.AddDays(-3),
+            NextStageDate = DateTime.Today.AddDays(15),
+            Stage = "Pendiente"
+        }
+    };
+
+    private string GetStageClass(string stage)
+    {
+        return stage switch
+        {
+            "Activa" => "stage-active",
+            "Vencida" => "stage-expired",
+            "Pendiente" => "stage-pending",
+            _ => "stage-pending"
+        };
+    }
+
+    public class AssignedBookViewModel
+    {
+        public string EmployeeName { get; set; } = string.Empty;
+        public string KgenCode { get; set; } = string.Empty;
+        public string LsaCode { get; set; } = string.Empty;
+        public string BookName { get; set; } = string.Empty;
+        public DateTime AssignmentDate { get; set; }
+        public DateTime NextStageDate { get; set; }
+        public string Stage { get; set; } = string.Empty;
+    }
+}
