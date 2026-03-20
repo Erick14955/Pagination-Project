@@ -25,18 +25,20 @@ namespace Pagination_Project.Services
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new Exception("No existe Supabase:ApiKey en appsettings.json.");
 
-            var url = $"{baseUrl}/rest/v1/{tableName}?select=*";
+            var url = $"{baseUrl}/rest/v1/{tableName}?select=ID";
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
             request.Headers.Add("apikey", apiKey);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             request.Headers.Add("Prefer", "count=exact");
 
             using var response = await _httpClient.SendAsync(request);
-            var body = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Tabla {tableName}: {response.StatusCode} - {body}");
+            }
 
             if (response.Headers.TryGetValues("Content-Range", out var values))
             {
