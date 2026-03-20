@@ -2,6 +2,8 @@
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
 @using Pagination_Project.Models
+@using Pagination_Project.Services
+@inject HttpClient Http
 
 <PageTitle>Dashboard - BibliotecaApp</PageTitle>
 
@@ -13,39 +15,46 @@
         </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-info">
-                <span class="stat-label">Total Usuarios</span>
-                <div class="stat-number">@stats.TotalUsers</div>
+    @if (loading)
+    {
+        <p>Cargando estadísticas...</p>
+    }
+    else
+    {
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Total Usuarios</span>
+                    <div class="stat-number">@stats?.TotalUsers</div>
+                </div>
+                <div class="stat-icon blue">👥</div>
             </div>
-            <div class="stat-icon blue">👥</div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-info">
-                <span class="stat-label">Total Empleados</span>
-                <div class="stat-number">@stats.TotalEmployees</div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Total Empleados</span>
+                    <div class="stat-number">@stats?.TotalEmployees</div>
+                </div>
+                <div class="stat-icon indigo">👤</div>
             </div>
-            <div class="stat-icon indigo">👤</div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-info">
-                <span class="stat-label">Total Libros</span>
-                <div class="stat-number">@stats.TotalBooks</div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Total Libros</span>
+                    <div class="stat-number">@stats?.TotalBooks</div>
+                </div>
+                <div class="stat-icon amber">📚</div>
             </div>
-            <div class="stat-icon amber">📚</div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-info">
-                <span class="stat-label">Total Evaluaciones</span>
-                <div class="stat-number">@stats.TotalEvaluations</div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Total Evaluaciones</span>
+                    <div class="stat-number">@stats?.TotalEvaluations</div>
+                </div>
+                <div class="stat-icon purple">⭐</div>
             </div>
-            <div class="stat-icon purple">⭐</div>
         </div>
-    </div>
+    }
 
     <div class="section-card">
         <div class="section-header">
@@ -118,13 +127,40 @@
 </div>
 
 @code {
-    private DashboardStatsDto stats = new()
+    private DashboardStatsDto stats = new();
+
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
     {
-        TotalUsers = 24,
-        TotalEmployees = 18,
-        TotalBooks = 126,
-        TotalEvaluations = 42
-    };
+        try
+        {
+            stats = await Http.GetFromJsonAsync<DashboardStatsDto>("api/dashboard/stats");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     try
+    //     {
+    //         stats = await Http.GetFromJsonAsync<DashboardStatsDto>("api/dashboard/stats");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error cargando stats: {ex.Message}");
+    //     }
+    // }
+    // private DashboardStatsDto stats = new()
+    // {
+    //     TotalUsers = await g("Users"),
+    //     TotalEmployees = await GetCountAsync("Employees"),
+    //     TotalBooks = await GetCountAsync("Books"),
+    //     TotalEvaluations = await GetCountAsync("Evaluations")
+    // };
 
     private List<AssignedBookViewModel> assignedBooks = new()
     {
