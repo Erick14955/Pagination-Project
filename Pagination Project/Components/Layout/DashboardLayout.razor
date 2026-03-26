@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Navigation
-@inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage SessionStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="dashboard-layout">
     <div class="sidebar-overlay @(sidebarOpen ? "show" : "")" @onclick="CerrarSidebar"></div>
@@ -17,37 +19,64 @@
             </button>
         </div>
 
-        <nav class="sidebar-menu">
-            <NavLink href="/dashboard" Match="NavLinkMatch.All" class="menu-link">
-                <span class="menu-icon">📊</span>
-                <span class="menu-text">Dashboard</span>
-            </NavLink>
+        <AuthorizeView>
+            <Authorized Context="auth">
+                <nav class="sidebar-menu">
+                    <NavLink href="/dashboard" Match="NavLinkMatch.All" class="menu-link">
+                        <span class="menu-icon">📊</span>
+                        <span class="menu-text">Dashboard</span>
+                    </NavLink>
 
-            <NavLink href="/usuarios" class="menu-link">
-                <span class="menu-icon">👥</span>
-                <span class="menu-text">Usuarios</span>
-            </NavLink>
+                    @if (TienePermiso(auth.User, "CreateUser") || TienePermiso(auth.User, "EditUser") || TienePermiso(auth.User, "DeleteUser"))
+                    {
+                        <NavLink href="/usuarios" class="menu-link">
+                            <span class="menu-icon">👥</span>
+                            <span class="menu-text">Usuarios</span>
+                        </NavLink>
+                    }
 
-            <NavLink href="/empleados" class="menu-link">
-                <span class="menu-icon">👤</span>
-                <span class="menu-text">Empleados</span>
-            </NavLink>
+                    @if (TienePermiso(auth.User, "CreateEmployees") || TienePermiso(auth.User, "EditEmployees") || TienePermiso(auth.User, "DeleteEmployees"))
+                    {
+                        <NavLink href="/empleados" class="menu-link">
+                            <span class="menu-icon">👤</span>
+                            <span class="menu-text">Empleados</span>
+                        </NavLink>
+                    }
 
-            <NavLink href="/libros" class="menu-link">
-                <span class="menu-icon">📖</span>
-                <span class="menu-text">Libros</span>
-            </NavLink>
+                    @if (TienePermiso(auth.User, "CreateBook") || TienePermiso(auth.User, "EditBook") || TienePermiso(auth.User, "DeleteBook") || TienePermiso(auth.User, "BooksView"))
+                    {
+                        <NavLink href="/libros" class="menu-link">
+                            <span class="menu-icon">📖</span>
+                            <span class="menu-text">Libros</span>
+                        </NavLink>
+                    }
 
-            <NavLink href="/evaluaciones" class="menu-link">
-                <span class="menu-icon">⭐</span>
-                <span class="menu-text">Evaluaciones</span>
-            </NavLink>
+                    @if (TienePermiso(auth.User, "QualifyBook"))
+                    {
+                        <NavLink href="/evaluaciones" class="menu-link">
+                            <span class="menu-icon">⭐</span>
+                            <span class="menu-text">Evaluaciones</span>
+                        </NavLink>
+                    }
 
-            <NavLink href="/asignaciones" class="menu-link">
-                <span class="menu-icon">📌</span>
-                <span class="menu-text">Asignaciones</span>
-            </NavLink>
-        </nav>
+                    @if (TienePermiso(auth.User, "AsignBook") || TienePermiso(auth.User, "ViewAssignations"))
+                    {
+                        <NavLink href="/asignaciones" class="menu-link">
+                            <span class="menu-icon">📌</span>
+                            <span class="menu-text">Asignaciones</span>
+                        </NavLink>
+                    }
+
+                    @if (TienePermiso(auth.User, "EditPermissionLevels"))
+                    {
+                        <NavLink href="/permisos" class="menu-link">
+                            <span class="menu-icon">🛡️</span>
+                            <span class="menu-text">Permisos</span>
+                        </NavLink>
+                    }
+                </nav>
+            </Authorized>
+        </AuthorizeView>
     </aside>
 
     <main class="main-content">
@@ -62,10 +91,22 @@
                 </div>
             </div>
 
-            <div class="user-info">
-                <span class="user-name">@nombreUsuario</span>
-                <button type="button" class="logout-btn" @onclick="CerrarSesion">Cerrar Sesión</button>
-            </div>
+            <AuthorizeView>
+                <Authorized Context="auth">
+                    <div class="user-info">
+                        <div class="user-badge">
+                            <div class="user-avatar">👤</div>
+                            <div class="user-details">
+                                <span class="user-name">@ObtenerNombre(auth.User)</span>
+                            </div>
+                        </div>
+
+                        <form method="post" action="/account/logout">
+                            <button type="submit" class="logout-btn">Cerrar Sesión</button>
+                        </form>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
         </header>
 
         <section class="page-content">
@@ -75,22 +116,13 @@
 </div>
 
 @code {
-    private string nombreUsuario = string.Empty;
     private bool sidebarOpen = true;
+    private ClaimsPrincipal? _usuario;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            var result = await SessionStorage.GetAsync<string>("Name");
-
-            if (result.Success && !string.IsNullOrWhiteSpace(result.Value))
-                nombreUsuario = result.Value;
-        }
-        catch
-        {
-            nombreUsuario = "Administrador";
-        }
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _usuario = authState.User;
     }
 
     private void ToggleSidebar()
@@ -103,12 +135,16 @@
         sidebarOpen = false;
     }
 
-    private async Task CerrarSesion()
+    private static bool TienePermiso(ClaimsPrincipal user, string claimType)
     {
-        await SessionStorage.DeleteAsync("UsuarioId");
-        await SessionStorage.DeleteAsync("Username");
-        await SessionStorage.DeleteAsync("Name");
+        return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
+    }
 
-        Navigation.NavigateTo("/login", forceLoad: true);
+    private static string ObtenerNombre(ClaimsPrincipal user)
+    {
+        return user.Identity?.Name
+               ?? user.FindFirst(ClaimTypes.Name)?.Value
+               ?? user.FindFirst("Username")?.Value
+               ?? "User";
     }
 }

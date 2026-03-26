@@ -3,6 +3,7 @@
     min-height: 100vh;
     background: #f3f5fa;
     position: relative;
+    overflow-x: hidden;
 }
 
 /* SIDEBAR */
@@ -10,7 +11,7 @@
     width: 280px;
     background: #16233b;
     color: #fff;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, width 0.3s ease;
     overflow: hidden;
     flex-shrink: 0;
     z-index: 1200;
@@ -114,6 +115,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 .top-header {
@@ -133,6 +135,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0;
 }
 
 .menu-toggle {
@@ -162,6 +165,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    min-width: 0;
 }
 
 .user-name {
@@ -179,6 +183,7 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
+    white-space: nowrap;
 }
 
     .logout-btn:hover {
@@ -187,6 +192,7 @@
 
 .page-content {
     padding: 24px;
+    overflow-x: hidden;
 }
 
 /* OVERLAY */
@@ -211,8 +217,14 @@
 
 /* MOBILE */
 @media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+    }
+
     .dashboard-layout {
-        display: block;
+        display: flex;
+        min-height: 100vh;
+        overflow-x: hidden;
     }
 
     .sidebar {
@@ -221,13 +233,16 @@
         left: 0;
         height: 100vh;
         width: 270px;
+        min-width: 270px;
         max-width: 82vw;
         transform: translateX(-100%);
+        z-index: 1200;
     }
 
         .sidebar.open {
             transform: translateX(0);
             width: 270px;
+            min-width: 270px;
         }
 
         .sidebar.closed {
@@ -246,6 +261,8 @@
 
     .main-content {
         width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .top-header {
@@ -262,18 +279,24 @@
 
     .header-title h1 {
         font-size: 23px;
+        line-height: 1.2;
     }
 
-    .user-info {
-        width: 100%;
-        justify-content: space-between;
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .user-name {
         font-size: 15px;
+        font-weight: 600;
+        color: #334155;
+        line-height: 1.2;
     }
 
-    .page-content {
-        padding: 16px;
+    .logout-btn {
+        padding: 10px 14px;
+        font-size: 14px;
     }
 }

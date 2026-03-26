@@ -1,9 +1,11 @@
 ﻿@page "/dashboard"
-@layout Pagination_Project.Components.Layout.DashboardLayout
-@rendermode InteractiveServer
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
 @using Pagination_Project.Models
 @using Pagination_Project.Services
-@inject HttpClient Http
+@inject IDashboardService DashboardService
+@layout Pagination_Project.Components.Layout.DashboardLayout
+@rendermode InteractiveServer
 
 <PageTitle>Dashboard - BibliotecaApp</PageTitle>
 
@@ -25,7 +27,7 @@
             <div class="stat-card">
                 <div class="stat-info">
                     <span class="stat-label">Total Usuarios</span>
-                    <div class="stat-number">@stats?.TotalUsers</div>
+                    <div class="stat-number">@stats.TotalUsers</div>
                 </div>
                 <div class="stat-icon blue">👥</div>
             </div>
@@ -33,7 +35,7 @@
             <div class="stat-card">
                 <div class="stat-info">
                     <span class="stat-label">Total Empleados</span>
-                    <div class="stat-number">@stats?.TotalEmployees</div>
+                    <div class="stat-number">@stats.TotalEmployees</div>
                 </div>
                 <div class="stat-icon indigo">👤</div>
             </div>
@@ -41,7 +43,7 @@
             <div class="stat-card">
                 <div class="stat-info">
                     <span class="stat-label">Total Libros</span>
-                    <div class="stat-number">@stats?.TotalBooks</div>
+                    <div class="stat-number">@stats.TotalBooks</div>
                 </div>
                 <div class="stat-icon amber">📚</div>
             </div>
@@ -49,7 +51,7 @@
             <div class="stat-card">
                 <div class="stat-info">
                     <span class="stat-label">Total Evaluaciones</span>
-                    <div class="stat-number">@stats?.TotalEvaluations</div>
+                    <div class="stat-number">@stats.TotalEvaluations</div>
                 </div>
                 <div class="stat-icon purple">⭐</div>
             </div>
@@ -60,7 +62,7 @@
         <div class="section-header">
             <div>
                 <h3>Libros Asignados</h3>
-                <p>Vista preliminar del listado de asignaciones activas.</p>
+                <p>Vista real del listado de asignaciones activas según la etapa del día.</p>
             </div>
 
             <div class="section-badge">
@@ -76,17 +78,16 @@
                         <th>KGEN Code</th>
                         <th>LSA Code</th>
                         <th>Libro</th>
-                        <th>Fecha Asignación</th>
-                        <th>Next Stage</th>
                         <th>Etapa</th>
+                        <th>Fecha Etapa</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (assignedBooks.Count == 0)
                     {
                         <tr>
-                            <td colspan="7" class="empty-row">
-                                No hay libros asignados para mostrar.
+                            <td colspan="6" class="empty-row">
+                                No hay libros asignados para mostrar hoy.
                             </td>
                         </tr>
                     }
@@ -110,13 +111,13 @@
                                     <span class="code-pill secondary">@item.LsaCode</span>
                                 </td>
                                 <td>@item.BookName</td>
-                                <td>@item.AssignmentDate.ToString("dd/MM/yyyy")</td>
-                                <td>@item.NextStageDate.ToString("dd/MM/yyyy")</td>
                                 <td>
-                                    <span class="stage-badge @GetStageClass(item.Stage)">
+@*                                     <span class="stage-badge @GetStageClass(item.Stage)">
                                         @item.Stage
-                                    </span>
+                                    </span> *@
+                                    @item.Stage
                                 </td>
+                                <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                             </tr>
                         }
                     }
@@ -127,15 +128,32 @@
 </div>
 
 @code {
-    private DashboardStatsDto stats = new();
-
+    private DashboardStatsDto stats = new DashboardStatsDto();
+    private List<AssignedBookDashboardDto> assignedBooks = new();
     private bool loading = true;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            stats = await Http.GetFromJsonAsync<DashboardStatsDto>("api/dashboard/stats");
+            var result = await DashboardService.GetDashboardSummaryAsync();
+
+            if (result is not null)
+            {
+                stats = result.Stats ?? new DashboardStatsDto();
+                assignedBooks = result.AssignedBooks ?? new List<AssignedBookDashboardDto>();
+            }
+            else
+            {
+                stats = new DashboardStatsDto();
+                assignedBooks = new List<AssignedBookDashboardDto>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            stats = new DashboardStatsDto();
+            assignedBooks = new List<AssignedBookDashboardDto>();
         }
         finally
         {
@@ -143,78 +161,17 @@
         }
     }
 
-    // protected override async Task OnInitializedAsync()
+    // private string GetStageClass(string stage)
     // {
-    //     try
+    //     return stage switch
     //     {
-    //         stats = await Http.GetFromJsonAsync<DashboardStatsDto>("api/dashboard/stats");
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Error cargando stats: {ex.Message}");
-    //     }
+    //         "Proof Extract" => "stage-active",
+    //         "Final Extract" => "stage-pending",
+    //         "Memo Extract" => "stage-pending",
+    //         "Dirxion Date" => "stage-active",
+    //         "Final PO Date" => "stage-expired",
+    //         "Shipping Date" => "stage-expired",
+    //         _ => "stage-pending"
+    //     };
     // }
-    // private DashboardStatsDto stats = new()
-    // {
-    //     TotalUsers = await g("Users"),
-    //     TotalEmployees = await GetCountAsync("Employees"),
-    //     TotalBooks = await GetCountAsync("Books"),
-    //     TotalEvaluations = await GetCountAsync("Evaluations")
-    // };
-
-    private List<AssignedBookViewModel> assignedBooks = new()
-    {
-        new AssignedBookViewModel
-        {
-            EmployeeName = "Juan Pérez",
-            KgenCode = "KGEN-00125",
-            LsaCode = "LSA-7781",
-            BookName = "Matemática Básica I",
-            AssignmentDate = DateTime.Today.AddDays(-10),
-            NextStageDate = DateTime.Today.AddDays(5),
-            Stage = "Activa"
-        },
-        new AssignedBookViewModel
-        {
-            EmployeeName = "María Rodríguez",
-            KgenCode = "KGEN-00218",
-            LsaCode = "LSA-8894",
-            BookName = "Lengua Española Avanzada",
-            AssignmentDate = DateTime.Today.AddDays(-20),
-            NextStageDate = DateTime.Today.AddDays(-1),
-            Stage = "Vencida"
-        },
-        new AssignedBookViewModel
-        {
-            EmployeeName = "Carlos Martínez",
-            KgenCode = "KGEN-00402",
-            LsaCode = "LSA-9910",
-            BookName = "Ciencias Naturales",
-            AssignmentDate = DateTime.Today.AddDays(-3),
-            NextStageDate = DateTime.Today.AddDays(15),
-            Stage = "Pendiente"
-        }
-    };
-
-    private string GetStageClass(string stage)
-    {
-        return stage switch
-        {
-            "Activa" => "stage-active",
-            "Vencida" => "stage-expired",
-            "Pendiente" => "stage-pending",
-            _ => "stage-pending"
-        };
-    }
-
-    public class AssignedBookViewModel
-    {
-        public string EmployeeName { get; set; } = string.Empty;
-        public string KgenCode { get; set; } = string.Empty;
-        public string LsaCode { get; set; } = string.Empty;
-        public string BookName { get; set; } = string.Empty;
-        public DateTime AssignmentDate { get; set; }
-        public DateTime NextStageDate { get; set; }
-        public string Stage { get; set; } = string.Empty;
-    }
 }
