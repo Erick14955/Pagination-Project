@@ -1,36 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pagination_Project.Services;
 
 namespace Pagination_Project.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/dashboard")]
+    [Authorize]
     public class DashboardController : ControllerBase
     {
-        private readonly SupabaseDashboardService _dashboardService;
+        private readonly IDashboardService _dashboardService;
 
-        public DashboardController(SupabaseDashboardService dashboardService)
+        public DashboardController(IDashboardService dashboardService)
         {
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("stats")]
-        public async Task<IActionResult> GetStats()
+        [HttpGet("summary")]
+        public async Task<IActionResult> GetSummary()
         {
-            try
-            {
-                var stats = await _dashboardService.GetDashboardStatsAsync();
-                return Ok(stats);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "Error interno cargando estadísticas.",
-                    detail = ex.Message,
-                    inner = ex.InnerException?.Message
-                });
-            }
+            var result = await _dashboardService.GetDashboardSummaryAsync();
+            return Ok(result);
         }
     }
 }

@@ -1,16 +1,7 @@
 ﻿@page "/"
 @page "/login"
-@using System.ComponentModel.DataAnnotations
-@using System.Net.Http.Headers
-@using System.Text.Json
-@using Isopoh.Cryptography.Argon2
-@inject HttpClient Http
 @inject NavigationManager Navigation
-@inject IConfiguration Configuration
-@inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage SessionStorage
 @layout Pagination_Project.Components.Layout.LoginLayout
-@rendermode InteractiveServer
-@using Pagination_Project.Models
 
 <PageTitle>Iniciar Sesión</PageTitle>
 
@@ -21,150 +12,52 @@
             <p>Pagination evaluation system</p>
         </div>
 
-        <EditForm Model="_model" OnValidSubmit="ValidarLogin" FormName="LoginForm">
-            <DataAnnotationsValidator />
+        <form method="post" action="/account/login">
+            <input type="hidden" name="ReturnUrl" value="/dashboard" />
 
             <div class="form-group">
                 <label style="text-align: center;">User</label>
-                <InputText @bind-Value="_model.Username" class="form-control" placeholder="Nombre" maxlength="20" style="text-align: center;" />
-                <ValidationMessage For="@(() => _model.Username)" />
+                <input name="Username"
+                       class="form-control"
+                       placeholder="Nombre"
+                       maxlength="50"
+                       autocomplete="username"
+                       style="text-align: center;" />
             </div>
 
             <div class="form-group">
                 <label style="text-align: center;">Password</label>
-                <InputText @bind-Value="_model.Password" type="password" class="form-control" placeholder="••••••••" maxlength="15" style="text-align: center;" />
-                <ValidationMessage For="@(() => _model.Password)" />
+                <input name="Password"
+                       type="password"
+                       class="form-control"
+                       placeholder="••••••••"
+                       maxlength="100"
+                       autocomplete="current-password"
+                       style="text-align: center;" />
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            @if (_mostrarError)
             {
                 <div class="validation-message" style="margin-bottom:12px;">
-                    @_errorMessage
+                    Incorrect user or password.
                 </div>
             }
 
-            <button type="submit" class="btn-login" disabled="@_loading">
-                @(_loading ? "Validating..." : "Login")
+            <button type="submit" class="btn-login">
+                Login
             </button>
-        </EditForm>
+        </form>
     </div>
 </div>
 
 @code {
-    private LoginRequest _model = new();
-    private bool _loading;
-    private string? _errorMessage;
+    private bool _mostrarError;
 
-    private async Task ValidarLogin()
+    protected override void OnInitialized()
     {
-        _loading = true;
-        _errorMessage = null;
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        try
-        {
-            var baseUrl = Configuration["Supabase:BaseUrl"];
-            var apiKey = Configuration["Supabase:ApiKey"];
-
-            if (string.IsNullOrEmpty(_model.Username) || string.IsNullOrEmpty(_model.Password))
-            {
-                _errorMessage = "Please enter both username and password.";
-                return;
-            }
-
-            var username = Uri.EscapeDataString(_model.Username.Trim());
-            var url = $"{baseUrl}/rest/v1/Users?Username=eq.{username}&select=ID,Username,Name,Password&limit=1";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("apikey", apiKey);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            using var response = await Http.SendAsync(request);
-            var json = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _errorMessage = $"Error consultando usuario: {response.StatusCode}";
-                return;
-            }
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-            var usuarios = JsonSerializer.Deserialize<List<SupabaseUserDto>>(json, options) ?? new();
-
-            var usuario = usuarios.FirstOrDefault();
-
-            if (usuario is null)
-            {
-                _errorMessage = "Incorrect user or password.";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(usuario.Password))
-            {
-                _errorMessage = "El usuario no tiene una contraseña válida.";
-                return;
-            }
-
-            bool passwordValida;
-
-            try
-            {
-                passwordValida = Argon2.Verify(usuario.Password, _model.Password);
-            }
-            catch
-            {
-                _errorMessage = "No fue posible validar la contraseña almacenada.";
-                return;
-            }
-
-            if (!passwordValida)
-            {
-                _errorMessage = "Incorrect user or password.";
-                return;
-            }
-
-            await SessionStorage.SetAsync("UsuarioId", usuario.ID);
-            await SessionStorage.SetAsync("Username", usuario.Username);
-            await SessionStorage.SetAsync("Name", usuario.Name);
-
-            Navigation.NavigateTo("/dashboard", forceLoad: true);
-
-
-            // var response = await Http.PostAsJsonAsync("api/auth/login", _model);
-
-            // if (response.IsSuccessStatusCode)
-            // {
-            //     var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-
-            //     if (result?.Success == true)
-            //     {
-            //         await SessionStorage.SetAsync("UsuarioId", result.UsuarioId);
-            //         await SessionStorage.SetAsync("Username", result.Username);
-            //         await SessionStorage.SetAsync("Name", result.Name);
-
-            //         Navigation.NavigateTo("/dashboard", forceLoad: true);
-            //         return;
-            //     }
-
-            //     _errorMessage = result?.Message ?? "Unable to log in.";
-            // }
-            // else
-            // {
-            //     var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            //     _errorMessage = result?.Message ?? "Incorrect user or password.";
-            // }
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"An error occurred: {ex.Message}";
-        }
-        finally
-        {
-            _loading = false;
-        }
+        _mostrarError = query.ContainsKey("error");
     }
 }

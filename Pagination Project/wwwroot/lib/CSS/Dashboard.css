@@ -2,12 +2,17 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 }
 
 .dashboard-title {
@@ -15,12 +20,14 @@
     font-size: 30px;
     font-weight: 800;
     color: #14213d;
+    line-height: 1.1;
 }
 
 .dashboard-subtitle {
     margin: 6px 0 0 0;
     color: #64748b;
     font-size: 15px;
+    line-height: 1.5;
 }
 
 .stats-grid {
@@ -36,6 +43,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 14px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     border: 1px solid #e8edf5;
     min-height: 130px;
@@ -45,12 +53,14 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-width: 0;
 }
 
 .stat-label {
     color: #64748b;
     font-size: 15px;
     font-weight: 600;
+    line-height: 1.35;
 }
 
 .stat-number {
@@ -93,6 +103,8 @@
     border: 1px solid #e8edf5;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
 }
 
 .section-header {
@@ -109,12 +121,14 @@
         font-size: 24px;
         font-weight: 800;
         color: #14213d;
+        line-height: 1.15;
     }
 
     .section-header p {
         margin: 6px 0 0 0;
         color: #64748b;
         font-size: 14px;
+        line-height: 1.5;
     }
 
 .section-badge {
@@ -125,10 +139,13 @@
     font-weight: 700;
     font-size: 14px;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .table-wrapper {
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .custom-table {
@@ -145,6 +162,7 @@
         text-align: left;
         padding: 16px 18px;
         border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
     }
 
     .custom-table tbody td {
@@ -163,6 +181,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
 .employee-avatar {
@@ -180,6 +199,7 @@
 .employee-name {
     font-weight: 700;
     color: #0f172a;
+    line-height: 1.35;
 }
 
 .code-pill {
@@ -190,6 +210,7 @@
     color: #1d4ed8;
     font-weight: 700;
     font-size: 12px;
+    white-space: nowrap;
 }
 
     .code-pill.secondary {
@@ -229,40 +250,158 @@
     padding: 28px !important;
 }
 
-@@media (max-width: 1200px) {
+@media (max-width: 1200px) {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
+    .dashboard-page {
+        gap: 18px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
     .dashboard-title {
-        font-size: 24px;
+        font-size: 22px;
+        line-height: 1.15;
     }
 
     .dashboard-subtitle {
         font-size: 14px;
+        line-height: 1.45;
+        max-width: 100%;
     }
 
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 14px;
     }
 
     .stat-card {
-        min-height: 110px;
-        padding: 18px;
+        min-height: auto;
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .stat-label {
+        font-size: 14px;
     }
 
     .stat-number {
-        font-size: 34px;
+        font-size: 32px;
+    }
+
+    .stat-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
+        border-radius: 14px;
+    }
+
+    .section-card {
+        border-radius: 18px;
     }
 
     .section-header {
+        padding: 18px 16px;
         flex-direction: column;
         align-items: flex-start;
+        gap: 12px;
     }
 
         .section-header h3 {
-            font-size: 20px;
+            font-size: 18px;
+            line-height: 1.2;
         }
+
+        .section-header p {
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+    .section-badge {
+        font-size: 13px;
+        padding: 8px 12px;
+        align-self: flex-start;
+    }
+
+    .custom-table {
+        min-width: 760px;
+    }
+
+        .custom-table thead th,
+        .custom-table tbody td {
+            padding: 14px 14px;
+            font-size: 13px;
+        }
+
+    .employee-avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+    }
+
+    .employee-name {
+        font-size: 13px;
+    }
+
+    .code-pill,
+    .stage-badge {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-title {
+        font-size: 20px;
+    }
+
+    .dashboard-subtitle {
+        font-size: 13px;
+    }
+
+    .stat-card {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+    }
+
+    .stat-number {
+        font-size: 28px;
+    }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 22px;
+    }
+
+    .section-header {
+        padding: 16px 14px;
+    }
+
+        .section-header h3 {
+            font-size: 17px;
+        }
+
+        .section-header p {
+            font-size: 13px;
+        }
+
+    .page-content .table-wrapper {
+        margin: 0 -2px;
+    }
+
+    .custom-table {
+        min-width: 700px;
+    }
 }
