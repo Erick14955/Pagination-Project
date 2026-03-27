@@ -4,74 +4,77 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="dashboard-layout">
-    <div class="sidebar-overlay @(sidebarOpen ? "show" : "")" @onclick="CerrarSidebar"></div>
+<div class="thryv-dashboard-layout">
+    <div class="thryv-sidebar-overlay @(sidebarOpen ? "show" : "")" @onclick="CloseSidebar"></div>
 
-    <aside class="sidebar @(sidebarOpen ? "open" : "closed")">
-        <div class="sidebar-header">
-            <div class="brand-block">
-                <h3>📚 BibliotecaApp</h3>
-                <p>Panel de Control</p>
+    <aside class="thryv-sidebar @(sidebarOpen ? "open" : "closed")">
+        <div class="thryv-sidebar-header">
+            <div class="thryv-brand-block">
+                <div class="thryv-brand-mark">T</div>
+                <div class="thryv-brand-text">
+                    <h3>Evaluations</h3>
+                    <p>Pagination evaluation system</p>
+                </div>
             </div>
 
-            <button type="button" class="sidebar-close" @onclick="CerrarSidebar" title="Cerrar menú">
+            <button type="button" class="thryv-sidebar-close" @onclick="CloseSidebar" title="Close menu">
                 ✕
             </button>
         </div>
 
         <AuthorizeView>
             <Authorized Context="auth">
-                <nav class="sidebar-menu">
-                    <NavLink href="/dashboard" Match="NavLinkMatch.All" class="menu-link">
-                        <span class="menu-icon">📊</span>
-                        <span class="menu-text">Dashboard</span>
+                <nav class="thryv-sidebar-menu">
+                    <NavLink href="/dashboard" Match="NavLinkMatch.All" class="thryv-menu-link">
+                        <span class="thryv-menu-icon">📊</span>
+                        <span class="thryv-menu-text">Dashboard</span>
                     </NavLink>
 
-                    @if (TienePermiso(auth.User, "CreateUser") || TienePermiso(auth.User, "EditUser") || TienePermiso(auth.User, "DeleteUser"))
+                    @if (HasPermission(auth.User, "CreateUser") || HasPermission(auth.User, "EditUser") || HasPermission(auth.User, "DeleteUser"))
                     {
-                        <NavLink href="/usuarios" class="menu-link">
-                            <span class="menu-icon">👥</span>
-                            <span class="menu-text">Usuarios</span>
+                        <NavLink href="/usuarios" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">👥</span>
+                            <span class="thryv-menu-text">Users</span>
                         </NavLink>
                     }
 
-                    @if (TienePermiso(auth.User, "CreateEmployees") || TienePermiso(auth.User, "EditEmployees") || TienePermiso(auth.User, "DeleteEmployees"))
+                    @if (HasPermission(auth.User, "CreateEmployees") || HasPermission(auth.User, "EditEmployees") || HasPermission(auth.User, "DeleteEmployees"))
                     {
-                        <NavLink href="/empleados" class="menu-link">
-                            <span class="menu-icon">👤</span>
-                            <span class="menu-text">Empleados</span>
+                        <NavLink href="/empleados" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">👤</span>
+                            <span class="thryv-menu-text">Employees</span>
                         </NavLink>
                     }
 
-                    @if (TienePermiso(auth.User, "CreateBook") || TienePermiso(auth.User, "EditBook") || TienePermiso(auth.User, "DeleteBook") || TienePermiso(auth.User, "BooksView"))
+                    @if (HasPermission(auth.User, "CreateBook") || HasPermission(auth.User, "EditBook") || HasPermission(auth.User, "DeleteBook") || HasPermission(auth.User, "BooksView"))
                     {
-                        <NavLink href="/libros" class="menu-link">
-                            <span class="menu-icon">📖</span>
-                            <span class="menu-text">Libros</span>
+                        <NavLink href="/libros" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">📖</span>
+                            <span class="thryv-menu-text">Books</span>
                         </NavLink>
                     }
 
-                    @if (TienePermiso(auth.User, "QualifyBook"))
+                    @if (HasPermission(auth.User, "QualifyBook"))
                     {
-                        <NavLink href="/evaluaciones" class="menu-link">
-                            <span class="menu-icon">⭐</span>
-                            <span class="menu-text">Evaluaciones</span>
+                        <NavLink href="/evaluaciones" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">⭐</span>
+                            <span class="thryv-menu-text">Evaluations</span>
                         </NavLink>
                     }
 
-                    @if (TienePermiso(auth.User, "AsignBook") || TienePermiso(auth.User, "ViewAssignations"))
+                    @if (HasPermission(auth.User, "AsignBook") || HasPermission(auth.User, "ViewAssignations"))
                     {
-                        <NavLink href="/asignaciones" class="menu-link">
-                            <span class="menu-icon">📌</span>
-                            <span class="menu-text">Asignaciones</span>
+                        <NavLink href="/asignaciones" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">📌</span>
+                            <span class="thryv-menu-text">Assignments</span>
                         </NavLink>
                     }
 
-                    @if (TienePermiso(auth.User, "EditPermissionLevels"))
+                    @if (HasPermission(auth.User, "EditPermissionLevels"))
                     {
-                        <NavLink href="/permisos" class="menu-link">
-                            <span class="menu-icon">🛡️</span>
-                            <span class="menu-text">Permisos</span>
+                        <NavLink href="/permisos" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">🛡️</span>
+                            <span class="thryv-menu-text">Permissions</span>
                         </NavLink>
                     }
                 </nav>
@@ -79,37 +82,39 @@
         </AuthorizeView>
     </aside>
 
-    <main class="main-content">
-        <header class="top-header">
-            <div class="header-left">
-                <button type="button" class="menu-toggle" @onclick="ToggleSidebar" title="Mostrar u ocultar menú">
+    <main class="thryv-main-content">
+        <header class="thryv-top-header">
+            <div class="thryv-header-left">
+                <button type="button" class="thryv-menu-toggle" @onclick="ToggleSidebar" title="Show or hide menu">
                     ☰
                 </button>
 
-                <div class="header-title">
-                    <h1>BibliotecaApp</h1>
+                <div class="thryv-header-title">
+                    <h1>Evaluations</h1>
+                    <span>Dashboard workspace</span>
                 </div>
             </div>
 
             <AuthorizeView>
                 <Authorized Context="auth">
-                    <div class="user-info">
-                        <div class="user-badge">
-                            <div class="user-avatar">👤</div>
-                            <div class="user-details">
-                                <span class="user-name">@ObtenerNombre(auth.User)</span>
+                    <div class="thryv-user-info">
+                        <div class="thryv-user-badge">
+                            <div class="thryv-user-avatar">👤</div>
+                            <div class="thryv-user-details">
+                                <span class="thryv-user-label">@ObtenerRol(auth.User)</span>
+                                <span class="thryv-user-name">@GetDisplayName(auth.User)</span>
                             </div>
                         </div>
 
                         <form method="post" action="/account/logout">
-                            <button type="submit" class="logout-btn">Cerrar Sesión</button>
+                            <button type="submit" class="thryv-logout-btn">Sign Out</button>
                         </form>
                     </div>
                 </Authorized>
             </AuthorizeView>
         </header>
 
-        <section class="page-content">
+        <section class="thryv-page-content">
             @Body
         </section>
     </main>
@@ -117,12 +122,12 @@
 
 @code {
     private bool sidebarOpen = true;
-    private ClaimsPrincipal? _usuario;
+    private ClaimsPrincipal? _user;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        _usuario = authState.User;
+        _user = authState.User;
     }
 
     private void ToggleSidebar()
@@ -130,21 +135,35 @@
         sidebarOpen = !sidebarOpen;
     }
 
-    private void CerrarSidebar()
+    private void CloseSidebar()
     {
         sidebarOpen = false;
     }
 
-    private static bool TienePermiso(ClaimsPrincipal user, string claimType)
+    private static bool HasPermission(ClaimsPrincipal user, string claimType)
     {
         return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string ObtenerNombre(ClaimsPrincipal user)
+    private static string GetDisplayName(ClaimsPrincipal user)
     {
         return user.Identity?.Name
                ?? user.FindFirst(ClaimTypes.Name)?.Value
                ?? user.FindFirst("Username")?.Value
                ?? "User";
+    }
+
+    private static string ObtenerRol(ClaimsPrincipal user)
+    {
+        var lvlId = user.FindFirst("LvlId")?.Value;
+
+        return lvlId switch
+        {
+            "1" => "Administrator",
+            "2" => "Supervisor",
+            "3" => "Assistant",
+            "4" => "User",
+            _ => "Usuario autenticado"
+        };
     }
 }

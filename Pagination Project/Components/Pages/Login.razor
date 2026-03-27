@@ -5,48 +5,60 @@
 
 <PageTitle>Iniciar Sesión</PageTitle>
 
-<div class="login-container">
-    <div class="login-box">
-        <div class="login-header">
-            <h2>📚 Evaluations</h2>
-            <p>Pagination evaluation system</p>
-        </div>
-
-        <form method="post" action="/account/login">
-            <input type="hidden" name="ReturnUrl" value="/dashboard" />
-
-            <div class="form-group">
-                <label style="text-align: center;">User</label>
-                <input name="Username"
-                       class="form-control"
-                       placeholder="Nombre"
-                       maxlength="50"
-                       autocomplete="username"
-                       style="text-align: center;" />
-            </div>
-
-            <div class="form-group">
-                <label style="text-align: center;">Password</label>
-                <input name="Password"
-                       type="password"
-                       class="form-control"
-                       placeholder="••••••••"
-                       maxlength="100"
-                       autocomplete="current-password"
-                       style="text-align: center;" />
-            </div>
-
-            @if (_mostrarError)
-            {
-                <div class="validation-message" style="margin-bottom:12px;">
-                    Incorrect user or password.
+<div class="thryv-login-page">
+    <div class="thryv-login-card">
+        <div class="thryv-login-panel">
+            <div class="thryv-logo-row">
+                <div class="thryv-logo-mark">T</div>
+                <div class="thryv-logo-text">
+                    <strong>Evaluations</strong>
+                    <span>Pagination evaluation system</span>
                 </div>
-            }
+            </div>
 
-            <button type="submit" class="btn-login">
-                Login
-            </button>
-        </form>
+            <h2 class="thryv-login-title">Welcome back</h2>
+            <p class="thryv-login-subtitle">
+                Sign in to continue to your dashboard.
+            </p>
+
+            <form method="post" action="/account/login">
+                <input type="hidden" name="ReturnUrl" value="/dashboard" />
+
+                <div class="thryv-form-group">
+                    <label>User</label>
+                    <input name="Username"
+                           class="thryv-input"
+                           placeholder="Enter your username"
+                           maxlength="50"
+                           autocomplete="username" />
+                </div>
+
+                <div class="thryv-form-group">
+                    <label>Password</label>
+                    <input name="Password"
+                           type="password"
+                           class="thryv-input"
+                           placeholder="••••••••"
+                           maxlength="100"
+                           autocomplete="current-password" />
+                </div>
+
+                @if (_mostrarError)
+                {
+                    <div class="thryv-error">
+                        Incorrect user or password.
+                    </div>
+                }
+
+                <button type="submit" class="thryv-login-button">
+                    Login
+                </button>
+            </form>
+
+            <div class="thryv-panel-footer">
+                Secure access to your evaluation workspace
+            </div>
+        </div>
     </div>
 </div>
 
