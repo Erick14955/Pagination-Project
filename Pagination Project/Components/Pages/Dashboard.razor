@@ -7,87 +7,91 @@
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
 
-<PageTitle>Dashboard - BibliotecaApp</PageTitle>
+<PageTitle>Dashboard - Evaluations</PageTitle>
 
-<div class="dashboard-page">
-    <div class="dashboard-header">
+<div class="thryv-dashboard-page">
+    <div class="thryv-dashboard-header">
         <div>
-            <h2 class="dashboard-title">Dashboard General</h2>
-            <p class="dashboard-subtitle">Resumen rápido del sistema y listado actual de libros asignados.</p>
+            <h2 class="thryv-dashboard-title">General Dashboard</h2>
+            <p class="thryv-dashboard-subtitle">
+                Quick system summary and current list of assigned books.
+            </p>
         </div>
     </div>
 
     @if (loading)
     {
-        <p>Cargando estadísticas...</p>
+        <div class="thryv-loading-card">
+            <div class="thryv-loading-text">Loading statistics...</div>
+        </div>
     }
     else
     {
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-info">
-                    <span class="stat-label">Total Usuarios</span>
-                    <div class="stat-number">@stats.TotalUsers</div>
+        <div class="thryv-stats-grid">
+            <div class="thryv-stat-card">
+                <div class="thryv-stat-info">
+                    <span class="thryv-stat-label">Total Users</span>
+                    <div class="thryv-stat-number">@stats.TotalUsers</div>
                 </div>
-                <div class="stat-icon blue">👥</div>
+                <div class="thryv-stat-icon users">👥</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-info">
-                    <span class="stat-label">Total Empleados</span>
-                    <div class="stat-number">@stats.TotalEmployees</div>
+            <div class="thryv-stat-card">
+                <div class="thryv-stat-info">
+                    <span class="thryv-stat-label">Total Employees</span>
+                    <div class="thryv-stat-number">@stats.TotalEmployees</div>
                 </div>
-                <div class="stat-icon indigo">👤</div>
+                <div class="thryv-stat-icon employees">👤</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-info">
-                    <span class="stat-label">Total Libros</span>
-                    <div class="stat-number">@stats.TotalBooks</div>
+            <div class="thryv-stat-card">
+                <div class="thryv-stat-info">
+                    <span class="thryv-stat-label">Total Books</span>
+                    <div class="thryv-stat-number">@stats.TotalBooks</div>
                 </div>
-                <div class="stat-icon amber">📚</div>
+                <div class="thryv-stat-icon books">📚</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-info">
-                    <span class="stat-label">Total Evaluaciones</span>
-                    <div class="stat-number">@stats.TotalEvaluations</div>
+            <div class="thryv-stat-card">
+                <div class="thryv-stat-info">
+                    <span class="thryv-stat-label">Total Evaluations</span>
+                    <div class="thryv-stat-number">@stats.TotalEvaluations</div>
                 </div>
-                <div class="stat-icon purple">⭐</div>
+                <div class="thryv-stat-icon evaluations">⭐</div>
             </div>
         </div>
     }
 
-    <div class="section-card">
-        <div class="section-header">
+    <div class="thryv-section-card">
+        <div class="thryv-section-header">
             <div>
-                <h3>Libros Asignados</h3>
-                <p>Vista real del listado de asignaciones activas según la etapa del día.</p>
+                <h3>Assigned Books</h3>
+                <p>Live view of active assignments based on the current stage of the day.</p>
             </div>
 
-            <div class="section-badge">
-                @assignedBooks.Count registros
+            <div class="thryv-section-badge">
+                @assignedBooks.Count records
             </div>
         </div>
 
-        <div class="table-wrapper">
-            <table class="custom-table">
+        <div class="thryv-table-wrapper">
+            <table class="thryv-custom-table">
                 <thead>
                     <tr>
-                        <th>Empleado</th>
+                        <th>Employee</th>
                         <th>KGEN Code</th>
                         <th>LSA Code</th>
-                        <th>Libro</th>
-                        <th>Etapa</th>
-                        <th>Fecha Etapa</th>
+                        <th>Book</th>
+                        <th>Stage</th>
+                        <th>Stage Date</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (assignedBooks.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="empty-row">
-                                No hay libros asignados para mostrar hoy.
+                            <td colspan="6" class="thryv-empty-row">
+                                No assigned books available to display today.
                             </td>
                         </tr>
                     }
@@ -97,25 +101,24 @@
                         {
                             <tr>
                                 <td>
-                                    <div class="employee-cell">
-                                        <div class="employee-avatar">👤</div>
+                                    <div class="thryv-employee-cell">
+                                        <div class="thryv-employee-avatar">👤</div>
                                         <div>
-                                            <div class="employee-name">@item.EmployeeName</div>
+                                            <div class="thryv-employee-name">@item.EmployeeName</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="code-pill">@item.KgenCode</span>
+                                    <span class="thryv-code-pill">@item.KgenCode</span>
                                 </td>
                                 <td>
-                                    <span class="code-pill secondary">@item.LsaCode</span>
+                                    <span class="thryv-code-pill secondary">@item.LsaCode</span>
                                 </td>
                                 <td>@item.BookName</td>
                                 <td>
-@*                                     <span class="stage-badge @GetStageClass(item.Stage)">
+                                    <span class="thryv-stage-pill">
                                         @item.Stage
-                                    </span> *@
-                                    @item.Stage
+                                    </span>
                                 </td>
                                 <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                             </tr>
@@ -160,18 +163,4 @@
             loading = false;
         }
     }
-
-    // private string GetStageClass(string stage)
-    // {
-    //     return stage switch
-    //     {
-    //         "Proof Extract" => "stage-active",
-    //         "Final Extract" => "stage-pending",
-    //         "Memo Extract" => "stage-pending",
-    //         "Dirxion Date" => "stage-active",
-    //         "Final PO Date" => "stage-expired",
-    //         "Shipping Date" => "stage-expired",
-    //         _ => "stage-pending"
-    //     };
-    // }
 }

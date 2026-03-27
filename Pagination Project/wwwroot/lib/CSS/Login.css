@@ -1,0 +1,265 @@
+﻿.thryv-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(circle at top left, rgba(255,80,0,0.10), transparent 28%), radial-gradient(circle at bottom right, rgba(255,80,0,0.08), transparent 24%), linear-gradient(135deg, #f8f8f8 0%, #ffffff 45%, #f3f4f6 100%);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+}
+
+.thryv-login-card {
+    width: 100%;
+    max-width: 760px;
+    background: #ffffff;
+    border-radius: 32px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 48px;
+}
+
+.thryv-login-panel {
+    width: 100%;
+    max-width: 610px;
+}
+
+.thryv-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.thryv-logo-mark {
+    width: 74px;
+    height: 74px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
+    color: #ff5000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    font-weight: 800;
+    box-shadow: 0 10px 24px rgba(17,17,17,0.18);
+    flex-shrink: 0;
+}
+
+.thryv-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+    .thryv-logo-text strong {
+        font-size: 34px;
+        font-weight: 800;
+        color: #141414;
+        letter-spacing: -0.02em;
+    }
+
+    .thryv-logo-text span {
+        font-size: 17px;
+        color: #6b7280;
+        margin-top: 6px;
+    }
+
+.thryv-login-title {
+    margin: 0 0 10px;
+    font-size: 54px;
+    font-weight: 800;
+    color: #101010;
+    letter-spacing: -0.03em;
+}
+
+.thryv-login-subtitle {
+    margin: 0 0 42px;
+    color: #6b7280;
+    font-size: 19px;
+    line-height: 1.6;
+}
+
+.thryv-form-group {
+    margin-bottom: 24px;
+}
+
+    .thryv-form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 17px;
+        font-weight: 700;
+        color: #242424;
+        letter-spacing: .2px;
+    }
+
+.thryv-input {
+    width: 100%;
+    height: 78px;
+    border-radius: 24px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: 0 24px;
+    font-size: 19px;
+    color: #111827;
+    outline: none;
+    transition: all .18s ease;
+    box-sizing: border-box;
+}
+
+    .thryv-input:focus {
+        border-color: #ff5000;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(255,80,0,0.12);
+    }
+
+    .thryv-input::placeholder {
+        color: #9ca3af;
+    }
+
+.thryv-error {
+    margin: 8px 0 20px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #fff3f0;
+    border: 1px solid rgba(255,80,0,0.18);
+    color: #c2410c;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.thryv-login-button {
+    width: 100%;
+    height: 80px;
+    border: none;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #ff5000 0%, #ff6a1f 100%);
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+    box-shadow: 0 18px 34px rgba(255,80,0,0.22);
+    margin-top: 8px;
+}
+
+    .thryv-login-button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+        box-shadow: 0 20px 36px rgba(255,80,0,0.28);
+    }
+
+    .thryv-login-button:active {
+        transform: translateY(0);
+    }
+
+.thryv-panel-footer {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 16px;
+    color: #6b7280;
+}
+
+@media (max-width: 768px) {
+    .thryv-login-card {
+        padding: 40px 24px;
+        border-radius: 24px;
+    }
+
+    .thryv-logo-mark {
+        width: 58px;
+        height: 58px;
+        font-size: 30px;
+    }
+
+    .thryv-logo-text strong {
+        font-size: 28px;
+    }
+
+    .thryv-logo-text span {
+        font-size: 15px;
+    }
+
+    .thryv-login-title {
+        font-size: 40px;
+    }
+
+    .thryv-login-subtitle {
+        font-size: 17px;
+    }
+
+    .thryv-input {
+        height: 64px;
+        font-size: 17px;
+        border-radius: 20px;
+    }
+
+    .thryv-login-button {
+        height: 68px;
+        font-size: 20px;
+        border-radius: 20px;
+    }
+}
+
+@media (max-width: 520px) {
+    .thryv-login-page {
+        padding: 14px;
+    }
+
+    .thryv-login-card {
+        padding: 28px 18px;
+    }
+
+    .thryv-logo-row {
+        gap: 12px;
+    }
+
+    .thryv-logo-mark {
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+        border-radius: 14px;
+    }
+
+    .thryv-logo-text strong {
+        font-size: 24px;
+    }
+
+    .thryv-logo-text span {
+        font-size: 14px;
+    }
+
+    .thryv-login-title {
+        font-size: 34px;
+    }
+
+    .thryv-login-subtitle {
+        font-size: 15px;
+        margin-bottom: 28px;
+    }
+
+    .thryv-form-group label {
+        font-size: 15px;
+    }
+
+    .thryv-input {
+        height: 58px;
+        font-size: 16px;
+        padding: 0 18px;
+        border-radius: 18px;
+    }
+
+    .thryv-login-button {
+        height: 60px;
+        font-size: 18px;
+        border-radius: 18px;
+    }
+
+    .thryv-panel-footer {
+        font-size: 14px;
+    }
+}
