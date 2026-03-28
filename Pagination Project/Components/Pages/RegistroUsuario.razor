@@ -1,0 +1,437 @@
+﻿@page "/registro-usuarios"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Pagination_Project.Models
+@using Pagination_Project.Services
+@inject IUsuarioService UsuarioService
+@layout Pagination_Project.Components.Layout.DashboardLayout
+@rendermode InteractiveServer
+
+<PageTitle>Users - Evaluations</PageTitle>
+
+<div class="thryv-users-page">
+    <div class="thryv-users-header">
+        <div>
+            <h2>Users Management</h2>
+            <p>Create, edit and delete system users.</p>
+        </div>
+
+        <button type="button" class="thryv-secondary-btn" @onclick="LimpiarFormulario">
+            @(Editando ? "Cancel edit" : "New user")
+        </button>
+    </div>
+
+    <div class="thryv-users-card thryv-form-card-full">
+        <div class="thryv-card-top">
+            <h3>@(Editando ? "Edit user" : "Register new user")</h3>
+            <span>@(Editando ? "Update the selected user's information." : "Fill in the fields to create a user.")</span>
+        </div>
+
+        <EditForm Model="modelo" OnValidSubmit="GuardarUsuarioAsync">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="thryv-form-grid-large">
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon">👤</span>
+                        <InputText class="thryv-input modern"
+                                   @bind-Value="modelo.Username"
+                                   placeholder=" " />
+                        <span class="thryv-floating-label">Username</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon">🪪</span>
+                        <InputText class="thryv-input modern"
+                                   @bind-Value="modelo.Name"
+                                   placeholder=" " />
+                        <span class="thryv-floating-label">Full Name</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon">✉️</span>
+                        <InputText class="thryv-input modern"
+                                   @bind-Value="modelo.Email"
+                                   placeholder=" " />
+                        <span class="thryv-floating-label">Email</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon">🔒</span>
+                        <InputText type="password"
+                                   class="thryv-input modern"
+                                   @bind-Value="modelo.Password"
+                                   placeholder=" " />
+                        <span class="thryv-floating-label">@(Editando ? "New Password (optional)" : "Password")</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group full">
+                    <label class="thryv-floating-field thryv-select-field">
+                        <span class="thryv-input-icon">🛡️</span>
+                        <InputSelect class="thryv-input modern thryv-select-input" @bind-Value="modelo.Lvl_Id">
+                            <option value="0">Select a user type</option>
+                            @foreach (var permiso in permisos)
+                            {
+                                <option value="@permiso.Id">@permiso.Name</option>
+                            }
+                        </InputSelect>
+                        <span class="thryv-floating-label always-float">User Type</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="thryv-form-actions">
+                <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
+                    @(Guardando ? "Saving..." : (Editando ? "Update User" : "Register User"))
+                </button>
+
+                <button type="button"
+                        class="thryv-danger-btn"
+                        @onclick="AbrirModalEliminar"
+                        disabled="@(!Editando || Guardando)">
+                    Delete
+                </button>
+            </div>
+        </EditForm>
+    </div>
+
+    <div class="thryv-users-card thryv-list-large">
+        <div class="thryv-list-header">
+            <div>
+                <h3>User List</h3>
+                <span>@usuariosFiltrados.Count record(s)</span>
+            </div>
+
+            <input class="thryv-search-input"
+                   placeholder="Search..."
+                   @bind="textoBusqueda"
+                   @bind:event="oninput" />
+        </div>
+
+        <div class="thryv-table-wrap large">
+            <table class="thryv-users-table large">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Permission</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Cargando)
+                    {
+                        <tr>
+                            <td colspan="5" class="thryv-empty-row">Loading users...</td>
+                        </tr>
+                    }
+                    else if (!usuariosFiltrados.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="thryv-empty-row">No users found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in usuariosFiltrados)
+                        {
+                            <tr class="@(modelo.Id == user.Id ? "selected" : "")"
+                                @ondblclick="() => SeleccionarUsuario(user)">
+                                <td>@user.Username</td>
+                                <td>@user.Name</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="thryv-role-badge">@user.NivelNombre</span>
+                                </td>
+                                <td>
+                                    <button type="button"
+                                            class="thryv-table-btn"
+                                            @onclick="() => SeleccionarUsuario(user)">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (MostrarModalEliminar)
+{
+    <div class="thryv-modal-overlay" @onclick="CerrarModalEliminar">
+        <div class="thryv-modal-card" @onclick:stopPropagation="true">
+            <div class="thryv-modal-header">
+                <h3>Confirm delete</h3>
+            </div>
+
+            <div class="thryv-modal-body">
+                <p>Are you sure you want to delete this user?</p>
+
+                <div class="thryv-modal-userbox">
+                    <strong>@modelo.Username</strong>
+                    @if (!string.IsNullOrWhiteSpace(modelo.Name))
+                    {
+                        <span>- @modelo.Name</span>
+                    }
+                </div>
+
+                <p class="thryv-modal-warning">
+                    This action cannot be undone.
+                </p>
+            </div>
+
+            <div class="thryv-modal-actions">
+                <button type="button"
+                        class="thryv-secondary-btn"
+                        @onclick="CerrarModalEliminar"
+                        disabled="@Guardando">
+                    No, go back
+                </button>
+
+                <button type="button"
+                        class="thryv-danger-btn"
+                        @onclick="ConfirmarEliminarUsuarioAsync"
+                        disabled="@Guardando">
+                    @(Guardando ? "Deleting..." : "Yes, delete")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarModalResultado)
+{
+    <div class="thryv-modal-overlay" @onclick="CerrarModalResultado">
+        <div class="thryv-modal-card thryv-result-modal" @onclick:stopPropagation="true">
+            <div class="thryv-modal-header">
+                <h3>@TituloModalResultado</h3>
+            </div>
+
+            <div class="thryv-modal-body">
+                <p>@MensajeModalResultado</p>
+            </div>
+
+            <div class="thryv-modal-actions">
+                <button type="button"
+                        class="thryv-primary-btn"
+                        @onclick="CerrarModalResultado">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<UsuarioListDto> usuarios = new();
+    private List<PermisoComboDto> permisos = new();
+
+    private UsuarioFormModel modelo = new();
+
+    private bool Cargando = true;
+    private bool Guardando = false;
+    private bool MostrarModalEliminar = false;
+    private bool MostrarModalResultado = false;
+
+    private string textoBusqueda = string.Empty;
+    private string TituloModalResultado = string.Empty;
+    private string MensajeModalResultado = string.Empty;
+
+    private bool Editando => modelo.Id != Guid.Empty;
+
+    private List<UsuarioListDto> usuariosFiltrados =>
+        usuarios
+            .Where(u =>
+                string.IsNullOrWhiteSpace(textoBusqueda) ||
+                u.Username.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase) ||
+                u.Name.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase) ||
+                u.Email.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(u => u.Username)
+            .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        Cargando = true;
+
+        try
+        {
+            permisos = await UsuarioService.ObtenerPermisosAsync();
+            usuarios = await UsuarioService.ObtenerTodosAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", $"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task GuardarUsuarioAsync()
+    {
+        Guardando = true;
+
+        try
+        {
+            if (Editando)
+            {
+                var dto = new UsuarioUpdateDto
+                {
+                    Id = modelo.Id,
+                    Username = modelo.Username,
+                    Email = modelo.Email,
+                    Password = string.IsNullOrWhiteSpace(modelo.Password) ? null : modelo.Password,
+                    Name = modelo.Name,
+                    Lvl_Id = modelo.Lvl_Id
+                };
+
+                var result = await UsuarioService.ActualizarAsync(dto);
+
+                if (result == null)
+                {
+                    MostrarResultado("Not found", "User not found.");
+                    return;
+                }
+
+                await CargarDatosAsync();
+                LimpiarFormulario();
+                MostrarResultado("User updated", "The user was updated successfully.");
+            }
+            else
+            {
+                var dto = new UsuarioCreateDto
+                {
+                    Username = modelo.Username,
+                    Email = modelo.Email,
+                    Password = modelo.Password,
+                    Name = modelo.Name,
+                    Lvl_Id = modelo.Lvl_Id
+                };
+
+                await UsuarioService.CrearAsync(dto);
+                await CargarDatosAsync();
+                LimpiarFormulario();
+                MostrarResultado("User created", "The user was created successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", ex.Message);
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void SeleccionarUsuario(UsuarioListDto user)
+    {
+        modelo = new UsuarioFormModel
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            Name = user.Name,
+            Password = string.Empty,
+            Lvl_Id = user.Lvl_Id
+        };
+
+        MostrarModalEliminar = false;
+    }
+
+    private void AbrirModalEliminar()
+    {
+        if (!Editando)
+            return;
+
+        MostrarModalEliminar = true;
+    }
+
+    private void CerrarModalEliminar()
+    {
+        MostrarModalEliminar = false;
+    }
+
+    private async Task ConfirmarEliminarUsuarioAsync()
+    {
+        if (!Editando)
+            return;
+
+        Guardando = true;
+
+        try
+        {
+            var eliminado = await UsuarioService.EliminarAsync(modelo.Id);
+
+            if (!eliminado)
+            {
+                MostrarModalEliminar = false;
+                MostrarResultado("Not found", "User not found.");
+                return;
+            }
+
+            MostrarModalEliminar = false;
+            await CargarDatosAsync();
+            LimpiarFormulario();
+            MostrarResultado("User deleted", "The user was deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            MostrarModalEliminar = false;
+            MostrarResultado("Error", $"Error deleting user: {ex.Message}");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void LimpiarFormulario()
+    {
+        modelo = new UsuarioFormModel();
+        MostrarModalEliminar = false;
+    }
+
+    private void MostrarResultado(string titulo, string mensaje)
+    {
+        TituloModalResultado = titulo;
+        MensajeModalResultado = mensaje;
+        MostrarModalResultado = true;
+    }
+
+    private void CerrarModalResultado()
+    {
+        MostrarModalResultado = false;
+        TituloModalResultado = string.Empty;
+        MensajeModalResultado = string.Empty;
+    }
+
+    public class UsuarioFormModel
+    {
+        public Guid Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public int Lvl_Id { get; set; }
+    }
+}

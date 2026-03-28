@@ -37,6 +37,7 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
 // ================================
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 builder.Services.AddControllers();
 
