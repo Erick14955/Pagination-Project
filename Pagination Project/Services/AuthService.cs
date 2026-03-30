@@ -31,6 +31,9 @@ namespace Pagination_Project.Services
             if (usuario is null || string.IsNullOrWhiteSpace(usuario.password))
                 return null;
 
+            if (usuario.Activo == false)
+                return null;
+
             try
             {
                 return Argon2.Verify(usuario.password, password) ? usuario : null;

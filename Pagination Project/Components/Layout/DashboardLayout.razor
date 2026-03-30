@@ -85,9 +85,12 @@
     <main class="thryv-main-content">
         <header class="thryv-top-header">
             <div class="thryv-header-left">
-                <button type="button" class="thryv-menu-toggle" @onclick="ToggleSidebar" title="Show or hide menu">
-                    ☰
-                </button>
+                @if (sidebarOpen == false)
+                {
+                    <button type="button" class="thryv-menu-toggle" @onclick="ToggleSidebar" title="Show or hide menu">
+                        ☰
+                    </button>
+                }
 
                 <div class="thryv-header-title">
                     <h1>Evaluations</h1>

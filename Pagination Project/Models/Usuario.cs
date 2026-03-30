@@ -20,6 +20,9 @@ namespace Pagination_Project.Models
         public string password { get; set; } = string.Empty;
 
         public string Name { get; set; } = string.Empty;
+        [Required]
+        [Column("Active")]
+        public bool Activo { get; set; } = true;
 
         [Column("Lvl_Id")]
         public int lvl_Id { get; set; }

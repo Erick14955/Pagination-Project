@@ -6,6 +6,10 @@
 @inject IUsuarioService UsuarioService
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
 
 <PageTitle>Users - Evaluations</PageTitle>
 
@@ -34,7 +38,12 @@
             <div class="thryv-form-grid-large">
                 <div class="thryv-form-group">
                     <label class="thryv-floating-field">
-                        <span class="thryv-input-icon">👤</span>
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
                         <InputText class="thryv-input modern"
                                    @bind-Value="modelo.Username"
                                    placeholder=" " />
@@ -44,7 +53,12 @@
 
                 <div class="thryv-form-group">
                     <label class="thryv-floating-field">
-                        <span class="thryv-input-icon">🪪</span>
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
                         <InputText class="thryv-input modern"
                                    @bind-Value="modelo.Name"
                                    placeholder=" " />
@@ -54,7 +68,12 @@
 
                 <div class="thryv-form-group">
                     <label class="thryv-floating-field">
-                        <span class="thryv-input-icon">✉️</span>
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 6h16v12H4z"></path>
+                                <path d="m4 7 8 6 8-6"></path>
+                            </svg>
+                        </span>
                         <InputText class="thryv-input modern"
                                    @bind-Value="modelo.Email"
                                    placeholder=" " />
@@ -64,7 +83,12 @@
 
                 <div class="thryv-form-group">
                     <label class="thryv-floating-field">
-                        <span class="thryv-input-icon">🔒</span>
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                            </svg>
+                        </span>
                         <InputText type="password"
                                    class="thryv-input modern"
                                    @bind-Value="modelo.Password"
@@ -73,9 +97,13 @@
                     </label>
                 </div>
 
-                <div class="thryv-form-group full">
+                <div class="thryv-form-group">
                     <label class="thryv-floating-field thryv-select-field">
-                        <span class="thryv-input-icon">🛡️</span>
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m12 2 2.4 4.9 5.4.8-3.9 3.8.9 5.5L12 14.9 7.2 17l.9-5.5L4.2 7.7l5.4-.8Z"></path>
+                            </svg>
+                        </span>
                         <InputSelect class="thryv-input modern thryv-select-input" @bind-Value="modelo.Lvl_Id">
                             <option value="0">Select a user type</option>
                             @foreach (var permiso in permisos)
@@ -86,19 +114,49 @@
                         <span class="thryv-floating-label always-float">User Type</span>
                     </label>
                 </div>
+
+                <div class="thryv-form-group">
+                    <div class="thryv-switch-card">
+                        <div class="thryv-switch-text">
+                            <span class="thryv-switch-title">User Status</span>
+                            <span class="thryv-switch-subtitle">
+                                @(modelo.Activo ? "This user is active" : "This user is inactive")
+                            </span>
+                        </div>
+
+                        <label class="thryv-switch">
+                            <InputCheckbox @bind-Value="modelo.Activo" />
+                            <span class="thryv-slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="thryv-form-actions">
-                <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
-                    @(Guardando ? "Saving..." : (Editando ? "Update User" : "Register User"))
-                </button>
+                <AuthorizeView>
+                    <Authorized Context="auth">
+                        @if (HasPermission(auth.User, "CreateUser"))
+                        {
+                            <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
+                                @(Guardando ? "Saving..." : (Editando ? "Update User" : "Register User"))
+                            </button>
+                        }
+                    </Authorized>
+                </AuthorizeView>
 
-                <button type="button"
-                        class="thryv-danger-btn"
-                        @onclick="AbrirModalEliminar"
-                        disabled="@(!Editando || Guardando)">
-                    Delete
-                </button>
+                <AuthorizeView>
+                    <Authorized Context="auth">
+                        @if (HasPermission(auth.User, "DeleteUser"))
+                        {
+                            <button type="button"
+                                    class="thryv-danger-btn"
+                                    @onclick="AbrirModalEliminar"
+                                    disabled="@(!Editando || Guardando)">
+                                Delete
+                            </button>
+                        }
+                    </Authorized>
+                </AuthorizeView>
             </div>
         </EditForm>
     </div>
@@ -124,21 +182,33 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Permission</th>
-                        <th>Action</th>
+                        <th>Status</th>
+                        <AuthorizeView>
+                            <Authorized Context="auth">
+                                @if (HasPermission(auth.User, "EditUser"))
+                                {
+                                    <th>Action</th>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
                     </tr>
                 </thead>
 
                 <tbody>
+                    @{
+                        var totalColumnas = (_user != null && HasPermission(_user, "EditUser")) ? 6 : 5;
+                    }
+
                     @if (Cargando)
                     {
                         <tr>
-                            <td colspan="5" class="thryv-empty-row">Loading users...</td>
+                            <td colspan="@totalColumnas" class="thryv-empty-row">Loading users...</td>
                         </tr>
                     }
                     else if (!usuariosFiltrados.Any())
                     {
                         <tr>
-                            <td colspan="5" class="thryv-empty-row">No users found.</td>
+                            <td colspan="@totalColumnas" class="thryv-empty-row">No users found.</td>
                         </tr>
                     }
                     else
@@ -146,7 +216,7 @@
                         @foreach (var user in usuariosFiltrados)
                         {
                             <tr class="@(modelo.Id == user.Id ? "selected" : "")"
-                                @ondblclick="() => SeleccionarUsuario(user)">
+                                @ondblclick="() => OnDobleClickUsuario(user)">
                                 <td>@user.Username</td>
                                 <td>@user.Name</td>
                                 <td>@user.Email</td>
@@ -154,12 +224,30 @@
                                     <span class="thryv-role-badge">@user.NivelNombre</span>
                                 </td>
                                 <td>
-                                    <button type="button"
-                                            class="thryv-table-btn"
-                                            @onclick="() => SeleccionarUsuario(user)">
-                                        Edit
-                                    </button>
+                                    @if (user.Activo)
+                                    {
+                                        <span class="thryv-status-badge active">● Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="thryv-status-badge inactive">● Inactive</span>
+                                    }
                                 </td>
+
+                                <AuthorizeView>
+                                    <Authorized Context="auth">
+                                        @if (HasPermission(auth.User, "EditUser"))
+                                        {
+                                            <td>
+                                                <button type="button"
+                                                        class="thryv-table-btn"
+                                                        @onclick="() => SeleccionarUsuario(user)">
+                                                    Edit
+                                                </button>
+                                            </td>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
                             </tr>
                         }
                     }
@@ -240,6 +328,7 @@
     private List<PermisoComboDto> permisos = new();
 
     private UsuarioFormModel modelo = new();
+    private ClaimsPrincipal? _user;
 
     private bool Cargando = true;
     private bool Guardando = false;
@@ -265,6 +354,13 @@
     protected override async Task OnInitializedAsync()
     {
         await CargarDatosAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+    }
+
+    private static bool HasPermission(ClaimsPrincipal user, string claimType)
+    {
+        return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarDatosAsync()
@@ -301,7 +397,8 @@
                     Email = modelo.Email,
                     Password = string.IsNullOrWhiteSpace(modelo.Password) ? null : modelo.Password,
                     Name = modelo.Name,
-                    Lvl_Id = modelo.Lvl_Id
+                    Lvl_Id = modelo.Lvl_Id,
+                    Activo = modelo.Activo
                 };
 
                 var result = await UsuarioService.ActualizarAsync(dto);
@@ -324,7 +421,8 @@
                     Email = modelo.Email,
                     Password = modelo.Password,
                     Name = modelo.Name,
-                    Lvl_Id = modelo.Lvl_Id
+                    Lvl_Id = modelo.Lvl_Id,
+                    Activo = modelo.Activo
                 };
 
                 await UsuarioService.CrearAsync(dto);
@@ -343,6 +441,17 @@
         }
     }
 
+    private void OnDobleClickUsuario(UsuarioListDto user)
+    {
+        if (_user == null)
+            return;
+
+        if (HasPermission(_user, "EditUser"))
+        {
+            SeleccionarUsuario(user);
+        }
+    }
+
     private void SeleccionarUsuario(UsuarioListDto user)
     {
         modelo = new UsuarioFormModel
@@ -352,7 +461,8 @@
             Email = user.Email,
             Name = user.Name,
             Password = string.Empty,
-            Lvl_Id = user.Lvl_Id
+            Lvl_Id = user.Lvl_Id,
+            Activo = user.Activo
         };
 
         MostrarModalEliminar = false;
@@ -407,7 +517,11 @@
 
     private void LimpiarFormulario()
     {
-        modelo = new UsuarioFormModel();
+        modelo = new UsuarioFormModel
+        {
+            Activo = true
+        };
+
         MostrarModalEliminar = false;
     }
 
@@ -433,5 +547,6 @@
         public string Password { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public int Lvl_Id { get; set; }
+        public bool Activo { get; set; } = true;
     }
 }
