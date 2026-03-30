@@ -29,7 +29,8 @@ namespace Pagination_Project.Services
                     Email = u.email,
                     Name = u.Name,
                     Lvl_Id = u.lvl_Id,
-                    NivelNombre = u.Permisos != null ? u.Permisos.Name : string.Empty
+                    NivelNombre = u.Permisos != null ? u.Permisos.Name : string.Empty,
+                    Activo = u.Activo
                 })
                 .ToListAsync();
         }
@@ -97,7 +98,8 @@ namespace Pagination_Project.Services
                 email = dto.Email,
                 password = Argon2.Hash(dto.Password),
                 Name = dto.Name,
-                lvl_Id = dto.Lvl_Id
+                lvl_Id = dto.Lvl_Id,
+                Activo = dto.Activo
             };
 
             db.Users.Add(usuario);
@@ -116,7 +118,8 @@ namespace Pagination_Project.Services
                 Email = usuario.email,
                 Name = usuario.Name,
                 Lvl_Id = usuario.lvl_Id,
-                NivelNombre = permisoNombre
+                NivelNombre = permisoNombre,
+                Activo = usuario.Activo
             };
         }
 
@@ -166,6 +169,7 @@ namespace Pagination_Project.Services
             usuario.email = dto.Email;
             usuario.Name = dto.Name;
             usuario.lvl_Id = dto.Lvl_Id;
+            usuario.Activo = dto.Activo;
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
@@ -187,7 +191,8 @@ namespace Pagination_Project.Services
                 Email = usuario.email,
                 Name = usuario.Name,
                 Lvl_Id = usuario.lvl_Id,
-                NivelNombre = permisoNombre
+                NivelNombre = permisoNombre,
+                Activo = usuario.Activo
             };
         }
 

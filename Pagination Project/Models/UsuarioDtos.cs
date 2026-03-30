@@ -10,6 +10,7 @@ namespace Pagination_Project.Models
         public string Name { get; set; } = string.Empty;
         public int Lvl_Id { get; set; }
         public string NivelNombre { get; set; } = string.Empty;
+        public bool Activo { get; set; }
     }
 
     public class UsuarioCreateDto
@@ -28,6 +29,8 @@ namespace Pagination_Project.Models
 
         [Required]
         public int Lvl_Id { get; set; }
+        [Required]
+        public bool Activo { get; set; } = true;
     }
 
     public class UsuarioUpdateDto
@@ -48,6 +51,8 @@ namespace Pagination_Project.Models
 
         [Required]
         public int Lvl_Id { get; set; }
+        [Required]
+        public bool Activo { get; set; }
     }
 
     public class PermisoComboDto

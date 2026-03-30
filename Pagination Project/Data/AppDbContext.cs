@@ -31,6 +31,7 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.password).HasColumnName("Password").IsRequired();
                 entity.Property(e => e.Name).HasColumnName("Name");
                 entity.Property(e => e.lvl_Id).HasColumnName("Lvl_Id");
+                entity.Property(e => e.Activo).HasColumnName("Active").IsRequired();
 
                 entity.HasIndex(e => e.Username).IsUnique();
 
