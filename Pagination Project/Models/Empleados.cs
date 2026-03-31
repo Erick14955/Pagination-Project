@@ -1,7 +1,7 @@
 ﻿namespace Pagination_Project.Models
 {
     public class Empleados
-{
+    {
         public Guid Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public int IdEmpleado { get; set; }
