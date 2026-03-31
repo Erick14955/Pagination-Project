@@ -1,0 +1,503 @@
+﻿@page "/registro-empleados"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Pagination_Project.Models
+@using Pagination_Project.Services
+@inject IEmpleadoService EmpleadoService
+@layout Pagination_Project.Components.Layout.DashboardLayout
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+
+<PageTitle>Employees - Evaluations</PageTitle>
+
+<div class="thryv-users-page">
+    <div class="thryv-users-header">
+        <div>
+            <h2>Employees Management</h2>
+            <p>Create, edit and delete employees.</p>
+        </div>
+
+        <button type="button" class="thryv-secondary-btn" @onclick="LimpiarFormulario">
+            @(Editando ? "Cancel edit" : "New employee")
+        </button>
+    </div>
+
+    <div class="thryv-users-card thryv-form-card-full">
+        <div class="thryv-card-top">
+            <h3>@(Editando ? "Edit employee" : "Register new employee")</h3>
+            <span>@(Editando ? "Update the selected employee's information." : "Fill in the fields to create an employee.")</span>
+        </div>
+
+        <EditForm Model="modelo" OnValidSubmit="GuardarEmpleadoAsync">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="thryv-form-grid-large">
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <InputText class="thryv-input modern"
+                                   @bind-Value="modelo.Nombre"
+                                   placeholder=" " />
+                        <span class="thryv-floating-label">Full Name</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 7h16"></path>
+                                <path d="M4 12h16"></path>
+                                <path d="M4 17h10"></path>
+                            </svg>
+                        </span>
+                        <InputNumber TValue="int"
+                                     class="thryv-input modern"
+                                     @bind-Value="modelo.IdEmpleado" />
+                        <span class="thryv-floating-label">Employee ID</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group">
+                    <label class="thryv-floating-field">
+                        <span class="thryv-input-icon thryv-svg-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 6h16v12H4z"></path>
+                                <path d="m4 7 8 6 8-6"></path>
+                            </svg>
+                        </span>
+                        <InputText class="thryv-input modern"
+                                   @bind-Value="modelo.Email"
+                                   placeholder=" " />
+                        <span class="thryv-floating-label">Email</span>
+                    </label>
+                </div>
+
+                <div class="thryv-form-group">
+                    <div class="thryv-switch-card">
+                        <div class="thryv-switch-text">
+                            <span class="thryv-switch-title">Employee Status</span>
+                            <span class="thryv-switch-subtitle">
+                                @(modelo.Activo ? "This employee is active" : "This employee is inactive")
+                            </span>
+                        </div>
+
+                        <label class="thryv-switch">
+                            <InputCheckbox @bind-Value="modelo.Activo" />
+                            <span class="thryv-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="thryv-form-actions">
+                <AuthorizeView>
+                    <Authorized Context="auth">
+                        @if ((!Editando && HasPermission(auth.User, "CreateEmployees")) ||
+                                                (Editando && HasPermission(auth.User, "EditEmployees")))
+                        {
+                            <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
+                                @(Guardando ? "Saving..." : (Editando ? "Update Employee" : "Register Employee"))
+                            </button>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView>
+                    <Authorized Context="auth">
+                        @if (HasPermission(auth.User, "DeleteEmployees"))
+                        {
+                            <button type="button"
+                                    class="thryv-danger-btn"
+                                    @onclick="AbrirModalEliminar"
+                                    disabled="@(!Editando || Guardando)">
+                                Delete
+                            </button>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </EditForm>
+    </div>
+
+    <div class="thryv-users-card thryv-list-large">
+        <div class="thryv-list-header">
+            <div>
+                <h3>Employees List</h3>
+                <span>@empleadosFiltrados.Count record(s)</span>
+            </div>
+
+            <input class="thryv-search-input"
+                   placeholder="Search..."
+                   @bind="textoBusqueda"
+                   @bind:event="oninput" />
+        </div>
+
+        <div class="thryv-table-wrap large">
+            <table class="thryv-users-table large">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <AuthorizeView>
+                            <Authorized Context="auth">
+                                @if (HasPermission(auth.User, "EditEmployees"))
+                                {
+                                    <th>Action</th>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @{
+                        var totalColumnas = (_user != null && HasPermission(_user, "EditEmployees")) ? 5 : 4;
+                    }
+
+                    @if (Cargando)
+                    {
+                        <tr>
+                            <td colspan="@totalColumnas" class="thryv-empty-row">Loading employees...</td>
+                        </tr>
+                    }
+                    else if (!empleadosFiltrados.Any())
+                    {
+                        <tr>
+                            <td colspan="@totalColumnas" class="thryv-empty-row">No employees found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var emp in empleadosFiltrados)
+                        {
+                            <tr class="@(modelo.Id == emp.Id ? "selected" : "")"
+                                @ondblclick="() => OnDobleClickEmpleado(emp)">
+                                <td>@emp.IdEmpleado</td>
+                                <td>@emp.Nombre</td>
+                                <td>@emp.Email</td>
+                                <td>
+                                    @if (emp.Activo)
+                                    {
+                                        <span class="thryv-status-badge active">● Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="thryv-status-badge inactive">● Inactive</span>
+                                    }
+                                </td>
+
+                                <AuthorizeView>
+                                    <Authorized Context="auth">
+                                        @if (HasPermission(auth.User, "EditEmployees"))
+                                        {
+                                            <td>
+                                                <button type="button"
+                                                        class="thryv-table-btn"
+                                                        @onclick="() => SeleccionarEmpleado(emp)">
+                                                    Edit
+                                                </button>
+                                            </td>
+                                        }
+                                    </Authorized>
+                                </AuthorizeView>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (MostrarModalEliminar)
+{
+    <div class="thryv-modal-overlay" @onclick="CerrarModalEliminar">
+        <div class="thryv-modal-card" @onclick:stopPropagation="true">
+            <div class="thryv-modal-header">
+                <h3>Confirm delete</h3>
+            </div>
+
+            <div class="thryv-modal-body">
+                <p>Are you sure you want to delete this employee?</p>
+
+                <div class="thryv-modal-userbox">
+                    <strong>@modelo.Nombre</strong>
+                    <span>- ID: @modelo.IdEmpleado</span>
+                </div>
+
+                <p class="thryv-modal-warning">
+                    This action cannot be undone.
+                </p>
+            </div>
+
+            <div class="thryv-modal-actions">
+                <button type="button"
+                        class="thryv-secondary-btn"
+                        @onclick="CerrarModalEliminar"
+                        disabled="@Guardando">
+                    No, go back
+                </button>
+
+                <button type="button"
+                        class="thryv-danger-btn"
+                        @onclick="ConfirmarEliminarEmpleadoAsync"
+                        disabled="@Guardando">
+                    @(Guardando ? "Deleting..." : "Yes, delete")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarModalResultado)
+{
+    <div class="thryv-modal-overlay" @onclick="CerrarModalResultado">
+        <div class="thryv-modal-card thryv-result-modal" @onclick:stopPropagation="true">
+            <div class="thryv-modal-header">
+                <h3>@TituloModalResultado</h3>
+            </div>
+
+            <div class="thryv-modal-body">
+                <p>@MensajeModalResultado</p>
+            </div>
+
+            <div class="thryv-modal-actions">
+                <button type="button"
+                        class="thryv-primary-btn"
+                        @onclick="CerrarModalResultado">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Empleados> empleados = new();
+
+    private EmpleadoFormModel modelo = new();
+    private ClaimsPrincipal? _user;
+
+    private bool Cargando = true;
+    private bool Guardando = false;
+    private bool MostrarModalEliminar = false;
+    private bool MostrarModalResultado = false;
+
+    private string textoBusqueda = string.Empty;
+    private string TituloModalResultado = string.Empty;
+    private string MensajeModalResultado = string.Empty;
+
+    private bool Editando => modelo.Id != Guid.Empty;
+
+    private List<Empleados> empleadosFiltrados =>
+        empleados
+            .Where(e =>
+                string.IsNullOrWhiteSpace(textoBusqueda) ||
+                e.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase) ||
+                e.Email.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase) ||
+                e.IdEmpleado.ToString().Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(e => e.Nombre)
+            .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+    }
+
+    private static bool HasPermission(ClaimsPrincipal user, string claimType)
+    {
+        return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        Cargando = true;
+
+        try
+        {
+            empleados = await EmpleadoService.ObtenerTodosAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", $"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task GuardarEmpleadoAsync()
+    {
+        Guardando = true;
+
+        try
+        {
+            if (Editando)
+            {
+                var dto = new EmpleadoUpdateDto
+                {
+                    Id = modelo.Id,
+                    Nombre = modelo.Nombre,
+                    Email = modelo.Email,
+                    IdEmpleado = modelo.IdEmpleado,
+                    Activo = modelo.Activo
+                };
+
+                var result = await EmpleadoService.ActualizarAsync(dto);
+
+                if (result == null)
+                {
+                    MostrarResultado("Not found", "Employee not found.");
+                    return;
+                }
+
+                await CargarDatosAsync();
+                LimpiarFormulario();
+                MostrarResultado("Employee updated", "The employee was updated successfully.");
+            }
+            else
+            {
+                var dto = new EmpleadoCreateDto
+                {
+                    Nombre = modelo.Nombre,
+                    Email = modelo.Email,
+                    IdEmpleado = modelo.IdEmpleado,
+                    Activo = modelo.Activo
+                };
+
+                await EmpleadoService.CrearAsync(dto);
+                await CargarDatosAsync();
+                LimpiarFormulario();
+                MostrarResultado("Employee created", "The employee was created successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", ex.Message);
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void OnDobleClickEmpleado(Empleados emp)
+    {
+        if (_user == null)
+            return;
+
+        if (HasPermission(_user, "EditEmployees"))
+        {
+            SeleccionarEmpleado(emp);
+        }
+    }
+
+    private void SeleccionarEmpleado(Empleados emp)
+    {
+        modelo = new EmpleadoFormModel
+        {
+            Id = emp.Id,
+            Nombre = emp.Nombre,
+            Email = emp.Email,
+            IdEmpleado = emp.IdEmpleado,
+            Activo = emp.Activo
+        };
+
+        MostrarModalEliminar = false;
+    }
+
+    private void AbrirModalEliminar()
+    {
+        if (!Editando)
+            return;
+
+        MostrarModalEliminar = true;
+    }
+
+    private void CerrarModalEliminar()
+    {
+        MostrarModalEliminar = false;
+    }
+
+    private async Task ConfirmarEliminarEmpleadoAsync()
+    {
+        if (!Editando)
+            return;
+
+        Guardando = true;
+
+        try
+        {
+            var eliminado = await EmpleadoService.EliminarAsync(modelo.Id);
+
+            if (!eliminado)
+            {
+                MostrarModalEliminar = false;
+                MostrarResultado("Not found", "Employee not found.");
+                return;
+            }
+
+            MostrarModalEliminar = false;
+            await CargarDatosAsync();
+            LimpiarFormulario();
+            MostrarResultado("Employee deleted", "The employee was deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            MostrarModalEliminar = false;
+            MostrarResultado("Error", $"Error deleting employee: {ex.Message}");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void LimpiarFormulario()
+    {
+        modelo = new EmpleadoFormModel
+        {
+            Activo = true
+        };
+
+        MostrarModalEliminar = false;
+    }
+
+    private void MostrarResultado(string titulo, string mensaje)
+    {
+        TituloModalResultado = titulo;
+        MensajeModalResultado = mensaje;
+        MostrarModalResultado = true;
+    }
+
+    private void CerrarModalResultado()
+    {
+        MostrarModalResultado = false;
+        TituloModalResultado = string.Empty;
+        MensajeModalResultado = string.Empty;
+    }
+
+    public class EmpleadoFormModel
+    {
+        public Guid Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public int IdEmpleado { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public bool Activo { get; set; } = true;
+    }
+}
