@@ -1,22 +1,36 @@
-﻿.thryv-dashboard-layout {
+﻿.thryv-dashboard-layout,
+.thryv-dashboard-layout * {
+    box-sizing: border-box;
+}
+
+.thryv-dashboard-layout {
+    position: fixed;
+    inset: 0;
     display: flex;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
     background: radial-gradient(circle at top left, rgba(255,80,0,0.08), transparent 26%), radial-gradient(circle at bottom right, rgba(255,80,0,0.06), transparent 22%), linear-gradient(135deg, #f8f8f8 0%, #ffffff 45%, #f3f4f6 100%);
-    position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* =========================
+   SIDEBAR FIJO
+========================= */
+
 .thryv-sidebar {
     width: 290px;
+    height: 100vh;
     background: linear-gradient(180deg, #111111 0%, #1f1f1f 100%);
     color: #ffffff;
-    transition: transform 0.3s ease, width 0.3s ease;
+    transition: width 0.3s ease, transform 0.3s ease;
     overflow: hidden;
     flex-shrink: 0;
     z-index: 1200;
     box-shadow: 16px 0 40px rgba(0, 0, 0, 0.12);
     border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
 }
 
     .thryv-sidebar.open {
@@ -26,6 +40,8 @@
     .thryv-sidebar.closed {
         width: 0;
         min-width: 0;
+        border-right: none;
+        box-shadow: none;
     }
 
 .thryv-sidebar-header {
@@ -35,6 +51,7 @@
     gap: 12px;
     padding: 24px 20px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
 }
 
 .thryv-brand-block {
@@ -93,12 +110,30 @@
         transform: translateY(-1px);
     }
 
+/* Menú con scroll propio si crece mucho */
 .thryv-sidebar-menu {
     display: flex;
     flex-direction: column;
-    padding: 18px 14px;
+    padding: 18px 14px 28px;
     gap: 10px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
+    .thryv-sidebar-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .thryv-sidebar-menu::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.18);
+        border-radius: 999px;
+    }
+
+    .thryv-sidebar-menu::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
 .thryv-menu-link {
     display: flex;
@@ -113,6 +148,7 @@
     white-space: nowrap;
     transition: all 0.2s ease;
     border: 1px solid transparent;
+    flex-shrink: 0;
 }
 
     .thryv-menu-link:hover {
@@ -140,26 +176,32 @@
     text-overflow: ellipsis;
 }
 
+/* =========================
+   MAIN CONTENT FIJO
+========================= */
+
 .thryv-main-content {
     flex: 1;
     min-width: 0;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
+/* Header superior fijo dentro del layout */
 .thryv-top-header {
     height: 88px;
-    background: rgba(255,255,255,0.88);
+    min-height: 88px;
+    background: rgba(255,255,255,0.92);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 26px;
     border-bottom: 1px solid rgba(17,17,17,0.06);
-    position: sticky;
-    top: 0;
     z-index: 1000;
+    flex-shrink: 0;
 }
 
 .thryv-header-left {
@@ -279,14 +321,35 @@
         transform: translateY(-1px);
     }
 
+/* Esta es la única parte que baja/sube */
 .thryv-page-content {
+    flex: 1;
+    min-height: 0;
     padding: 24px;
+    overflow-y: auto;
     overflow-x: hidden;
 }
+
+    .thryv-page-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .thryv-page-content::-webkit-scrollbar-thumb {
+        background: rgba(17,17,17,0.22);
+        border-radius: 999px;
+    }
+
+    .thryv-page-content::-webkit-scrollbar-track {
+        background: rgba(17,17,17,0.04);
+    }
 
 .thryv-sidebar-overlay {
     display: none;
 }
+
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media (max-width: 992px) {
     .thryv-sidebar {
@@ -303,32 +366,30 @@
 }
 
 @media (max-width: 768px) {
-    html, body {
-        overflow-x: hidden;
-    }
-
     .thryv-dashboard-layout {
-        display: flex;
-        min-height: 100vh;
-        overflow-x: hidden;
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
     }
 
     .thryv-sidebar {
         position: fixed;
         top: 0;
         left: 0;
-        height: 100vh;
         width: 270px;
         min-width: 270px;
         max-width: 82vw;
+        height: 100vh;
         transform: translateX(-100%);
         z-index: 1200;
     }
 
         .thryv-sidebar.open {
-            transform: translateX(0);
             width: 270px;
             min-width: 270px;
+            transform: translateX(0);
         }
 
         .thryv-sidebar.closed {
@@ -348,7 +409,8 @@
     .thryv-main-content {
         width: 100%;
         max-width: 100%;
-        overflow-x: hidden;
+        height: 100vh;
+        overflow: hidden;
     }
 
     .thryv-top-header {
@@ -357,6 +419,7 @@
         padding: 14px 16px;
         flex-wrap: wrap;
         gap: 12px;
+        flex-shrink: 0;
     }
 
     .thryv-header-left {
@@ -391,6 +454,10 @@
 
     .thryv-page-content {
         padding: 18px 14px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 }
 

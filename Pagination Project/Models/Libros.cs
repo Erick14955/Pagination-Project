@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc.Diagnostics;
-
-namespace Pagination_Project.Models
+﻿namespace Pagination_Project.Models
 {
     public class Libros
-{
+    {
         public Guid Id { get; set; }
+
         public string PrintFooter { get; set; } = string.Empty;
         public string LegacyCoce { get; set; } = string.Empty;
         public string LSACode { get; set; } = string.Empty;
@@ -15,6 +14,7 @@ namespace Pagination_Project.Models
         public string ProductIssue { get; set; } = string.Empty;
         public string TrimSize { get; set; } = string.Empty;
         public string BindPlant { get; set; } = string.Empty;
+
         public DateOnly ProofExtract { get; set; }
         public DateOnly FinalExtract { get; set; }
         public DateOnly MemoExtract { get; set; }
@@ -22,6 +22,7 @@ namespace Pagination_Project.Models
         public DateOnly ShippingDate { get; set; }
         public DateOnly DirxionDate { get; set; }
         public DateOnly PubDate { get; set; }
+
         public bool SRLSuppression { get; set; }
         public bool NWP { get; set; }
     }

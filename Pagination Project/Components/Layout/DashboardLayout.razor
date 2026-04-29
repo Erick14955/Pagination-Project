@@ -48,7 +48,7 @@
 
                     @if (HasPermission(auth.User, "CreateBook") || HasPermission(auth.User, "EditBook") || HasPermission(auth.User, "DeleteBook") || HasPermission(auth.User, "BooksView"))
                     {
-                        <NavLink href="/libros" class="thryv-menu-link">
+                        <NavLink href="/books" Match="NavLinkMatch.Prefix" class="thryv-menu-link">
                             <span class="thryv-menu-icon">📖</span>
                             <span class="thryv-menu-text">Books</span>
                         </NavLink>

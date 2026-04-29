@@ -16,8 +16,28 @@ namespace Pagination_Project.Services
 
         public async Task<Usuario?> ValidarLoginAsync(string username, string password)
         {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-                return null;
+            var resultado = await ValidarLoginDetalladoAsync(username, password);
+
+            return resultado.Exitoso ? resultado.Usuario : null;
+        }
+
+        public async Task<LoginResult> ValidarLoginDetalladoAsync(string username, string password)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return new LoginResult
+                {
+                    Estado = LoginEstado.UsuarioNoExiste
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                return new LoginResult
+                {
+                    Estado = LoginEstado.ContrasenaIncorrecta
+                };
+            }
 
             var usernameLimpio = username.Trim();
 
@@ -28,19 +48,58 @@ namespace Pagination_Project.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == usernameLimpio);
 
-            if (usuario is null || string.IsNullOrWhiteSpace(usuario.password))
-                return null;
+            if (usuario is null)
+            {
+                return new LoginResult
+                {
+                    Estado = LoginEstado.UsuarioNoExiste
+                };
+            }
 
             if (usuario.Activo == false)
-                return null;
+            {
+                return new LoginResult
+                {
+                    Estado = LoginEstado.UsuarioInactivo,
+                    Usuario = usuario
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(usuario.password))
+            {
+                return new LoginResult
+                {
+                    Estado = LoginEstado.ContrasenaIncorrecta,
+                    Usuario = usuario
+                };
+            }
 
             try
             {
-                return Argon2.Verify(usuario.password, password) ? usuario : null;
+                var passwordCorrecta = Argon2.Verify(usuario.password, password);
+
+                if (!passwordCorrecta)
+                {
+                    return new LoginResult
+                    {
+                        Estado = LoginEstado.ContrasenaIncorrecta,
+                        Usuario = usuario
+                    };
+                }
+
+                return new LoginResult
+                {
+                    Estado = LoginEstado.Correcto,
+                    Usuario = usuario
+                };
             }
             catch
             {
-                return null;
+                return new LoginResult
+                {
+                    Estado = LoginEstado.ContrasenaIncorrecta,
+                    Usuario = usuario
+                };
             }
         }
     }

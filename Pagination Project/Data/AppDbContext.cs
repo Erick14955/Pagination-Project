@@ -68,7 +68,7 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.FinalPODate).HasColumnName("Final_PO_Date");
                 entity.Property(e => e.ShippingDate).HasColumnName("Shipping_Date");
                 entity.Property(e => e.PubDate).HasColumnName("Pub_Date");
-                entity.Property(e => e.PrintFooter).HasColumnName("Print_Footer");
+                entity.Property(e => e.PrintFooter).HasColumnName("Print_Foot");
                 entity.Property(e => e.LegacyCoce).HasColumnName("Legacy_Code");
                 entity.Property(e => e.State).HasColumnName("State");
                 entity.Property(e => e.Database).HasColumnName("Database");

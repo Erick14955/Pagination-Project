@@ -95,12 +95,26 @@ app.MapPost("/account/login", async (
     var returnUrl = form["ReturnUrl"].ToString();
 
     if (string.IsNullOrWhiteSpace(returnUrl))
+    {
         returnUrl = "/dashboard";
+    }
 
-    var usuario = await authService.ValidarLoginAsync(username, password);
+    var resultado = await authService.ValidarLoginDetalladoAsync(username, password);
 
-    if (usuario is null)
-        return Results.Redirect("/login?error=1");
+    if (!resultado.Exitoso || resultado.Usuario is null)
+    {
+        var error = resultado.Estado switch
+        {
+            LoginEstado.UsuarioNoExiste => "usuario",
+            LoginEstado.ContrasenaIncorrecta => "password",
+            LoginEstado.UsuarioInactivo => "inactivo",
+            _ => "general"
+        };
+
+        return Results.Redirect($"/login?error={error}");
+    }
+
+    var usuario = resultado.Usuario;
 
     var claims = new List<Claim>
     {
@@ -116,15 +130,18 @@ app.MapPost("/account/login", async (
         claims.Add(new("CreateUser", usuario.Permisos.CreateUser.ToString()));
         claims.Add(new("EditUser", usuario.Permisos.EditUser.ToString()));
         claims.Add(new("DeleteUser", usuario.Permisos.DeleteUser.ToString()));
+
         claims.Add(new("CreateBook", usuario.Permisos.CreateBook.ToString()));
         claims.Add(new("EditBook", usuario.Permisos.EditBook.ToString()));
         claims.Add(new("DeleteBook", usuario.Permisos.DeleteBook.ToString()));
         claims.Add(new("AsignBook", usuario.Permisos.AsignBook.ToString()));
         claims.Add(new("BooksView", usuario.Permisos.BooksView.ToString()));
         claims.Add(new("QualifyBook", usuario.Permisos.QualifyBook.ToString()));
+
         claims.Add(new("CreateEmployees", usuario.Permisos.CreateEmployees.ToString()));
         claims.Add(new("EditEmployees", usuario.Permisos.EditEmployees.ToString()));
         claims.Add(new("DeleteEmployees", usuario.Permisos.DeleteEmployees.ToString()));
+
         claims.Add(new("EditPermissionLevels", usuario.Permisos.EditPermissionLevels.ToString()));
         claims.Add(new("ViewAssignations", usuario.Permisos.ViewAssignations.ToString()));
     }
@@ -145,8 +162,14 @@ app.MapPost("/account/login", async (
             ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
         });
 
+    if (!returnUrl.StartsWith("/") || returnUrl.StartsWith("//"))
+    {
+        returnUrl = "/dashboard";
+    }
+
     return Results.Redirect(returnUrl);
-});
+})
+.DisableAntiforgery();
 
 app.MapPost("/account/logout", async (HttpContext httpContext) =>
 {
@@ -163,6 +186,7 @@ app.MapControllers();
 // Blazor
 // ================================
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

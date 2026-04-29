@@ -5,5 +5,7 @@ namespace Pagination_Project.Services
     public interface IAuthService
     {
         Task<Usuario?> ValidarLoginAsync(string username, string password);
+
+        Task<LoginResult> ValidarLoginDetalladoAsync(string username, string password);
     }
 }

@@ -1,0 +1,929 @@
+﻿@page "/books"
+@page "/libros"
+@page "/registro-libros"
+
+@using System.Globalization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using ClosedXML.Excel
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IJSRuntime JS
+
+<PageTitle>Books - BibliotecaApp</PageTitle>
+
+<div class="books-page">
+
+    <section class="page-hero">
+        <div>
+            <h1>Book Management</h1>
+            <p>
+                Create, update, and manage books.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span>Total</span>
+                <strong>@Libros.Count</strong>
+            </div>
+            <div class="stat-card">
+                <span>Filtered</span>
+                <strong>@LibrosFiltrados.Count()</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Mensaje))
+    {
+        <div class="alert-box @TipoMensaje">
+            @Mensaje
+        </div>
+    }
+
+    <section class="form-card">
+        <div class="section-header">
+            <div>
+                <h2>@(LibroSeleccionadoId is null ? "Add New Book" : "Edit Selected Book")</h2>
+                <p>Complete the book information, codes, extract dates, and configuration options.</p>
+            </div>
+
+            <div class="header-actions">
+                <InputFile @key="XlsxInputKey"
+                           id="xlsxUpload"
+                           class="file-input-hidden"
+                           OnChange="ImportBooksFromXlsxAsync"
+                           accept=".xlsx" />
+
+                <label for="xlsxUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
+                    @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
+                </label>
+
+                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                    ✨ New
+                </button>
+            </div>
+        </div>
+
+        <form @onsubmit="GuardarLibroAsync" @onsubmit:preventDefault>
+            <div class="form-grid">
+
+                <div class="form-group large">
+                    <label>Book Name</label>
+                    <input class="form-control"
+                           @bind="Formulario.BookName"
+                           placeholder="Book name"
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label>KGEN Code</label>
+                    <input class="form-control"
+                           @bind="Formulario.KGENCode"
+                           placeholder="KGEN Code" />
+                </div>
+
+                <div class="form-group">
+                    <label>LSA Code</label>
+                    <input class="form-control"
+                           @bind="Formulario.LSACode"
+                           placeholder="LSA Code" />
+                </div>
+
+                <div class="form-group">
+                    <label>Legacy Code</label>
+                    <input class="form-control"
+                           @bind="Formulario.LegacyCoce"
+                           placeholder="Legacy Coce" />
+                </div>
+
+                <div class="form-group">
+                    <label>State</label>
+                    <input class="form-control"
+                           @bind="Formulario.State"
+                           placeholder="State" />
+                </div>
+
+                <div class="form-group">
+                    <label>Database</label>
+                    <input class="form-control"
+                           @bind="Formulario.Database"
+                           placeholder="Database" />
+                </div>
+
+                <div class="form-group">
+                    <label>Product Issue</label>
+                    <input class="form-control"
+                           @bind="Formulario.ProductIssue"
+                           placeholder="Product Issue" />
+                </div>
+
+                <div class="form-group">
+                    <label>Trim Size</label>
+                    <input class="form-control"
+                           @bind="Formulario.TrimSize"
+                           placeholder="Trim Size" />
+                </div>
+
+                <div class="form-group">
+                    <label>Bind Plant</label>
+                    <input class="form-control"
+                           @bind="Formulario.BindPlant"
+                           placeholder="Bind Plant" />
+                </div>
+
+                <div class="form-group large">
+                    <label>Print Foot</label>
+                    <input class="form-control"
+                           @bind="Formulario.PrintFooter"
+                           placeholder="Print foot" />
+                </div>
+            </div>
+
+            <div class="subsection-title">
+                <span>Book Dates</span>
+            </div>
+
+            <div class="form-grid dates-grid">
+
+                <div class="form-group">
+                    <label>Proof Extract</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.ProofExtract)"
+                           @onchange="e => Formulario.ProofExtract = ParseDate(e.Value)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Final Extract</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.FinalExtract)"
+                           @onchange="e => Formulario.FinalExtract = ParseDate(e.Value)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Memo Extract</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.MemoExtract)"
+                           @onchange="e => Formulario.MemoExtract = ParseDate(e.Value)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Final PO Date</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.FinalPODate)"
+                           @onchange="e => Formulario.FinalPODate = ParseDate(e.Value)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Shipping Date</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.ShippingDate)"
+                           @onchange="e => Formulario.ShippingDate = ParseDate(e.Value)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Dirxion Date</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.DirxionDate)"
+                           @onchange="e => Formulario.DirxionDate = ParseDate(e.Value)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Pub Date</label>
+                    <input type="date"
+                           class="form-control"
+                           value="@ToInputDate(Formulario.PubDate)"
+                           @onchange="e => Formulario.PubDate = ParseDate(e.Value)" />
+                </div>
+            </div>
+
+            <div class="switch-row">
+                <label class="switch-card">
+                    <input type="checkbox" @bind="Formulario.SRLSuppression" />
+                    <span>
+                        <strong>SRL Suppression</strong>
+                        <small>Enable this option if SRL suppression applies.</small>
+                    </span>
+                </label>
+
+                <label class="switch-card">
+                    <input type="checkbox" @bind="Formulario.NWP" />
+                    <span>
+                        <strong>NWP</strong>
+                        <small>Enable this option if the book applies to NWP.</small>
+                    </span>
+                </label>
+            </div>
+
+            <div class="button-row">
+                <button type="submit" class="btn-primary" disabled="@Guardando">
+                    @(Guardando ? "Saving..." : LibroSeleccionadoId is null ? "Save Book" : "Save Changes")
+                </button>
+
+                <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                    Clear
+                </button>
+
+                <button type="button"
+                        class="btn-danger"
+                        disabled="@(LibroSeleccionadoId is null || Guardando)"
+                        @onclick="EliminarLibroAsync">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="list-card">
+        <div class="section-header table-header">
+            <div>
+                <h2>Book List</h2>
+                <p>Double-click a row to load it into the form.</p>
+            </div>
+
+            <div class="search-box">
+                <span>🔎</span>
+                <input placeholder="Search by book, KGEN, LSA, state, database, or product issue..."
+                       @bind="Busqueda"
+                       @bind:event="oninput" />
+            </div>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-state">
+                Loading books...
+            </div>
+        }
+        else if (!LibrosFiltrados.Any())
+        {
+            <div class="empty-state">
+                <strong>No books to display.</strong>
+                <span>Add a new book or change the search filter.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="books-table">
+                    <thead>
+                        <tr>
+                            <th>Book Name</th>
+                            <th>KGEN</th>
+                            <th>LSA</th>
+                            <th>State</th>
+                            <th>Database</th>
+                            <th>Product Issue</th>
+                            <th>Proof</th>
+                            <th>Final</th>
+                            <th>Pub Date</th>
+                            <th>SRL</th>
+                            <th>NWP</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var libro in LibrosFiltrados)
+                        {
+                            <tr class="@(LibroSeleccionadoId == libro.Id ? "selected-row" : "")"
+                                @ondblclick="() => SeleccionarLibro(libro)">
+
+                                <td>
+                                    <div class="book-title">
+                                        <strong>@libro.BookName</strong>
+                                        <span>@libro.PrintFooter</span>
+                                    </div>
+                                </td>
+
+                                <td>@libro.KGENCode</td>
+                                <td>@libro.LSACode</td>
+                                <td>
+                                    <span class="pill">@libro.State</span>
+                                </td>
+                                <td>@libro.Database</td>
+                                <td>@libro.ProductIssue</td>
+                                <td>@FormatoFecha(libro.ProofExtract)</td>
+                                <td>@FormatoFecha(libro.FinalExtract)</td>
+                                <td>@FormatoFecha(libro.PubDate)</td>
+                                <td>@(libro.SRLSuppression ? "Yes" : "No")</td>
+                                <td>@(libro.NWP ? "Yes" : "No")</td>
+                                <td class="actions-cell">
+                                    <button type="button"
+                                            class="icon-btn"
+                                            title="Edit"
+                                            @onclick="() => SeleccionarLibro(libro)">
+                                        ✏️
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private List<Libros> Libros { get; set; } = new();
+    private Libros Formulario { get; set; } = CrearNuevoLibro();
+
+    private Guid? LibroSeleccionadoId { get; set; }
+
+    private string Busqueda { get; set; } = string.Empty;
+    private string Mensaje { get; set; } = string.Empty;
+    private string TipoMensaje { get; set; } = "success";
+
+    private bool Cargando { get; set; } = true;
+    private bool Guardando { get; set; } = false;
+    private bool ImportandoXlsx { get; set; } = false;
+    private int XlsxInputKey { get; set; } = 0;
+    private const long MaxXlsxSize = 20 * 1024 * 1024;
+
+    private IEnumerable<Libros> LibrosFiltrados
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Busqueda))
+                return Libros;
+
+            var filtro = Busqueda.Trim().ToLowerInvariant();
+
+            return Libros.Where(l =>
+                (l.BookName ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                (l.KGENCode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                (l.LSACode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                (l.State ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                (l.Database ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                (l.ProductIssue ?? string.Empty).ToLowerInvariant().Contains(filtro));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarLibrosAsync();
+    }
+
+    private async Task CargarLibrosAsync()
+    {
+        try
+        {
+            Cargando = true;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            Libros = await db.Libros
+                .AsNoTracking()
+                .OrderBy(l => l.BookName)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error loading books: {ex.Message}", "error");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task GuardarLibroAsync()
+    {
+        try
+        {
+            Guardando = true;
+            LimpiarMensaje();
+
+            if (string.IsNullOrWhiteSpace(Formulario.BookName))
+            {
+                MostrarMensaje("Book name is required.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            if (Formulario.Id == Guid.Empty)
+            {
+                Formulario.Id = Guid.NewGuid();
+
+                db.Libros.Add(ClonarLibro(Formulario));
+                await db.SaveChangesAsync();
+
+                MostrarMensaje("Book saved successfully.", "success");
+            }
+            else
+            {
+                var libroDb = await db.Libros.FirstOrDefaultAsync(l => l.Id == Formulario.Id);
+
+                if (libroDb is null)
+                {
+                    MostrarMensaje("The selected book was not found.", "error");
+                    return;
+                }
+
+                libroDb.PrintFooter = Formulario.PrintFooter;
+                libroDb.LegacyCoce = Formulario.LegacyCoce;
+                libroDb.LSACode = Formulario.LSACode;
+                libroDb.KGENCode = Formulario.KGENCode;
+                libroDb.BookName = Formulario.BookName;
+                libroDb.State = Formulario.State;
+                libroDb.Database = Formulario.Database;
+                libroDb.ProductIssue = Formulario.ProductIssue;
+                libroDb.TrimSize = Formulario.TrimSize;
+                libroDb.BindPlant = Formulario.BindPlant;
+
+                libroDb.ProofExtract = Formulario.ProofExtract;
+                libroDb.FinalExtract = Formulario.FinalExtract;
+                libroDb.MemoExtract = Formulario.MemoExtract;
+                libroDb.FinalPODate = Formulario.FinalPODate;
+                libroDb.ShippingDate = Formulario.ShippingDate;
+                libroDb.DirxionDate = Formulario.DirxionDate;
+                libroDb.PubDate = Formulario.PubDate;
+
+                libroDb.SRLSuppression = Formulario.SRLSuppression;
+                libroDb.NWP = Formulario.NWP;
+
+                await db.SaveChangesAsync();
+
+                MostrarMensaje("Book updated successfully.", "success");
+            }
+
+            await CargarLibrosAsync();
+            LimpiarFormulario();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error saving book: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void SeleccionarLibro(Libros libro)
+    {
+        LibroSeleccionadoId = libro.Id;
+        Formulario = ClonarLibro(libro);
+
+        MostrarMensaje("Book loaded for editing.", "info");
+    }
+
+    private async Task EliminarLibroAsync()
+    {
+        if (LibroSeleccionadoId is null || Formulario.Id == Guid.Empty)
+        {
+            MostrarMensaje("Select a book before deleting.", "error");
+            return;
+        }
+
+        var confirmar = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"Are you sure you want to delete '{Formulario.BookName}'?");
+
+        if (!confirmar)
+            return;
+
+        try
+        {
+            Guardando = true;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var libroDb = await db.Libros.FirstOrDefaultAsync(l => l.Id == Formulario.Id);
+
+            if (libroDb is null)
+            {
+                MostrarMensaje("The selected book was not found.", "error");
+                return;
+            }
+
+            db.Libros.Remove(libroDb);
+            await db.SaveChangesAsync();
+
+            MostrarMensaje("Book deleted successfully.", "success");
+
+            await CargarLibrosAsync();
+            LimpiarFormulario();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error deleting book: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void LimpiarFormulario()
+    {
+        Formulario = CrearNuevoLibro();
+        LibroSeleccionadoId = null;
+        LimpiarMensaje();
+    }
+
+    private static Libros CrearNuevoLibro()
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+        return new Libros
+        {
+            Id = Guid.Empty,
+            PrintFooter = string.Empty,
+            LegacyCoce = string.Empty,
+            LSACode = string.Empty,
+            KGENCode = string.Empty,
+            BookName = string.Empty,
+            State = string.Empty,
+            Database = string.Empty,
+            ProductIssue = string.Empty,
+            TrimSize = string.Empty,
+            BindPlant = string.Empty,
+
+            ProofExtract = hoy,
+            FinalExtract = hoy,
+            MemoExtract = hoy,
+            FinalPODate = hoy,
+            ShippingDate = hoy,
+            DirxionDate = hoy,
+            PubDate = hoy,
+
+            SRLSuppression = false,
+            NWP = false
+        };
+    }
+
+    private static Libros ClonarLibro(Libros libro)
+    {
+        return new Libros
+        {
+            Id = libro.Id,
+            PrintFooter = libro.PrintFooter ?? string.Empty,
+            LegacyCoce = libro.LegacyCoce ?? string.Empty,
+            LSACode = libro.LSACode ?? string.Empty,
+            KGENCode = libro.KGENCode ?? string.Empty,
+            BookName = libro.BookName ?? string.Empty,
+            State = libro.State ?? string.Empty,
+            Database = libro.Database ?? string.Empty,
+            ProductIssue = libro.ProductIssue ?? string.Empty,
+            TrimSize = libro.TrimSize ?? string.Empty,
+            BindPlant = libro.BindPlant ?? string.Empty,
+
+            ProofExtract = libro.ProofExtract,
+            FinalExtract = libro.FinalExtract,
+            MemoExtract = libro.MemoExtract,
+            FinalPODate = libro.FinalPODate,
+            ShippingDate = libro.ShippingDate,
+            DirxionDate = libro.DirxionDate,
+            PubDate = libro.PubDate,
+
+            SRLSuppression = libro.SRLSuppression,
+            NWP = libro.NWP
+        };
+    }
+
+    private static string ToInputDate(DateOnly value)
+    {
+        if (value == default)
+            return string.Empty;
+
+        return value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
+    private static DateOnly ParseDate(object? value)
+    {
+        var texto = value?.ToString();
+
+        if (DateOnly.TryParse(texto, out var fecha))
+            return fecha;
+
+        return DateOnly.FromDateTime(DateTime.Today);
+    }
+
+    private static string FormatoFecha(DateOnly fecha)
+    {
+        if (fecha == default)
+            return "-";
+
+        return fecha.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+    }
+
+    private void MostrarMensaje(string mensaje, string tipo)
+    {
+        Mensaje = mensaje;
+        TipoMensaje = tipo;
+    }
+
+    private void LimpiarMensaje()
+    {
+        Mensaje = string.Empty;
+        TipoMensaje = "success";
+    }
+    private async Task ImportBooksFromXlsxAsync(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            ImportandoXlsx = true;
+            LimpiarMensaje();
+
+            var file = e.File;
+
+            if (file is null)
+            {
+                MostrarMensaje("No file was selected.", "error");
+                return;
+            }
+
+            if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                MostrarMensaje("Only .xlsx files are allowed.", "error");
+                return;
+            }
+
+            await using var stream = file.OpenReadStream(MaxXlsxSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using var workbook = new XLWorkbook(memoryStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+
+            if (worksheet is null)
+            {
+                MostrarMensaje("The XLSX file does not contain any worksheet.", "error");
+                return;
+            }
+
+            var headerRow = worksheet.FirstRowUsed();
+
+            if (headerRow is null)
+            {
+                MostrarMensaje("The XLSX file is empty.", "error");
+                return;
+            }
+
+            var headerMap = BuildHeaderMap(headerRow);
+
+            if (!HeaderExists(headerMap, "BookName", "Book Name"))
+            {
+                MostrarMensaje("The XLSX file must contain a 'BookName' or 'Book Name' column.", "error");
+                return;
+            }
+
+            var importedBooks = new List<Libros>();
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var skippedRows = 0;
+
+            foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
+            {
+                var bookName = ReadText(row, headerMap, "BookName", "Book Name");
+
+                if (string.IsNullOrWhiteSpace(bookName))
+                {
+                    skippedRows++;
+                    continue;
+                }
+
+                var libro = new Libros
+                {
+                    Id = Guid.NewGuid(),
+
+                    BookName = bookName,
+                    PrintFooter = ReadText(row, headerMap, "PrintFooter", "Print Footer", "Print Foot"),
+                    LegacyCoce = ReadText(row, headerMap, "LegacyCoce", "Legacy Code", "LegacyCode", "Legacy Coce"),
+                    LSACode = ReadText(row, headerMap, "LSACode", "LSA Code", "LSA"),
+                    KGENCode = ReadText(row, headerMap, "KGENCode", "KGEN Code", "KGEN"),
+                    State = ReadText(row, headerMap, "State"),
+                    Database = ReadText(row, headerMap, "Database"),
+                    ProductIssue = ReadText(row, headerMap, "ProductIssue", "Product Issue"),
+                    TrimSize = ReadText(row, headerMap, "TrimSize", "Trim Size"),
+                    BindPlant = ReadText(row, headerMap, "BindPlant", "Bind Plant"),
+
+                    ProofExtract = ReadDate(row, headerMap, today, "ProofExtract", "Proof Extract"),
+                    FinalExtract = ReadDate(row, headerMap, today, "FinalExtract", "Final Extract"),
+                    MemoExtract = ReadDate(row, headerMap, today, "MemoExtract", "Memo Extract"),
+                    FinalPODate = ReadDate(row, headerMap, today, "FinalPODate", "Final PO Date", "Final PO"),
+                    ShippingDate = ReadDate(row, headerMap, today, "ShippingDate", "Shipping Date"),
+                    DirxionDate = ReadDate(row, headerMap, today, "DirxionDate", "Dirxion Date"),
+                    PubDate = ReadDate(row, headerMap, today, "PubDate", "Pub Date"),
+
+                    SRLSuppression = ReadBool(row, headerMap, "SRLSuppression", "SRL Suppression", "SRL"),
+                    NWP = ReadBool(row, headerMap, "NWP")
+                };
+
+                importedBooks.Add(libro);
+            }
+
+            if (!importedBooks.Any())
+            {
+                MostrarMensaje("No valid books were found in the XLSX file.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var kgenCodes = importedBooks
+                .Where(x => !string.IsNullOrWhiteSpace(x.KGENCode))
+                .Select(x => x.KGENCode.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var existingBooks = await db.Libros
+                .Where(x => kgenCodes.Contains(x.KGENCode))
+                .ToListAsync();
+
+            var existingDictionary = existingBooks
+                .GroupBy(x => x.KGENCode, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var inserted = 0;
+            var updated = 0;
+
+            foreach (var imported in importedBooks)
+            {
+                if (!string.IsNullOrWhiteSpace(imported.KGENCode) &&
+                    existingDictionary.TryGetValue(imported.KGENCode.Trim(), out var existing))
+                {
+                    CopyBookValues(existing, imported);
+                    updated++;
+                }
+                else
+                {
+                    db.Libros.Add(imported);
+                    inserted++;
+                }
+            }
+
+            await db.SaveChangesAsync();
+
+            await CargarLibrosAsync();
+
+            XlsxInputKey++;
+
+            MostrarMensaje($"XLSX import completed. Inserted: {inserted}. Updated: {updated}. Skipped rows: {skippedRows}.", "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error importing XLSX file: {ex.Message}", "error");
+        }
+        finally
+        {
+            ImportandoXlsx = false;
+        }
+    }
+
+    private static Dictionary<string, int> BuildHeaderMap(IXLRow headerRow)
+    {
+        var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var cell in headerRow.CellsUsed())
+        {
+            var header = NormalizeHeader(cell.GetString());
+
+            if (!string.IsNullOrWhiteSpace(header) && !map.ContainsKey(header))
+            {
+                map.Add(header, cell.Address.ColumnNumber);
+            }
+        }
+
+        return map;
+    }
+
+    private static bool HeaderExists(Dictionary<string, int> headerMap, params string[] names)
+    {
+        return names.Any(name => headerMap.ContainsKey(NormalizeHeader(name)));
+    }
+
+    private static string NormalizeHeader(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        return new string(value
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
+    }
+
+    private static IXLCell? GetCell(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            var key = NormalizeHeader(name);
+
+            if (headerMap.TryGetValue(key, out var columnNumber))
+                return row.Cell(columnNumber);
+        }
+
+        return null;
+    }
+
+    private static string ReadText(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+
+        if (cell is null || cell.IsEmpty())
+            return string.Empty;
+
+        return cell.GetString().Trim();
+    }
+
+    private static DateOnly ReadDate(IXLRow row, Dictionary<string, int> headerMap, DateOnly defaultValue, params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+
+        if (cell is null || cell.IsEmpty())
+            return defaultValue;
+
+        if (cell.TryGetValue<DateTime>(out var dateTime))
+            return DateOnly.FromDateTime(dateTime);
+
+        if (cell.TryGetValue<double>(out var numberValue))
+        {
+            try
+            {
+                var excelDate = DateTime.FromOADate(numberValue);
+                return DateOnly.FromDateTime(excelDate);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        var text = cell.GetString().Trim();
+
+        string[] formats =
+        {
+        "MM/dd/yyyy",
+        "M/d/yyyy",
+        "yyyy-MM-dd",
+        "dd/MM/yyyy",
+        "d/M/yyyy"
+    };
+
+        if (DateOnly.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exactDate))
+            return exactDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+            return parsedDate;
+
+        return defaultValue;
+    }
+
+    private static bool ReadBool(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+
+        if (cell is null || cell.IsEmpty())
+            return false;
+
+        if (cell.TryGetValue<bool>(out var boolValue))
+            return boolValue;
+
+        var text = cell.GetString().Trim().ToLowerInvariant();
+
+        return text is "true" or "yes" or "y" or "1" or "x" or "si" or "sí";
+    }
+
+    private static void CopyBookValues(Libros destination, Libros source)
+    {
+        destination.PrintFooter = source.PrintFooter;
+        destination.LegacyCoce = source.LegacyCoce;
+        destination.LSACode = source.LSACode;
+        destination.KGENCode = source.KGENCode;
+        destination.BookName = source.BookName;
+        destination.State = source.State;
+        destination.Database = source.Database;
+        destination.ProductIssue = source.ProductIssue;
+        destination.TrimSize = source.TrimSize;
+        destination.BindPlant = source.BindPlant;
+
+        destination.ProofExtract = source.ProofExtract;
+        destination.FinalExtract = source.FinalExtract;
+        destination.MemoExtract = source.MemoExtract;
+        destination.FinalPODate = source.FinalPODate;
+        destination.ShippingDate = source.ShippingDate;
+        destination.DirxionDate = source.DirxionDate;
+        destination.PubDate = source.PubDate;
+
+        destination.SRLSuppression = source.SRLSuppression;
+        destination.NWP = source.NWP;
+    }
+
+}
