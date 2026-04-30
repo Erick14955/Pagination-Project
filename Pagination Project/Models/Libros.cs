@@ -4,16 +4,17 @@
     {
         public Guid Id { get; set; }
 
-        public string PrintFooter { get; set; } = string.Empty;
-        public string LegacyCoce { get; set; } = string.Empty;
+        public Guid? PrintFootId { get; set; }
+        public Guid? LegacyCodeId { get; set; }
+        public Guid? StateId { get; set; }
+        public Guid? DatabaseId { get; set; }
+        public Guid? TrimSizeId { get; set; }
+        public Guid? BindPlantId { get; set; }
+
         public string LSACode { get; set; } = string.Empty;
         public string KGENCode { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string Database { get; set; } = string.Empty;
         public string ProductIssue { get; set; } = string.Empty;
-        public string TrimSize { get; set; } = string.Empty;
-        public string BindPlant { get; set; } = string.Empty;
 
         public DateOnly ProofExtract { get; set; }
         public DateOnly FinalExtract { get; set; }

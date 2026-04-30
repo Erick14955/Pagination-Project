@@ -4,12 +4,12 @@
 
 @using System.Globalization
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.JSInterop
+@using ClosedXML.Excel
 @using Pagination_Project.Data
 @using Pagination_Project.Models
-@using Microsoft.AspNetCore.Components.Forms
-@using ClosedXML.Excel
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
@@ -34,6 +34,7 @@
                 <span>Total</span>
                 <strong>@Libros.Count</strong>
             </div>
+
             <div class="stat-card">
                 <span>Filtered</span>
                 <strong>@LibrosFiltrados.Count()</strong>
@@ -52,7 +53,7 @@
         <div class="section-header">
             <div>
                 <h2>@(LibroSeleccionadoId is null ? "Add New Book" : "Edit Selected Book")</h2>
-                <p>Complete the book information, codes, extract dates, and configuration options.</p>
+                <p>Complete the book information, codes and extract dates</p>
             </div>
 
             <div class="header-actions">
@@ -99,23 +100,35 @@
 
                 <div class="form-group">
                     <label>Legacy Code</label>
-                    <input class="form-control"
-                           @bind="Formulario.LegacyCoce"
-                           placeholder="Legacy Coce" />
+                    <select class="form-control" @bind="Formulario.LegacyCodeId">
+                        <option value="">Select legacy code</option>
+                        @foreach (var item in LegacyCodes)
+                        {
+                            <option value="@item.Id">@item.Legacy_Code_Name</option>
+                        }
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label>State</label>
-                    <input class="form-control"
-                           @bind="Formulario.State"
-                           placeholder="State" />
+                    <select class="form-control" @bind="Formulario.StateId">
+                        <option value="">Select state</option>
+                        @foreach (var item in States)
+                        {
+                            <option value="@item.Id">@item.State_Name</option>
+                        }
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label>Database</label>
-                    <input class="form-control"
-                           @bind="Formulario.Database"
-                           placeholder="Database" />
+                    <select class="form-control" @bind="Formulario.DatabaseId">
+                        <option value="">Select database</option>
+                        @foreach (var item in Databases)
+                        {
+                            <option value="@item.Id">@item.Database_Name</option>
+                        }
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -127,23 +140,35 @@
 
                 <div class="form-group">
                     <label>Trim Size</label>
-                    <input class="form-control"
-                           @bind="Formulario.TrimSize"
-                           placeholder="Trim Size" />
+                    <select class="form-control" @bind="Formulario.TrimSizeId">
+                        <option value="">Select trim size</option>
+                        @foreach (var item in TrimSizes)
+                        {
+                            <option value="@item.Id">@item.Trim_Size_Name</option>
+                        }
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label>Bind Plant</label>
-                    <input class="form-control"
-                           @bind="Formulario.BindPlant"
-                           placeholder="Bind Plant" />
+                    <select class="form-control" @bind="Formulario.BindPlantId">
+                        <option value="">Select bind plant</option>
+                        @foreach (var item in BindPlants)
+                        {
+                            <option value="@item.Id">@item.Bind_Plant_Name</option>
+                        }
+                    </select>
                 </div>
 
                 <div class="form-group large">
                     <label>Print Foot</label>
-                    <input class="form-control"
-                           @bind="Formulario.PrintFooter"
-                           placeholder="Print foot" />
+                    <select class="form-control" @bind="Formulario.PrintFootId">
+                        <option value="">Select print foot</option>
+                        @foreach (var item in PrintFeet)
+                        {
+                            <option value="@item.Id">@item.Print_Foot_Name</option>
+                        }
+                    </select>
                 </div>
             </div>
 
@@ -254,11 +279,28 @@
                 <p>Double-click a row to load it into the form.</p>
             </div>
 
-            <div class="search-box">
-                <span>🔎</span>
-                <input placeholder="Search by book, KGEN, LSA, state, database, or product issue..."
-                       @bind="Busqueda"
-                       @bind:event="oninput" />
+            <div class="list-filters">
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input placeholder="Search by book, KGEN, LSA, state, database, legacy code, print foot..."
+                           @bind="Busqueda"
+                           @bind:event="oninput" />
+                </div>
+
+                <div class="month-filter">
+                    <label>Pub Date Month</label>
+                    <select class="form-control filter-select" @bind="SelectedPubMonth">
+                        <option value="">All Pub Dates</option>
+                        @foreach (var month in PubDateMonths)
+                        {
+                            <option value="@month.Value">@month.Label (@month.Count)</option>
+                        }
+                    </select>
+                </div>
+
+                <button type="button" class="btn-filter-clear" @onclick="ClearListFilters">
+                    Clear
+                </button>
             </div>
         </div>
 
@@ -281,15 +323,89 @@
                 <table class="books-table">
                     <thead>
                         <tr>
-                            <th>Book Name</th>
-                            <th>KGEN</th>
-                            <th>LSA</th>
-                            <th>State</th>
-                            <th>Database</th>
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("BookName")'>
+                                    Book Name <span>@GetSortIcon("BookName")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("KGEN")'>
+                                    KGEN <span>@GetSortIcon("KGEN")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("LSA")'>
+                                    LSA <span>@GetSortIcon("LSA")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("State")'>
+                                    State <span>@GetSortIcon("State")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Database")'>
+                                    Database <span>@GetSortIcon("Database")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Legacy")'>
+                                    Legacy Code <span>@GetSortIcon("Legacy")</span>
+                                </button>
+                            </th>
+
+                            <th>Print Foot</th>
+                            <th>Trim Size</th>
+                            <th>Bind Plant</th>
                             <th>Product Issue</th>
-                            <th>Proof</th>
-                            <th>Final</th>
-                            <th>Pub Date</th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Proof")'>
+                                    Proof <span>@GetSortIcon("Proof")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Final")'>
+                                    Final <span>@GetSortIcon("Final")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Memo")'>
+                                    Memo <span>@GetSortIcon("Memo")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("FinalPO")'>
+                                    Final PO <span>@GetSortIcon("FinalPO")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Shipping")'>
+                                    Shipping <span>@GetSortIcon("Shipping")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("Dirxion")'>
+                                    Dirxion <span>@GetSortIcon("Dirxion")</span>
+                                </button>
+                            </th>
+
+                            <th>
+                                <button type="button" class="sortable-header" @onclick='() => SortBy("PubDate")'>
+                                    Pub Date <span>@GetSortIcon("PubDate")</span>
+                                </button>
+                            </th>
+
                             <th>SRL</th>
                             <th>NWP</th>
                             <th></th>
@@ -297,7 +413,7 @@
                     </thead>
 
                     <tbody>
-                        @foreach (var libro in LibrosFiltrados)
+                        @foreach (var libro in LibrosOrdenados)
                         {
                             <tr class="@(LibroSeleccionadoId == libro.Id ? "selected-row" : "")"
                                 @ondblclick="() => SeleccionarLibro(libro)">
@@ -305,22 +421,33 @@
                                 <td>
                                     <div class="book-title">
                                         <strong>@libro.BookName</strong>
-                                        <span>@libro.PrintFooter</span>
+                                        <span>@GetPrintFootName(libro.PrintFootId)</span>
                                     </div>
                                 </td>
 
                                 <td>@libro.KGENCode</td>
                                 <td>@libro.LSACode</td>
+
                                 <td>
-                                    <span class="pill">@libro.State</span>
+                                    <span class="pill">@GetStateName(libro.StateId)</span>
                                 </td>
-                                <td>@libro.Database</td>
+
+                                <td>@GetDatabaseName(libro.DatabaseId)</td>
+                                <td>@GetLegacyCodeName(libro.LegacyCodeId)</td>
+                                <td>@GetPrintFootName(libro.PrintFootId)</td>
+                                <td>@GetTrimSizeName(libro.TrimSizeId)</td>
+                                <td>@GetBindPlantName(libro.BindPlantId)</td>
                                 <td>@libro.ProductIssue</td>
                                 <td>@FormatoFecha(libro.ProofExtract)</td>
                                 <td>@FormatoFecha(libro.FinalExtract)</td>
+                                <td>@FormatoFecha(libro.MemoExtract)</td>
+                                <td>@FormatoFecha(libro.FinalPODate)</td>
+                                <td>@FormatoFecha(libro.ShippingDate)</td>
+                                <td>@FormatoFecha(libro.DirxionDate)</td>
                                 <td>@FormatoFecha(libro.PubDate)</td>
                                 <td>@(libro.SRLSuppression ? "Yes" : "No")</td>
                                 <td>@(libro.NWP ? "Yes" : "No")</td>
+
                                 <td class="actions-cell">
                                     <button type="button"
                                             class="icon-btn"
@@ -340,6 +467,14 @@
 
 @code {
     private List<Libros> Libros { get; set; } = new();
+
+    private List<Bind_Plant> BindPlants { get; set; } = new();
+    private List<Pagination_Project.Models.Database> Databases { get; set; } = new();
+    private List<Legacy_Code> LegacyCodes { get; set; } = new();
+    private List<Print_Foot> PrintFeet { get; set; } = new();
+    private List<State> States { get; set; } = new();
+    private List<Trim_Size> TrimSizes { get; set; } = new();
+
     private Libros Formulario { get; set; } = CrearNuevoLibro();
 
     private Guid? LibroSeleccionadoId { get; set; }
@@ -351,31 +486,117 @@
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
+
     private int XlsxInputKey { get; set; } = 0;
+
     private const long MaxXlsxSize = 20 * 1024 * 1024;
+
+    private string SelectedPubMonth { get; set; } = string.Empty;
+    private string SortColumn { get; set; } = "BookName";
+    private bool SortDescending { get; set; } = false;
 
     private IEnumerable<Libros> LibrosFiltrados
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(Busqueda))
-                return Libros;
+            IEnumerable<Libros> query = Libros;
 
-            var filtro = Busqueda.Trim().ToLowerInvariant();
+            if (!string.IsNullOrWhiteSpace(Busqueda))
+            {
+                var filtro = Busqueda.Trim().ToLowerInvariant();
 
-            return Libros.Where(l =>
-                (l.BookName ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                (l.KGENCode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                (l.LSACode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                (l.State ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                (l.Database ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                (l.ProductIssue ?? string.Empty).ToLowerInvariant().Contains(filtro));
+                query = query.Where(l =>
+                    (l.BookName ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                    (l.KGENCode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                    (l.LSACode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                    (l.ProductIssue ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                    GetStateName(l.StateId).ToLowerInvariant().Contains(filtro) ||
+                    GetDatabaseName(l.DatabaseId).ToLowerInvariant().Contains(filtro) ||
+                    GetLegacyCodeName(l.LegacyCodeId).ToLowerInvariant().Contains(filtro) ||
+                    GetPrintFootName(l.PrintFootId).ToLowerInvariant().Contains(filtro) ||
+                    GetTrimSizeName(l.TrimSizeId).ToLowerInvariant().Contains(filtro) ||
+                    GetBindPlantName(l.BindPlantId).ToLowerInvariant().Contains(filtro));
+            }
+
+            if (!string.IsNullOrWhiteSpace(SelectedPubMonth))
+            {
+                query = query.Where(l => GetPubMonthValue(l.PubDate) == SelectedPubMonth);
+            }
+
+            return query;
+        }
+    }
+
+    private IEnumerable<Libros> LibrosOrdenados => ApplySorting(LibrosFiltrados);
+
+    private IEnumerable<PubMonthOption> PubDateMonths
+    {
+        get
+        {
+            return Libros
+                .Where(l => l.PubDate != default)
+                .GroupBy(l => GetPubMonthValue(l.PubDate))
+                .Select(g =>
+                {
+                    var firstDate = g.First().PubDate;
+
+                    return new PubMonthOption
+                    {
+                        Value = g.Key,
+                        Label = GetPubMonthLabel(firstDate),
+                        Count = g.Count()
+                    };
+                })
+                .OrderByDescending(x => x.Value);
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
+        await CargarCatalogosAsync();
         await CargarLibrosAsync();
+    }
+
+    private async Task CargarCatalogosAsync()
+    {
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            BindPlants = await db.Bind_Plants
+                .AsNoTracking()
+                .OrderBy(x => x.Bind_Plant_Name)
+                .ToListAsync();
+
+            Databases = await db.Databases
+                .AsNoTracking()
+                .OrderBy(x => x.Database_Name)
+                .ToListAsync();
+
+            LegacyCodes = await db.Legacy_Codes
+                .AsNoTracking()
+                .OrderBy(x => x.Legacy_Code_Name)
+                .ToListAsync();
+
+            PrintFeet = await db.Print_Foots
+                .AsNoTracking()
+                .OrderBy(x => x.Print_Foot_Name)
+                .ToListAsync();
+
+            States = await db.States
+                .AsNoTracking()
+                .OrderBy(x => x.State_Name)
+                .ToListAsync();
+
+            TrimSizes = await db.Trim_Sizes
+                .AsNoTracking()
+                .OrderBy(x => x.Trim_Size_Name)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error loading catalogs: {ex.Message}", "error");
+        }
     }
 
     private async Task CargarLibrosAsync()
@@ -435,16 +656,17 @@
                     return;
                 }
 
-                libroDb.PrintFooter = Formulario.PrintFooter;
-                libroDb.LegacyCoce = Formulario.LegacyCoce;
+                libroDb.PrintFootId = Formulario.PrintFootId;
+                libroDb.LegacyCodeId = Formulario.LegacyCodeId;
+                libroDb.StateId = Formulario.StateId;
+                libroDb.DatabaseId = Formulario.DatabaseId;
+                libroDb.TrimSizeId = Formulario.TrimSizeId;
+                libroDb.BindPlantId = Formulario.BindPlantId;
+
                 libroDb.LSACode = Formulario.LSACode;
                 libroDb.KGENCode = Formulario.KGENCode;
                 libroDb.BookName = Formulario.BookName;
-                libroDb.State = Formulario.State;
-                libroDb.Database = Formulario.Database;
                 libroDb.ProductIssue = Formulario.ProductIssue;
-                libroDb.TrimSize = Formulario.TrimSize;
-                libroDb.BindPlant = Formulario.BindPlant;
 
                 libroDb.ProofExtract = Formulario.ProofExtract;
                 libroDb.FinalExtract = Formulario.FinalExtract;
@@ -544,16 +766,18 @@
         return new Libros
         {
             Id = Guid.Empty,
-            PrintFooter = string.Empty,
-            LegacyCoce = string.Empty,
+
+            PrintFootId = null,
+            LegacyCodeId = null,
+            StateId = null,
+            DatabaseId = null,
+            TrimSizeId = null,
+            BindPlantId = null,
+
             LSACode = string.Empty,
             KGENCode = string.Empty,
             BookName = string.Empty,
-            State = string.Empty,
-            Database = string.Empty,
             ProductIssue = string.Empty,
-            TrimSize = string.Empty,
-            BindPlant = string.Empty,
 
             ProofExtract = hoy,
             FinalExtract = hoy,
@@ -573,16 +797,18 @@
         return new Libros
         {
             Id = libro.Id,
-            PrintFooter = libro.PrintFooter ?? string.Empty,
-            LegacyCoce = libro.LegacyCoce ?? string.Empty,
+
+            PrintFootId = libro.PrintFootId,
+            LegacyCodeId = libro.LegacyCodeId,
+            StateId = libro.StateId,
+            DatabaseId = libro.DatabaseId,
+            TrimSizeId = libro.TrimSizeId,
+            BindPlantId = libro.BindPlantId,
+
             LSACode = libro.LSACode ?? string.Empty,
             KGENCode = libro.KGENCode ?? string.Empty,
             BookName = libro.BookName ?? string.Empty,
-            State = libro.State ?? string.Empty,
-            Database = libro.Database ?? string.Empty,
             ProductIssue = libro.ProductIssue ?? string.Empty,
-            TrimSize = libro.TrimSize ?? string.Empty,
-            BindPlant = libro.BindPlant ?? string.Empty,
 
             ProofExtract = libro.ProofExtract,
             FinalExtract = libro.FinalExtract,
@@ -597,49 +823,21 @@
         };
     }
 
-    private static string ToInputDate(DateOnly value)
-    {
-        if (value == default)
-            return string.Empty;
-
-        return value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-    }
-
-    private static DateOnly ParseDate(object? value)
-    {
-        var texto = value?.ToString();
-
-        if (DateOnly.TryParse(texto, out var fecha))
-            return fecha;
-
-        return DateOnly.FromDateTime(DateTime.Today);
-    }
-
-    private static string FormatoFecha(DateOnly fecha)
-    {
-        if (fecha == default)
-            return "-";
-
-        return fecha.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
-    }
-
-    private void MostrarMensaje(string mensaje, string tipo)
-    {
-        Mensaje = mensaje;
-        TipoMensaje = tipo;
-    }
-
-    private void LimpiarMensaje()
-    {
-        Mensaje = string.Empty;
-        TipoMensaje = "success";
-    }
     private async Task ImportBooksFromXlsxAsync(InputFileChangeEventArgs e)
     {
         try
         {
             ImportandoXlsx = true;
             LimpiarMensaje();
+
+            if (!BindPlants.Any() ||
+                !Databases.Any() ||
+                !LegacyCodes.Any() ||
+                !PrintFeet.Any() ||
+                !TrimSizes.Any())
+            {
+                await CargarCatalogosAsync();
+            }
 
             var file = e.File;
 
@@ -657,6 +855,7 @@
 
             await using var stream = file.OpenReadStream(MaxXlsxSize);
             using var memoryStream = new MemoryStream();
+
             await stream.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
 
@@ -679,51 +878,98 @@
 
             var headerMap = BuildHeaderMap(headerRow);
 
-            if (!HeaderExists(headerMap, "BookName", "Book Name"))
+            if (!HeaderExists(headerMap, "Product Name"))
             {
-                MostrarMensaje("The XLSX file must contain a 'BookName' or 'Book Name' column.", "error");
+                MostrarMensaje("The XLSX file must contain the 'Product Name' column.", "error");
+                return;
+            }
+
+            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code"))
+            {
+                MostrarMensaje("The XLSX file must contain the 'KGen Product Code' column.", "error");
                 return;
             }
 
             var importedBooks = new List<Libros>();
             var today = DateOnly.FromDateTime(DateTime.Today);
             var skippedRows = 0;
+            var catalogWarnings = new List<string>();
 
             foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
             {
-                var bookName = ReadText(row, headerMap, "BookName", "Book Name");
+                var bookName = ReadText(row, headerMap, "Product Name");
+                var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code");
 
-                if (string.IsNullOrWhiteSpace(bookName))
+                if (string.IsNullOrWhiteSpace(bookName) && string.IsNullOrWhiteSpace(kgenCode))
                 {
                     skippedRows++;
                     continue;
                 }
+
+                if (string.IsNullOrWhiteSpace(bookName))
+                {
+                    skippedRows++;
+                    catalogWarnings.Add($"Row {row.RowNumber()}: Product Name is empty");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(kgenCode))
+                {
+                    skippedRows++;
+                    catalogWarnings.Add($"Row {row.RowNumber()}: KGen Product Code is empty");
+                    continue;
+                }
+
+                var footPrintText = ReadText(row, headerMap, "Foot Print");
+                var legacyCoText = ReadText(row, headerMap, "Legacy Co");
+                var stateText = ReadText(row, headerMap, "State");
+                var graphicsDatabaseText = ReadText(row, headerMap, "Graphics Database");
+                var trimSizeText = ReadText(row, headerMap, "Trim Size");
+                var bindPlantText = ReadText(row, headerMap, "Bind Plant");
+
+                var printFootId = FindPrintFootId(footPrintText);
+                var legacyCodeId = FindLegacyCodeId(legacyCoText);
+                var stateId = FindStateId(stateText);
+                var databaseId = FindDatabaseId(graphicsDatabaseText);
+                var trimSizeId = FindTrimSizeId(trimSizeText);
+                var bindPlantId = FindBindPlantId(bindPlantText);
+
+                AddCatalogWarningIfNeeded(catalogWarnings, row.RowNumber(), "Foot Print", footPrintText, printFootId);
+                AddCatalogWarningIfNeeded(catalogWarnings, row.RowNumber(), "Legacy Co", legacyCoText, legacyCodeId);
+                AddCatalogWarningIfNeeded(catalogWarnings, row.RowNumber(), "State", stateText, stateId);
+                AddCatalogWarningIfNeeded(catalogWarnings, row.RowNumber(), "Graphics Database", graphicsDatabaseText, databaseId);
+                AddCatalogWarningIfNeeded(catalogWarnings, row.RowNumber(), "Trim Size", trimSizeText, trimSizeId);
+                AddCatalogWarningIfNeeded(catalogWarnings, row.RowNumber(), "Bind Plant", bindPlantText, bindPlantId);
+
+                var firstDuePrinterDate = ReadDate(row, headerMap, today, "First Due Printer");
+                var finalPoDate = CalculateFinalPoDate(firstDuePrinterDate);
 
                 var libro = new Libros
                 {
                     Id = Guid.NewGuid(),
 
                     BookName = bookName,
-                    PrintFooter = ReadText(row, headerMap, "PrintFooter", "Print Footer", "Print Foot"),
-                    LegacyCoce = ReadText(row, headerMap, "LegacyCoce", "Legacy Code", "LegacyCode", "Legacy Coce"),
-                    LSACode = ReadText(row, headerMap, "LSACode", "LSA Code", "LSA"),
-                    KGENCode = ReadText(row, headerMap, "KGENCode", "KGEN Code", "KGEN"),
-                    State = ReadText(row, headerMap, "State"),
-                    Database = ReadText(row, headerMap, "Database"),
-                    ProductIssue = ReadText(row, headerMap, "ProductIssue", "Product Issue"),
-                    TrimSize = ReadText(row, headerMap, "TrimSize", "Trim Size"),
-                    BindPlant = ReadText(row, headerMap, "BindPlant", "Bind Plant"),
+                    KGENCode = kgenCode,
+                    LSACode = ReadText(row, headerMap, "LSA Code", "LSA"),
+                    ProductIssue = ReadText(row, headerMap, "Product Issue"),
 
-                    ProofExtract = ReadDate(row, headerMap, today, "ProofExtract", "Proof Extract"),
-                    FinalExtract = ReadDate(row, headerMap, today, "FinalExtract", "Final Extract"),
-                    MemoExtract = ReadDate(row, headerMap, today, "MemoExtract", "Memo Extract"),
-                    FinalPODate = ReadDate(row, headerMap, today, "FinalPODate", "Final PO Date", "Final PO"),
-                    ShippingDate = ReadDate(row, headerMap, today, "ShippingDate", "Shipping Date"),
-                    DirxionDate = ReadDate(row, headerMap, today, "DirxionDate", "Dirxion Date"),
-                    PubDate = ReadDate(row, headerMap, today, "PubDate", "Pub Date"),
+                    PrintFootId = printFootId,
+                    LegacyCodeId = legacyCodeId,
+                    StateId = stateId,
+                    DatabaseId = databaseId,
+                    TrimSizeId = trimSizeId,
+                    BindPlantId = bindPlantId,
 
-                    SRLSuppression = ReadBool(row, headerMap, "SRLSuppression", "SRL Suppression", "SRL"),
-                    NWP = ReadBool(row, headerMap, "NWP")
+                    ProofExtract = ReadDate(row, headerMap, today, "Proof Extract", "Extract - Proof"),
+                    FinalExtract = ReadDate(row, headerMap, today, "Extract - Final"),
+                    MemoExtract = ReadDate(row, headerMap, today, "Memo Extract", "Extract - Memo"),
+                    FinalPODate = finalPoDate,
+                    ShippingDate = firstDuePrinterDate,
+                    DirxionDate = ReadDate(row, headerMap, today, "Dirxion"),
+                    PubDate = ReadDate(row, headerMap, today, "Pub Date", "Publication Date"),
+
+                    SRLSuppression = ReadYesNoBool(row, headerMap, "SRL Suppression Flag"),
+                    NWP = ReadYesNoBool(row, headerMap, "NWP")
                 };
 
                 importedBooks.Add(libro);
@@ -748,7 +994,8 @@
                 .ToListAsync();
 
             var existingDictionary = existingBooks
-                .GroupBy(x => x.KGENCode, StringComparer.OrdinalIgnoreCase)
+                .Where(x => !string.IsNullOrWhiteSpace(x.KGENCode))
+                .GroupBy(x => x.KGENCode.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             var inserted = 0;
@@ -775,7 +1022,20 @@
 
             XlsxInputKey++;
 
-            MostrarMensaje($"XLSX import completed. Inserted: {inserted}. Updated: {updated}. Skipped rows: {skippedRows}.", "success");
+            var finalMessage = $"XLSX import completed. Inserted: {inserted}. Updated: {updated}. Skipped rows: {skippedRows}.";
+
+            if (catalogWarnings.Any())
+            {
+                var warningPreview = string.Join(" | ", catalogWarnings.Take(6));
+                finalMessage += $" Catalog warnings: {warningPreview}";
+
+                if (catalogWarnings.Count > 6)
+                {
+                    finalMessage += $" and {catalogWarnings.Count - 6} more.";
+                }
+            }
+
+            MostrarMensaje(finalMessage, "success");
         }
         catch (Exception ex)
         {
@@ -785,6 +1045,44 @@
         {
             ImportandoXlsx = false;
         }
+    }
+
+    private static void CopyBookValues(Libros destination, Libros source)
+    {
+        destination.PrintFootId = source.PrintFootId;
+        destination.LegacyCodeId = source.LegacyCodeId;
+        destination.StateId = source.StateId;
+        destination.DatabaseId = source.DatabaseId;
+        destination.TrimSizeId = source.TrimSizeId;
+        destination.BindPlantId = source.BindPlantId;
+
+        destination.LSACode = source.LSACode;
+        destination.KGENCode = source.KGENCode;
+        destination.BookName = source.BookName;
+        destination.ProductIssue = source.ProductIssue;
+
+        destination.ProofExtract = source.ProofExtract;
+        destination.FinalExtract = source.FinalExtract;
+        destination.MemoExtract = source.MemoExtract;
+        destination.FinalPODate = source.FinalPODate;
+        destination.ShippingDate = source.ShippingDate;
+        destination.DirxionDate = source.DirxionDate;
+        destination.PubDate = source.PubDate;
+
+        destination.SRLSuppression = source.SRLSuppression;
+        destination.NWP = source.NWP;
+    }
+
+    private static DateOnly CalculateFinalPoDate(DateOnly firstDuePrinter)
+    {
+        var candidate = firstDuePrinter.AddDays(-1);
+
+        while (candidate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            candidate = candidate.AddDays(-1);
+        }
+
+        return candidate;
     }
 
     private static Dictionary<string, int> BuildHeaderMap(IXLRow headerRow)
@@ -840,6 +1138,19 @@
         if (cell is null || cell.IsEmpty())
             return string.Empty;
 
+        var formatted = cell.GetFormattedString()?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(formatted))
+            return formatted;
+
+        if (cell.TryGetValue<double>(out var numberValue))
+        {
+            if (Math.Abs(numberValue % 1) < 0.0000001)
+                return Convert.ToInt64(numberValue).ToString(CultureInfo.InvariantCulture);
+
+            return numberValue.ToString(CultureInfo.InvariantCulture);
+        }
+
         return cell.GetString().Trim();
     }
 
@@ -866,16 +1177,23 @@
             }
         }
 
-        var text = cell.GetString().Trim();
+        var text = cell.GetFormattedString()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            text = cell.GetString().Trim();
 
         string[] formats =
         {
-        "MM/dd/yyyy",
-        "M/d/yyyy",
-        "yyyy-MM-dd",
-        "dd/MM/yyyy",
-        "d/M/yyyy"
-    };
+            "MM/dd/yyyy",
+            "M/d/yyyy",
+            "yyyy-MM-dd",
+            "dd/MM/yyyy",
+            "d/M/yyyy",
+            "M/d/yy",
+            "MM/dd/yy",
+            "dd/MM/yy",
+            "d/M/yy"
+        };
 
         if (DateOnly.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exactDate))
             return exactDate;
@@ -883,10 +1201,13 @@
         if (DateOnly.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
             return parsedDate;
 
+        if (DateOnly.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.None, out var currentCultureDate))
+            return currentCultureDate;
+
         return defaultValue;
     }
 
-    private static bool ReadBool(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    private static bool ReadYesNoBool(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
     {
         var cell = GetCell(row, headerMap, names);
 
@@ -896,34 +1217,269 @@
         if (cell.TryGetValue<bool>(out var boolValue))
             return boolValue;
 
-        var text = cell.GetString().Trim().ToLowerInvariant();
+        var text = cell.GetFormattedString()?.Trim().ToUpperInvariant();
 
-        return text is "true" or "yes" or "y" or "1" or "x" or "si" or "sí";
+        if (string.IsNullOrWhiteSpace(text))
+            text = cell.GetString().Trim().ToUpperInvariant();
+
+        return text is "Y" or "YES" or "TRUE" or "1" or "X";
     }
 
-    private static void CopyBookValues(Libros destination, Libros source)
+    private void AddCatalogWarningIfNeeded(List<string> warnings, int rowNumber, string catalogName, string value, Guid? id)
     {
-        destination.PrintFooter = source.PrintFooter;
-        destination.LegacyCoce = source.LegacyCoce;
-        destination.LSACode = source.LSACode;
-        destination.KGENCode = source.KGENCode;
-        destination.BookName = source.BookName;
-        destination.State = source.State;
-        destination.Database = source.Database;
-        destination.ProductIssue = source.ProductIssue;
-        destination.TrimSize = source.TrimSize;
-        destination.BindPlant = source.BindPlant;
+        if (string.IsNullOrWhiteSpace(value))
+            return;
 
-        destination.ProofExtract = source.ProofExtract;
-        destination.FinalExtract = source.FinalExtract;
-        destination.MemoExtract = source.MemoExtract;
-        destination.FinalPODate = source.FinalPODate;
-        destination.ShippingDate = source.ShippingDate;
-        destination.DirxionDate = source.DirxionDate;
-        destination.PubDate = source.PubDate;
-
-        destination.SRLSuppression = source.SRLSuppression;
-        destination.NWP = source.NWP;
+        if (id is null)
+        {
+            warnings.Add($"Row {rowNumber}: {catalogName} '{value}' was not found");
+        }
     }
 
+    private Guid? FindStateId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return States.FirstOrDefault(x =>
+            string.Equals(x.State_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindDatabaseId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return Databases.FirstOrDefault(x =>
+            string.Equals(x.Database_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindLegacyCodeId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return LegacyCodes.FirstOrDefault(x =>
+            string.Equals(x.Legacy_Code_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindPrintFootId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return PrintFeet.FirstOrDefault(x =>
+            string.Equals(x.Print_Foot_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindTrimSizeId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return TrimSizes.FirstOrDefault(x =>
+            string.Equals(x.Trim_Size_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindBindPlantId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return BindPlants.FirstOrDefault(x =>
+            string.Equals(x.Bind_Plant_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private string GetStateName(Guid? id)
+    {
+        return States.FirstOrDefault(x => x.Id == id)?.State_Name ?? "-";
+    }
+
+    private string GetDatabaseName(Guid? id)
+    {
+        return Databases.FirstOrDefault(x => x.Id == id)?.Database_Name ?? "-";
+    }
+
+    private string GetLegacyCodeName(Guid? id)
+    {
+        return LegacyCodes.FirstOrDefault(x => x.Id == id)?.Legacy_Code_Name ?? "-";
+    }
+
+    private string GetPrintFootName(Guid? id)
+    {
+        return PrintFeet.FirstOrDefault(x => x.Id == id)?.Print_Foot_Name ?? "-";
+    }
+
+    private string GetTrimSizeName(Guid? id)
+    {
+        return TrimSizes.FirstOrDefault(x => x.Id == id)?.Trim_Size_Name ?? "-";
+    }
+
+    private string GetBindPlantName(Guid? id)
+    {
+        return BindPlants.FirstOrDefault(x => x.Id == id)?.Bind_Plant_Name ?? "-";
+    }
+
+    private static string ToInputDate(DateOnly value)
+    {
+        if (value == default)
+            return string.Empty;
+
+        return value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
+    private static DateOnly ParseDate(object? value)
+    {
+        var texto = value?.ToString();
+
+        if (DateOnly.TryParse(texto, out var fecha))
+            return fecha;
+
+        return DateOnly.FromDateTime(DateTime.Today);
+    }
+
+    private static string FormatoFecha(DateOnly fecha)
+    {
+        if (fecha == default)
+            return "-";
+
+        return fecha.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+    }
+
+    private void MostrarMensaje(string mensaje, string tipo)
+    {
+        Mensaje = mensaje;
+        TipoMensaje = tipo;
+    }
+
+    private void LimpiarMensaje()
+    {
+        Mensaje = string.Empty;
+        TipoMensaje = "success";
+    }
+
+    private IEnumerable<Libros> ApplySorting(IEnumerable<Libros> source)
+    {
+        return SortColumn switch
+        {
+            "BookName" => SortDescending
+                ? source.OrderByDescending(x => x.BookName ?? string.Empty)
+                : source.OrderBy(x => x.BookName ?? string.Empty),
+
+            "KGEN" => SortDescending
+                ? source.OrderByDescending(x => x.KGENCode ?? string.Empty)
+                : source.OrderBy(x => x.KGENCode ?? string.Empty),
+
+            "LSA" => SortDescending
+                ? source.OrderByDescending(x => x.LSACode ?? string.Empty)
+                : source.OrderBy(x => x.LSACode ?? string.Empty),
+
+            "State" => SortDescending
+                ? source.OrderByDescending(x => GetStateName(x.StateId))
+                : source.OrderBy(x => GetStateName(x.StateId)),
+
+            "Database" => SortDescending
+                ? source.OrderByDescending(x => GetDatabaseName(x.DatabaseId))
+                : source.OrderBy(x => GetDatabaseName(x.DatabaseId)),
+
+            "Legacy" => SortDescending
+                ? source.OrderByDescending(x => GetLegacyCodeName(x.LegacyCodeId))
+                : source.OrderBy(x => GetLegacyCodeName(x.LegacyCodeId)),
+
+            "Proof" => SortDescending
+                ? source.OrderByDescending(x => x.ProofExtract)
+                : source.OrderBy(x => x.ProofExtract),
+
+            "Final" => SortDescending
+                ? source.OrderByDescending(x => x.FinalExtract)
+                : source.OrderBy(x => x.FinalExtract),
+
+            "Memo" => SortDescending
+                ? source.OrderByDescending(x => x.MemoExtract)
+                : source.OrderBy(x => x.MemoExtract),
+
+            "FinalPO" => SortDescending
+                ? source.OrderByDescending(x => x.FinalPODate)
+                : source.OrderBy(x => x.FinalPODate),
+
+            "Shipping" => SortDescending
+                ? source.OrderByDescending(x => x.ShippingDate)
+                : source.OrderBy(x => x.ShippingDate),
+
+            "Dirxion" => SortDescending
+                ? source.OrderByDescending(x => x.DirxionDate)
+                : source.OrderBy(x => x.DirxionDate),
+
+            "PubDate" => SortDescending
+                ? source.OrderByDescending(x => x.PubDate)
+                : source.OrderBy(x => x.PubDate),
+
+            _ => source.OrderBy(x => x.BookName ?? string.Empty)
+        };
+    }
+
+    private void SortBy(string column)
+    {
+        if (SortColumn == column)
+        {
+            SortDescending = !SortDescending;
+            return;
+        }
+
+        SortColumn = column;
+
+        SortDescending = IsDateColumn(column);
+    }
+
+    private static bool IsDateColumn(string column)
+    {
+        return column is "Proof"
+            or "Final"
+            or "Memo"
+            or "FinalPO"
+            or "Shipping"
+            or "Dirxion"
+            or "PubDate";
+    }
+
+    private string GetSortIcon(string column)
+    {
+        if (SortColumn != column)
+            return "↕";
+
+        return SortDescending ? "↓" : "↑";
+    }
+
+    private void ClearListFilters()
+    {
+        Busqueda = string.Empty;
+        SelectedPubMonth = string.Empty;
+        SortColumn = "BookName";
+        SortDescending = false;
+    }
+
+    private static string GetPubMonthValue(DateOnly date)
+    {
+        if (date == default)
+            return string.Empty;
+
+        return $"{date.Year:D4}-{date.Month:D2}";
+    }
+
+    private static string GetPubMonthLabel(DateOnly date)
+    {
+        if (date == default)
+            return "No Pub Date";
+
+        var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+
+        return firstDayOfMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+    }
+
+    private sealed class PubMonthOption
+    {
+        public string Value { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public int Count { get; set; }
+    }
 }

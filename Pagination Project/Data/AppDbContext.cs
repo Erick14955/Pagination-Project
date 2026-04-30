@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Pagination_Project.Models;
 
 namespace Pagination_Project.Data
@@ -15,6 +16,12 @@ namespace Pagination_Project.Data
         public DbSet<Asignaciones> Asignaciones => Set<Asignaciones>();
         public DbSet<Empleados> Empleados => Set<Empleados>();
         public DbSet<Evaluaciones> Evaluaciones => Set<Evaluaciones>();
+        public DbSet<Bind_Plant> Bind_Plants => Set<Bind_Plant>();
+        public DbSet<Database> Databases => Set<Database>();
+        public DbSet<Legacy_Code> Legacy_Codes => Set<Legacy_Code>();
+        public DbSet<Print_Foot> Print_Foots => Set<Print_Foot>();
+        public DbSet<State> States => Set<State>();
+        public DbSet<Trim_Size> Trim_Sizes => Set<Trim_Size>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,30 +60,130 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.Activo).HasColumnName("Active").IsRequired();
             });
 
+            modelBuilder.Entity<Bind_Plant>(entity =>
+            {
+                entity.ToTable("Bind_Plant");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id").HasColumnType("uuid");
+                entity.Property(e => e.Bind_Plant_Name).HasColumnName("Bind_Plant_Name").IsRequired();
+            });
+
+            modelBuilder.Entity<Database>(entity =>
+            {
+                entity.ToTable("Database");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id").HasColumnType("uuid");
+                entity.Property(e => e.Database_Name).HasColumnName("Database_Name").IsRequired();
+            });
+
+            modelBuilder.Entity<Legacy_Code>(entity =>
+            {
+                entity.ToTable("Legacy_Code");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id").HasColumnType("uuid");
+                entity.Property(e => e.Legacy_Code_Name).HasColumnName("Legacy_Code_Name").IsRequired();
+            });
+
+            modelBuilder.Entity<Print_Foot>(entity =>
+            {
+                entity.ToTable("Print_Foot");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id").HasColumnType("uuid");
+                entity.Property(e => e.Print_Foot_Name).HasColumnName("Print_Foot_Name").IsRequired();
+            });
+
+            modelBuilder.Entity<State>(entity =>
+            {
+                entity.ToTable("State");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id").HasColumnType("uuid");
+                entity.Property(e => e.State_Name).HasColumnName("State_Name").IsRequired();
+            });
+
+            modelBuilder.Entity<Trim_Size>(entity =>
+            {
+                entity.ToTable("Trim_Size");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("Id").HasColumnType("uuid");
+                entity.Property(e => e.Trim_Size_Name).HasColumnName("Trim_Size_Name").IsRequired();
+            });
+
             modelBuilder.Entity<Libros>(entity =>
             {
-                entity.ToTable("Books");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).HasColumnName("ID").HasColumnType("uuid");
-                entity.Property(e => e.BookName).HasColumnName("Book_Name").IsRequired();
-                entity.Property(e => e.KGENCode).HasColumnName("KGEN_Code");
-                entity.Property(e => e.LSACode).HasColumnName("LSA_Code");
-                entity.Property(e => e.ProofExtract).HasColumnName("Proof_Extract");
-                entity.Property(e => e.FinalExtract).HasColumnName("Final_Extract");
-                entity.Property(e => e.MemoExtract).HasColumnName("Memo_Extract");
-                entity.Property(e => e.DirxionDate).HasColumnName("Dirxion_Date");
-                entity.Property(e => e.FinalPODate).HasColumnName("Final_PO_Date");
-                entity.Property(e => e.ShippingDate).HasColumnName("Shipping_Date");
-                entity.Property(e => e.PubDate).HasColumnName("Pub_Date");
-                entity.Property(e => e.PrintFooter).HasColumnName("Print_Foot");
-                entity.Property(e => e.LegacyCoce).HasColumnName("Legacy_Code");
-                entity.Property(e => e.State).HasColumnName("State");
-                entity.Property(e => e.Database).HasColumnName("Database");
-                entity.Property(e => e.ProductIssue).HasColumnName("Product_Issue");
-                entity.Property(e => e.TrimSize).HasColumnName("Trim_Size");
-                entity.Property(e => e.BindPlant).HasColumnName("Bind_Plant");
-                entity.Property(e => e.SRLSuppression).HasColumnName("SRL_Suppression");
-                entity.Property(e => e.NWP).HasColumnName("NWP");
+                modelBuilder.Entity<Libros>(entity =>
+                {
+                    entity.ToTable("Books");
+
+                    entity.HasKey(e => e.Id);
+
+                    entity.Property(e => e.Id)
+                        .HasColumnName("ID")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.BookName)
+                        .HasColumnName("Book_Name")
+                        .IsRequired();
+
+                    entity.Property(e => e.KGENCode)
+                        .HasColumnName("KGEN_Code");
+
+                    entity.Property(e => e.LSACode)
+                        .HasColumnName("LSA_Code");
+
+                    entity.Property(e => e.ProductIssue)
+                        .HasColumnName("Product_Issue");
+
+                    entity.Property(e => e.PrintFootId)
+                        .HasColumnName("Print_Foot")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.LegacyCodeId)
+                        .HasColumnName("Legacy_Code")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.StateId)
+                        .HasColumnName("State")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.DatabaseId)
+                        .HasColumnName("Database")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.TrimSizeId)
+                        .HasColumnName("Trim_Size")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.BindPlantId)
+                        .HasColumnName("Bind_Plant")
+                        .HasColumnType("uuid");
+
+                    entity.Property(e => e.ProofExtract)
+                        .HasColumnName("Proof_Extract");
+
+                    entity.Property(e => e.FinalExtract)
+                        .HasColumnName("Final_Extract");
+
+                    entity.Property(e => e.MemoExtract)
+                        .HasColumnName("Memo_Extract");
+
+                    entity.Property(e => e.FinalPODate)
+                        .HasColumnName("Final_PO_Date");
+
+                    entity.Property(e => e.ShippingDate)
+                        .HasColumnName("Shipping_Date");
+
+                    entity.Property(e => e.DirxionDate)
+                        .HasColumnName("Dirxion_Date");
+
+                    entity.Property(e => e.PubDate)
+                        .HasColumnName("Pub_Date");
+
+                    entity.Property(e => e.SRLSuppression)
+                        .HasColumnName("SRL_Suppression");
+
+                    entity.Property(e => e.NWP)
+                        .HasColumnName("NWP");
+                });
             });
 
             modelBuilder.Entity<Permisos>(entity =>
