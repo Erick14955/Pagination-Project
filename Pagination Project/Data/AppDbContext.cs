@@ -130,6 +130,11 @@ namespace Pagination_Project.Data
                     entity.Property(e => e.LSACode)
                         .HasColumnName("LSA_Code");
 
+                    entity.Property(e => e.Finalizado)
+                      .HasColumnName("Completed")
+                      .HasDefaultValue(false)
+                      .IsRequired();
+
                     entity.Property(e => e.ProductIssue)
                         .HasColumnName("Product_Issue");
 
@@ -212,33 +217,42 @@ namespace Pagination_Project.Data
             modelBuilder.Entity<Asignaciones>(entity =>
             {
                 entity.ToTable("Assignments");
+
                 entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.Id)
                     .HasColumnName("ID")
                     .HasColumnType("uuid");
 
-                entity.Property(e => e.IdLibro)
-                    .HasColumnName("Book_Id")
-                    .HasColumnType("uuid")
-                    .IsRequired();
-
                 entity.Property(e => e.IdEmpleado)
                     .HasColumnName("Employee_Id")
                     .HasColumnType("uuid")
                     .IsRequired();
 
-                entity.HasOne(e => e.Libro)
-                    .WithMany()
-                    .HasForeignKey(e => e.IdLibro)
-                    .HasPrincipalKey(l => l.Id)
-                    .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(e => e.IdLibro)
+                    .HasColumnName("Book_Id")
+                    .HasColumnType("uuid")
+                    .IsRequired();
+
+                entity.Property(e => e.Finalizado)
+                  .HasColumnName("Completed")
+                  .HasDefaultValue(false)
+                  .IsRequired();
 
                 entity.HasOne(e => e.Empleado)
-                    .WithMany()
+                    .WithMany(emp => emp.Asignaciones)
                     .HasForeignKey(e => e.IdEmpleado)
                     .HasPrincipalKey(emp => emp.Id)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Libro)
+                    .WithMany(libro => libro.Asignaciones)
+                    .HasForeignKey(e => e.IdLibro)
+                    .HasPrincipalKey(libro => libro.Id)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(x => new { x.IdEmpleado, x.IdLibro })
+                    .IsUnique();
             });
 
 
@@ -281,6 +295,11 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.Corrections).HasColumnName("Corrections");
                 entity.Property(e => e.PendingCorrections).HasColumnName("Pending_Corrections");
                 entity.Property(e => e.TaskMemoWrongComment).HasColumnName("Task_Memo_Wrong_Comment");
+
+                entity.Property(e => e.Finalizado)
+                  .HasColumnName("Completed")
+                  .HasDefaultValue(false)
+                  .IsRequired();
 
                 entity.Property(e => e.AssignationId)
                     .HasColumnName("Assignation_Id")

@@ -1,0 +1,1122 @@
+﻿@page "/reportes-finalizados"
+@page "/finished-reports"
+@page "/reportes"
+
+@using System.Globalization
+@using System.Text
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+@using ClosedXML.Excel
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IJSRuntime JS
+
+<PageTitle>Finished Reports</PageTitle>
+
+<div class="reports-page">
+
+    <section class="page-hero">
+        <div>
+            <h1>Finished Reports</h1>
+            <p>
+                Review and download all finalized books, assignments and evaluations.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span>Books</span>
+                <strong>@LibrosReporte.Count</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Assignments</span>
+                <strong>@AsignacionesReporte.Count</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Evaluations</span>
+                <strong>@EvaluacionesReporte.Count</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="report-card">
+
+        <div class="section-header">
+            <div>
+                <h2>Report Filters</h2>
+                <p>Select the report type and apply filters before downloading.</p>
+            </div>
+        </div>
+
+        <div class="filters-grid">
+
+            <div class="field">
+                <label>Report Type</label>
+                <select @bind="TipoReporteSeleccionado" @bind:after="OnTipoReporteChanged">
+                    <option value="Libros">Finished Books</option>
+                    <option value="Asignaciones">Finished Assignments</option>
+                    <option value="Evaluaciones">Finished Evaluations</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Date From</label>
+                <input type="date" @bind="FechaDesde" />
+            </div>
+
+            <div class="field">
+                <label>Date To</label>
+                <input type="date" @bind="FechaHasta" />
+            </div>
+
+            <div class="field">
+                <label>Employee</label>
+                <select @bind="EmpleadoIdSeleccionado" disabled="@(!PermiteFiltroEmpleado)">
+                    <option value="">All employees</option>
+                    @foreach (var empleado in EmpleadosFiltro)
+                    {
+                        <option value="@empleado.Id">@empleado.Nombre</option>
+                    }
+                </select>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn-primary" @onclick="CargarReporteAsync">
+                    Search
+                </button>
+
+                <button class="btn-secondary" @onclick="LimpiarFiltrosAsync">
+                    Clear
+                </button>
+
+                <button class="btn-download" @onclick="DescargarReporteXlsxAsync" disabled="@(!TieneDatos)">
+                    Download XLSX
+                </button>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="report-list-card">
+
+        <div class="list-header">
+            <div>
+                <h2>@TituloListado</h2>
+                <p>@SubtituloListado</p>
+            </div>
+
+            <div class="total-pill">
+                @TotalActual records
+            </div>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-box">
+                Loading report...
+            </div>
+        }
+        else if (!TieneDatos)
+        {
+            <div class="empty-box">
+                No finalized records found with the selected filters.
+            </div>
+        }
+        else
+        {
+            @if (TipoReporteSeleccionado == "Libros")
+            {
+                <div class="table-shell">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Book Name</th>
+                                <th>KGEN</th>
+                                <th>LSA</th>
+                                <th>State</th>
+                                <th>Database</th>
+                                <th>Legacy</th>
+                                <th>Proof</th>
+                                <th>Final</th>
+                                <th>Memo</th>
+                                <th>Final PO</th>
+                                <th>Shipping</th>
+                                <th>Dirxion</th>
+                                <th>Pub Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in LibrosReporte)
+                            {
+                                <tr>
+                                    <td class="strong-cell">@item.BookName</td>
+                                    <td>@item.Kgen</td>
+                                    <td>@item.Lsa</td>
+                                    <td>@item.State</td>
+                                    <td>@item.Database</td>
+                                    <td>@item.Legacy</td>
+                                    <td>@FormatDate(item.ProofDate)</td>
+                                    <td>@FormatDate(item.FinalDate)</td>
+                                    <td>@FormatDate(item.MemoDate)</td>
+                                    <td>@FormatDate(item.FinalPoDate)</td>
+                                    <td>@FormatDate(item.ShippingDate)</td>
+                                    <td>@FormatDate(item.DirxionDate)</td>
+                                    <td>@FormatDate(item.PubDate)</td>
+                                    <td>
+                                        <span class="status-pill">Finished</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            @if (TipoReporteSeleccionado == "Asignaciones")
+            {
+                <div class="table-shell">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Book Name</th>
+                                <th>KGEN</th>
+                                <th>Pub Date</th>
+                                <th>Dirxion Date</th>
+                                <th>Proof</th>
+                                <th>Final</th>
+                                <th>Memo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in AsignacionesReporte)
+                            {
+                                <tr>
+                                    <td class="strong-cell">@item.EmployeeName</td>
+                                    <td>@item.BookName</td>
+                                    <td>@item.Kgen</td>
+                                    <td>@FormatDate(item.PubDate)</td>
+                                    <td>@FormatDate(item.DirectionDate)</td>
+                                    <td>@FormatDate(item.ProofDate)</td>
+                                    <td>@FormatDate(item.FinalDate)</td>
+                                    <td>@FormatDate(item.MemoDate)</td>
+                                    <td>
+                                        <span class="status-pill">Finished</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            @if (TipoReporteSeleccionado == "Evaluaciones")
+            {
+                <div class="table-shell">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Book Name</th>
+                                <th>KGEN</th>
+                                <th>LSA</th>
+                                <th>Pub Date</th>
+                                <th>Motif YP</th>
+                                <th>Motif WP</th>
+                                <th>Inventory Report</th>
+                                <th>Shipping Folder</th>
+                                <th>Task Memo</th>
+                                <th>Total %</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in EvaluacionesReporte)
+                            {
+                                <tr>
+                                    <td class="strong-cell">@item.EmployeeName</td>
+                                    <td>@item.BookName</td>
+                                    <td>
+                                        <span class="kgen-pill">@item.Kgen</span>
+                                    </td>
+                                    <td>@item.Lsa</td>
+                                    <td>@FormatDate(item.PubDate)</td>
+                                    <td>@FormatPercent(item.MotifYp)</td>
+                                    <td>@FormatPercent(item.MotifWp)</td>
+                                    <td>@FormatPercent(item.InventoryReport)</td>
+                                    <td>@FormatPercent(item.ProductShippingFolder)</td>
+                                    <td>@FormatPercent(item.TaskMemo)</td>
+                                    <td class="total-percent">@FormatPercent(item.TotalPorcentaje)</td>
+                                    <td>
+                                        <span class="status-pill">Finished</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+
+    </section>
+
+</div>
+
+@code {
+
+    private string TipoReporteSeleccionado { get; set; } = "Libros";
+
+    private DateTime? FechaDesde { get; set; }
+    private DateTime? FechaHasta { get; set; }
+
+    private Guid? EmpleadoIdSeleccionado { get; set; }
+
+    private bool Cargando { get; set; }
+
+    private List<EmpleadoFiltroDto> EmpleadosFiltro { get; set; } = new();
+
+    private List<LibroReporteDto> LibrosReporte { get; set; } = new();
+    private List<AsignacionReporteDto> AsignacionesReporte { get; set; } = new();
+    private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } = new();
+    private List<Database> Databases { get; set; } = new();
+    private List<Legacy_Code> LegacyCodes { get; set; } = new();
+    private List<State> States { get; set; } = new();
+
+    private bool PermiteFiltroEmpleado =>
+        TipoReporteSeleccionado == "Asignaciones" ||
+        TipoReporteSeleccionado == "Evaluaciones";
+
+    private bool TieneDatos =>
+        TipoReporteSeleccionado switch
+        {
+            "Libros" => LibrosReporte.Any(),
+            "Asignaciones" => AsignacionesReporte.Any(),
+            "Evaluaciones" => EvaluacionesReporte.Any(),
+            _ => false
+        };
+
+    private int TotalActual =>
+        TipoReporteSeleccionado switch
+        {
+            "Libros" => LibrosReporte.Count,
+            "Asignaciones" => AsignacionesReporte.Count,
+            "Evaluaciones" => EvaluacionesReporte.Count,
+            _ => 0
+        };
+
+    private string TituloListado =>
+        TipoReporteSeleccionado switch
+        {
+            "Libros" => "Finished Books List",
+            "Asignaciones" => "Finished Assignments List",
+            "Evaluaciones" => "Finished Evaluations List",
+            _ => "Finished Report"
+        };
+
+    private string SubtituloListado =>
+        TipoReporteSeleccionado switch
+        {
+            "Libros" => "Showing only finalized books.",
+            "Asignaciones" => "Showing only finalized assignments.",
+            "Evaluaciones" => "Showing only finalized evaluations.",
+            _ => string.Empty
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        FechaDesde = DateTime.Today.AddMonths(-1);
+        FechaHasta = DateTime.Today;
+
+        await CargarCatalogosAsync();
+        await CargarEmpleadosAsync();
+        await CargarReporteAsync();
+    }
+    private string GetStateName(Guid? id)
+    {
+        return States.FirstOrDefault(x => x.Id == id)?.State_Name ?? "-";
+    }
+
+    private string GetDatabaseName(Guid? id)
+    {
+        return Databases.FirstOrDefault(x => x.Id == id)?.Database_Name ?? "-";
+    }
+
+    private string GetLegacyCodeName(Guid? id)
+    {
+        return LegacyCodes.FirstOrDefault(x => x.Id == id)?.Legacy_Code_Name ?? "-";
+    }
+
+
+    private async Task CargarCatalogosAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        Databases = await db.Databases
+            .AsNoTracking()
+            .OrderBy(x => x.Database_Name)
+            .ToListAsync();
+
+        LegacyCodes = await db.Legacy_Codes
+            .AsNoTracking()
+            .OrderBy(x => x.Legacy_Code_Name)
+            .ToListAsync();
+
+        States = await db.States
+            .AsNoTracking()
+            .OrderBy(x => x.State_Name)
+            .ToListAsync();
+    }
+
+    private static string FormatDateTime(DateTime? date)
+    {
+        return date.HasValue
+            ? date.Value.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
+            : "";
+    }
+
+    private async Task CargarEmpleadosAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        EmpleadosFiltro = await db.Empleados
+            .AsNoTracking()
+            .OrderBy(e => e.Nombre)
+            .Select(e => new EmpleadoFiltroDto
+            {
+                Id = e.Id,
+                Nombre = e.Nombre
+            })
+            .ToListAsync();
+    }
+
+    private async Task OnTipoReporteChanged()
+    {
+        if (!PermiteFiltroEmpleado)
+            EmpleadoIdSeleccionado = null;
+
+        await CargarReporteAsync();
+    }
+
+    private async Task LimpiarFiltrosAsync()
+    {
+        FechaDesde = DateTime.Today.AddMonths(-1);
+        FechaHasta = DateTime.Today;
+        EmpleadoIdSeleccionado = null;
+
+        await CargarReporteAsync();
+    }
+
+    private async Task CargarReporteAsync()
+    {
+        Cargando = true;
+
+        LibrosReporte.Clear();
+        AsignacionesReporte.Clear();
+        EvaluacionesReporte.Clear();
+
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            await MarcarFinalizadosAutomaticamenteAsync(db);
+
+            if (TipoReporteSeleccionado == "Libros")
+            {
+                await CargarLibrosFinalizadosAsync(db);
+            }
+            else if (TipoReporteSeleccionado == "Asignaciones")
+            {
+                await CargarAsignacionesFinalizadasAsync(db);
+            }
+            else if (TipoReporteSeleccionado == "Evaluaciones")
+            {
+                await CargarEvaluacionesFinalizadasAsync(db);
+            }
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task DescargarReporteXlsxAsync()
+    {
+        if (!TieneDatos)
+            return;
+
+        try
+        {
+            using var workbook = new XLWorkbook();
+
+            if (TipoReporteSeleccionado == "Libros")
+            {
+                GenerarHojaLibros(workbook);
+            }
+            else if (TipoReporteSeleccionado == "Asignaciones")
+            {
+                GenerarHojaAsignaciones(workbook);
+            }
+            else if (TipoReporteSeleccionado == "Evaluaciones")
+            {
+                GenerarHojaEvaluaciones(workbook);
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            var bytes = stream.ToArray();
+            var base64 = Convert.ToBase64String(bytes);
+
+            var fileName = TipoReporteSeleccionado switch
+            {
+                "Libros" => $"Finished_Books_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                "Asignaciones" => $"Finished_Assignments_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                "Evaluaciones" => $"Finished_Evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                _ => $"Finished_Report_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+            };
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating XLSX: {ex.Message}");
+        }
+    }
+
+    private void GenerarHojaLibros(XLWorkbook workbook)
+    {
+        var worksheet = workbook.Worksheets.Add("Finished Books");
+
+        worksheet.Cell(1, 1).Value = "Book Name";
+        worksheet.Cell(1, 2).Value = "KGEN";
+        worksheet.Cell(1, 3).Value = "LSA";
+        worksheet.Cell(1, 4).Value = "State";
+        worksheet.Cell(1, 5).Value = "Database";
+        worksheet.Cell(1, 6).Value = "Legacy";
+        worksheet.Cell(1, 7).Value = "Proof";
+        worksheet.Cell(1, 8).Value = "Final";
+        worksheet.Cell(1, 9).Value = "Memo";
+        worksheet.Cell(1, 10).Value = "Final PO";
+        worksheet.Cell(1, 11).Value = "Shipping";
+        worksheet.Cell(1, 12).Value = "Dirxion";
+        worksheet.Cell(1, 13).Value = "Pub Date";
+
+        var row = 2;
+
+        foreach (var item in LibrosReporte)
+        {
+            worksheet.Cell(row, 1).Value = item.BookName;
+            worksheet.Cell(row, 2).Value = item.Kgen;
+            worksheet.Cell(row, 3).Value = item.Lsa;
+            worksheet.Cell(row, 4).Value = item.State;
+            worksheet.Cell(row, 5).Value = item.Database;
+            worksheet.Cell(row, 6).Value = item.Legacy;
+
+            EscribirFechaExcel(worksheet.Cell(row, 7), item.ProofDate);
+            EscribirFechaExcel(worksheet.Cell(row, 8), item.FinalDate);
+            EscribirFechaExcel(worksheet.Cell(row, 9), item.MemoDate);
+            EscribirFechaExcel(worksheet.Cell(row, 10), item.FinalPoDate);
+            EscribirFechaExcel(worksheet.Cell(row, 11), item.ShippingDate);
+            EscribirFechaExcel(worksheet.Cell(row, 12), item.DirxionDate);
+            EscribirFechaExcel(worksheet.Cell(row, 13), item.PubDate);
+
+            row++;
+        }
+
+        AplicarEstiloExcel(worksheet, row - 1, 13);
+    }
+
+    private void GenerarHojaAsignaciones(XLWorkbook workbook)
+    {
+        var worksheet = workbook.Worksheets.Add("Finished Assignments");
+
+        worksheet.Cell(1, 1).Value = "Employee";
+        worksheet.Cell(1, 2).Value = "Book Name";
+        worksheet.Cell(1, 3).Value = "KGEN";
+        worksheet.Cell(1, 4).Value = "Pub Date";
+        worksheet.Cell(1, 5).Value = "Dirxion Date";
+        worksheet.Cell(1, 6).Value = "Proof";
+        worksheet.Cell(1, 7).Value = "Final";
+        worksheet.Cell(1, 8).Value = "Memo";
+
+        var row = 2;
+
+        foreach (var item in AsignacionesReporte)
+        {
+            worksheet.Cell(row, 1).Value = item.EmployeeName;
+            worksheet.Cell(row, 2).Value = item.BookName;
+            worksheet.Cell(row, 3).Value = item.Kgen;
+
+            EscribirFechaExcel(worksheet.Cell(row, 4), item.PubDate);
+            EscribirFechaExcel(worksheet.Cell(row, 5), item.DirectionDate);
+            EscribirFechaExcel(worksheet.Cell(row, 6), item.ProofDate);
+            EscribirFechaExcel(worksheet.Cell(row, 7), item.FinalDate);
+            EscribirFechaExcel(worksheet.Cell(row, 8), item.MemoDate);
+
+            row++;
+        }
+
+        AplicarEstiloExcel(worksheet, row - 1, 8);
+    }
+
+    private void GenerarHojaEvaluaciones(XLWorkbook workbook)
+    {
+        var worksheet = workbook.Worksheets.Add("Finished Evaluations");
+
+        worksheet.Cell(1, 1).Value = "Employee";
+        worksheet.Cell(1, 2).Value = "Book Name";
+        worksheet.Cell(1, 3).Value = "KGEN";
+        worksheet.Cell(1, 4).Value = "LSA";
+        worksheet.Cell(1, 5).Value = "Pub Date";
+        worksheet.Cell(1, 6).Value = "Motif YP";
+        worksheet.Cell(1, 7).Value = "Motif WP";
+        worksheet.Cell(1, 8).Value = "Inventory Report";
+        worksheet.Cell(1, 9).Value = "Shipping Folder";
+        worksheet.Cell(1, 10).Value = "Task Memo";
+        worksheet.Cell(1, 11).Value = "Total %";
+
+        var row = 2;
+
+        foreach (var item in EvaluacionesReporte)
+        {
+            worksheet.Cell(row, 1).Value = item.EmployeeName;
+            worksheet.Cell(row, 2).Value = item.BookName;
+            worksheet.Cell(row, 3).Value = item.Kgen;
+            worksheet.Cell(row, 4).Value = item.Lsa;
+
+            EscribirFechaExcel(worksheet.Cell(row, 5), item.PubDate);
+
+            EscribirPorcentajeExcel(worksheet.Cell(row, 6), item.MotifYp);
+            EscribirPorcentajeExcel(worksheet.Cell(row, 7), item.MotifWp);
+            EscribirPorcentajeExcel(worksheet.Cell(row, 8), item.InventoryReport);
+            EscribirPorcentajeExcel(worksheet.Cell(row, 9), item.ProductShippingFolder);
+            EscribirPorcentajeExcel(worksheet.Cell(row, 10), item.TaskMemo);
+            EscribirPorcentajeExcel(worksheet.Cell(row, 11), item.TotalPorcentaje);
+
+            row++;
+        }
+
+        AplicarEstiloExcel(worksheet, row - 1, 11);
+    }
+
+    private static void EscribirFechaExcel(IXLCell cell, DateOnly? fecha)
+    {
+        if (fecha.HasValue)
+        {
+            var dateTime = fecha.Value.ToDateTime(TimeOnly.MinValue);
+            cell.Value = dateTime;
+            cell.Style.DateFormat.Format = "MM/dd/yyyy";
+        }
+        else
+        {
+            cell.Value = "-";
+        }
+    }
+
+    private static void EscribirPorcentajeExcel(IXLCell cell, decimal? porcentaje)
+    {
+        if (porcentaje.HasValue)
+        {
+            cell.Value = porcentaje.Value / 100m;
+            cell.Style.NumberFormat.Format = "0.00%";
+        }
+        else
+        {
+            cell.Value = 0;
+            cell.Style.NumberFormat.Format = "0.00%";
+        }
+    }
+
+    private static void AplicarEstiloExcel(IXLWorksheet worksheet, int lastRow, int lastColumn)
+    {
+        if (lastRow < 1)
+            lastRow = 1;
+
+        var header = worksheet.Range(1, 1, 1, lastColumn);
+
+        header.Style.Font.Bold = true;
+        header.Style.Font.FontColor = XLColor.White;
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml("#111827");
+        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Alignment.WrapText = false;
+
+        worksheet.Row(1).Height = 24;
+
+        var range = worksheet.Range(1, 1, lastRow, lastColumn);
+        range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        range.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+        if (lastRow >= 2)
+        {
+            var dataRange = worksheet.Range(2, 1, lastRow, lastColumn);
+            dataRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+            dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        }
+
+        worksheet.Columns(1, lastColumn).AdjustToContents();
+
+        for (int col = 1; col <= lastColumn; col++)
+        {
+            var heading = worksheet.Cell(1, col).GetString();
+            var minWidth = Math.Max(heading.Length + 4, 12);
+
+            if (worksheet.Column(col).Width < minWidth)
+                worksheet.Column(col).Width = minWidth;
+
+            if (worksheet.Column(col).Width > 45)
+            {
+                worksheet.Column(col).Width = 45;
+                worksheet.Column(col).Style.Alignment.WrapText = true;
+            }
+        }
+
+        worksheet.SheetView.FreezeRows(1);
+
+        worksheet.Range(1, 1, lastRow, lastColumn).SetAutoFilter();
+    }
+
+    private async Task MarcarFinalizadosAutomaticamenteAsync(AppDbContext db)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+        var librosPendientes = await db.Libros
+            .Where(l => !l.Finalizado && l.DirxionDate < hoy)
+            .ToListAsync();
+
+        foreach (var libro in librosPendientes)
+        {
+            libro.Finalizado = true;
+        }
+
+        var asignacionesPendientes = await db.Asignaciones
+            .Include(a => a.Libro)
+            .Where(a => a.Finalizado == false)
+            .ToListAsync();
+
+        foreach (var asignacion in asignacionesPendientes)
+        {
+            if (asignacion.Libro is not null && asignacion.Libro.Finalizado)
+                asignacion.Finalizado = true;
+        }
+
+        var evaluacionesPendientes = await db.Evaluaciones
+            .Include(e => e.Asignacion)
+            .Where(e => e.Finalizado == false)
+            .ToListAsync();
+
+        foreach (var evaluacion in evaluacionesPendientes)
+        {
+            if (evaluacion.Asignacion is not null && evaluacion.Asignacion.Finalizado)
+                evaluacion.Finalizado = true;
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private async Task CargarLibrosFinalizadosAsync(AppDbContext db)
+    {
+        var query = db.Libros
+            .AsNoTracking()
+            .Where(l => l.Finalizado == true);
+
+        if (FechaDesde.HasValue)
+        {
+            var desde = DateOnly.FromDateTime(FechaDesde.Value);
+
+            query = query.Where(l =>
+                l.DirxionDate >= desde);
+        }
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
+
+            query = query.Where(l =>
+                l.DirxionDate <= hasta);
+        }
+
+        var librosDb = await query
+            .OrderByDescending(l => l.DirxionDate)
+            .ToListAsync();
+
+        LibrosReporte = librosDb
+            .Select(l => new LibroReporteDto
+            {
+                BookName = l.BookName,
+                Kgen = l.KGENCode,
+                Lsa = l.LSACode,
+
+                State = GetStateName(l.StateId),
+                Database = GetDatabaseName(l.DatabaseId),
+                Legacy = GetLegacyCodeName(l.LegacyCodeId),
+
+                ProofDate = l.ProofExtract,
+                FinalDate = l.FinalExtract,
+                MemoDate = l.MemoExtract,
+                FinalPoDate = l.FinalPODate,
+                ShippingDate = l.ShippingDate,
+                DirxionDate = l.DirxionDate,
+                PubDate = l.PubDate
+            })
+            .ToList();
+    }
+
+    private async Task CargarAsignacionesFinalizadasAsync(AppDbContext db)
+    {
+        var query = db.Asignaciones
+            .AsNoTracking()
+            .Include(a => a.Empleado)
+            .Include(a => a.Libro)
+            .Where(a => a.Finalizado == true);
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            query = query.Where(a => a.IdEmpleado == EmpleadoIdSeleccionado.Value);
+        }
+
+        if (FechaDesde.HasValue)
+        {
+            var desde = DateOnly.FromDateTime(FechaDesde.Value);
+
+            query = query.Where(a =>
+                a.Libro != null &&
+                a.Libro.PubDate >= desde);
+        }
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
+
+            query = query.Where(a =>
+                a.Libro != null &&
+                a.Libro.PubDate <= hasta);
+        }
+
+        AsignacionesReporte = await query
+            .OrderByDescending(a => a.Libro != null ? a.Libro.PubDate : DateOnly.MinValue)
+            .Select(a => new AsignacionReporteDto
+            {
+                EmployeeName = a.Empleado != null ? a.Empleado.Nombre : "",
+                BookName = a.Libro != null ? a.Libro.BookName : "",
+                Kgen = a.Libro != null ? a.Libro.KGENCode : "",
+                PubDate = a.Libro != null ? a.Libro.PubDate : null,
+                DirectionDate = a.Libro != null ? a.Libro.DirxionDate : null,
+                ProofDate = a.Libro != null ? a.Libro.ProofExtract : null,
+                FinalDate = a.Libro != null ? a.Libro.FinalExtract : null,
+                MemoDate = a.Libro != null ? a.Libro.MemoExtract : null,
+            })
+            .ToListAsync();
+    }
+
+    private async Task CargarEvaluacionesFinalizadasAsync(AppDbContext db)
+    {
+        var query = db.Evaluaciones
+            .AsNoTracking()
+            .Include(e => e.Asignacion)
+                .ThenInclude(a => a.Empleado)
+            .Include(e => e.Asignacion)
+                .ThenInclude(a => a.Libro)
+            .Where(e => e.Finalizado == true);
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            query = query.Where(e =>
+                e.Asignacion != null &&
+                e.Asignacion.IdEmpleado == EmpleadoIdSeleccionado.Value);
+        }
+
+        // En Evaluaciones, el filtro de fecha se toma desde el PubDate del libro relacionado.
+        if (FechaDesde.HasValue)
+        {
+            var desde = DateOnly.FromDateTime(FechaDesde.Value);
+
+            query = query.Where(e =>
+                e.Asignacion != null &&
+                e.Asignacion.Libro != null &&
+                e.Asignacion.Libro.PubDate >= desde);
+        }
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
+
+            query = query.Where(e =>
+                e.Asignacion != null &&
+                e.Asignacion.Libro != null &&
+                e.Asignacion.Libro.PubDate <= hasta);
+        }
+
+        EvaluacionesReporte = await query
+            .OrderByDescending(e =>
+                e.Asignacion != null && e.Asignacion.Libro != null
+                    ? e.Asignacion.Libro.PubDate
+                    : DateOnly.MinValue)
+            .Select(e => new EvaluacionReporteDto
+            {
+                EmployeeName = e.Asignacion != null && e.Asignacion.Empleado != null
+                    ? e.Asignacion.Empleado.Nombre
+                    : "",
+
+                BookName = e.Asignacion != null && e.Asignacion.Libro != null
+                    ? e.Asignacion.Libro.BookName
+                    : "",
+
+                Kgen = e.Asignacion != null && e.Asignacion.Libro != null
+                    ? e.Asignacion.Libro.KGENCode
+                    : "",
+
+                Lsa = e.Asignacion != null && e.Asignacion.Libro != null
+                    ? e.Asignacion.Libro.LSACode
+                    : "",
+
+                PubDate = e.Asignacion != null && e.Asignacion.Libro != null
+                    ? e.Asignacion.Libro.PubDate
+                    : null,
+
+                MotifYp = e.MotifYp,
+                MotifWp = e.MotifWp,
+                InventoryReport = e.InventoryReport,
+                ProductShippingFolder = e.ProductShippingFolder,
+                TaskMemo = e.TaskMemo
+            })
+            .ToListAsync();
+
+        foreach (var item in EvaluacionesReporte)
+        {
+            item.TotalPorcentaje = CalcularPorcentajeGeneralReporte(item);
+        }
+    }
+
+    private async Task DescargarReporteAsync()
+    {
+        if (!TieneDatos)
+            return;
+
+        var csv = TipoReporteSeleccionado switch
+        {
+            "Libros" => GenerarCsvLibros(),
+            "Asignaciones" => GenerarCsvAsignaciones(),
+            "Evaluaciones" => GenerarCsvEvaluaciones(),
+            _ => string.Empty
+        };
+
+        if (string.IsNullOrWhiteSpace(csv))
+            return;
+
+        var bytes = Encoding.UTF8.GetBytes(csv);
+        var base64 = Convert.ToBase64String(bytes);
+
+        var fileName = TipoReporteSeleccionado switch
+        {
+            "Libros" => $"finished_books_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
+            "Asignaciones" => $"finished_assignments_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
+            "Evaluaciones" => $"finished_evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
+            _ => $"finished_report_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+        };
+
+        await JS.InvokeVoidAsync(
+            "downloadFileFromBase64",
+            fileName,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            base64);
+    }
+
+    private string GenerarCsvLibros()
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("Employee,Book Name,KGEN,Pub Date,Dirxion Date,Proof,Final,Memo,Status");
+
+        foreach (var item in LibrosReporte)
+        {
+            sb.AppendLine(string.Join(",",
+                Csv(item.BookName),
+                Csv(item.Kgen),
+                Csv(item.Lsa),
+                Csv(item.State),
+                Csv(item.Database),
+                Csv(item.Legacy),
+                Csv(FormatDate(item.ProofDate)),
+                Csv(FormatDate(item.FinalDate)),
+                Csv(FormatDate(item.MemoDate)),
+                Csv(FormatDate(item.FinalPoDate)),
+                Csv(FormatDate(item.ShippingDate)),
+                Csv(FormatDate(item.DirxionDate)),
+                Csv(FormatDate(item.PubDate)),
+                Csv("Finished")
+            ));
+        }
+
+        return sb.ToString();
+    }
+
+    private string GenerarCsvAsignaciones()
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("Employee,Book Name,KGEN,Assignment Date,Direction Date,Proof,Final,Memo,Pub Date,Status");
+
+        foreach (var item in AsignacionesReporte)
+        {
+            sb.AppendLine(string.Join(",",
+                Csv(item.EmployeeName),
+                Csv(item.BookName),
+                Csv(item.Kgen),
+                Csv(FormatDate(item.PubDate)),
+                Csv(FormatDate(item.DirectionDate)),
+                Csv(FormatDate(item.ProofDate)),
+                Csv(FormatDate(item.FinalDate)),
+                Csv(FormatDate(item.MemoDate)),
+                Csv("Finished")
+            ));
+        }
+
+        return sb.ToString();
+    }
+
+    private string GenerarCsvEvaluaciones()
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("Employee,Book Name,KGEN,LSA,Pub Date,Motif YP,Motif WP,Inventory Report,Shipping Folder,Task Memo,Total %,Status");
+
+        foreach (var item in EvaluacionesReporte)
+        {
+            sb.AppendLine(string.Join(",",
+                Csv(item.EmployeeName),
+                Csv(item.BookName),
+                Csv(item.Kgen),
+                Csv(item.Lsa),
+                Csv(FormatDate(item.PubDate)),
+                Csv(FormatPercent(item.MotifYp)),
+                Csv(FormatPercent(item.MotifWp)),
+                Csv(FormatPercent(item.InventoryReport)),
+                Csv(FormatPercent(item.ProductShippingFolder)),
+                Csv(FormatPercent(item.TaskMemo)),
+                Csv(FormatPercent(item.TotalPorcentaje)),
+                Csv("Finished")
+            ));
+        }
+
+        return sb.ToString();
+    }
+
+    private static string Csv(string? value)
+    {
+        value ??= string.Empty;
+        value = value.Replace("\"", "\"\"");
+        return $"\"{value}\"";
+    }
+
+    private static string FormatDate(DateOnly? date)
+    {
+        return date.HasValue
+            ? date.Value.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
+            : "";
+    }
+
+    private static string FormatPercent(decimal? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString("0.00", CultureInfo.InvariantCulture) + "%"
+            : "0.00%";
+    }
+
+    private sealed class EmpleadoFiltroDto
+    {
+        public Guid Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+    }
+
+    private sealed class LibroReporteDto
+    {
+        public string BookName { get; set; } = string.Empty;
+        public string Kgen { get; set; } = string.Empty;
+        public string Lsa { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+        public string Database { get; set; } = string.Empty;
+        public string Legacy { get; set; } = string.Empty;
+        public DateOnly? ProofDate { get; set; }
+        public DateOnly? FinalDate { get; set; }
+        public DateOnly? MemoDate { get; set; }
+        public DateOnly? FinalPoDate { get; set; }
+        public DateOnly? ShippingDate { get; set; }
+        public DateOnly? DirxionDate { get; set; }
+        public DateOnly? PubDate { get; set; }
+    }
+
+    private sealed class AsignacionReporteDto
+    {
+        public string EmployeeName { get; set; } = string.Empty;
+        public string BookName { get; set; } = string.Empty;
+        public string Kgen { get; set; } = string.Empty;
+        public DateOnly? PubDate { get; set; }
+        public DateOnly? DirectionDate { get; set; }
+        public DateOnly? ProofDate { get; set; }
+        public DateOnly? FinalDate { get; set; }
+        public DateOnly? MemoDate { get; set; }
+    }
+
+    private static decimal CalcularPorcentajeGeneralReporte(EvaluacionReporteDto item)
+    {
+        var valores = new List<decimal>();
+
+        if (item.MotifYp.HasValue)
+            valores.Add(item.MotifYp.Value);
+
+        if (item.MotifWp.HasValue)
+            valores.Add(item.MotifWp.Value);
+
+        if (item.InventoryReport.HasValue)
+            valores.Add(item.InventoryReport.Value);
+
+        if (item.ProductShippingFolder.HasValue)
+            valores.Add(item.ProductShippingFolder.Value);
+
+        if (item.TaskMemo.HasValue)
+            valores.Add(item.TaskMemo.Value);
+
+        if (valores.Count == 0)
+            return 0;
+
+        return Math.Round(valores.Average(), 2);
+    }
+
+    private sealed class EvaluacionReporteDto
+    {
+        public string EmployeeName { get; set; } = string.Empty;
+        public string BookName { get; set; } = string.Empty;
+        public string Kgen { get; set; } = string.Empty;
+        public string Lsa { get; set; } = string.Empty;
+
+        public DateOnly? PubDate { get; set; }
+
+        public decimal? MotifYp { get; set; }
+        public decimal? MotifWp { get; set; }
+        public decimal? InventoryReport { get; set; }
+        public decimal? ProductShippingFolder { get; set; }
+        public decimal? TaskMemo { get; set; }
+
+        public decimal TotalPorcentaje { get; set; }
+    }
+}

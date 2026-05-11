@@ -28,43 +28,91 @@ namespace Pagination_Project.Services
                 TotalEvaluations = await db.Evaluaciones.AsNoTracking().CountAsync()
             };
 
-            var assignedBooks = await (
+            var data = await (
                 from a in db.Asignaciones.AsNoTracking()
                 join l in db.Libros.AsNoTracking() on a.IdLibro equals l.Id
                 join e in db.Empleados.AsNoTracking() on a.IdEmpleado equals e.Id
-                where l.ProofExtract == yesterday
-                   || l.FinalExtract == yesterday
-                   || l.MemoExtract == yesterday
-                   || l.DirxionDate == today
-                   || l.FinalPODate == today
-                   || l.ShippingDate == today
-                select new AssignedBookDashboardDto
+
+                join bpJoin in db.Bind_Plants.AsNoTracking()
+                    on l.BindPlantId equals bpJoin.Id into bindPlantGroup
+                from bp in bindPlantGroup.DefaultIfEmpty()
+
+                select new
                 {
                     EmployeeName = e.Nombre ?? string.Empty,
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
                     BookName = l.BookName ?? string.Empty,
-                    Stage =
-                        l.ProofExtract == yesterday ? "Proof Extract" :
-                        l.FinalExtract == yesterday ? "Final Extract" :
-                        l.MemoExtract == yesterday ? "Memo Extract" :
-                        l.DirxionDate == today ? "Dirxion Date" :
-                        l.FinalPODate == today ? "Final PO Date" :
-                        l.ShippingDate == today ? "Shipping Date" :
-                        string.Empty,
-                    StageDate =
-                        l.ProofExtract == yesterday ? l.ProofExtract.AddDays(1) :
-                        l.FinalExtract == yesterday ? l.FinalExtract.AddDays(1) :
-                        l.MemoExtract == yesterday ? l.MemoExtract.AddDays(1) :
-                        l.DirxionDate == today ? l.DirxionDate :
-                        l.FinalPODate == today ? l.FinalPODate :
-                        l.ShippingDate == today ? l.ShippingDate :
-                        null
+
+                    l.ProofExtract,
+                    l.FinalExtract,
+                    l.MemoExtract,
+                    l.DirxionDate,
+                    l.FinalPODate,
+                    l.ShippingDate,
+
+                    BindPlantName = bp != null ? bp.Bind_Plant_Name : string.Empty
                 }
-            )
-            .OrderBy(x => x.StageDate)
-            .ThenBy(x => x.EmployeeName)
-            .ToListAsync();
+            ).ToListAsync();
+
+            var assignedBooks = data
+                .Select(x =>
+                {
+                    var bindPlantName = (x.BindPlantName ?? string.Empty).Trim().ToUpperInvariant();
+
+                    var excluirMemoPorBindPlant =
+                        bindPlantName == "PREM" ||
+                        bindPlantName == "DIRX";
+
+                    string stage = string.Empty;
+                    DateOnly? stageDate = null;
+
+                    if (x.ProofExtract == yesterday)
+                    {
+                        stage = "Proof Extract";
+                        stageDate = x.ProofExtract.AddDays(1);
+                    }
+                    else if (x.FinalExtract == yesterday)
+                    {
+                        stage = "Final Extract";
+                        stageDate = x.FinalExtract.AddDays(1);
+                    }
+                    else if (x.MemoExtract == yesterday && !excluirMemoPorBindPlant)
+                    {
+                        stage = "Memo Extract";
+                        stageDate = x.MemoExtract.AddDays(1);
+                    }
+                    else if (x.DirxionDate == today)
+                    {
+                        stage = "Dirxion Date";
+                        stageDate = x.DirxionDate;
+                    }
+                    else if (x.FinalPODate == today)
+                    {
+                        stage = "Final PO Date";
+                        stageDate = x.FinalPODate;
+                    }
+                    else if (x.ShippingDate == today)
+                    {
+                        stage = "Shipping Date";
+                        stageDate = x.ShippingDate;
+                    }
+
+                    return new AssignedBookDashboardDto
+                    {
+                        EmployeeName = x.EmployeeName,
+                        KgenCode = x.KgenCode,
+                        LsaCode = x.LsaCode,
+                        BookName = x.BookName,
+                        Stage = stage,
+                        StageDate = stageDate
+                    };
+                })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Stage))
+                .OrderBy(x => x.StageDate)
+                .ThenBy(x => x.EmployeeName)
+                .ThenBy(x => x.BookName)
+                .ToList();
 
             return new DashboardSummaryDto
             {

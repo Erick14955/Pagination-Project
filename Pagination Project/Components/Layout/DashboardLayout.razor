@@ -70,6 +70,14 @@
                         </NavLink>
                     }
 
+                    @if (PuedeVerReportes(auth.User))
+                    {
+                        <NavLink href="/reportes-finalizados" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">📄</span>
+                            <span class="thryv-menu-text">Reports</span>
+                        </NavLink>
+                    }
+
                     @if (HasPermission(auth.User, "EditPermissionLevels"))
                     {
                         <NavLink href="/permisos" class="thryv-menu-link">
@@ -154,6 +162,15 @@
                ?? user.FindFirst(ClaimTypes.Name)?.Value
                ?? user.FindFirst("Username")?.Value
                ?? "User";
+    }
+
+    private static bool PuedeVerReportes(ClaimsPrincipal user)
+    {
+        var rol = ObtenerRol(user);
+
+        return rol == "Administrator" ||
+               rol == "Supervisor" ||
+               rol == "Assistant";
     }
 
     private static string ObtenerRol(ClaimsPrincipal user)

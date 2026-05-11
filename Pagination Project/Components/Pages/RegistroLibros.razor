@@ -607,8 +607,11 @@
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
+            await ActualizarFinalizadosPorDirxionAsync(db);
+
             Libros = await db.Libros
                 .AsNoTracking()
+                .Where(l => !l.Finalizado)
                 .OrderBy(l => l.BookName)
                 .ToListAsync();
         }
@@ -620,6 +623,38 @@
         {
             Cargando = false;
         }
+    }
+
+    private async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+        var librosParaFinalizar = await db.Libros
+            .Include(l => l.Asignaciones)
+                .ThenInclude(a => a.Evaluaciones)
+            .Where(l => !l.Finalizado &&
+                        l.DirxionDate < hoy)
+            .ToListAsync();
+
+        if (!librosParaFinalizar.Any())
+            return;
+
+        foreach (var libro in librosParaFinalizar)
+        {
+            libro.Finalizado = true;
+
+            foreach (var asignacion in libro.Asignaciones)
+            {
+                asignacion.Finalizado = true;
+
+                foreach (var evaluacion in asignacion.Evaluaciones)
+                {
+                    evaluacion.Finalizado = true;
+                }
+            }
+        }
+
+        await db.SaveChangesAsync();
     }
 
     private async Task GuardarLibroAsync()
@@ -788,7 +823,8 @@
             PubDate = hoy,
 
             SRLSuppression = false,
-            NWP = false
+            NWP = false,
+            Finalizado = false
         };
     }
 
@@ -819,7 +855,8 @@
             PubDate = libro.PubDate,
 
             SRLSuppression = libro.SRLSuppression,
-            NWP = libro.NWP
+            NWP = libro.NWP,
+            Finalizado = libro.Finalizado
         };
     }
 
@@ -943,6 +980,7 @@
 
                 var firstDuePrinterDate = ReadDate(row, headerMap, today, "First Due Printer");
                 var finalPoDate = CalculateFinalPoDate(firstDuePrinterDate);
+                var dirxionDate = ReadDate(row, headerMap, today, "Dirxion");
 
                 var libro = new Libros
                 {
@@ -965,11 +1003,13 @@
                     MemoExtract = ReadDate(row, headerMap, today, "Memo Extract", "Extract - Memo"),
                     FinalPODate = finalPoDate,
                     ShippingDate = firstDuePrinterDate,
-                    DirxionDate = ReadDate(row, headerMap, today, "Dirxion"),
+                    DirxionDate = dirxionDate,
                     PubDate = ReadDate(row, headerMap, today, "Pub Date", "Publication Date"),
 
                     SRLSuppression = ReadYesNoBool(row, headerMap, "SRL Suppression Flag"),
-                    NWP = ReadYesNoBool(row, headerMap, "NWP")
+                    NWP = ReadYesNoBool(row, headerMap, "NWP"),
+
+                    Finalizado = dirxionDate < today
                 };
 
                 importedBooks.Add(libro);
@@ -1071,6 +1111,9 @@
 
         destination.SRLSuppression = source.SRLSuppression;
         destination.NWP = source.NWP;
+
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        destination.Finalizado = source.DirxionDate < hoy;
     }
 
     private static DateOnly CalculateFinalPoDate(DateOnly firstDuePrinter)

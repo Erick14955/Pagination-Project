@@ -1,0 +1,1042 @@
+﻿@page "/evaluaciones"
+@page "/evaluations"
+@page "/registro-evaluaciones"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IJSRuntime JS
+
+<PageTitle>Evaluations</PageTitle>
+
+<link href="style/registroevaluaciones.css" rel="stylesheet" />
+
+<div class="evaluations-page">
+
+    <section class="page-hero">
+        <div>
+            <h1>Evaluations Management</h1>
+            <p>
+                Register, review and manage assignment evaluations. Percentages are calculated automatically from the selected errors.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span>Total Evaluations</span>
+                <strong>@Historial.Count</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Available Assignments</span>
+                <strong>@Asignaciones.Count</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Mensaje))
+    {
+        <div class="alert-box @TipoMensaje">
+            @Mensaje
+        </div>
+    }
+
+    <section class="form-card">
+        <div class="section-header">
+            <div>
+                <h2>Select Assignment</h2>
+                <p>Select the employee and book assignment that will be evaluated.</p>
+            </div>
+
+            <div class="header-actions">
+                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                    ✨ New
+                </button>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Assignment</label>
+
+                <select class="form-control" @bind="Evaluacion.AssignationId">
+                    <option value="@Guid.Empty">-- Select assignment --</option>
+
+                    @foreach (var item in Asignaciones)
+                    {
+                        <option value="@item.Id">@item.Descripcion</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <span>Motif YP</span>
+            <strong>@PorcentajeVista(TotalMotifYpVista, 8)%</strong>
+            <small>@TotalMotifYpVista errors marked</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Motif WP</span>
+            <strong>@PorcentajeVista(TotalMotifWpVista, 3)%</strong>
+            <small>@TotalMotifWpVista errors marked</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Inventory Report</span>
+            <strong>@PorcentajeVista(TotalInventoryVista, 4)%</strong>
+            <small>@TotalInventoryVista errors marked</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Shipping Folder</span>
+            <strong>@PorcentajeVista(TotalShippingVista, 8)%</strong>
+            <small>@TotalShippingVista errors marked</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Task Memo</span>
+            <strong>@PorcentajeVista(TotalTaskVista, 3)%</strong>
+            <small>@TotalTaskVista errors marked</small>
+        </div>
+    </section>
+
+    <section class="evaluation-grid">
+
+        <div class="evaluation-block">
+            <div class="block-header">
+                <div>
+                    <h2>📌 Motif YP</h2>
+                    <p>Quality issues related to Motif YP.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalMotifYpVista</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.TouchingRule" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Touching Rule</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.PagesSwapped" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Pages With Swapped</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.PplpWrongPlace" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>PPLP with wrong place</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.CouponsHeading" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Coupons with heading</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.DoubleTruckWrongPlace" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Double truck with wrong placement</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.FillersOutside" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Fillers outside</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingYspFiller" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing YSP filler</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.GradeUnder75" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Grade of the pages under 75%</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="evaluation-block">
+            <div class="block-header">
+                <div>
+                    <h2>⚙️ Motif WP</h2>
+                    <p>Quality issues related to Motif WP.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalMotifWpVista</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.WdqcsNoAnchors" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>WDQCS no touching with anchor</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.WhpsNoAnchors" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>WHPS no touching with anchor</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.WfpsNoAnchors" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>WPFS no touching with anchor</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="evaluation-block">
+            <div class="block-header">
+                <div>
+                    <h2>📦 Inventory Report</h2>
+                    <p>Inventory report missing elements.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalInventoryVista</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingCornerAd" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing Corner Ad</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingBanner" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing Banner</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingRandomTab" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing Random Tab</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingForcedTab" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing Forced Tab</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="evaluation-block">
+            <div class="block-header">
+                <div>
+                    <h2>📎 Product Shipping Folder</h2>
+                    <p>Output and shipping folder validation.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalShippingVista</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.FileNamingIssue" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>File Naming Issue</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.OutputWrongDate" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Output with wrong date</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.WrongPitstop" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Wrong Pitstop</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.RestaurantBleedIssue" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Restaurant Bleed Bar issue</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.WrongSigFiller" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Wrong SIG fillers</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.FobFolder" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>FOB folder</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingPaidItem" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing paid item</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.MissingSelfPromo" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Missing self promo</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="evaluation-block">
+            <div class="block-header">
+                <div>
+                    <h2>📋 Task Memo</h2>
+                    <p>Memo correction and closing validation.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalTaskVista</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.Corrections" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Corrections no properly applied</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.PendingCorrections" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Pending corrections</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="Evaluacion.TaskMemoWrongComment" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Task memo closed with the wrong comment</span>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <section class="form-card">
+        <div class="section-header actions-section">
+            <div>
+                <h2>@(ModoEdicion ? "Update Evaluation" : "Save Evaluation")</h2>
+            </div>
+
+            <div class="header-actions">
+                <button type="button"
+                        class="btn-primary"
+                        disabled="@Guardando"
+                        @onclick="GuardarEvaluacionAsync">
+                    @(Guardando ? "Saving..." : ModoEdicion ? "Update Evaluation" : "Save Evaluation")
+                </button>
+
+                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                    Clear
+                </button>
+
+                <button type="button"
+                        class="btn-danger"
+                        disabled="@(!ModoEdicion || Guardando)"
+                        @onclick="EliminarEvaluacionAsync">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="list-card">
+        <div class="section-header table-header">
+            <div>
+                <h2>Evaluation History</h2>
+                <p>Double click on a row to load and edit an evaluation.</p>
+            </div>
+
+            <div class="list-filters">
+
+                <select class="employee-filter-select"
+                        @bind="EmpleadoFiltroNombre">
+                    <option value="">All Employees</option>
+
+                    @foreach (var empleado in EmpleadosParaFiltro)
+                    {
+                        <option value="@empleado.EmpleadoNombre">
+                            @empleado.EmpleadoNombre
+                        </option>
+                    }
+                </select>
+
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input placeholder="Search by employee or KGEN..."
+                           @bind="Busqueda"
+                           @bind:event="oninput" />
+                </div>
+
+                <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-state">
+                Loading evaluations...
+            </div>
+        }
+        else if (!HistorialFiltrado.Any())
+        {
+            <div class="empty-state">
+                <strong>No evaluations to display.</strong>
+                <span>Create a new evaluation or change the search filter.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="evaluations-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>KGEN</th>
+                            <th>Motif YP</th>
+                            <th>Motif WP</th>
+                            <th>Inventory</th>
+                            <th>Shipping</th>
+                            <th>Task Memo</th>
+                            <th>Total %</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in HistorialFiltrado)
+                        {
+                            <tr @ondblclick="() => SeleccionarEvaluacionAsync(item.Id)">
+                                <td>
+                                    <div class="employee-title">
+                                        <strong>@item.EmpleadoNombre</strong>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="kgen-pill">@item.KGENCode</span>
+                                </td>
+
+                                <td>@MostrarPorcentaje(item.MotifYp)</td>
+                                <td>@MostrarPorcentaje(item.MotifWp)</td>
+                                <td>@MostrarPorcentaje(item.InventoryReport)</td>
+                                <td>@MostrarPorcentaje(item.ProductShippingFolder)</td>
+                                <td>@MostrarPorcentaje(item.TaskMemo)</td>
+
+                                <td>
+                                    <strong class="total-percent">
+                                        @MostrarPorcentaje(item.PorcentajeGeneral)
+                                    </strong>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+</div>
+
+@code {
+    private Evaluaciones Evaluacion { get; set; } = new();
+
+    private List<AsignacionComboDto> Asignaciones { get; set; } = new();
+    private List<EvaluacionListadoDto> Historial { get; set; } = new();
+
+    private string Mensaje { get; set; } = string.Empty;
+    private string TipoMensaje { get; set; } = "success";
+    private string Busqueda { get; set; } = string.Empty;
+
+    private string EmpleadoFiltroNombre { get; set; } = string.Empty;
+
+    private IEnumerable<EvaluacionListadoDto> EmpleadosParaFiltro
+    {
+        get
+        {
+            return Historial
+                .Where(x => !string.IsNullOrWhiteSpace(x.EmpleadoNombre) && x.EmpleadoNombre != "-")
+                .GroupBy(x => x.EmpleadoNombre)
+                .Select(g => g.First())
+                .OrderBy(x => x.EmpleadoNombre);
+        }
+    }
+
+    private bool Cargando { get; set; } = true;
+    private bool Guardando { get; set; } = false;
+    private bool ModoEdicion { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatosAsync();
+        LimpiarFormulario();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        try
+        {
+            Cargando = true;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            await ActualizarFinalizadosPorDirxionAsync(db);
+
+            await CargarAsignacionesAsync(db);
+            await CargarHistorialAsync(db);
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error loading evaluations: {ex.Message}", "error");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task CargarAsignacionesAsync(AppDbContext db)
+    {
+        var assignationIdActual = Evaluacion.AssignationId;
+
+        Asignaciones = await db.Asignaciones
+            .AsNoTracking()
+            .Include(a => a.Empleado)
+            .Include(a => a.Libro)
+            .Where(a => !a.Finalizado &&
+                        a.Libro != null &&
+                        !a.Libro.Finalizado &&
+                        (
+                            !db.Evaluaciones.Any(e => e.AssignationId == a.Id) ||
+                            a.Id == assignationIdActual
+                        ))
+            .OrderBy(a => a.Empleado!.Nombre)
+            .ThenBy(a => a.Libro!.BookName)
+            .Select(a => new AsignacionComboDto
+            {
+                Id = a.Id,
+                Descripcion =
+                    (a.Empleado != null ? a.Empleado.Nombre : "-") +
+                    " - " +
+                    (a.Libro != null ? a.Libro.BookName : "-") +
+                    " | KGEN: " +
+                    (a.Libro != null ? a.Libro.KGENCode : "-") +
+                    " | LSA: " +
+                    (a.Libro != null ? a.Libro.LSACode : "-")
+            })
+            .ToListAsync();
+    }
+
+    private async Task CargarHistorialAsync(AppDbContext db)
+    {
+        var evaluacionesDb = await db.Evaluaciones
+            .AsNoTracking()
+            .Include(e => e.Asignacion)
+                .ThenInclude(a => a.Empleado)
+            .Include(e => e.Asignacion)
+                .ThenInclude(a => a.Libro)
+            .OrderBy(e => e.Asignacion.Empleado!.Nombre)
+            .ThenBy(e => e.Asignacion.Libro!.KGENCode)
+            .ToListAsync();
+
+        Historial = evaluacionesDb.Select(e => new EvaluacionListadoDto
+        {
+            Id = e.Id,
+            AssignationId = e.AssignationId,
+
+            EmpleadoNombre = e.Asignacion?.Empleado?.Nombre ?? "-",
+
+            KGENCode = e.Asignacion?.Libro?.KGENCode ?? "-",
+
+            MotifYp = e.MotifYp,
+            MotifWp = e.MotifWp,
+            InventoryReport = e.InventoryReport,
+            ProductShippingFolder = e.ProductShippingFolder,
+            TaskMemo = e.TaskMemo
+        }).ToList();
+
+        foreach (var item in Historial)
+        {
+            item.PorcentajeGeneral = CalcularPorcentajeGeneral(item);
+        }
+    }
+
+    private IEnumerable<EvaluacionListadoDto> HistorialFiltrado
+    {
+        get
+        {
+            IEnumerable<EvaluacionListadoDto> query = Historial;
+
+            if (!string.IsNullOrWhiteSpace(EmpleadoFiltroNombre))
+            {
+                query = query.Where(x =>
+                    string.Equals(
+                        x.EmpleadoNombre?.Trim(),
+                        EmpleadoFiltroNombre.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(Busqueda))
+            {
+                var filtro = Busqueda.Trim().ToUpperInvariant();
+
+                query = query.Where(x =>
+                    (x.EmpleadoNombre ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
+                    (x.KGENCode ?? string.Empty).ToUpperInvariant().Contains(filtro));
+            }
+
+            return query;
+        }
+    }
+
+    private async Task GuardarEvaluacionAsync()
+    {
+        try
+        {
+            Guardando = true;
+            LimpiarMensaje();
+
+            if (Evaluacion.AssignationId == Guid.Empty)
+            {
+                MostrarMensaje("Select a valid assignment.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            if (Evaluacion.Id == Guid.Empty)
+            {
+                var existe = await db.Evaluaciones
+                    .AnyAsync(e => e.AssignationId == Evaluacion.AssignationId);
+
+                if (existe)
+                {
+                    MostrarMensaje("This assignment already has an evaluation. Open it from the history to edit it.", "error");
+                    return;
+                }
+
+                Evaluacion.Id = Guid.NewGuid();
+                Evaluacion.Finalizado = false;
+
+                db.Evaluaciones.Add(Evaluacion);
+            }
+            else
+            {
+                var existente = await db.Evaluaciones
+                    .FirstOrDefaultAsync(e => e.Id == Evaluacion.Id);
+
+                if (existente is null)
+                {
+                    MostrarMensaje("The selected evaluation was not found.", "error");
+                    return;
+                }
+
+                existente.AssignationId = Evaluacion.AssignationId;
+
+                existente.TouchingRule = Evaluacion.TouchingRule;
+                existente.PagesSwapped = Evaluacion.PagesSwapped;
+                existente.PplpWrongPlace = Evaluacion.PplpWrongPlace;
+                existente.CouponsHeading = Evaluacion.CouponsHeading;
+                existente.DoubleTruckWrongPlace = Evaluacion.DoubleTruckWrongPlace;
+                existente.FillersOutside = Evaluacion.FillersOutside;
+                existente.MissingYspFiller = Evaluacion.MissingYspFiller;
+                existente.GradeUnder75 = Evaluacion.GradeUnder75;
+
+                existente.WhpsNoAnchors = Evaluacion.WhpsNoAnchors;
+                existente.WfpsNoAnchors = Evaluacion.WfpsNoAnchors;
+                existente.WdqcsNoAnchors = Evaluacion.WdqcsNoAnchors;
+
+                existente.MissingCornerAd = Evaluacion.MissingCornerAd;
+                existente.MissingBanner = Evaluacion.MissingBanner;
+                existente.MissingRandomTab = Evaluacion.MissingRandomTab;
+                existente.MissingForcedTab = Evaluacion.MissingForcedTab;
+
+                existente.FileNamingIssue = Evaluacion.FileNamingIssue;
+                existente.OutputWrongDate = Evaluacion.OutputWrongDate;
+                existente.WrongPitstop = Evaluacion.WrongPitstop;
+                existente.RestaurantBleedIssue = Evaluacion.RestaurantBleedIssue;
+                existente.WrongSigFiller = Evaluacion.WrongSigFiller;
+                existente.FobFolder = Evaluacion.FobFolder;
+                existente.MissingPaidItem = Evaluacion.MissingPaidItem;
+                existente.MissingSelfPromo = Evaluacion.MissingSelfPromo;
+
+                existente.Corrections = Evaluacion.Corrections;
+                existente.PendingCorrections = Evaluacion.PendingCorrections;
+                existente.TaskMemoWrongComment = Evaluacion.TaskMemoWrongComment;
+
+                existente.Finalizado = Evaluacion.Finalizado;
+            }
+
+            await db.SaveChangesAsync();
+
+            var evaluacionGuardada = await db.Evaluaciones
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == Evaluacion.Id);
+
+            if (evaluacionGuardada is not null)
+            {
+                Evaluacion = evaluacionGuardada;
+                ModoEdicion = true;
+            }
+
+            await CargarAsignacionesAsync(db);
+            await CargarHistorialAsync(db);
+
+            MostrarMensaje("Evaluation saved successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error saving evaluation: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private async Task SeleccionarEvaluacionAsync(Guid id)
+    {
+        try
+        {
+            LimpiarMensaje();
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var item = await db.Evaluaciones
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (item is null)
+            {
+                MostrarMensaje("The selected evaluation was not found.", "error");
+                return;
+            }
+
+            Evaluacion = item;
+            ModoEdicion = true;
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error selecting evaluation: {ex.Message}", "error");
+        }
+    }
+
+    private async Task EliminarEvaluacionAsync()
+    {
+        if (!ModoEdicion || Evaluacion.Id == Guid.Empty)
+            return;
+
+        var confirmar = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Are you sure you want to delete this evaluation?");
+
+        if (!confirmar)
+            return;
+
+        try
+        {
+            Guardando = true;
+            LimpiarMensaje();
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var item = await db.Evaluaciones
+                .FirstOrDefaultAsync(e => e.Id == Evaluacion.Id);
+
+            if (item is null)
+            {
+                MostrarMensaje("The selected evaluation was not found.", "error");
+                return;
+            }
+
+            db.Evaluaciones.Remove(item);
+            await db.SaveChangesAsync();
+
+            LimpiarFormulario();
+
+            await CargarAsignacionesAsync(db);
+            await CargarHistorialAsync(db);
+
+            MostrarMensaje("Evaluation deleted successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error deleting evaluation: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+        var librosParaFinalizar = await db.Libros
+            .Include(x => x.Asignaciones)
+                .ThenInclude(a => a.Evaluaciones)
+            .Where(x => !x.Finalizado &&
+                        x.DirxionDate < hoy)
+            .ToListAsync();
+
+        if (!librosParaFinalizar.Any())
+            return;
+
+        foreach (var libro in librosParaFinalizar)
+        {
+            libro.Finalizado = true;
+
+            foreach (var asignacion in libro.Asignaciones)
+            {
+                asignacion.Finalizado = true;
+
+                foreach (var evaluacion in asignacion.Evaluaciones)
+                {
+                    evaluacion.Finalizado = true;
+                }
+            }
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private void LimpiarFormulario()
+    {
+        Evaluacion = new Evaluaciones
+        {
+            Id = Guid.Empty,
+            AssignationId = Guid.Empty,
+            Finalizado = false
+        };
+
+        ModoEdicion = false;
+        LimpiarMensaje();
+    }
+
+    private void LimpiarFiltros()
+    {
+        Busqueda = string.Empty;
+        EmpleadoFiltroNombre = string.Empty;
+    }
+
+    private void MostrarMensaje(string mensaje, string tipo)
+    {
+        Mensaje = mensaje;
+        TipoMensaje = tipo;
+    }
+
+    private void LimpiarMensaje()
+    {
+        Mensaje = string.Empty;
+        TipoMensaje = "success";
+    }
+
+    private int TotalMotifYpVista =>
+        Contar(Evaluacion.TouchingRule) +
+        Contar(Evaluacion.PagesSwapped) +
+        Contar(Evaluacion.PplpWrongPlace) +
+        Contar(Evaluacion.CouponsHeading) +
+        Contar(Evaluacion.DoubleTruckWrongPlace) +
+        Contar(Evaluacion.FillersOutside) +
+        Contar(Evaluacion.MissingYspFiller) +
+        Contar(Evaluacion.GradeUnder75);
+
+    private int TotalMotifWpVista =>
+        Contar(Evaluacion.WhpsNoAnchors) +
+        Contar(Evaluacion.WfpsNoAnchors) +
+        Contar(Evaluacion.WdqcsNoAnchors);
+
+    private int TotalInventoryVista =>
+        Contar(Evaluacion.MissingCornerAd) +
+        Contar(Evaluacion.MissingBanner) +
+        Contar(Evaluacion.MissingRandomTab) +
+        Contar(Evaluacion.MissingForcedTab);
+
+    private int TotalShippingVista =>
+        Contar(Evaluacion.FileNamingIssue) +
+        Contar(Evaluacion.OutputWrongDate) +
+        Contar(Evaluacion.WrongPitstop) +
+        Contar(Evaluacion.RestaurantBleedIssue) +
+        Contar(Evaluacion.WrongSigFiller) +
+        Contar(Evaluacion.FobFolder) +
+        Contar(Evaluacion.MissingPaidItem) +
+        Contar(Evaluacion.MissingSelfPromo);
+
+    private int TotalTaskVista =>
+        Contar(Evaluacion.Corrections) +
+        Contar(Evaluacion.PendingCorrections) +
+        Contar(Evaluacion.TaskMemoWrongComment);
+
+    private static int Contar(bool valor)
+    {
+        return valor ? 1 : 0;
+    }
+
+    private static string PorcentajeVista(int errores, int total)
+    {
+        if (total <= 0)
+            return "0.00";
+
+        var porcentaje = ((total - errores) * 100m) / total;
+
+        if (porcentaje < 0)
+            porcentaje = 0;
+
+        return porcentaje.ToString("0.00");
+    }
+
+    private static string MostrarPorcentaje(decimal? valor)
+    {
+        return valor.HasValue ? $"{valor.Value:0.00}%" : "0.00%";
+    }
+
+    private static decimal CalcularPorcentajeGeneral(EvaluacionListadoDto item)
+    {
+        var valores = new List<decimal>();
+
+        if (item.MotifYp.HasValue)
+            valores.Add(item.MotifYp.Value);
+
+        if (item.MotifWp.HasValue)
+            valores.Add(item.MotifWp.Value);
+
+        if (item.InventoryReport.HasValue)
+            valores.Add(item.InventoryReport.Value);
+
+        if (item.ProductShippingFolder.HasValue)
+            valores.Add(item.ProductShippingFolder.Value);
+
+        if (item.TaskMemo.HasValue)
+            valores.Add(item.TaskMemo.Value);
+
+        if (valores.Count == 0)
+            return 0;
+
+        return Math.Round(valores.Average(), 2);
+    }
+
+    private sealed class AsignacionComboDto
+    {
+        public Guid Id { get; set; }
+        public string Descripcion { get; set; } = string.Empty;
+    }
+
+    private sealed class EvaluacionListadoDto
+    {
+        public Guid Id { get; set; }
+        public Guid AssignationId { get; set; }
+
+        public string EmpleadoNombre { get; set; } = string.Empty;
+        public string KGENCode { get; set; } = string.Empty;
+
+        public decimal? MotifYp { get; set; }
+        public decimal? MotifWp { get; set; }
+        public decimal? InventoryReport { get; set; }
+        public decimal? ProductShippingFolder { get; set; }
+        public decimal? TaskMemo { get; set; }
+
+        public decimal PorcentajeGeneral { get; set; }
+    }
+}

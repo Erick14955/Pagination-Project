@@ -45,6 +45,7 @@ namespace Pagination_Project.Models
         public decimal? InventoryReport { get; set; }
         public decimal? ProductShippingFolder { get; set; }
         public decimal? TaskMemo { get; set; }
+        public bool Finalizado { get; set; }
 
         public Asignaciones Asignacion { get; set; }
     }

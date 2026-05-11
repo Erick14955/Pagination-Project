@@ -423,3 +423,21 @@
         min-width: 700px;
     }
 }
+
+.thryv-custom-table thead th:nth-child(4),
+.thryv-custom-table tbody td:nth-child(4) {
+    text-align: center;
+}
+
+.thryv-custom-table thead th:nth-child(5),
+.thryv-custom-table tbody td:nth-child(5) {
+    text-align: center;
+}
+
+.thryv-custom-table tbody td:nth-child(5) {
+    vertical-align: middle;
+}
+
+    .thryv-custom-table tbody td:nth-child(5) .thryv-stage-pill {
+        margin: 0 auto;
+    }

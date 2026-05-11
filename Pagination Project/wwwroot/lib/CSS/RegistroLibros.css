@@ -684,3 +684,43 @@ button:disabled {
             width: 100%;
         }
 }
+
+.list-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.month-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: -18px;
+}
+
+    .month-filter label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #334155;
+        margin: 0;
+        line-height: 1;
+    }
+
+.search-box,
+.filter-select,
+.btn-filter-clear {
+    height: 46px;
+}
+
+.filter-select {
+    min-width: 210px;
+    padding: 0 14px;
+}
+
+.btn-filter-clear {
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

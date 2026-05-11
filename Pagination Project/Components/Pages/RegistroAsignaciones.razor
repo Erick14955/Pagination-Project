@@ -1,0 +1,1451 @@
+﻿@page "/asignaciones"
+@page "/assignments"
+@page "/registro-asignaciones"
+
+@using System.Globalization
+@using System.Text
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using ClosedXML.Excel
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IJSRuntime JS
+
+<PageTitle>Assignments - BibliotecaApp</PageTitle>
+
+<div class="assignments-page">
+
+    <section class="page-hero">
+        <div>
+            <h1>Book Assignments</h1>
+            <p>
+                Assign books to employees manually or import assignments using an XLSX file.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span>Total Assignments</span>
+                <strong>@AsignacionesListado.Count</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Filtered</span>
+                <strong>@AsignacionesFiltradas.Count()</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Mensaje))
+    {
+        <div class="alert-box @TipoMensaje">
+            @Mensaje
+        </div>
+    }
+
+    <section class="form-card">
+        <div class="section-header">
+            <div>
+                <h2>Assign Book to Employee</h2>
+                <p>Select an employee and search the book by Book Name, KGEN Code or LSA Code.</p>
+            </div>
+
+            <div class="header-actions">
+                <InputFile @key="XlsxInputKey"
+                           id="xlsxAssignmentsUpload"
+                           class="file-input-hidden"
+                           OnChange="ImportAssignmentsFromXlsxAsync"
+                           accept=".xlsx" />
+
+                <label for="xlsxAssignmentsUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
+                    @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
+                </label>
+
+                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                    ✨ New
+                </button>
+            </div>
+        </div>
+
+        <form @onsubmit="GuardarAsignacionAsync" @onsubmit:preventDefault>
+            <div class="form-grid">
+
+                <div class="form-group large">
+                    <label>Employee</label>
+
+                    <input class="form-control"
+                           list="employeesList"
+                           placeholder="Search employee by name or employee ID"
+                           @bind="EmpleadoTexto"
+                           @bind:event="oninput"
+                           required />
+
+                    <datalist id="employeesList">
+                        @foreach (var empleado in EmpleadosFiltrados)
+                        {
+                            <option value="@GetEmpleadoDisplay(empleado)"></option>
+                        }
+                    </datalist>
+                </div>
+
+                <div class="form-group large">
+                    <label>Book</label>
+
+                    <input class="form-control"
+                           list="booksList"
+                           placeholder="Search by Book Name, KGEN Code or LSA Code"
+                           @bind="LibroTexto"
+                           @bind:event="oninput"
+                           required />
+
+                    <datalist id="booksList">
+                        @foreach (var libro in LibrosFiltradosParaCombo)
+                        {
+                            <option value="@GetLibroDisplay(libro)"></option>
+                        }
+                    </datalist>
+                </div>
+
+            </div>
+
+            @if (EmpleadoSeleccionado is not null || LibroSeleccionado is not null)
+            {
+                <div class="preview-grid">
+                    <div class="preview-card">
+                        <span>Selected Employee</span>
+                        <strong>@(EmpleadoSeleccionado?.Nombre ?? "-")</strong>
+                        <small>@(EmpleadoSeleccionado is null ? "No valid employee selected" : $"Employee ID: {EmpleadoSeleccionado.IdEmpleado}")</small>
+                    </div>
+
+                    <div class="preview-card">
+                        <span>Selected Book</span>
+                        <strong>@(LibroSeleccionado?.BookName ?? "-")</strong>
+                        <small>
+                            @(LibroSeleccionado is null
+                                                    ? "No valid book selected"
+                                                    : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
+                    </small>
+                </div>
+            </div>
+                        }
+
+            <div class="button-row">
+                <button type="submit" class="btn-primary" disabled="@Guardando">
+                    @(Guardando ? "Saving..." : "Save Assignment")
+                </button>
+
+                <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                    Clear
+                </button>
+            </div>
+        </form>
+    </section>
+
+    @if (ResultadoImportacion is not null)
+    {
+        <section class="import-result-card">
+            <h2>XLSX Import Result</h2>
+
+            <div class="import-stats">
+                <div>
+                    <span>Books Created</span>
+                    <strong>@ResultadoImportacion.LibrosCreados</strong>
+                </div>
+
+                <div>
+                    <span>Assignments Created</span>
+                    <strong>@ResultadoImportacion.AsignacionesCreadas</strong>
+                </div>
+
+                <div>
+                    <span>Duplicated</span>
+                    <strong>@ResultadoImportacion.AsignacionesDuplicadas</strong>
+                </div>
+
+                <div>
+                    <span>Skipped Rows</span>
+                    <strong>@ResultadoImportacion.FilasOmitidas</strong>
+                </div>
+            </div>
+
+            @if (ResultadoImportacion.Observaciones.Any())
+            {
+                <details class="import-details">
+                    <summary>View observations</summary>
+
+                    <ul>
+                        @foreach (var item in ResultadoImportacion.Observaciones.Take(80))
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                </details>
+            }
+        </section>
+    }
+
+    <section class="list-card">
+        <div class="section-header table-header">
+            <div>
+                <h2>Assignment List</h2>
+                <p>View and manage all employee-book assignments.</p>
+            </div>
+
+            <div class="list-filters">
+
+                <select class="employee-filter-select"
+                        @bind="EmpleadoFiltroId">
+                    <option value="">All Employees</option>
+
+                    @foreach (var empleado in EmpleadosParaFiltro)
+                    {
+                        <option value="@empleado.EmpleadoId">
+                            @empleado.EmpleadoNombre
+                        </option>
+                    }
+                </select>
+
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input placeholder="Search by employee, book, KGEN, LSA, state, database..."
+                           @bind="Busqueda"
+                           @bind:event="oninput" />
+                </div>
+
+                <button type="button"
+                        class="btn-export-xlsx"
+                        @onclick="ExportarAsignacionesXlsxAsync">
+                    📤 Export XLSX
+                </button>
+
+                <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-state">
+                Loading assignments...
+            </div>
+        }
+        else if (!AsignacionesFiltradas.Any())
+        {
+            <div class="empty-state">
+                <strong>No assignments to display.</strong>
+                <span>Create a new assignment or change the search filter.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="assignments-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Book Name</th>
+                            <th>KGEN</th>
+                            <th>LSA</th>
+                            <th>State</th>
+                            <th>Database</th>
+                            <th>Legacy Code</th>
+                            <th>Print Foot</th>
+                            <th>Trim Size</th>
+                            <th>Bind Plant</th>
+                            <th>Pub Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in AsignacionesFiltradas)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="employee-title">
+                                        <strong>@item.EmpleadoNombre</strong>
+                                        <span>@item.EmpleadoEmail</span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="book-title">
+                                        <strong>@item.BookName</strong>
+                                        <span>@item.ProductIssue</span>
+                                    </div>
+                                </td>
+
+                                <td>@item.KGENCode</td>
+                                <td>@item.LSACode</td>
+                                <td><span class="pill">@item.StateName</span></td>
+                                <td>@item.DatabaseName</td>
+                                <td>@item.LegacyCodeName</td>
+                                <td>@item.PrintFootName</td>
+                                <td>@item.TrimSizeName</td>
+                                <td>@item.BindPlantName</td>
+                                <td>@FormatoFecha(item.PubDate)</td>
+
+                                <td class="actions-cell">
+                                    <button type="button"
+                                            class="icon-btn danger"
+                                            title="Delete"
+                                            @onclick="() => EliminarAsignacionAsync(item.Id)">
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private List<Empleados> Empleados { get; set; } = new();
+    private List<Libros> Libros { get; set; } = new();
+    private List<AsignacionViewModel> AsignacionesListado { get; set; } = new();
+
+    private List<Bind_Plant> BindPlants { get; set; } = new();
+    private List<Pagination_Project.Models.Database> Databases { get; set; } = new();
+    private List<Legacy_Code> LegacyCodes { get; set; } = new();
+    private List<Print_Foot> PrintFeet { get; set; } = new();
+    private List<State> States { get; set; } = new();
+    private List<Trim_Size> TrimSizes { get; set; } = new();
+
+    private string EmpleadoTexto { get; set; } = string.Empty;
+    private string LibroTexto { get; set; } = string.Empty;
+    private string Busqueda { get; set; } = string.Empty;
+
+    private string Mensaje { get; set; } = string.Empty;
+    private string TipoMensaje { get; set; } = "success";
+
+    private bool Cargando { get; set; } = true;
+    private bool Guardando { get; set; } = false;
+    private bool ImportandoXlsx { get; set; } = false;
+
+    private int XlsxInputKey { get; set; } = 0;
+    private const long MaxXlsxSize = 20 * 1024 * 1024;
+
+    private ImportacionAsignacionesResultado? ResultadoImportacion { get; set; }
+
+    private Empleados? EmpleadoSeleccionado => BuscarEmpleadoSeleccionado();
+    private Libros? LibroSeleccionado => BuscarLibroSeleccionado();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarCatalogosAsync();
+        await CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        try
+        {
+            Cargando = true;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            await ActualizarFinalizadosPorDirxionAsync(db);
+
+            Empleados = await db.Empleados
+                .AsNoTracking()
+                .Where(x => x.Activo)
+                .OrderBy(x => x.Nombre)
+                .ToListAsync();
+
+            Libros = await db.Libros
+                .AsNoTracking()
+                .Where(x => !x.Finalizado)
+                .OrderBy(x => x.BookName)
+                .ToListAsync();
+
+            var asignacionesDb = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Empleado)
+                .Include(x => x.Libro)
+                .Where(x => !x.Finalizado &&
+                            x.Libro != null &&
+                            !x.Libro.Finalizado)
+                .OrderBy(x => x.Empleado!.Nombre)
+                .ThenBy(x => x.Libro!.BookName)
+                .ToListAsync();
+
+            AsignacionesListado = asignacionesDb.Select(x => new AsignacionViewModel
+            {
+                Id = x.Id,
+
+                EmpleadoId = x.IdEmpleado,
+                EmpleadoNombre = x.Empleado?.Nombre ?? string.Empty,
+                EmpleadoCodigo = x.Empleado?.IdEmpleado ?? 0,
+                EmpleadoEmail = x.Empleado?.Email ?? string.Empty,
+
+                LibroId = x.IdLibro,
+                BookName = x.Libro?.BookName ?? string.Empty,
+                KGENCode = x.Libro?.KGENCode ?? string.Empty,
+                LSACode = x.Libro?.LSACode ?? string.Empty,
+                ProductIssue = x.Libro?.ProductIssue ?? string.Empty,
+
+                StateName = GetStateName(x.Libro?.StateId),
+                DatabaseName = GetDatabaseName(x.Libro?.DatabaseId),
+                LegacyCodeName = GetLegacyCodeName(x.Libro?.LegacyCodeId),
+                PrintFootName = GetPrintFootName(x.Libro?.PrintFootId),
+                TrimSizeName = GetTrimSizeName(x.Libro?.TrimSizeId),
+                BindPlantName = GetBindPlantName(x.Libro?.BindPlantId),
+
+                PubDate = x.Libro?.PubDate ?? default
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error loading assignments: {ex.Message}", "error");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task CargarCatalogosAsync()
+    {
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            BindPlants = await db.Bind_Plants
+                .AsNoTracking()
+                .OrderBy(x => x.Bind_Plant_Name)
+                .ToListAsync();
+
+            Databases = await db.Databases
+                .AsNoTracking()
+                .OrderBy(x => x.Database_Name)
+                .ToListAsync();
+
+            LegacyCodes = await db.Legacy_Codes
+                .AsNoTracking()
+                .OrderBy(x => x.Legacy_Code_Name)
+                .ToListAsync();
+
+            PrintFeet = await db.Print_Foots
+                .AsNoTracking()
+                .OrderBy(x => x.Print_Foot_Name)
+                .ToListAsync();
+
+            States = await db.States
+                .AsNoTracking()
+                .OrderBy(x => x.State_Name)
+                .ToListAsync();
+
+            TrimSizes = await db.Trim_Sizes
+                .AsNoTracking()
+                .OrderBy(x => x.Trim_Size_Name)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error loading catalogs: {ex.Message}", "error");
+        }
+    }
+
+    private IEnumerable<Empleados> EmpleadosFiltrados
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(EmpleadoTexto))
+                return Empleados.Take(100);
+
+            var filtro = Normalizar(EmpleadoTexto);
+
+            return Empleados
+                .Where(x =>
+                    Normalizar(x.Nombre).Contains(filtro) ||
+                    x.IdEmpleado.ToString(CultureInfo.InvariantCulture).Contains(filtro))
+                .Take(100);
+        }
+    }
+
+    private IEnumerable<Libros> LibrosFiltradosParaCombo
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(LibroTexto))
+                return Libros.Take(100);
+
+            var filtro = Normalizar(LibroTexto);
+
+            return Libros
+                .Where(x =>
+                    Normalizar(x.BookName).Contains(filtro) ||
+                    Normalizar(x.KGENCode).Contains(filtro) ||
+                    Normalizar(x.LSACode).Contains(filtro))
+                .Take(100);
+        }
+    }
+
+    private IEnumerable<AsignacionViewModel> AsignacionesFiltradas
+    {
+        get
+        {
+            IEnumerable<AsignacionViewModel> query = AsignacionesListado;
+
+            if (!string.IsNullOrWhiteSpace(EmpleadoFiltroId) &&
+                Guid.TryParse(EmpleadoFiltroId, out var empleadoId))
+            {
+                query = query.Where(x => x.EmpleadoId == empleadoId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Busqueda))
+            {
+                var filtro = Normalizar(Busqueda);
+
+                query = query.Where(x =>
+                    Normalizar(x.EmpleadoNombre).Contains(filtro) ||
+                    x.EmpleadoCodigo.ToString(CultureInfo.InvariantCulture).Contains(filtro) ||
+                    Normalizar(x.EmpleadoEmail).Contains(filtro) ||
+                    Normalizar(x.BookName).Contains(filtro) ||
+                    Normalizar(x.KGENCode).Contains(filtro) ||
+                    Normalizar(x.LSACode).Contains(filtro) ||
+                    Normalizar(x.StateName).Contains(filtro) ||
+                    Normalizar(x.DatabaseName).Contains(filtro) ||
+                    Normalizar(x.LegacyCodeName).Contains(filtro) ||
+                    Normalizar(x.PrintFootName).Contains(filtro) ||
+                    Normalizar(x.TrimSizeName).Contains(filtro) ||
+                    Normalizar(x.BindPlantName).Contains(filtro));
+            }
+
+            return query;
+        }
+    }
+
+    private async Task GuardarAsignacionAsync()
+    {
+        try
+        {
+            Guardando = true;
+            LimpiarMensaje();
+            ResultadoImportacion = null;
+
+            var empleado = BuscarEmpleadoSeleccionado();
+            var libro = BuscarLibroSeleccionado();
+
+            if (empleado is null)
+            {
+                MostrarMensaje("Select a valid employee.", "error");
+                return;
+            }
+
+            if (libro is null)
+            {
+                MostrarMensaje("Select a valid book. You can search by Book Name, KGEN Code or LSA Code.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var existe = await db.Asignaciones
+                .AnyAsync(x => x.IdEmpleado == empleado.Id && x.IdLibro == libro.Id);
+
+            if (existe)
+            {
+                MostrarMensaje("This book is already assigned to this employee.", "error");
+                return;
+            }
+
+            var asignacion = new Asignaciones
+            {
+                Id = Guid.NewGuid(),
+                IdEmpleado = empleado.Id,
+                IdLibro = libro.Id,
+                Finalizado = false
+            };
+
+            db.Asignaciones.Add(asignacion);
+            await db.SaveChangesAsync();
+
+            MostrarMensaje("Assignment saved successfully.", "success");
+
+            LimpiarFormulario();
+            await CargarDatosAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error saving assignment: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private async Task EliminarAsignacionAsync(Guid id)
+    {
+        var confirmar = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Are you sure you want to delete this assignment?");
+
+        if (!confirmar)
+            return;
+
+        try
+        {
+            LimpiarMensaje();
+            ResultadoImportacion = null;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var asignacion = await db.Asignaciones
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (asignacion is null)
+            {
+                MostrarMensaje("The selected assignment was not found.", "error");
+                return;
+            }
+
+            db.Asignaciones.Remove(asignacion);
+            await db.SaveChangesAsync();
+
+            MostrarMensaje("Assignment deleted successfully.", "success");
+
+            await CargarDatosAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error deleting assignment: {ex.Message}", "error");
+        }
+    }
+
+    private async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+        var librosParaFinalizar = await db.Libros
+            .Include(x => x.Asignaciones)
+                .ThenInclude(a => a.Evaluaciones)
+            .Where(x => !x.Finalizado &&
+                        x.DirxionDate < hoy)
+            .ToListAsync();
+
+        if (!librosParaFinalizar.Any())
+            return;
+
+        foreach (var libro in librosParaFinalizar)
+        {
+            libro.Finalizado = true;
+
+            foreach (var asignacion in libro.Asignaciones)
+            {
+                asignacion.Finalizado = true;
+
+                foreach (var evaluacion in asignacion.Evaluaciones)
+                {
+                    evaluacion.Finalizado = true;
+                }
+            }
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private async Task ImportAssignmentsFromXlsxAsync(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            ImportandoXlsx = true;
+            LimpiarMensaje();
+
+            ResultadoImportacion = new ImportacionAsignacionesResultado();
+
+            if (!BindPlants.Any() ||
+                !Databases.Any() ||
+                !LegacyCodes.Any() ||
+                !PrintFeet.Any() ||
+                !TrimSizes.Any())
+            {
+                await CargarCatalogosAsync();
+            }
+
+            var file = e.File;
+
+            if (file is null)
+            {
+                MostrarMensaje("No file was selected.", "error");
+                return;
+            }
+
+            if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                MostrarMensaje("Only .xlsx files are allowed.", "error");
+                return;
+            }
+
+            await using var stream = file.OpenReadStream(MaxXlsxSize);
+            using var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using var workbook = new XLWorkbook(memoryStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+
+            if (worksheet is null)
+            {
+                MostrarMensaje("The XLSX file does not contain any worksheet.", "error");
+                return;
+            }
+
+            var headerRow = worksheet.FirstRowUsed();
+
+            if (headerRow is null)
+            {
+                MostrarMensaje("The XLSX file is empty.", "error");
+                return;
+            }
+
+            var headerMap = BuildHeaderMap(headerRow);
+
+            if (!HeaderExists(headerMap, "Employee", "Employee Name"))
+            {
+                MostrarMensaje("The XLSX file must contain the 'Employee' or 'Employee Name' column.", "error");
+                return;
+            }
+
+            if (!HeaderExists(headerMap, "Product Name"))
+            {
+                MostrarMensaje("The XLSX file must contain the 'Product Name' column.", "error");
+                return;
+            }
+
+            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code"))
+            {
+                MostrarMensaje("The XLSX file must contain the 'KGen Product Code' column.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var empleadosDb = await db.Empleados
+                .Where(x => x.Activo)
+                .ToListAsync();
+
+            var librosDb = await db.Libros
+                .Where(x => !x.Finalizado)
+                .ToListAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
+            {
+                var rowNumber = row.RowNumber();
+
+                var employeeName = ReadText(row, headerMap, "Employee", "Employee Name");
+                var bookName = ReadText(row, headerMap, "Product Name");
+                var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code");
+                var lsaCode = ReadText(row, headerMap, "LSA Code", "LSA");
+
+                if (string.IsNullOrWhiteSpace(employeeName) &&
+                    string.IsNullOrWhiteSpace(bookName) &&
+                    string.IsNullOrWhiteSpace(kgenCode) &&
+                    string.IsNullOrWhiteSpace(lsaCode))
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(employeeName))
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Employee name is empty.");
+                    continue;
+                }
+
+                var empleado = BuscarEmpleadoPorNombre(empleadosDb, employeeName);
+
+                if (empleado is null)
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Employee '{employeeName}' was not found.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(bookName) && string.IsNullOrWhiteSpace(kgenCode) && string.IsNullOrWhiteSpace(lsaCode))
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Book information is empty.");
+                    continue;
+                }
+
+                var libro = BuscarLibroPorCodigos(librosDb, kgenCode, lsaCode);
+
+                if (libro is null)
+                {
+                    if (string.IsNullOrWhiteSpace(bookName))
+                    {
+                        ResultadoImportacion.FilasOmitidas++;
+                        ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Book was not found and Product Name is empty.");
+                        continue;
+                    }
+
+                    var footPrintText = ReadText(row, headerMap, "Foot Print");
+                    var legacyCoText = ReadText(row, headerMap, "Legacy Co");
+                    var stateText = ReadText(row, headerMap, "State");
+                    var graphicsDatabaseText = ReadText(row, headerMap, "Graphics Database");
+                    var trimSizeText = ReadText(row, headerMap, "Trim Size");
+                    var bindPlantText = ReadText(row, headerMap, "Bind Plant");
+
+                    var printFootId = FindPrintFootId(footPrintText);
+                    var legacyCodeId = FindLegacyCodeId(legacyCoText);
+                    var stateId = FindStateId(stateText);
+                    var databaseId = FindDatabaseId(graphicsDatabaseText);
+                    var trimSizeId = FindTrimSizeId(trimSizeText);
+                    var bindPlantId = FindBindPlantId(bindPlantText);
+
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Foot Print", footPrintText, printFootId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Legacy Co", legacyCoText, legacyCodeId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "State", stateText, stateId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Graphics Database", graphicsDatabaseText, databaseId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Trim Size", trimSizeText, trimSizeId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Bind Plant", bindPlantText, bindPlantId);
+
+                    var firstDuePrinterDate = ReadDate(row, headerMap, today, "First Due Printer");
+                    var finalPoDate = CalculateFinalPoDate(firstDuePrinterDate);
+
+                    libro = new Libros
+                    {
+                        Id = Guid.NewGuid(),
+
+                        BookName = bookName,
+                        KGENCode = kgenCode,
+                        LSACode = lsaCode,
+                        ProductIssue = ReadText(row, headerMap, "Product Issue"),
+
+                        PrintFootId = printFootId,
+                        LegacyCodeId = legacyCodeId,
+                        StateId = stateId,
+                        DatabaseId = databaseId,
+                        TrimSizeId = trimSizeId,
+                        BindPlantId = bindPlantId,
+
+                        ProofExtract = ReadDate(row, headerMap, today, "Proof Extract", "Extract - Proof"),
+                        FinalExtract = ReadDate(row, headerMap, today, "Extract - Final"),
+                        MemoExtract = ReadDate(row, headerMap, today, "Memo Extract", "Extract - Memo"),
+                        FinalPODate = finalPoDate,
+                        ShippingDate = firstDuePrinterDate,
+                        DirxionDate = ReadDate(row, headerMap, today, "Dirxion"),
+                        PubDate = ReadDate(row, headerMap, today, "Pub Date", "Publication Date"),
+
+                        SRLSuppression = ReadYesNoBool(row, headerMap, "SRL Suppression Flag"),
+                        NWP = ReadYesNoBool(row, headerMap, "NWP")
+                    };
+
+                    db.Libros.Add(libro);
+                    librosDb.Add(libro);
+
+                    ResultadoImportacion.LibrosCreados++;
+                }
+
+                var existeAsignacion = await db.Asignaciones
+                    .AnyAsync(x => x.IdEmpleado == empleado.Id && x.IdLibro == libro.Id);
+
+                if (existeAsignacion)
+                {
+                    ResultadoImportacion.AsignacionesDuplicadas++;
+                    continue;
+                }
+
+                db.Asignaciones.Add(new Asignaciones
+                {
+                    Id = Guid.NewGuid(),
+                    IdEmpleado = empleado.Id,
+                    IdLibro = libro.Id
+                });
+
+                ResultadoImportacion.AsignacionesCreadas++;
+            }
+
+            await db.SaveChangesAsync();
+
+            XlsxInputKey++;
+
+            await CargarDatosAsync();
+
+            MostrarMensaje(
+                $"XLSX import completed. Books created: {ResultadoImportacion.LibrosCreados}. Assignments created: {ResultadoImportacion.AsignacionesCreadas}. Duplicated: {ResultadoImportacion.AsignacionesDuplicadas}. Skipped rows: {ResultadoImportacion.FilasOmitidas}.",
+                "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error importing XLSX file: {ex.Message}", "error");
+        }
+        finally
+        {
+            ImportandoXlsx = false;
+        }
+    }
+
+    private Empleados? BuscarEmpleadoSeleccionado()
+    {
+        if (string.IsNullOrWhiteSpace(EmpleadoTexto))
+            return null;
+
+        var texto = EmpleadoTexto.Trim();
+        var normalizado = Normalizar(texto);
+
+        return Empleados.FirstOrDefault(x =>
+            string.Equals(GetEmpleadoDisplay(x), texto, StringComparison.OrdinalIgnoreCase) ||
+            Normalizar(x.Nombre) == normalizado ||
+            x.IdEmpleado.ToString(CultureInfo.InvariantCulture) == texto);
+    }
+
+    private Libros? BuscarLibroSeleccionado()
+    {
+        if (string.IsNullOrWhiteSpace(LibroTexto))
+            return null;
+
+        var texto = LibroTexto.Trim();
+        var normalizado = Normalizar(texto);
+
+        return Libros.FirstOrDefault(x =>
+            string.Equals(GetLibroDisplay(x), texto, StringComparison.OrdinalIgnoreCase) ||
+            Normalizar(x.BookName) == normalizado ||
+            Normalizar(x.KGENCode) == normalizado ||
+            Normalizar(x.LSACode) == normalizado);
+    }
+
+    private static Empleados? BuscarEmpleadoPorNombre(List<Empleados> empleados, string employeeName)
+    {
+        var normalizado = Normalizar(employeeName);
+
+        return empleados.FirstOrDefault(x => Normalizar(x.Nombre) == normalizado);
+    }
+
+    private static Libros? BuscarLibroPorCodigos(List<Libros> libros, string kgenCode, string lsaCode)
+    {
+        var kgen = Normalizar(kgenCode);
+        var lsa = Normalizar(lsaCode);
+
+        return libros.FirstOrDefault(x =>
+            (!string.IsNullOrWhiteSpace(kgen) && Normalizar(x.KGENCode) == kgen) ||
+            (!string.IsNullOrWhiteSpace(lsa) && Normalizar(x.LSACode) == lsa));
+    }
+
+    private string GetEmpleadoDisplay(Empleados empleado)
+    {
+        return $"{empleado.Nombre} | ID: {empleado.IdEmpleado}";
+    }
+
+    private string GetLibroDisplay(Libros libro)
+    {
+        return $"{libro.BookName} | KGEN: {libro.KGENCode} | LSA: {libro.LSACode}";
+    }
+
+    private void LimpiarFormulario()
+    {
+        EmpleadoTexto = string.Empty;
+        LibroTexto = string.Empty;
+        LimpiarMensaje();
+    }
+
+    private void LimpiarFiltros()
+    {
+        Busqueda = string.Empty;
+        EmpleadoFiltroId = string.Empty;
+    }
+
+    private async Task ExportarAsignacionesXlsxAsync()
+    {
+        try
+        {
+            LimpiarMensaje();
+
+            var datos = AsignacionesFiltradas.ToList();
+
+            if (!datos.Any())
+            {
+                MostrarMensaje("There are no assignments to export.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var asignacionIds = datos.Select(x => x.Id).ToList();
+
+            var asignacionesCompletas = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Empleado)
+                .Include(x => x.Libro)
+                .Where(x => asignacionIds.Contains(x.Id))
+                .OrderBy(x => x.Empleado!.Nombre)
+                .ThenBy(x => x.Libro!.BookName)
+                .ToListAsync();
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Assignments");
+
+            worksheet.Cell(1, 1).Value = "Employee";
+            worksheet.Cell(1, 2).Value = "Book Name";
+            worksheet.Cell(1, 3).Value = "KGEN";
+            worksheet.Cell(1, 4).Value = "LSA";
+            worksheet.Cell(1, 5).Value = "Product Issue";
+            worksheet.Cell(1, 6).Value = "State";
+            worksheet.Cell(1, 7).Value = "Database";
+            worksheet.Cell(1, 8).Value = "Legacy Code";
+            worksheet.Cell(1, 9).Value = "Print Foot";
+            worksheet.Cell(1, 10).Value = "Trim Size";
+            worksheet.Cell(1, 11).Value = "Bind Plant";
+            worksheet.Cell(1, 12).Value = "Proof Extract";
+            worksheet.Cell(1, 13).Value = "Final Extract";
+            worksheet.Cell(1, 14).Value = "Memo Extract";
+            worksheet.Cell(1, 15).Value = "Final PO Date";
+            worksheet.Cell(1, 16).Value = "Shipping Date";
+            worksheet.Cell(1, 17).Value = "Dirxion Date";
+            worksheet.Cell(1, 18).Value = "Pub Date";
+            worksheet.Cell(1, 19).Value = "SRL Suppression";
+            worksheet.Cell(1, 20).Value = "NWP";
+
+            var header = worksheet.Range(1, 1, 1, 21);
+            header.Style.Font.Bold = true;
+            header.Style.Fill.BackgroundColor = XLColor.FromHtml("#111827");
+            header.Style.Font.FontColor = XLColor.White;
+            header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            var row = 2;
+
+            foreach (var asignacion in asignacionesCompletas)
+            {
+                var libro = asignacion.Libro;
+
+                worksheet.Cell(row, 1).Value = asignacion.Empleado?.Nombre ?? "-";
+                worksheet.Cell(row, 2).Value = libro?.BookName ?? "-";
+                worksheet.Cell(row, 3).Value = libro?.KGENCode ?? "-";
+                worksheet.Cell(row, 4).Value = libro?.LSACode ?? "-";
+                worksheet.Cell(row, 5).Value = libro?.ProductIssue ?? "-";
+                worksheet.Cell(row, 6).Value = GetStateName(libro?.StateId);
+                worksheet.Cell(row, 7).Value = GetDatabaseName(libro?.DatabaseId);
+                worksheet.Cell(row, 8).Value = GetLegacyCodeName(libro?.LegacyCodeId);
+                worksheet.Cell(row, 9).Value = GetPrintFootName(libro?.PrintFootId);
+                worksheet.Cell(row, 10).Value = GetTrimSizeName(libro?.TrimSizeId);
+                worksheet.Cell(row, 11).Value = GetBindPlantName(libro?.BindPlantId);
+
+                EscribirFechaExcel(worksheet.Cell(row, 12), libro?.ProofExtract);
+                EscribirFechaExcel(worksheet.Cell(row, 13), libro?.FinalExtract);
+                EscribirFechaExcel(worksheet.Cell(row, 14), libro?.MemoExtract);
+                EscribirFechaExcel(worksheet.Cell(row, 15), libro?.FinalPODate);
+                EscribirFechaExcel(worksheet.Cell(row, 16), libro?.ShippingDate);
+                EscribirFechaExcel(worksheet.Cell(row, 17), libro?.DirxionDate);
+                EscribirFechaExcel(worksheet.Cell(row, 18), libro?.PubDate);
+
+                worksheet.Cell(row, 19).Value = libro?.SRLSuppression == true ? "Yes" : "No";
+                worksheet.Cell(row, 20).Value = libro?.NWP == true ? "Yes" : "No";
+
+                row++;
+            }
+
+            var dataRange = worksheet.Range(1, 1, row - 1, 21);
+            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            worksheet.Columns().AdjustToContents();
+            worksheet.SheetView.FreezeRows(1);
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            var bytes = stream.ToArray();
+            var base64 = Convert.ToBase64String(bytes);
+
+            var empleadoNombre = "AllEmployees";
+
+            if (!string.IsNullOrWhiteSpace(EmpleadoFiltroId) &&
+                Guid.TryParse(EmpleadoFiltroId, out var empleadoId))
+            {
+                empleadoNombre = datos
+                    .FirstOrDefault(x => x.EmpleadoId == empleadoId)?
+                    .EmpleadoNombre ?? "Employee";
+
+                empleadoNombre = LimpiarNombreArchivo(empleadoNombre);
+            }
+
+            var fileName = $"Assignments_{empleadoNombre}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+
+            MostrarMensaje("XLSX file generated successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error exporting XLSX file: {ex.Message}", "error");
+        }
+    }
+
+    private static void EscribirFechaExcel(IXLCell cell, DateOnly? fecha)
+    {
+        if (fecha is null || fecha.Value == default)
+        {
+            cell.Value = "-";
+            return;
+        }
+
+        cell.Value = fecha.Value.ToDateTime(TimeOnly.MinValue);
+        cell.Style.DateFormat.Format = "MM/dd/yyyy";
+    }
+
+    private static string LimpiarNombreArchivo(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "Export";
+
+        var invalidChars = Path.GetInvalidFileNameChars();
+
+        var clean = new string(value
+            .Where(c => !invalidChars.Contains(c))
+            .ToArray());
+
+        clean = clean.Replace(" ", "_");
+
+        return string.IsNullOrWhiteSpace(clean) ? "Export" : clean;
+    }
+
+    private static Dictionary<string, int> BuildHeaderMap(IXLRow headerRow)
+    {
+        var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var cell in headerRow.CellsUsed())
+        {
+            var header = NormalizeHeader(cell.GetString());
+
+            if (!string.IsNullOrWhiteSpace(header) && !map.ContainsKey(header))
+            {
+                map.Add(header, cell.Address.ColumnNumber);
+            }
+        }
+
+        return map;
+    }
+
+    private static bool HeaderExists(Dictionary<string, int> headerMap, params string[] names)
+    {
+        return names.Any(name => headerMap.ContainsKey(NormalizeHeader(name)));
+    }
+
+    private static string NormalizeHeader(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        return new string(value
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
+    }
+
+    private static IXLCell? GetCell(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            var key = NormalizeHeader(name);
+
+            if (headerMap.TryGetValue(key, out var columnNumber))
+                return row.Cell(columnNumber);
+        }
+
+        return null;
+    }
+
+    private static string ReadText(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+
+        if (cell is null || cell.IsEmpty())
+            return string.Empty;
+
+        var formatted = cell.GetFormattedString()?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(formatted))
+            return formatted;
+
+        if (cell.TryGetValue<double>(out var numberValue))
+        {
+            if (Math.Abs(numberValue % 1) < 0.0000001)
+                return Convert.ToInt64(numberValue).ToString(CultureInfo.InvariantCulture);
+
+            return numberValue.ToString(CultureInfo.InvariantCulture);
+        }
+
+        return cell.GetString().Trim();
+    }
+
+    private static DateOnly ReadDate(IXLRow row, Dictionary<string, int> headerMap, DateOnly defaultValue, params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+
+        if (cell is null || cell.IsEmpty())
+            return defaultValue;
+
+        if (cell.TryGetValue<DateTime>(out var dateTime))
+            return DateOnly.FromDateTime(dateTime);
+
+        if (cell.TryGetValue<double>(out var numberValue))
+        {
+            try
+            {
+                var excelDate = DateTime.FromOADate(numberValue);
+                return DateOnly.FromDateTime(excelDate);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        var text = cell.GetFormattedString()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            text = cell.GetString().Trim();
+
+        string[] formats =
+        {
+            "MM/dd/yyyy",
+            "M/d/yyyy",
+            "yyyy-MM-dd",
+            "dd/MM/yyyy",
+            "d/M/yyyy",
+            "M/d/yy",
+            "MM/dd/yy",
+            "dd/MM/yy",
+            "d/M/yy"
+        };
+
+        if (DateOnly.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exactDate))
+            return exactDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+            return parsedDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.None, out var currentCultureDate))
+            return currentCultureDate;
+
+        return defaultValue;
+    }
+
+    private static bool ReadYesNoBool(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+
+        if (cell is null || cell.IsEmpty())
+            return false;
+
+        if (cell.TryGetValue<bool>(out var boolValue))
+            return boolValue;
+
+        var text = cell.GetFormattedString()?.Trim().ToUpperInvariant();
+
+        if (string.IsNullOrWhiteSpace(text))
+            text = cell.GetString().Trim().ToUpperInvariant();
+
+        return text is "Y" or "YES" or "TRUE" or "1" or "X";
+    }
+
+    private static DateOnly CalculateFinalPoDate(DateOnly firstDuePrinter)
+    {
+        var candidate = firstDuePrinter.AddDays(-1);
+
+        while (candidate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            candidate = candidate.AddDays(-1);
+        }
+
+        return candidate;
+    }
+
+    private void AddCatalogWarningIfNeeded(List<string> warnings, int rowNumber, string catalogName, string value, Guid? id)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+
+        if (id is null)
+        {
+            warnings.Add($"Row {rowNumber}: {catalogName} '{value}' was not found.");
+        }
+    }
+
+    private Guid? FindStateId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return States.FirstOrDefault(x =>
+            string.Equals(x.State_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindDatabaseId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return Databases.FirstOrDefault(x =>
+            string.Equals(x.Database_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindLegacyCodeId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return LegacyCodes.FirstOrDefault(x =>
+            string.Equals(x.Legacy_Code_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindPrintFootId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return PrintFeet.FirstOrDefault(x =>
+            string.Equals(x.Print_Foot_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindTrimSizeId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return TrimSizes.FirstOrDefault(x =>
+            string.Equals(x.Trim_Size_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private Guid? FindBindPlantId(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return BindPlants.FirstOrDefault(x =>
+            string.Equals(x.Bind_Plant_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private string GetStateName(Guid? id)
+    {
+        return States.FirstOrDefault(x => x.Id == id)?.State_Name ?? "-";
+    }
+
+    private string GetDatabaseName(Guid? id)
+    {
+        return Databases.FirstOrDefault(x => x.Id == id)?.Database_Name ?? "-";
+    }
+
+    private string GetLegacyCodeName(Guid? id)
+    {
+        return LegacyCodes.FirstOrDefault(x => x.Id == id)?.Legacy_Code_Name ?? "-";
+    }
+
+    private string GetPrintFootName(Guid? id)
+    {
+        return PrintFeet.FirstOrDefault(x => x.Id == id)?.Print_Foot_Name ?? "-";
+    }
+
+    private string GetTrimSizeName(Guid? id)
+    {
+        return TrimSizes.FirstOrDefault(x => x.Id == id)?.Trim_Size_Name ?? "-";
+    }
+
+    private string GetBindPlantName(Guid? id)
+    {
+        return BindPlants.FirstOrDefault(x => x.Id == id)?.Bind_Plant_Name ?? "-";
+    }
+
+    private static string FormatoFecha(DateOnly fecha)
+    {
+        if (fecha == default)
+            return "-";
+
+        return fecha.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+    }
+
+    private static string Normalizar(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+            return string.Empty;
+
+        var normalized = texto.Trim().ToUpperInvariant().Normalize(NormalizationForm.FormD);
+
+        var chars = normalized
+            .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+            .ToArray();
+
+        return new string(chars).Normalize(NormalizationForm.FormC);
+    }
+
+    private void MostrarMensaje(string mensaje, string tipo)
+    {
+        Mensaje = mensaje;
+        TipoMensaje = tipo;
+    }
+
+    private void LimpiarMensaje()
+    {
+        Mensaje = string.Empty;
+        TipoMensaje = "success";
+    }
+
+    private string EmpleadoFiltroId { get; set; } = string.Empty;
+
+    private IEnumerable<AsignacionViewModel> EmpleadosParaFiltro
+    {
+        get
+        {
+            return AsignacionesListado
+                .GroupBy(x => x.EmpleadoId)
+                .Select(g => g.First())
+                .OrderBy(x => x.EmpleadoNombre);
+        }
+    }
+
+    private sealed class AsignacionViewModel
+    {
+        public Guid Id { get; set; }
+
+        public Guid EmpleadoId { get; set; }
+        public string EmpleadoNombre { get; set; } = string.Empty;
+        public int EmpleadoCodigo { get; set; }
+        public string EmpleadoEmail { get; set; } = string.Empty;
+
+        public Guid LibroId { get; set; }
+        public string BookName { get; set; } = string.Empty;
+        public string KGENCode { get; set; } = string.Empty;
+        public string LSACode { get; set; } = string.Empty;
+        public string ProductIssue { get; set; } = string.Empty;
+
+        public string StateName { get; set; } = string.Empty;
+        public string DatabaseName { get; set; } = string.Empty;
+        public string LegacyCodeName { get; set; } = string.Empty;
+        public string PrintFootName { get; set; } = string.Empty;
+        public string TrimSizeName { get; set; } = string.Empty;
+        public string BindPlantName { get; set; } = string.Empty;
+
+        public DateOnly PubDate { get; set; }
+    }
+
+    private sealed class ImportacionAsignacionesResultado
+    {
+        public int LibrosCreados { get; set; }
+        public int AsignacionesCreadas { get; set; }
+        public int AsignacionesDuplicadas { get; set; }
+        public int FilasOmitidas { get; set; }
+        public List<string> Observaciones { get; set; } = new();
+    }
+}

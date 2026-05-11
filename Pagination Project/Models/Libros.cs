@@ -26,5 +26,8 @@
 
         public bool SRLSuppression { get; set; }
         public bool NWP { get; set; }
+        public bool Finalizado { get; set; }
+
+        public ICollection<Asignaciones> Asignaciones { get; set; } = new List<Asignaciones>();
     }
 }
