@@ -20,12 +20,30 @@ namespace Pagination_Project.Services
             var today = DateOnly.FromDateTime(DateTime.Today);
             var yesterday = today.AddDays(-1);
 
+            await ActualizarFinalizadosPorDirxionAsync(db, today);
+
             DashboardStatsDto stats = new DashboardStatsDto
             {
-                TotalUsers = await db.Users.AsNoTracking().CountAsync(),
-                TotalEmployees = await db.Empleados.AsNoTracking().CountAsync(),
-                TotalBooks = await db.Libros.AsNoTracking().CountAsync(),
-                TotalEvaluations = await db.Evaluaciones.AsNoTracking().CountAsync()
+                TotalUsers = await db.Users
+                    .AsNoTracking()
+                    .CountAsync(),
+
+                TotalEmployees = await db.Empleados
+                    .AsNoTracking()
+                    .CountAsync(),
+
+                TotalBooks = await db.Libros
+                    .AsNoTracking()
+                    .CountAsync(l => !l.Finalizado),
+
+                TotalEvaluations = await db.Evaluaciones
+                    .AsNoTracking()
+                    .CountAsync(ev =>
+                        !ev.Finalizado &&
+                        ev.Asignacion != null &&
+                        !ev.Asignacion.Finalizado &&
+                        ev.Asignacion.Libro != null &&
+                        !ev.Asignacion.Libro.Finalizado)
             };
 
             var data = await (
@@ -37,8 +55,15 @@ namespace Pagination_Project.Services
                     on l.BindPlantId equals bpJoin.Id into bindPlantGroup
                 from bp in bindPlantGroup.DefaultIfEmpty()
 
+                where !a.Finalizado &&
+                      !l.Finalizado
+
                 select new
                 {
+                    AssignmentId = a.Id,
+                    BookId = l.Id,
+                    EmployeeId = e.Id,
+
                     EmployeeName = e.Nombre ?? string.Empty,
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
@@ -58,7 +83,9 @@ namespace Pagination_Project.Services
             var assignedBooks = data
                 .Select(x =>
                 {
-                    var bindPlantName = (x.BindPlantName ?? string.Empty).Trim().ToUpperInvariant();
+                    var bindPlantName = (x.BindPlantName ?? string.Empty)
+                        .Trim()
+                        .ToUpperInvariant();
 
                     var excluirMemoPorBindPlant =
                         bindPlantName == "PREM" ||
@@ -119,6 +146,37 @@ namespace Pagination_Project.Services
                 Stats = stats,
                 AssignedBooks = assignedBooks
             };
+        }
+
+        private static async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db, DateOnly today)
+        {
+            var librosParaFinalizar = await db.Libros
+                .Include(l => l.Asignaciones)
+                    .ThenInclude(a => a.Evaluaciones)
+                .Where(l =>
+                    !l.Finalizado &&
+                    l.DirxionDate < today)
+                .ToListAsync();
+
+            if (!librosParaFinalizar.Any())
+                return;
+
+            foreach (var libro in librosParaFinalizar)
+            {
+                libro.Finalizado = true;
+
+                foreach (var asignacion in libro.Asignaciones)
+                {
+                    asignacion.Finalizado = true;
+
+                    foreach (var evaluacion in asignacion.Evaluaciones)
+                    {
+                        evaluacion.Finalizado = true;
+                    }
+                }
+            }
+
+            await db.SaveChangesAsync();
         }
     }
 }

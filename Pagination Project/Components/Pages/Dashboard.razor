@@ -1,9 +1,15 @@
 ﻿@page "/dashboard"
 @attribute [Authorize]
+
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Pagination_Project.Models
 @using Pagination_Project.Services
+
 @inject IDashboardService DashboardService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
 
@@ -27,39 +33,67 @@
     }
     else
     {
-        <div class="thryv-stats-grid">
-            <div class="thryv-stat-card">
-                <div class="thryv-stat-info">
-                    <span class="thryv-stat-label">Total Users</span>
-                    <div class="thryv-stat-number">@stats.TotalUsers</div>
-                </div>
-                <div class="thryv-stat-icon users">👥</div>
-            </div>
+        @if (PuedeVerUsuarios || PuedeVerEmpleados || PuedeVerLibros || PuedeVerEvaluaciones || PuedeVerAsignaciones)
+        {
+            <div class="thryv-stats-grid">
 
-            <div class="thryv-stat-card">
-                <div class="thryv-stat-info">
-                    <span class="thryv-stat-label">Total Employees</span>
-                    <div class="thryv-stat-number">@stats.TotalEmployees</div>
-                </div>
-                <div class="thryv-stat-icon employees">👤</div>
-            </div>
+                @if (PuedeVerUsuarios)
+                {
+                    <div class="thryv-stat-card">
+                        <div class="thryv-stat-info">
+                            <span class="thryv-stat-label">Total Users</span>
+                            <div class="thryv-stat-number">@stats.TotalUsers</div>
+                        </div>
+                        <div class="thryv-stat-icon users">👥</div>
+                    </div>
+                }
 
-            <div class="thryv-stat-card">
-                <div class="thryv-stat-info">
-                    <span class="thryv-stat-label">Total Books</span>
-                    <div class="thryv-stat-number">@stats.TotalBooks</div>
-                </div>
-                <div class="thryv-stat-icon books">📚</div>
-            </div>
+                @if (PuedeVerEmpleados)
+                {
+                    <div class="thryv-stat-card">
+                        <div class="thryv-stat-info">
+                            <span class="thryv-stat-label">Total Employees</span>
+                            <div class="thryv-stat-number">@stats.TotalEmployees</div>
+                        </div>
+                        <div class="thryv-stat-icon employees">👤</div>
+                    </div>
+                }
 
-            <div class="thryv-stat-card">
-                <div class="thryv-stat-info">
-                    <span class="thryv-stat-label">Total Evaluations</span>
-                    <div class="thryv-stat-number">@stats.TotalEvaluations</div>
-                </div>
-                <div class="thryv-stat-icon evaluations">⭐</div>
+                @if (PuedeVerLibros)
+                {
+                    <div class="thryv-stat-card">
+                        <div class="thryv-stat-info">
+                            <span class="thryv-stat-label">Active Books</span>
+                            <div class="thryv-stat-number">@stats.TotalBooks</div>
+                        </div>
+                        <div class="thryv-stat-icon books">📚</div>
+                    </div>
+                }
+
+                @if (PuedeVerEvaluaciones)
+                {
+                    <div class="thryv-stat-card">
+                        <div class="thryv-stat-info">
+                            <span class="thryv-stat-label">Active Evaluations</span>
+                            <div class="thryv-stat-number">@stats.TotalEvaluations</div>
+                        </div>
+                        <div class="thryv-stat-icon evaluations">⭐</div>
+                    </div>
+                }
+
+                @if (PuedeVerAsignaciones)
+                {
+                    <div class="thryv-stat-card">
+                        <div class="thryv-stat-info">
+                            <span class="thryv-stat-label">Active Assignments Today</span>
+                            <div class="thryv-stat-number">@assignedBooks.Count</div>
+                        </div>
+                        <div class="thryv-stat-icon books">📌</div>
+                    </div>
+                }
+
             </div>
-        </div>
+        }
     }
 
     <div class="thryv-section-card">
@@ -86,6 +120,7 @@
                         <th>Stage Date</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @if (assignedBooks.Count == 0)
                     {
@@ -108,18 +143,23 @@
                                         </div>
                                     </div>
                                 </td>
+
                                 <td>
                                     <span class="thryv-code-pill">@item.KgenCode</span>
                                 </td>
+
                                 <td>
                                     <span class="thryv-code-pill secondary">@item.LsaCode</span>
                                 </td>
+
                                 <td>@item.BookName</td>
+
                                 <td>
                                     <span class="thryv-stage-pill">
                                         @item.Stage
                                     </span>
                                 </td>
+
                                 <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
                             </tr>
                         }
@@ -133,12 +173,26 @@
 @code {
     private DashboardStatsDto stats = new DashboardStatsDto();
     private List<AssignedBookDashboardDto> assignedBooks = new();
+
+    private ClaimsPrincipal? _user;
+
     private bool loading = true;
+
+    private bool PuedeVerUsuarios { get; set; }
+    private bool PuedeVerEmpleados { get; set; }
+    private bool PuedeVerLibros { get; set; }
+    private bool PuedeVerEvaluaciones { get; set; }
+    private bool PuedeVerAsignaciones { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            _user = authState.User;
+
+            CargarPermisosDashboard();
+
             var result = await DashboardService.GetDashboardSummaryAsync();
 
             if (result is not null)
@@ -155,6 +209,7 @@
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+
             stats = new DashboardStatsDto();
             assignedBooks = new List<AssignedBookDashboardDto>();
         }
@@ -162,5 +217,44 @@
         {
             loading = false;
         }
+    }
+
+    private void CargarPermisosDashboard()
+    {
+        PuedeVerUsuarios =
+            HasPermission(_user, "CreateUser") ||
+            HasPermission(_user, "EditUser") ||
+            HasPermission(_user, "DeleteUser");
+
+        PuedeVerEmpleados =
+            HasPermission(_user, "CreateEmployees") ||
+            HasPermission(_user, "EditEmployees") ||
+            HasPermission(_user, "DeleteEmployees") ||
+            HasPermission(_user, "ViewEmployees");
+
+        PuedeVerLibros =
+            HasPermission(_user, "CreateBook") ||
+            HasPermission(_user, "EditBook") ||
+            HasPermission(_user, "DeleteBook") ||
+            HasPermission(_user, "BooksView");
+
+        PuedeVerEvaluaciones =
+            HasPermission(_user, "QualifyBook");
+
+        PuedeVerAsignaciones =
+            HasPermission(_user, "CreateAssignations") ||
+            HasPermission(_user, "AsignBook") ||
+            HasPermission(_user, "ViewAssignations");
+    }
+
+    private static bool HasPermission(ClaimsPrincipal? user, string claimType)
+    {
+        if (user is null)
+            return false;
+
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
     }
 }

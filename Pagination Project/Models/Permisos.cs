@@ -19,11 +19,13 @@ namespace Pagination_Project.Models
         public bool AsignBook { get; set; }
         public bool BooksView { get; set; }
         public bool QualifyBook { get; set; }
+        public bool ViewEmployees { get; set; }
         public bool CreateEmployees { get; set; }
         public bool EditEmployees { get; set; }
         public bool DeleteEmployees { get; set; }
         public bool EditPermissionLevels { get; set; }
         public bool ViewAssignations { get; set; }
+        public bool CreateAssignations { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();

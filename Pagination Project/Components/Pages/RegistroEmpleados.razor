@@ -20,114 +20,111 @@
             <p>Create, edit and delete employees.</p>
         </div>
 
-        <button type="button" class="thryv-secondary-btn" @onclick="LimpiarFormulario">
-            @(Editando ? "Cancel edit" : "New employee")
-        </button>
+        @if (CreateEmployees || EditEmployees)
+        {
+            <button type="button" class="thryv-secondary-btn" @onclick="LimpiarFormulario">
+                @(Editando ? "Cancel edit" : "New employee")
+            </button>
+        }
     </div>
 
-    <div class="thryv-users-card thryv-form-card-full">
-        <div class="thryv-card-top">
-            <h3>@(Editando ? "Edit employee" : "Register new employee")</h3>
-            <span>@(Editando ? "Update the selected employee's information." : "Fill in the fields to create an employee.")</span>
-        </div>
+    @if (CreateEmployees || EditEmployees)
+    {
+        <div class="thryv-users-card thryv-form-card-full">
+            <div class="thryv-card-top">
+                <h3>@(Editando ? "Edit employee" : "Register new employee")</h3>
+                <span>@(Editando ? "Update the selected employee's information." : "Fill in the fields to create an employee.")</span>
+            </div>
 
-        <EditForm Model="modelo" OnValidSubmit="GuardarEmpleadoAsync">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+            <EditForm Model="modelo" OnValidSubmit="GuardarEmpleadoAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-            <div class="thryv-form-grid-large">
-                <div class="thryv-form-group">
-                    <label class="thryv-floating-field">
-                        <span class="thryv-input-icon thryv-svg-icon">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M20 21a8 8 0 0 0-16 0"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        </span>
-                        <InputText class="thryv-input modern"
-                                   @bind-Value="modelo.Nombre"
-                                   placeholder=" " />
-                        <span class="thryv-floating-label">Full Name</span>
-                    </label>
-                </div>
-
-                <div class="thryv-form-group">
-                    <label class="thryv-floating-field">
-                        <span class="thryv-input-icon thryv-svg-icon">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M4 7h16"></path>
-                                <path d="M4 12h16"></path>
-                                <path d="M4 17h10"></path>
-                            </svg>
-                        </span>
-                        <InputNumber TValue="int"
-                                     class="thryv-input modern"
-                                     @bind-Value="modelo.IdEmpleado" />
-                        <span class="thryv-floating-label">Employee ID</span>
-                    </label>
-                </div>
-
-                <div class="thryv-form-group">
-                    <label class="thryv-floating-field">
-                        <span class="thryv-input-icon thryv-svg-icon">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M4 6h16v12H4z"></path>
-                                <path d="m4 7 8 6 8-6"></path>
-                            </svg>
-                        </span>
-                        <InputText class="thryv-input modern"
-                                   @bind-Value="modelo.Email"
-                                   placeholder=" " />
-                        <span class="thryv-floating-label">Email</span>
-                    </label>
-                </div>
-
-                <div class="thryv-form-group">
-                    <div class="thryv-switch-card">
-                        <div class="thryv-switch-text">
-                            <span class="thryv-switch-title">Employee Status</span>
-                            <span class="thryv-switch-subtitle">
-                                @(modelo.Activo ? "This employee is active" : "This employee is inactive")
+                <div class="thryv-form-grid-large">
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
                             </span>
-                        </div>
-
-                        <label class="thryv-switch">
-                            <InputCheckbox @bind-Value="modelo.Activo" />
-                            <span class="thryv-slider"></span>
+                            <InputText class="thryv-input modern"
+                            @bind-Value="modelo.Nombre"
+                            placeholder=" " />
+                            <span class="thryv-floating-label">Full Name</span>
                         </label>
                     </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M4 7h16"></path>
+                                    <path d="M4 12h16"></path>
+                                    <path d="M4 17h10"></path>
+                                </svg>
+                            </span>
+                            <InputNumber TValue="int"
+                            class="thryv-input modern"
+                            @bind-Value="modelo.IdEmpleado" />
+                            <span class="thryv-floating-label">Employee ID</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M4 6h16v12H4z"></path>
+                                    <path d="m4 7 8 6 8-6"></path>
+                                </svg>
+                            </span>
+                            <InputText class="thryv-input modern"
+                            @bind-Value="modelo.Email"
+                            placeholder=" " />
+                            <span class="thryv-floating-label">Email</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <div class="thryv-switch-card">
+                            <div class="thryv-switch-text">
+                                <span class="thryv-switch-title">Employee Status</span>
+                                <span class="thryv-switch-subtitle">
+                                    @(modelo.Activo ? "This employee is active" : "This employee is inactive")
+                                </span>
+                            </div>
+
+                            <label class="thryv-switch">
+                                <InputCheckbox @bind-Value="modelo.Activo" />
+                                <span class="thryv-slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="thryv-form-actions">
-                <AuthorizeView>
-                    <Authorized Context="auth">
-                        @if ((!Editando && HasPermission(auth.User, "CreateEmployees")) ||
-                                                (Editando && HasPermission(auth.User, "EditEmployees")))
-                        {
-                            <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
-                                @(Guardando ? "Saving..." : (Editando ? "Update Employee" : "Register Employee"))
-                            </button>
-                        }
-                    </Authorized>
-                </AuthorizeView>
+                <div class="thryv-form-actions">
+                    @if (PuedeCrearOEditar)
+                    {
+                        <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
+                            @(Guardando ? "Saving..." : (Editando ? "Update Employee" : "Register Employee"))
+                        </button>
+                    }
 
-                <AuthorizeView>
-                    <Authorized Context="auth">
-                        @if (HasPermission(auth.User, "DeleteEmployees"))
-                        {
-                            <button type="button"
-                                    class="thryv-danger-btn"
-                                    @onclick="AbrirModalEliminar"
-                                    disabled="@(!Editando || Guardando)">
-                                Delete
-                            </button>
-                        }
-                    </Authorized>
-                </AuthorizeView>
-            </div>
-        </EditForm>
-    </div>
+                    @if (DeleteEmployees)
+                    {
+                        <button type="button"
+                                class="thryv-danger-btn"
+                                @onclick="AbrirModalEliminar"
+                                disabled="@(!Editando || Guardando)">
+                            Delete
+                        </button>
+                    }
+                </div>
+            </EditForm>
+        </div>
+    }
 
     <div class="thryv-users-card thryv-list-large">
         <div class="thryv-list-header">
@@ -150,20 +147,16 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Status</th>
-                        <AuthorizeView>
-                            <Authorized Context="auth">
-                                @if (HasPermission(auth.User, "EditEmployees"))
-                                {
-                                    <th>Action</th>
-                                }
-                            </Authorized>
-                        </AuthorizeView>
+                        @if (EditEmployees)
+                        {
+                            <th>Action</th>
+                        }
                     </tr>
                 </thead>
 
                 <tbody>
                     @{
-                        var totalColumnas = (_user != null && HasPermission(_user, "EditEmployees")) ? 5 : 4;
+                        var totalColumnas = EditEmployees ? 5 : 4;
                     }
 
                     @if (Cargando)
@@ -198,20 +191,16 @@
                                     }
                                 </td>
 
-                                <AuthorizeView>
-                                    <Authorized Context="auth">
-                                        @if (HasPermission(auth.User, "EditEmployees"))
-                                        {
-                                            <td>
-                                                <button type="button"
-                                                        class="thryv-table-btn"
-                                                        @onclick="() => SeleccionarEmpleado(emp)">
-                                                    Edit
-                                                </button>
-                                            </td>
-                                        }
-                                    </Authorized>
-                                </AuthorizeView>
+                                @if (EditEmployees)
+                                {
+                                    <td>
+                                        <button type="button"
+                                                class="thryv-table-btn"
+                                                @onclick="() => SeleccionarEmpleado(emp)">
+                                            Edit
+                                        </button>
+                                    </td>
+                                }
                             </tr>
                         }
                     }
@@ -221,7 +210,7 @@
     </div>
 </div>
 
-@if (MostrarModalEliminar)
+@if (DeleteEmployees && MostrarModalEliminar)
 {
     <div class="thryv-modal-overlay" @onclick="CerrarModalEliminar">
         <div class="thryv-modal-card" @onclick:stopPropagation="true">
@@ -290,6 +279,14 @@
     private EmpleadoFormModel modelo = new();
     private ClaimsPrincipal? _user;
 
+    private bool CreateEmployees { get; set; }
+    private bool EditEmployees { get; set; }
+    private bool DeleteEmployees { get; set; }
+    private bool ViewEmployees { get; set; }
+
+    private bool PuedeCrearOEditar => !Editando ? CreateEmployees : EditEmployees;
+    private bool SoloVista => ViewEmployees && !CreateEmployees && !EditEmployees && !DeleteEmployees;
+
     private bool Cargando = true;
     private bool Guardando = false;
     private bool MostrarModalEliminar = false;
@@ -313,14 +310,26 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarDatosAsync();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
+
+        CreateEmployees = HasPermission(_user, "CreateEmployees");
+        EditEmployees = HasPermission(_user, "EditEmployees");
+        DeleteEmployees = HasPermission(_user, "DeleteEmployees");
+        ViewEmployees = HasPermission(_user, "ViewEmployees");
+
+        await CargarDatosAsync();
     }
 
-    private static bool HasPermission(ClaimsPrincipal user, string claimType)
+    private static bool HasPermission(ClaimsPrincipal? user, string claimType)
     {
-        return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
+        if (user is null)
+            return false;
+
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarDatosAsync()
@@ -343,6 +352,12 @@
 
     private async Task GuardarEmpleadoAsync()
     {
+        if (!PuedeCrearOEditar)
+        {
+            MostrarResultado("Permission denied", "You do not have permission to perform this action.");
+            return;
+        }
+
         Guardando = true;
 
         try
@@ -398,17 +413,17 @@
 
     private void OnDobleClickEmpleado(Empleados emp)
     {
-        if (_user == null)
+        if (!EditEmployees)
             return;
 
-        if (HasPermission(_user, "EditEmployees"))
-        {
-            SeleccionarEmpleado(emp);
-        }
+        SeleccionarEmpleado(emp);
     }
 
     private void SeleccionarEmpleado(Empleados emp)
     {
+        if (!EditEmployees)
+            return;
+
         modelo = new EmpleadoFormModel
         {
             Id = emp.Id,
@@ -423,6 +438,9 @@
 
     private void AbrirModalEliminar()
     {
+        if (!DeleteEmployees)
+            return;
+
         if (!Editando)
             return;
 
@@ -436,6 +454,13 @@
 
     private async Task ConfirmarEliminarEmpleadoAsync()
     {
+        if (!DeleteEmployees)
+        {
+            MostrarModalEliminar = false;
+            MostrarResultado("Permission denied", "You do not have permission to delete employees.");
+            return;
+        }
+
         if (!Editando)
             return;
 
@@ -470,6 +495,9 @@
 
     private void LimpiarFormulario()
     {
+        if (!CreateEmployees && !EditEmployees)
+            return;
+
         modelo = new EmpleadoFormModel
         {
             Activo = true

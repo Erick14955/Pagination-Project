@@ -11,6 +11,10 @@
 @using ClosedXML.Excel
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
@@ -50,105 +54,108 @@
         </div>
     }
 
-    <section class="form-card">
-        <div class="section-header">
-            <div>
-                <h2>Assign Book to Employee</h2>
-                <p>Select an employee and search the book by Book Name, KGEN Code or LSA Code.</p>
-            </div>
-
-            <div class="header-actions">
-                <InputFile @key="XlsxInputKey"
-                           id="xlsxAssignmentsUpload"
-                           class="file-input-hidden"
-                           OnChange="ImportAssignmentsFromXlsxAsync"
-                           accept=".xlsx" />
-
-                <label for="xlsxAssignmentsUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
-                    @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
-                </label>
-
-                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
-                    ✨ New
-                </button>
-            </div>
-        </div>
-
-        <form @onsubmit="GuardarAsignacionAsync" @onsubmit:preventDefault>
-            <div class="form-grid">
-
-                <div class="form-group large">
-                    <label>Employee</label>
-
-                    <input class="form-control"
-                           list="employeesList"
-                           placeholder="Search employee by name or employee ID"
-                           @bind="EmpleadoTexto"
-                           @bind:event="oninput"
-                           required />
-
-                    <datalist id="employeesList">
-                        @foreach (var empleado in EmpleadosFiltrados)
-                        {
-                            <option value="@GetEmpleadoDisplay(empleado)"></option>
-                        }
-                    </datalist>
+    @if(CreateAssignations)
+    {
+        <section class="form-card">
+            <div class="section-header">
+                <div>
+                    <h2>Assign Book to Employee</h2>
+                    <p>Select an employee and search the book by Book Name, KGEN Code or LSA Code.</p>
                 </div>
 
-                <div class="form-group large">
-                    <label>Book</label>
+                <div class="header-actions">
+                    <InputFile @key="XlsxInputKey"
+                               id="xlsxAssignmentsUpload"
+                               class="file-input-hidden"
+                               OnChange="ImportAssignmentsFromXlsxAsync"
+                               accept=".xlsx" />
 
-                    <input class="form-control"
-                           list="booksList"
-                           placeholder="Search by Book Name, KGEN Code or LSA Code"
-                           @bind="LibroTexto"
-                           @bind:event="oninput"
-                           required />
+                    <label for="xlsxAssignmentsUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
+                        @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
+                    </label>
 
-                    <datalist id="booksList">
-                        @foreach (var libro in LibrosFiltradosParaCombo)
-                        {
-                            <option value="@GetLibroDisplay(libro)"></option>
-                        }
-                    </datalist>
+                    <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                        ✨ New
+                    </button>
                 </div>
-
             </div>
 
-            @if (EmpleadoSeleccionado is not null || LibroSeleccionado is not null)
-            {
-                <div class="preview-grid">
-                    <div class="preview-card">
-                        <span>Selected Employee</span>
-                        <strong>@(EmpleadoSeleccionado?.Nombre ?? "-")</strong>
-                        <small>@(EmpleadoSeleccionado is null ? "No valid employee selected" : $"Employee ID: {EmpleadoSeleccionado.IdEmpleado}")</small>
+            <form @onsubmit="GuardarAsignacionAsync" @onsubmit:preventDefault>
+                <div class="form-grid">
+
+                    <div class="form-group large">
+                        <label>Employee</label>
+
+                        <input class="form-control"
+                               list="employeesList"
+                               placeholder="Search employee by name or employee ID"
+                               @bind="EmpleadoTexto"
+                               @bind:event="oninput"
+                               required />
+
+                        <datalist id="employeesList">
+                            @foreach (var empleado in EmpleadosFiltrados)
+                            {
+                                <option value="@GetEmpleadoDisplay(empleado)"></option>
+                            }
+                        </datalist>
                     </div>
 
-                    <div class="preview-card">
-                        <span>Selected Book</span>
-                        <strong>@(LibroSeleccionado?.BookName ?? "-")</strong>
-                        <small>
-                            @(LibroSeleccionado is null
-                                                    ? "No valid book selected"
-                                                    : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
-                    </small>
+                    <div class="form-group large">
+                        <label>Book</label>
+
+                        <input class="form-control"
+                               list="booksList"
+                               placeholder="Search by Book Name, KGEN Code or LSA Code"
+                               @bind="LibroTexto"
+                               @bind:event="oninput"
+                               required />
+
+                        <datalist id="booksList">
+                            @foreach (var libro in LibrosFiltradosParaCombo)
+                            {
+                                <option value="@GetLibroDisplay(libro)"></option>
+                            }
+                        </datalist>
+                    </div>
+
                 </div>
-            </div>
-                        }
 
-            <div class="button-row">
-                <button type="submit" class="btn-primary" disabled="@Guardando">
-                    @(Guardando ? "Saving..." : "Save Assignment")
-                </button>
+                @if (EmpleadoSeleccionado is not null || LibroSeleccionado is not null)
+                {
+                    <div class="preview-grid">
+                        <div class="preview-card">
+                            <span>Selected Employee</span>
+                            <strong>@(EmpleadoSeleccionado?.Nombre ?? "-")</strong>
+                            <small>@(EmpleadoSeleccionado is null ? "No valid employee selected" : $"Employee ID: {EmpleadoSeleccionado.IdEmpleado}")</small>
+                        </div>
 
-                <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
-                    Clear
-                </button>
-            </div>
-        </form>
-    </section>
+                        <div class="preview-card">
+                            <span>Selected Book</span>
+                            <strong>@(LibroSeleccionado?.BookName ?? "-")</strong>
+                            <small>
+                                @(LibroSeleccionado is null
+                                                        ? "No valid book selected"
+                                                        : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
+                        </small>
+                    </div>
+                </div>
+                            }
 
-    @if (ResultadoImportacion is not null)
+                <div class="button-row">
+                    <button type="submit" class="btn-primary" disabled="@Guardando">
+                        @(Guardando ? "Saving..." : "Save Assignment")
+                    </button>
+
+                    <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                        Clear
+                    </button>
+                </div>
+            </form>
+        </section>
+    }
+
+    @if (CreateAssignations && ResultadoImportacion is not null)
     {
         <section class="import-result-card">
             <h2>XLSX Import Result</h2>
@@ -261,7 +268,10 @@
                             <th>Trim Size</th>
                             <th>Bind Plant</th>
                             <th>Pub Date</th>
-                            <th></th>
+                            @if (CreateAssignations)
+                            {
+                                <th></th>
+                            }
                         </tr>
                     </thead>
 
@@ -293,14 +303,17 @@
                                 <td>@item.BindPlantName</td>
                                 <td>@FormatoFecha(item.PubDate)</td>
 
-                                <td class="actions-cell">
-                                    <button type="button"
-                                            class="icon-btn danger"
-                                            title="Delete"
-                                            @onclick="() => EliminarAsignacionAsync(item.Id)">
-                                        🗑️
-                                    </button>
-                                </td>
+                                @if (CreateAssignations)
+                                {
+                                    <td class="actions-cell">
+                                        <button type="button"
+                                                class="icon-btn danger"
+                                                title="Delete"
+                                                @onclick="() => EliminarAsignacionAsync(item.Id)">
+                                            🗑️
+                                        </button>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
@@ -329,6 +342,9 @@
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
 
+    private ClaimsPrincipal? UsuarioActual { get; set; }
+    private bool CreateAssignations { get; set; } = false;
+
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
@@ -343,8 +359,24 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        UsuarioActual = authState.User;
+        CreateAssignations = HasPermission(UsuarioActual, "CreateAssignations");
+
         await CargarCatalogosAsync();
         await CargarDatosAsync();
+    }
+
+    private static bool HasPermission(ClaimsPrincipal? user, string claimType)
+    {
+        if (user is null)
+            return false;
+
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarDatosAsync()
@@ -529,6 +561,12 @@
 
     private async Task GuardarAsignacionAsync()
     {
+        if (!CreateAssignations)
+        {
+            MostrarMensaje("You do not have permission to create assignments.", "error");
+            return;
+        }
+
         try
         {
             Guardando = true;
@@ -589,6 +627,12 @@
 
     private async Task EliminarAsignacionAsync(Guid id)
     {
+        if (!CreateAssignations)
+        {
+            MostrarMensaje("You do not have permission to delete assignments.", "error");
+            return;
+        }
+
         var confirmar = await JS.InvokeAsync<bool>(
             "confirm",
             "Are you sure you want to delete this assignment?");
@@ -659,6 +703,12 @@
 
     private async Task ImportAssignmentsFromXlsxAsync(InputFileChangeEventArgs e)
     {
+        if (!CreateAssignations)
+        {
+            MostrarMensaje("You do not have permission to import assignments.", "error");
+            return;
+        }
+
         try
         {
             ImportandoXlsx = true;

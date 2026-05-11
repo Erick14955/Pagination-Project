@@ -110,85 +110,82 @@ namespace Pagination_Project.Data
 
             modelBuilder.Entity<Libros>(entity =>
             {
-                modelBuilder.Entity<Libros>(entity =>
-                {
-                    entity.ToTable("Books");
+                entity.ToTable("Books");
 
-                    entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.Id);
 
-                    entity.Property(e => e.Id)
-                        .HasColumnName("ID")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.BookName)
-                        .HasColumnName("Book_Name")
-                        .IsRequired();
+                entity.Property(e => e.BookName)
+                    .HasColumnName("Book_Name")
+                    .IsRequired();
 
-                    entity.Property(e => e.KGENCode)
-                        .HasColumnName("KGEN_Code");
+                entity.Property(e => e.KGENCode)
+                    .HasColumnName("KGEN_Code");
 
-                    entity.Property(e => e.LSACode)
-                        .HasColumnName("LSA_Code");
+                entity.Property(e => e.LSACode)
+                    .HasColumnName("LSA_Code");
 
-                    entity.Property(e => e.Finalizado)
-                      .HasColumnName("Completed")
-                      .HasDefaultValue(false)
-                      .IsRequired();
+                entity.Property(e => e.Finalizado)
+                    .HasColumnName("Completed")
+                    .HasDefaultValue(false)
+                    .IsRequired();
 
-                    entity.Property(e => e.ProductIssue)
-                        .HasColumnName("Product_Issue");
+                entity.Property(e => e.ProductIssue)
+                    .HasColumnName("Product_Issue");
 
-                    entity.Property(e => e.PrintFootId)
-                        .HasColumnName("Print_Foot")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.PrintFootId)
+                    .HasColumnName("Print_Foot")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.LegacyCodeId)
-                        .HasColumnName("Legacy_Code")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.LegacyCodeId)
+                    .HasColumnName("Legacy_Code")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.StateId)
-                        .HasColumnName("State")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.StateId)
+                    .HasColumnName("State")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.DatabaseId)
-                        .HasColumnName("Database")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.DatabaseId)
+                    .HasColumnName("Database")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.TrimSizeId)
-                        .HasColumnName("Trim_Size")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.TrimSizeId)
+                    .HasColumnName("Trim_Size")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.BindPlantId)
-                        .HasColumnName("Bind_Plant")
-                        .HasColumnType("uuid");
+                entity.Property(e => e.BindPlantId)
+                    .HasColumnName("Bind_Plant")
+                    .HasColumnType("uuid");
 
-                    entity.Property(e => e.ProofExtract)
-                        .HasColumnName("Proof_Extract");
+                entity.Property(e => e.ProofExtract)
+                    .HasColumnName("Proof_Extract");
 
-                    entity.Property(e => e.FinalExtract)
-                        .HasColumnName("Final_Extract");
+                entity.Property(e => e.FinalExtract)
+                    .HasColumnName("Final_Extract");
 
-                    entity.Property(e => e.MemoExtract)
-                        .HasColumnName("Memo_Extract");
+                entity.Property(e => e.MemoExtract)
+                    .HasColumnName("Memo_Extract");
 
-                    entity.Property(e => e.FinalPODate)
-                        .HasColumnName("Final_PO_Date");
+                entity.Property(e => e.FinalPODate)
+                    .HasColumnName("Final_PO_Date");
 
-                    entity.Property(e => e.ShippingDate)
-                        .HasColumnName("Shipping_Date");
+                entity.Property(e => e.ShippingDate)
+                    .HasColumnName("Shipping_Date");
 
-                    entity.Property(e => e.DirxionDate)
-                        .HasColumnName("Dirxion_Date");
+                entity.Property(e => e.DirxionDate)
+                    .HasColumnName("Dirxion_Date");
 
-                    entity.Property(e => e.PubDate)
-                        .HasColumnName("Pub_Date");
+                entity.Property(e => e.PubDate)
+                    .HasColumnName("Pub_Date");
 
-                    entity.Property(e => e.SRLSuppression)
-                        .HasColumnName("SRL_Suppression");
+                entity.Property(e => e.SRLSuppression)
+                    .HasColumnName("SRL_Suppression");
 
-                    entity.Property(e => e.NWP)
-                        .HasColumnName("NWP");
-                });
+                entity.Property(e => e.NWP)
+                    .HasColumnName("NWP");
             });
 
             modelBuilder.Entity<Permisos>(entity =>
@@ -212,6 +209,16 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.EditPermissionLevels).HasColumnName("Edit_Permissions_Levels");
                 entity.Property(e => e.ViewAssignations).HasColumnName("View_Assignation");
                 entity.Property(e => e.Name).HasColumnName("Permission_Name");
+                entity.Property(e => e.CreateAssignations).HasColumnName("Create_Assignation");
+                entity.Property(e => e.ViewEmployees).HasColumnName("View_Employees");
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("Permission_Name")
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasIndex(e => e.Name)
+                    .IsUnique();
             });
 
             modelBuilder.Entity<Asignaciones>(entity =>

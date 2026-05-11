@@ -1,0 +1,905 @@
+﻿@page "/permission-levels"
+@page "/permisos"
+@page "/niveles-permisos"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IJSRuntime JS
+
+<PageTitle>Permission Levels</PageTitle>
+
+<link href="style/permissionlevels.css" rel="stylesheet" />
+
+<div class="permissions-page">
+
+    <section class="page-hero">
+        <div>
+            <h1>Permission Levels Management</h1>
+            <p>
+                Create, edit and manage user permission profiles. Each permission level must have a unique name.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span>Total Levels</span>
+                <strong>@PermisosLista.Count</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Current Mode</span>
+                <strong>@(PermisoActual.Id > 0 ? "Editing" : "Creating")</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Mensaje))
+    {
+        <div class="alert-box @TipoMensaje">
+            @Mensaje
+        </div>
+    }
+
+    <section class="form-card">
+        <div class="section-header">
+            <div>
+                <h2>@(PermisoActual.Id > 0 ? "Edit Permission Level" : "Create Permission Level")</h2>
+                <p>
+                    Enter the permission name and select the allowed actions for this profile.
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <button type="button" class="btn-light" @onclick="NuevoPermiso">
+                    ✨ New
+                </button>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Permission Name</label>
+
+                <input class="form-control"
+                       placeholder="Example: Administrator, Supervisor, Evaluator..."
+                       @bind="PermisoActual.Name"
+                       @bind:event="oninput" />
+
+                <small>
+                    This name is unique. It will identify the permission level assigned to users.
+                </small>
+            </div>
+        </div>
+    </section>
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <span>Users</span>
+            <strong>@TotalUsers</strong>
+            <small>permissions selected</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Books</span>
+            <strong>@TotalBooks</strong>
+            <small>permissions selected</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Assignments</span>
+            <strong>@TotalAssignments</strong>
+            <small>permissions selected</small>
+        </div>
+
+        <div class="summary-card">
+            <span>Employees</span>
+            <strong>@TotalEmployees</strong>
+            <small>permissions selected</small>
+        </div>
+
+        <div class="summary-card">
+            <span>System</span>
+            <strong>@TotalSystem</strong>
+            <small>permissions selected</small>
+        </div>
+    </section>
+
+    <section class="permissions-grid">
+
+        <div class="permission-block">
+            <div class="block-header">
+                <div>
+                    <h2>👤 Users</h2>
+                    <p>Manage user registration and maintenance permissions.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalUsers</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.CreateUser" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Create User</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.EditUser" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Edit User</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.DeleteUser" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Delete User</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="permission-block">
+            <div class="block-header">
+                <div>
+                    <h2>📚 Books</h2>
+                    <p>Manage books creation, edition, deletion and visibility.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalBooks</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.CreateBook" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Create Book</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.EditBook" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Edit Book</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.DeleteBook" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Delete Book</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.BooksView" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Books View</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="permission-block">
+            <div class="block-header">
+                <div>
+                    <h2>🗂️ Assignments</h2>
+                    <p>Manage book assignment and assignment visualization.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalAssignments</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.CreateAssignations" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Create Assignations</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.AsignBook" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Assign Book</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.ViewAssignations" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>View Assignations</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="permission-block">
+            <div class="block-header">
+                <div>
+                    <h2>✅ Evaluations</h2>
+                    <p>Permission to qualify assignment evaluations.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalEvaluations</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.QualifyBook" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Qualify Book</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="permission-block">
+            <div class="block-header">
+                <div>
+                    <h2>👥 Employees</h2>
+                    <p>Manage employee creation, edition and deletion.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalEmployees</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.CreateEmployees" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Create Employees</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.EditEmployees" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Edit Employees</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.DeleteEmployees" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Delete Employees</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.ViewEmployees" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>View Employees</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="permission-block">
+            <div class="block-header">
+                <div>
+                    <h2>⚙️ System</h2>
+                    <p>Administrative permissions related to permission levels.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalSystem</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.EditPermissionLevels" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Edit Permission Levels</span>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <section class="form-card">
+        <div class="section-header actions-section">
+            <div>
+                <h2>@(PermisoActual.Id > 0 ? "Update Permission Level" : "Save Permission Level")</h2>
+                <p>
+                    Save the current permission profile or clear the form to create another one.
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <button type="button"
+                        class="btn-primary"
+                        disabled="@Guardando"
+                        @onclick="GuardarPermisoAsync">
+                    @(Guardando ? "Saving..." : PermisoActual.Id > 0 ? "Update Permission" : "Save Permission")
+                </button>
+
+                <button type="button" class="btn-light" @onclick="NuevoPermiso">
+                    Clear
+                </button>
+
+                <button type="button" class="btn-light" @onclick="SeleccionarTodos">
+                    Select All
+                </button>
+
+                <button type="button" class="btn-light" @onclick="QuitarTodos">
+                    Clear Permissions
+                </button>
+
+                <button type="button"
+                        class="btn-danger"
+                        disabled="@(PermisoActual.Id == 0 || Guardando)"
+                        @onclick="EliminarPermisoAsync">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="list-card">
+        <div class="section-header table-header">
+            <div>
+                <h2>Permission Levels History</h2>
+                <p>Double click on a row to load and edit a permission level.</p>
+            </div>
+
+            <div class="list-filters">
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input placeholder="Search by permission name..."
+                           @bind="Busqueda"
+                           @bind:event="oninput" />
+                </div>
+
+                <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        @if (Cargando)
+        {
+            <div class="loading-state">
+                Loading permission levels...
+            </div>
+        }
+        else if (!PermisosFiltrados.Any())
+        {
+            <div class="empty-state">
+                <strong>No permission levels to display.</strong>
+                <span>Create a new permission level or change the search filter.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="permissions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Permission Name</th>
+                            <th>Users</th>
+                            <th>Books</th>
+                            <th>Assignments</th>
+                            <th>Evaluations</th>
+                            <th>Employees</th>
+                            <th>System</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in PermisosFiltrados)
+                        {
+                            <tr class="@(PermisoActual.Id == item.Id ? "selected-row" : "")"
+                                @ondblclick="() => SeleccionarPermisoAsync(item.Id)">
+                                <td>
+                                    <span class="id-pill">@item.Id</span>
+                                </td>
+
+                                <td>
+                                    <div class="permission-title">
+                                        <strong>@item.Name</strong>
+                                    </div>
+                                </td>
+
+                                <td>@ContarGrupoUsers(item)</td>
+                                <td>@ContarGrupoBooks(item)</td>
+                                <td>@ContarGrupoAssignments(item)</td>
+                                <td>@ContarGrupoEvaluations(item)</td>
+                                <td>@ContarGrupoEmployees(item)</td>
+                                <td>@ContarGrupoSystem(item)</td>
+
+                                <td>
+                                    <strong class="total-permissions">
+                                        @ContarTotalPermisos(item)
+                                    </strong>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+</div>
+
+@code {
+    private List<Permisos> PermisosLista { get; set; } = new();
+    private Permisos PermisoActual { get; set; } = new();
+
+    private string Mensaje { get; set; } = string.Empty;
+    private string TipoMensaje { get; set; } = "success";
+    private string Busqueda { get; set; } = string.Empty;
+
+    private bool Cargando { get; set; } = true;
+    private bool Guardando { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPermisosAsync();
+        NuevoPermiso();
+    }
+
+    private async Task CargarPermisosAsync()
+    {
+        try
+        {
+            Cargando = true;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            PermisosLista = await db.Set<Permisos>()
+                .AsNoTracking()
+                .OrderBy(x => x.Name)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error loading permission levels: {ex.Message}", "error");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private IEnumerable<Permisos> PermisosFiltrados
+    {
+        get
+        {
+            IEnumerable<Permisos> query = PermisosLista;
+
+            if (!string.IsNullOrWhiteSpace(Busqueda))
+            {
+                var filtro = Busqueda.Trim().ToUpperInvariant();
+
+                query = query.Where(x =>
+                    (x.Name ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
+                    x.Id.ToString().Contains(filtro));
+            }
+
+            return query;
+        }
+    }
+
+    private async Task SeleccionarPermisoAsync(int id)
+    {
+        try
+        {
+            LimpiarMensaje();
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var permiso = await db.Set<Permisos>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (permiso is null)
+            {
+                MostrarMensaje("Permission level not found.", "error");
+                return;
+            }
+
+            PermisoActual = CopiarPermiso(permiso);
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error selecting permission level: {ex.Message}", "error");
+        }
+    }
+
+    private void NuevoPermiso()
+    {
+        PermisoActual = new Permisos
+        {
+            Id = 0,
+            Name = string.Empty
+        };
+
+        LimpiarMensaje();
+    }
+
+    private async Task GuardarPermisoAsync()
+    {
+        try
+        {
+            Guardando = true;
+            LimpiarMensaje();
+
+            var nombreLimpio = PermisoActual.Name?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(nombreLimpio))
+            {
+                MostrarMensaje("Permission name is required.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var existeNombre = await db.Set<Permisos>()
+                .AsNoTracking()
+                .AnyAsync(x =>
+                    x.Id != PermisoActual.Id &&
+                    x.Name.ToLower() == nombreLimpio.ToLower());
+
+            if (existeNombre)
+            {
+                MostrarMensaje("A permission level with this name already exists.", "error");
+                return;
+            }
+
+            if (PermisoActual.Id == 0)
+            {
+                var nuevo = CopiarPermiso(PermisoActual);
+                nuevo.Id = 0;
+                nuevo.Name = nombreLimpio;
+
+                db.Set<Permisos>().Add(nuevo);
+                await db.SaveChangesAsync();
+
+                PermisoActual = CopiarPermiso(nuevo);
+
+                MostrarMensaje("Permission level created successfully.", "success");
+            }
+            else
+            {
+                var permisoDb = await db.Set<Permisos>()
+                    .FirstOrDefaultAsync(x => x.Id == PermisoActual.Id);
+
+                if (permisoDb is null)
+                {
+                    MostrarMensaje("Permission level not found.", "error");
+                    return;
+                }
+
+                permisoDb.Name = nombreLimpio;
+
+                permisoDb.CreateUser = PermisoActual.CreateUser;
+                permisoDb.EditUser = PermisoActual.EditUser;
+                permisoDb.DeleteUser = PermisoActual.DeleteUser;
+
+                permisoDb.CreateBook = PermisoActual.CreateBook;
+                permisoDb.EditBook = PermisoActual.EditBook;
+                permisoDb.DeleteBook = PermisoActual.DeleteBook;
+                permisoDb.AsignBook = PermisoActual.AsignBook;
+                permisoDb.BooksView = PermisoActual.BooksView;
+                permisoDb.QualifyBook = PermisoActual.QualifyBook;
+
+                permisoDb.CreateEmployees = PermisoActual.CreateEmployees;
+                permisoDb.EditEmployees = PermisoActual.EditEmployees;
+                permisoDb.DeleteEmployees = PermisoActual.DeleteEmployees;
+                permisoDb.ViewEmployees = PermisoActual.ViewEmployees;
+
+                permisoDb.EditPermissionLevels = PermisoActual.EditPermissionLevels;
+                permisoDb.ViewAssignations = PermisoActual.ViewAssignations;
+                permisoDb.CreateAssignations = PermisoActual.CreateAssignations;
+
+                await db.SaveChangesAsync();
+
+                PermisoActual = CopiarPermiso(permisoDb);
+
+                MostrarMensaje("Permission level updated successfully.", "success");
+            }
+
+            await CargarPermisosAsync();
+        }
+        catch (DbUpdateException)
+        {
+            MostrarMensaje("This permission name already exists or there was a database error while saving.", "error");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error saving permission level: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private async Task EliminarPermisoAsync()
+    {
+        if (PermisoActual.Id == 0)
+            return;
+
+        var confirmar = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"Are you sure you want to delete the permission level '{PermisoActual.Name}'?"
+        );
+
+        if (!confirmar)
+            return;
+
+        try
+        {
+            Guardando = true;
+            LimpiarMensaje();
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var permisoDb = await db.Set<Permisos>()
+                .Include(x => x.Usuarios)
+                .FirstOrDefaultAsync(x => x.Id == PermisoActual.Id);
+
+            if (permisoDb is null)
+            {
+                MostrarMensaje("Permission level not found.", "error");
+                return;
+            }
+
+            if (permisoDb.Usuarios.Any())
+            {
+                MostrarMensaje("This permission level cannot be deleted because it is assigned to one or more users.", "error");
+                return;
+            }
+
+            db.Set<Permisos>().Remove(permisoDb);
+            await db.SaveChangesAsync();
+
+            NuevoPermiso();
+            await CargarPermisosAsync();
+
+            MostrarMensaje("Permission level deleted successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error deleting permission level: {ex.Message}", "error");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void SeleccionarTodos()
+    {
+        PermisoActual.CreateUser = true;
+        PermisoActual.EditUser = true;
+        PermisoActual.DeleteUser = true;
+
+        PermisoActual.CreateBook = true;
+        PermisoActual.EditBook = true;
+        PermisoActual.DeleteBook = true;
+        PermisoActual.AsignBook = true;
+        PermisoActual.BooksView = true;
+        PermisoActual.QualifyBook = true;
+
+        PermisoActual.CreateEmployees = true;
+        PermisoActual.EditEmployees = true;
+        PermisoActual.DeleteEmployees = true;
+        PermisoActual.ViewEmployees = true;
+
+        PermisoActual.EditPermissionLevels = true;
+        PermisoActual.ViewAssignations = true;
+        PermisoActual.CreateAssignations = true;
+    }
+
+    private void QuitarTodos()
+    {
+        PermisoActual.CreateUser = false;
+        PermisoActual.EditUser = false;
+        PermisoActual.DeleteUser = false;
+        PermisoActual.ViewEmployees = false;
+
+        PermisoActual.CreateBook = false;
+        PermisoActual.EditBook = false;
+        PermisoActual.DeleteBook = false;
+        PermisoActual.AsignBook = false;
+        PermisoActual.BooksView = false;
+        PermisoActual.QualifyBook = false;
+
+        PermisoActual.CreateEmployees = false;
+        PermisoActual.EditEmployees = false;
+        PermisoActual.DeleteEmployees = false;
+
+        PermisoActual.EditPermissionLevels = false;
+        PermisoActual.ViewAssignations = false;
+        PermisoActual.CreateAssignations = false;
+    }
+
+    private void LimpiarFiltros()
+    {
+        Busqueda = string.Empty;
+    }
+
+    private void MostrarMensaje(string mensaje, string tipo)
+    {
+        Mensaje = mensaje;
+        TipoMensaje = tipo;
+    }
+
+    private void LimpiarMensaje()
+    {
+        Mensaje = string.Empty;
+        TipoMensaje = "success";
+    }
+
+    private int TotalUsers =>
+        Contar(PermisoActual.CreateUser) +
+        Contar(PermisoActual.EditUser) +
+        Contar(PermisoActual.DeleteUser);
+
+    private int TotalBooks =>
+        Contar(PermisoActual.CreateBook) +
+        Contar(PermisoActual.EditBook) +
+        Contar(PermisoActual.DeleteBook) +
+        Contar(PermisoActual.BooksView);
+
+    private int TotalAssignments =>
+        Contar(PermisoActual.AsignBook) +
+        Contar(PermisoActual.ViewAssignations) +
+        Contar(PermisoActual.ViewAssignations);
+
+    private int TotalEvaluations =>
+        Contar(PermisoActual.QualifyBook);
+
+    private int TotalEmployees =>
+        Contar(PermisoActual.CreateEmployees) +
+        Contar(PermisoActual.EditEmployees) +
+        Contar(PermisoActual.DeleteEmployees) +
+       Contar(PermisoActual.ViewEmployees);
+
+    private int TotalSystem =>
+        Contar(PermisoActual.EditPermissionLevels);
+
+    private static int Contar(bool valor)
+    {
+        return valor ? 1 : 0;
+    }
+
+    private static int ContarGrupoUsers(Permisos item)
+    {
+        return Contar(item.CreateUser) +
+               Contar(item.EditUser) +
+               Contar(item.DeleteUser);
+    }
+
+    private static int ContarGrupoBooks(Permisos item)
+    {
+        return Contar(item.CreateBook) +
+               Contar(item.EditBook) +
+               Contar(item.DeleteBook) +
+               Contar(item.BooksView);
+    }
+
+    private static int ContarGrupoAssignments(Permisos item)
+    {
+        return Contar(item.AsignBook) +
+               Contar(item.ViewAssignations) +
+               Contar(item.ViewAssignations);
+    }
+
+    private static int ContarGrupoEvaluations(Permisos item)
+    {
+        return Contar(item.QualifyBook);
+    }
+
+    private static int ContarGrupoEmployees(Permisos item)
+    {
+        return Contar(item.CreateEmployees) +
+               Contar(item.EditEmployees) +
+               Contar(item.DeleteEmployees) +
+               Contar(item.ViewEmployees);
+    }
+
+    private static int ContarGrupoSystem(Permisos item)
+    {
+        return Contar(item.EditPermissionLevels);
+    }
+
+    private static int ContarTotalPermisos(Permisos item)
+    {
+        return ContarGrupoUsers(item) +
+               ContarGrupoBooks(item) +
+               ContarGrupoAssignments(item) +
+               ContarGrupoEvaluations(item) +
+               ContarGrupoEmployees(item) +
+               ContarGrupoSystem(item);
+    }
+
+    private static Permisos CopiarPermiso(Permisos permiso)
+    {
+        return new Permisos
+        {
+            Id = permiso.Id,
+            Name = permiso.Name ?? string.Empty,
+
+            CreateUser = permiso.CreateUser,
+            EditUser = permiso.EditUser,
+            DeleteUser = permiso.DeleteUser,
+
+            CreateBook = permiso.CreateBook,
+            EditBook = permiso.EditBook,
+            DeleteBook = permiso.DeleteBook,
+            AsignBook = permiso.AsignBook,
+            BooksView = permiso.BooksView,
+            QualifyBook = permiso.QualifyBook,
+
+            CreateEmployees = permiso.CreateEmployees,
+            EditEmployees = permiso.EditEmployees,
+            DeleteEmployees = permiso.DeleteEmployees,
+            ViewEmployees = permiso.ViewEmployees,
+
+            EditPermissionLevels = permiso.EditPermissionLevels,
+            ViewAssignations = permiso.ViewAssignations,
+            CreateAssignations = permiso.CreateAssignations
+        };
+    }
+}

@@ -38,7 +38,7 @@
                         </NavLink>
                     }
 
-                    @if (HasPermission(auth.User, "CreateEmployees") || HasPermission(auth.User, "EditEmployees") || HasPermission(auth.User, "DeleteEmployees"))
+                    @if (HasPermission(auth.User, "CreateEmployees") || HasPermission(auth.User, "EditEmployees") || HasPermission(auth.User, "DeleteEmployees") || HasPermission(auth.User, "ViewEmployees"))
                     {
                         <NavLink href="/registro-empleados" class="thryv-menu-link">
                             <span class="thryv-menu-icon">👤</span>
@@ -62,7 +62,7 @@
                         </NavLink>
                     }
 
-                    @if (HasPermission(auth.User, "AsignBook") || HasPermission(auth.User, "ViewAssignations"))
+                    @if (HasPermission(auth.User, "AsignBook") || HasPermission(auth.User, "ViewAssignations") || HasPermission(auth.User, "CreateAssignations"))
                     {
                         <NavLink href="/asignaciones" class="thryv-menu-link">
                             <span class="thryv-menu-icon">📌</span>

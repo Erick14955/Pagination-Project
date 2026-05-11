@@ -10,12 +10,15 @@
 @using ClosedXML.Excel
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Books - BibliotecaApp</PageTitle>
 
@@ -49,228 +52,246 @@
         </div>
     }
 
-    <section class="form-card">
-        <div class="section-header">
-            <div>
-                <h2>@(LibroSeleccionadoId is null ? "Add New Book" : "Edit Selected Book")</h2>
-                <p>Complete the book information, codes and extract dates</p>
-            </div>
-
-            <div class="header-actions">
-                <InputFile @key="XlsxInputKey"
-                           id="xlsxUpload"
-                           class="file-input-hidden"
-                           OnChange="ImportBooksFromXlsxAsync"
-                           accept=".xlsx" />
-
-                <label for="xlsxUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
-                    @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
-                </label>
-
-                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
-                    ✨ New
-                </button>
-            </div>
-        </div>
-
-        <form @onsubmit="GuardarLibroAsync" @onsubmit:preventDefault>
-            <div class="form-grid">
-
-                <div class="form-group large">
-                    <label>Book Name</label>
-                    <input class="form-control"
-                           @bind="Formulario.BookName"
-                           placeholder="Book name"
-                           required />
+    @if (PuedeVerFormularioLibro)
+    {
+        <section class="form-card">
+            <div class="section-header">
+                <div>
+                    <h2>@(LibroSeleccionadoId is null ? "Add New Book" : "Edit Selected Book")</h2>
+                    <p>Complete the book information, codes and extract dates</p>
                 </div>
 
-                <div class="form-group">
-                    <label>KGEN Code</label>
-                    <input class="form-control"
-                           @bind="Formulario.KGENCode"
-                           placeholder="KGEN Code" />
-                </div>
+                <div class="header-actions">
+                    @if (CreateBook || EditBook)
+                    {
+                        <InputFile @key="XlsxInputKey"
+                                   id="xlsxUpload"
+                                   class="file-input-hidden"
+                                   OnChange="ImportBooksFromXlsxAsync"
+                                   accept=".xlsx" />
 
-                <div class="form-group">
-                    <label>LSA Code</label>
-                    <input class="form-control"
-                           @bind="Formulario.LSACode"
-                           placeholder="LSA Code" />
-                </div>
+                        <label for="xlsxUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
+                            @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
+                        </label>
+                    }
 
-                <div class="form-group">
-                    <label>Legacy Code</label>
-                    <select class="form-control" @bind="Formulario.LegacyCodeId">
-                        <option value="">Select legacy code</option>
-                        @foreach (var item in LegacyCodes)
-                        {
-                            <option value="@item.Id">@item.Legacy_Code_Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>State</label>
-                    <select class="form-control" @bind="Formulario.StateId">
-                        <option value="">Select state</option>
-                        @foreach (var item in States)
-                        {
-                            <option value="@item.Id">@item.State_Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Database</label>
-                    <select class="form-control" @bind="Formulario.DatabaseId">
-                        <option value="">Select database</option>
-                        @foreach (var item in Databases)
-                        {
-                            <option value="@item.Id">@item.Database_Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Product Issue</label>
-                    <input class="form-control"
-                           @bind="Formulario.ProductIssue"
-                           placeholder="Product Issue" />
-                </div>
-
-                <div class="form-group">
-                    <label>Trim Size</label>
-                    <select class="form-control" @bind="Formulario.TrimSizeId">
-                        <option value="">Select trim size</option>
-                        @foreach (var item in TrimSizes)
-                        {
-                            <option value="@item.Id">@item.Trim_Size_Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Bind Plant</label>
-                    <select class="form-control" @bind="Formulario.BindPlantId">
-                        <option value="">Select bind plant</option>
-                        @foreach (var item in BindPlants)
-                        {
-                            <option value="@item.Id">@item.Bind_Plant_Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group large">
-                    <label>Print Foot</label>
-                    <select class="form-control" @bind="Formulario.PrintFootId">
-                        <option value="">Select print foot</option>
-                        @foreach (var item in PrintFeet)
-                        {
-                            <option value="@item.Id">@item.Print_Foot_Name</option>
-                        }
-                    </select>
+                    @if (CreateBook || EditBook)
+                    {
+                        <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                            ✨ New
+                        </button>
+                    }
                 </div>
             </div>
 
-            <div class="subsection-title">
-                <span>Book Dates</span>
-            </div>
+            <form @onsubmit="GuardarLibroAsync" @onsubmit:preventDefault>
+                <div class="form-grid">
 
-            <div class="form-grid dates-grid">
+                    <div class="form-group large">
+                        <label>Book Name</label>
+                        <input class="form-control"
+                               @bind="Formulario.BookName"
+                               placeholder="Book name"
+                               required />
+                    </div>
 
-                <div class="form-group">
-                    <label>Proof Extract</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.ProofExtract)"
-                           @onchange="e => Formulario.ProofExtract = ParseDate(e.Value)" />
+                    <div class="form-group">
+                        <label>KGEN Code</label>
+                        <input class="form-control"
+                               @bind="Formulario.KGENCode"
+                               placeholder="KGEN Code" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>LSA Code</label>
+                        <input class="form-control"
+                               @bind="Formulario.LSACode"
+                               placeholder="LSA Code" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Legacy Code</label>
+                        <select class="form-control" @bind="Formulario.LegacyCodeId">
+                            <option value="">Select legacy code</option>
+                            @foreach (var item in LegacyCodes)
+                            {
+                                <option value="@item.Id">@item.Legacy_Code_Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>State</label>
+                        <select class="form-control" @bind="Formulario.StateId">
+                            <option value="">Select state</option>
+                            @foreach (var item in States)
+                            {
+                                <option value="@item.Id">@item.State_Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Database</label>
+                        <select class="form-control" @bind="Formulario.DatabaseId">
+                            <option value="">Select database</option>
+                            @foreach (var item in Databases)
+                            {
+                                <option value="@item.Id">@item.Database_Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Product Issue</label>
+                        <input class="form-control"
+                               @bind="Formulario.ProductIssue"
+                               placeholder="Product Issue" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Trim Size</label>
+                        <select class="form-control" @bind="Formulario.TrimSizeId">
+                            <option value="">Select trim size</option>
+                            @foreach (var item in TrimSizes)
+                            {
+                                <option value="@item.Id">@item.Trim_Size_Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bind Plant</label>
+                        <select class="form-control" @bind="Formulario.BindPlantId">
+                            <option value="">Select bind plant</option>
+                            @foreach (var item in BindPlants)
+                            {
+                                <option value="@item.Id">@item.Bind_Plant_Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group large">
+                        <label>Print Foot</label>
+                        <select class="form-control" @bind="Formulario.PrintFootId">
+                            <option value="">Select print foot</option>
+                            @foreach (var item in PrintFeet)
+                            {
+                                <option value="@item.Id">@item.Print_Foot_Name</option>
+                            }
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Final Extract</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.FinalExtract)"
-                           @onchange="e => Formulario.FinalExtract = ParseDate(e.Value)" />
+                <div class="subsection-title">
+                    <span>Book Dates</span>
                 </div>
 
-                <div class="form-group">
-                    <label>Memo Extract</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.MemoExtract)"
-                           @onchange="e => Formulario.MemoExtract = ParseDate(e.Value)" />
+                <div class="form-grid dates-grid">
+
+                    <div class="form-group">
+                        <label>Proof Extract</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.ProofExtract)"
+                               @onchange="e => Formulario.ProofExtract = ParseDate(e.Value)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Final Extract</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.FinalExtract)"
+                               @onchange="e => Formulario.FinalExtract = ParseDate(e.Value)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Memo Extract</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.MemoExtract)"
+                               @onchange="e => Formulario.MemoExtract = ParseDate(e.Value)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Final PO Date</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.FinalPODate)"
+                               @onchange="e => Formulario.FinalPODate = ParseDate(e.Value)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Shipping Date</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.ShippingDate)"
+                               @onchange="e => Formulario.ShippingDate = ParseDate(e.Value)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dirxion Date</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.DirxionDate)"
+                               @onchange="e => Formulario.DirxionDate = ParseDate(e.Value)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pub Date</label>
+                        <input type="date"
+                               class="form-control"
+                               value="@ToInputDate(Formulario.PubDate)"
+                               @onchange="e => Formulario.PubDate = ParseDate(e.Value)" />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Final PO Date</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.FinalPODate)"
-                           @onchange="e => Formulario.FinalPODate = ParseDate(e.Value)" />
+                <div class="switch-row">
+                    <label class="switch-card">
+                        <input type="checkbox" @bind="Formulario.SRLSuppression" />
+                        <span>
+                            <strong>SRL Suppression</strong>
+                            <small>Enable this option if SRL suppression applies.</small>
+                        </span>
+                    </label>
+
+                    <label class="switch-card">
+                        <input type="checkbox" @bind="Formulario.NWP" />
+                        <span>
+                            <strong>NWP</strong>
+                            <small>Enable this option if the book applies to NWP.</small>
+                        </span>
+                    </label>
                 </div>
 
-                <div class="form-group">
-                    <label>Shipping Date</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.ShippingDate)"
-                           @onchange="e => Formulario.ShippingDate = ParseDate(e.Value)" />
+                <div class="button-row">
+                    @if (PuedeCrearOEditarLibro)
+                    {
+                        <button type="submit" class="btn-primary" disabled="@Guardando">
+                            @(Guardando ? "Saving..." : LibroSeleccionadoId is null ? "Save Book" : "Save Changes")
+                        </button>
+                    }
+
+                    @if (CreateBook || EditBook)
+                    {
+                        <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                            Clear
+                        </button>
+                    }
+
+                    @if (DeleteBook)
+                    {
+                        <button type="button"
+                                class="btn-danger"
+                                disabled="@(LibroSeleccionadoId is null || Guardando)"
+                                @onclick="EliminarLibroAsync">
+                            Delete
+                        </button>
+                    }
                 </div>
-
-                <div class="form-group">
-                    <label>Dirxion Date</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.DirxionDate)"
-                           @onchange="e => Formulario.DirxionDate = ParseDate(e.Value)" />
-                </div>
-
-                <div class="form-group">
-                    <label>Pub Date</label>
-                    <input type="date"
-                           class="form-control"
-                           value="@ToInputDate(Formulario.PubDate)"
-                           @onchange="e => Formulario.PubDate = ParseDate(e.Value)" />
-                </div>
-            </div>
-
-            <div class="switch-row">
-                <label class="switch-card">
-                    <input type="checkbox" @bind="Formulario.SRLSuppression" />
-                    <span>
-                        <strong>SRL Suppression</strong>
-                        <small>Enable this option if SRL suppression applies.</small>
-                    </span>
-                </label>
-
-                <label class="switch-card">
-                    <input type="checkbox" @bind="Formulario.NWP" />
-                    <span>
-                        <strong>NWP</strong>
-                        <small>Enable this option if the book applies to NWP.</small>
-                    </span>
-                </label>
-            </div>
-
-            <div class="button-row">
-                <button type="submit" class="btn-primary" disabled="@Guardando">
-                    @(Guardando ? "Saving..." : LibroSeleccionadoId is null ? "Save Book" : "Save Changes")
-                </button>
-
-                <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
-                    Clear
-                </button>
-
-                <button type="button"
-                        class="btn-danger"
-                        disabled="@(LibroSeleccionadoId is null || Guardando)"
-                        @onclick="EliminarLibroAsync">
-                    Delete
-                </button>
-            </div>
-        </form>
-    </section>
+            </form>
+        </section>
+    }
 
     <section class="list-card">
         <div class="section-header table-header">
@@ -408,7 +429,10 @@
 
                             <th>SRL</th>
                             <th>NWP</th>
-                            <th></th>
+                            @if (EditBook)
+                            {
+                                <th></th>
+                            }
                         </tr>
                     </thead>
 
@@ -416,7 +440,7 @@
                         @foreach (var libro in LibrosOrdenados)
                         {
                             <tr class="@(LibroSeleccionadoId == libro.Id ? "selected-row" : "")"
-                                @ondblclick="() => SeleccionarLibro(libro)">
+                                @ondblclick="() => OnDobleClickLibro(libro)">
 
                                 <td>
                                     <div class="book-title">
@@ -448,14 +472,17 @@
                                 <td>@(libro.SRLSuppression ? "Yes" : "No")</td>
                                 <td>@(libro.NWP ? "Yes" : "No")</td>
 
-                                <td class="actions-cell">
-                                    <button type="button"
-                                            class="icon-btn"
-                                            title="Edit"
-                                            @onclick="() => SeleccionarLibro(libro)">
-                                        ✏️
-                                    </button>
-                                </td>
+                                @if (EditBook)
+                                {
+                                    <td class="actions-cell">
+                                        <button type="button"
+                                                class="icon-btn"
+                                                title="Edit"
+                                                @onclick="() => SeleccionarLibro(libro)">
+                                            ✏️
+                                        </button>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
@@ -467,6 +494,17 @@
 
 @code {
     private List<Libros> Libros { get; set; } = new();
+
+    private ClaimsPrincipal? _user;
+
+    private bool CreateBook { get; set; }
+    private bool EditBook { get; set; }
+    private bool DeleteBook { get; set; }
+    private bool BooksView { get; set; }
+
+    private bool PuedeCrearOEditarLibro => LibroSeleccionadoId is null ? CreateBook : EditBook;
+    private bool PuedeVerFormularioLibro => CreateBook || EditBook;
+    private bool SoloVistaLibros => BooksView && !CreateBook && !EditBook && !DeleteBook;
 
     private List<Bind_Plant> BindPlants { get; set; } = new();
     private List<Pagination_Project.Models.Database> Databases { get; set; } = new();
@@ -527,6 +565,14 @@
         }
     }
 
+    private void OnDobleClickLibro(Libros libro)
+    {
+        if (!EditBook)
+            return;
+
+        SeleccionarLibro(libro);
+    }
+
     private IEnumerable<Libros> LibrosOrdenados => ApplySorting(LibrosFiltrados);
 
     private IEnumerable<PubMonthOption> PubDateMonths
@@ -553,8 +599,27 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        CreateBook = HasPermission(_user, "CreateBook");
+        EditBook = HasPermission(_user, "EditBook");
+        DeleteBook = HasPermission(_user, "DeleteBook");
+        BooksView = HasPermission(_user, "BooksView");
+
         await CargarCatalogosAsync();
         await CargarLibrosAsync();
+    }
+
+    private static bool HasPermission(ClaimsPrincipal? user, string claimType)
+    {
+        if (user is null)
+            return false;
+
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarCatalogosAsync()
@@ -659,6 +724,11 @@
 
     private async Task GuardarLibroAsync()
     {
+        if (!PuedeCrearOEditarLibro)
+        {
+            MostrarMensaje("You do not have permission to save books.", "error");
+            return;
+        }
         try
         {
             Guardando = true;
@@ -734,6 +804,9 @@
 
     private void SeleccionarLibro(Libros libro)
     {
+        if (!EditBook)
+            return;
+
         LibroSeleccionadoId = libro.Id;
         Formulario = ClonarLibro(libro);
 
@@ -742,6 +815,12 @@
 
     private async Task EliminarLibroAsync()
     {
+        if (!DeleteBook)
+        {
+            MostrarMensaje("You do not have permission to delete books.", "error");
+            return;
+        }
+
         if (LibroSeleccionadoId is null || Formulario.Id == Guid.Empty)
         {
             MostrarMensaje("Select a book before deleting.", "error");
@@ -789,6 +868,9 @@
 
     private void LimpiarFormulario()
     {
+        if (!CreateBook && !EditBook)
+            return;
+
         Formulario = CrearNuevoLibro();
         LibroSeleccionadoId = null;
         LimpiarMensaje();
@@ -862,6 +944,12 @@
 
     private async Task ImportBooksFromXlsxAsync(InputFileChangeEventArgs e)
     {
+        if (!CreateBook)
+        {
+            MostrarMensaje("You do not have permission to import books.", "error");
+            return;
+        }
+
         try
         {
             ImportandoXlsx = true;
