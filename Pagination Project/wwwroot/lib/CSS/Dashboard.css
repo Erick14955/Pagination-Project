@@ -157,6 +157,63 @@
         line-height: 1.55;
     }
 
+.thryv-section-actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.thryv-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 240px;
+}
+
+    .thryv-filter-group label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #6b7280;
+    }
+
+.thryv-filter-select {
+    height: 42px;
+    border: 1px solid rgba(17,17,17,0.12);
+    border-radius: 14px;
+    padding: 0 14px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+    outline: none;
+    transition: all .18s ease;
+}
+
+    .thryv-filter-select:focus {
+        border-color: #ff5000;
+        box-shadow: 0 0 0 4px rgba(255,80,0,0.12);
+    }
+
+.thryv-clear-filter-btn {
+    height: 42px;
+    border: none;
+    border-radius: 14px;
+    padding: 0 16px;
+    background: rgba(17,17,17,0.08);
+    color: #111111;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .18s ease;
+}
+
+    .thryv-clear-filter-btn:hover {
+        background: rgba(17,17,17,0.12);
+        transform: translateY(-1px);
+    }
+
 .thryv-section-badge {
     background: rgba(255,80,0,0.10);
     color: #c2410c;
@@ -167,6 +224,10 @@
     white-space: nowrap;
     flex-shrink: 0;
     border: 1px solid rgba(255,80,0,0.14);
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .thryv-table-wrapper {
@@ -270,9 +331,35 @@
     font-weight: 600;
 }
 
+.thryv-custom-table thead th:nth-child(4),
+.thryv-custom-table tbody td:nth-child(4) {
+    text-align: center;
+}
+
+.thryv-custom-table thead th:nth-child(5),
+.thryv-custom-table tbody td:nth-child(5) {
+    text-align: center;
+}
+
+.thryv-custom-table tbody td:nth-child(5) {
+    vertical-align: middle;
+}
+
+    .thryv-custom-table tbody td:nth-child(5) .thryv-stage-pill {
+        margin: 0 auto;
+    }
+
 @media (max-width: 1200px) {
     .thryv-stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .thryv-section-header {
+        align-items: flex-start;
+    }
+
+    .thryv-section-actions {
+        justify-content: flex-start;
     }
 }
 
@@ -344,6 +431,24 @@
             font-size: 14px;
             line-height: 1.45;
         }
+
+    .thryv-section-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .thryv-filter-group {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .thryv-filter-select,
+    .thryv-clear-filter-btn,
+    .thryv-section-badge {
+        width: 100%;
+    }
 
     .thryv-section-badge {
         font-size: 13px;
@@ -423,21 +528,3 @@
         min-width: 700px;
     }
 }
-
-.thryv-custom-table thead th:nth-child(4),
-.thryv-custom-table tbody td:nth-child(4) {
-    text-align: center;
-}
-
-.thryv-custom-table thead th:nth-child(5),
-.thryv-custom-table tbody td:nth-child(5) {
-    text-align: center;
-}
-
-.thryv-custom-table tbody td:nth-child(5) {
-    vertical-align: middle;
-}
-
-    .thryv-custom-table tbody td:nth-child(5) .thryv-stage-pill {
-        margin: 0 auto;
-    }

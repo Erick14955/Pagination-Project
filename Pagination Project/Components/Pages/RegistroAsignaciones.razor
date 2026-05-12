@@ -22,7 +22,9 @@
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
 
-<PageTitle>Assignments - BibliotecaApp</PageTitle>
+<PageTitle>Assignments</PageTitle>
+
+<link href="style/asignaciones.css" rel="stylesheet" />
 
 <div class="assignments-page">
 
@@ -54,7 +56,7 @@
         </div>
     }
 
-    @if(CreateAssignations)
+    @if (CreateAssignations)
     {
         <section class="form-card">
             <div class="section-header">
@@ -137,10 +139,10 @@
                                 @(LibroSeleccionado is null
                                                         ? "No valid book selected"
                                                         : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
-                        </small>
+                            </small>
+                        </div>
                     </div>
-                </div>
-                            }
+                }
 
                 <div class="button-row">
                     <button type="submit" class="btn-primary" disabled="@Guardando">
@@ -152,49 +154,6 @@
                     </button>
                 </div>
             </form>
-        </section>
-    }
-
-    @if (CreateAssignations && ResultadoImportacion is not null)
-    {
-        <section class="import-result-card">
-            <h2>XLSX Import Result</h2>
-
-            <div class="import-stats">
-                <div>
-                    <span>Books Created</span>
-                    <strong>@ResultadoImportacion.LibrosCreados</strong>
-                </div>
-
-                <div>
-                    <span>Assignments Created</span>
-                    <strong>@ResultadoImportacion.AsignacionesCreadas</strong>
-                </div>
-
-                <div>
-                    <span>Duplicated</span>
-                    <strong>@ResultadoImportacion.AsignacionesDuplicadas</strong>
-                </div>
-
-                <div>
-                    <span>Skipped Rows</span>
-                    <strong>@ResultadoImportacion.FilasOmitidas</strong>
-                </div>
-            </div>
-
-            @if (ResultadoImportacion.Observaciones.Any())
-            {
-                <details class="import-details">
-                    <summary>View observations</summary>
-
-                    <ul>
-                        @foreach (var item in ResultadoImportacion.Observaciones.Take(80))
-                        {
-                            <li>@item</li>
-                        }
-                    </ul>
-                </details>
-            }
         </section>
     }
 
@@ -329,7 +288,7 @@
     private List<AsignacionViewModel> AsignacionesListado { get; set; } = new();
 
     private List<Bind_Plant> BindPlants { get; set; } = new();
-    private List<Pagination_Project.Models.Database> Databases { get; set; } = new();
+    private List<Database> Databases { get; set; } = new();
     private List<Legacy_Code> LegacyCodes { get; set; } = new();
     private List<Print_Foot> PrintFeet { get; set; } = new();
     private List<State> States { get; set; } = new();
@@ -348,6 +307,11 @@
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
+
+    // private bool MostrarModalImportacion { get; set; } = false;
+    // private string TituloModalImportacion { get; set; } = string.Empty;
+    // private string ResumenModalImportacion { get; set; } = string.Empty;
+    // private string TipoModalImportacion { get; set; } = "success";
 
     private int XlsxInputKey { get; set; } = 0;
     private const long MaxXlsxSize = 20 * 1024 * 1024;
@@ -701,6 +665,24 @@
         await db.SaveChangesAsync();
     }
 
+    private async Task MostrarModalImportacionJsAsync(string titulo, string resumen, string tipo)
+    {
+        ResultadoImportacion ??= new ImportacionAsignacionesResultado();
+
+        await JS.InvokeVoidAsync("assignmentImportModal.show", new
+        {
+            title = titulo,
+            summary = resumen,
+            type = tipo,
+            booksCreated = ResultadoImportacion.LibrosCreados,
+            assignmentsCreated = ResultadoImportacion.AsignacionesCreadas,
+            duplicated = ResultadoImportacion.AsignacionesDuplicadas,
+            skippedRows = ResultadoImportacion.FilasOmitidas,
+            errors = ResultadoImportacion.Errores,
+            warnings = ResultadoImportacion.Advertencias
+        });
+    }
+
     private async Task ImportAssignmentsFromXlsxAsync(InputFileChangeEventArgs e)
     {
         if (!CreateAssignations)
@@ -716,6 +698,11 @@
 
             ResultadoImportacion = new ImportacionAsignacionesResultado();
 
+            await JS.InvokeVoidAsync("assignmentImportModal.close");
+
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
             if (!BindPlants.Any() ||
                 !Databases.Any() ||
                 !LegacyCodes.Any() ||
@@ -729,13 +716,25 @@
 
             if (file is null)
             {
-                MostrarMensaje("No file was selected.", "error");
+                ResultadoImportacion.Errores.Add("No file was selected.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "No file was selected.",
+                    "error");
+
                 return;
             }
 
             if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
             {
-                MostrarMensaje("Only .xlsx files are allowed.", "error");
+                ResultadoImportacion.Errores.Add($"The selected file '{file.Name}' is not valid. Only .xlsx files are allowed.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "Only .xlsx files are allowed.",
+                    "error");
+
                 return;
             }
 
@@ -750,7 +749,13 @@
 
             if (worksheet is null)
             {
-                MostrarMensaje("The XLSX file does not contain any worksheet.", "error");
+                ResultadoImportacion.Errores.Add("The XLSX file does not contain any worksheet.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "The XLSX file does not contain any worksheet.",
+                    "error");
+
                 return;
             }
 
@@ -758,7 +763,13 @@
 
             if (headerRow is null)
             {
-                MostrarMensaje("The XLSX file is empty.", "error");
+                ResultadoImportacion.Errores.Add("The XLSX file is empty.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "The XLSX file is empty.",
+                    "error");
+
                 return;
             }
 
@@ -766,19 +777,37 @@
 
             if (!HeaderExists(headerMap, "Employee", "Employee Name"))
             {
-                MostrarMensaje("The XLSX file must contain the 'Employee' or 'Employee Name' column.", "error");
+                ResultadoImportacion.Errores.Add("Missing required column: 'Employee' or 'Employee Name'.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "The file is missing required columns.",
+                    "error");
+
                 return;
             }
 
             if (!HeaderExists(headerMap, "Product Name"))
             {
-                MostrarMensaje("The XLSX file must contain the 'Product Name' column.", "error");
+                ResultadoImportacion.Errores.Add("Missing required column: 'Product Name'.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "The file is missing required columns.",
+                    "error");
+
                 return;
             }
 
             if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code"))
             {
-                MostrarMensaje("The XLSX file must contain the 'KGen Product Code' column.", "error");
+                ResultadoImportacion.Errores.Add("Missing required column: 'KGen Product Code', 'KGEN Product Code' or 'KGEN Code'.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "The file is missing required columns.",
+                    "error");
+
                 return;
             }
 
@@ -815,7 +844,7 @@
                 if (string.IsNullOrWhiteSpace(employeeName))
                 {
                     ResultadoImportacion.FilasOmitidas++;
-                    ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Employee name is empty.");
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: The column 'Employee' is empty.");
                     continue;
                 }
 
@@ -824,14 +853,16 @@
                 if (empleado is null)
                 {
                     ResultadoImportacion.FilasOmitidas++;
-                    ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Employee '{employeeName}' was not found.");
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: Employee '{employeeName}' was not found or is not active.");
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(bookName) && string.IsNullOrWhiteSpace(kgenCode) && string.IsNullOrWhiteSpace(lsaCode))
+                if (string.IsNullOrWhiteSpace(bookName) &&
+                    string.IsNullOrWhiteSpace(kgenCode) &&
+                    string.IsNullOrWhiteSpace(lsaCode))
                 {
                     ResultadoImportacion.FilasOmitidas++;
-                    ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Book information is empty.");
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: Book information is empty. Fill at least Product Name, KGEN Code or LSA Code.");
                     continue;
                 }
 
@@ -842,7 +873,7 @@
                     if (string.IsNullOrWhiteSpace(bookName))
                     {
                         ResultadoImportacion.FilasOmitidas++;
-                        ResultadoImportacion.Observaciones.Add($"Row {rowNumber}: Book was not found and Product Name is empty.");
+                        ResultadoImportacion.Errores.Add($"Row {rowNumber}: Book was not found and the column 'Product Name' is empty.");
                         continue;
                     }
 
@@ -860,14 +891,79 @@
                     var trimSizeId = FindTrimSizeId(trimSizeText);
                     var bindPlantId = FindBindPlantId(bindPlantText);
 
-                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Foot Print", footPrintText, printFootId);
-                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Legacy Co", legacyCoText, legacyCodeId);
-                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "State", stateText, stateId);
-                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Graphics Database", graphicsDatabaseText, databaseId);
-                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Trim Size", trimSizeText, trimSizeId);
-                    AddCatalogWarningIfNeeded(ResultadoImportacion.Observaciones, rowNumber, "Bind Plant", bindPlantText, bindPlantId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Advertencias, rowNumber, "Foot Print", footPrintText, printFootId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Advertencias, rowNumber, "Legacy Co", legacyCoText, legacyCodeId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Advertencias, rowNumber, "State", stateText, stateId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Advertencias, rowNumber, "Graphics Database", graphicsDatabaseText, databaseId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Advertencias, rowNumber, "Trim Size", trimSizeText, trimSizeId);
+                    AddCatalogWarningIfNeeded(ResultadoImportacion.Advertencias, rowNumber, "Bind Plant", bindPlantText, bindPlantId);
 
-                    var firstDuePrinterDate = ReadDate(row, headerMap, today, "First Due Printer");
+                    var erroresAntesDeFechas = ResultadoImportacion.Errores.Count;
+
+                    var firstDuePrinterDate = ReadDateWithValidation(
+                        row,
+                        headerMap,
+                        today,
+                        ResultadoImportacion.Errores,
+                        rowNumber,
+                        false,
+                        "First Due Printer");
+
+                    var proofExtract = ReadDateWithValidation(
+                        row,
+                        headerMap,
+                        today,
+                        ResultadoImportacion.Errores,
+                        rowNumber,
+                        false,
+                        "Proof Extract",
+                        "Extract - Proof");
+
+                    var finalExtract = ReadDateWithValidation(
+                        row,
+                        headerMap,
+                        today,
+                        ResultadoImportacion.Errores,
+                        rowNumber,
+                        false,
+                        "Extract - Final");
+
+                    var memoExtract = ReadDateWithValidation(
+                        row,
+                        headerMap,
+                        today,
+                        ResultadoImportacion.Errores,
+                        rowNumber,
+                        false,
+                        "Memo Extract",
+                        "Extract - Memo");
+
+                    var dirxionDate = ReadDateWithValidation(
+                        row,
+                        headerMap,
+                        today,
+                        ResultadoImportacion.Errores,
+                        rowNumber,
+                        false,
+                        "Dirxion");
+
+                    var pubDate = ReadDateWithValidation(
+                        row,
+                        headerMap,
+                        today,
+                        ResultadoImportacion.Errores,
+                        rowNumber,
+                        false,
+                        "Pub Date",
+                        "Publication Date");
+
+                    if (ResultadoImportacion.Errores.Count > erroresAntesDeFechas)
+                    {
+                        ResultadoImportacion.FilasOmitidas++;
+                        ResultadoImportacion.Errores.Add($"Row {rowNumber}: The row was skipped because it contains invalid date values.");
+                        continue;
+                    }
+
                     var finalPoDate = CalculateFinalPoDate(firstDuePrinterDate);
 
                     libro = new Libros
@@ -886,16 +982,17 @@
                         TrimSizeId = trimSizeId,
                         BindPlantId = bindPlantId,
 
-                        ProofExtract = ReadDate(row, headerMap, today, "Proof Extract", "Extract - Proof"),
-                        FinalExtract = ReadDate(row, headerMap, today, "Extract - Final"),
-                        MemoExtract = ReadDate(row, headerMap, today, "Memo Extract", "Extract - Memo"),
+                        ProofExtract = proofExtract,
+                        FinalExtract = finalExtract,
+                        MemoExtract = memoExtract,
                         FinalPODate = finalPoDate,
                         ShippingDate = firstDuePrinterDate,
-                        DirxionDate = ReadDate(row, headerMap, today, "Dirxion"),
-                        PubDate = ReadDate(row, headerMap, today, "Pub Date", "Publication Date"),
+                        DirxionDate = dirxionDate,
+                        PubDate = pubDate,
 
                         SRLSuppression = ReadYesNoBool(row, headerMap, "SRL Suppression Flag"),
-                        NWP = ReadYesNoBool(row, headerMap, "NWP")
+                        NWP = ReadYesNoBool(row, headerMap, "NWP"),
+                        Finalizado = false
                     };
 
                     db.Libros.Add(libro);
@@ -917,7 +1014,8 @@
                 {
                     Id = Guid.NewGuid(),
                     IdEmpleado = empleado.Id,
-                    IdLibro = libro.Id
+                    IdLibro = libro.Id,
+                    Finalizado = false
                 });
 
                 ResultadoImportacion.AsignacionesCreadas++;
@@ -927,19 +1025,62 @@
 
             XlsxInputKey++;
 
+            var tipoResultado = ResultadoImportacion.TieneErrores ? "error" : "success";
+
+            var tituloResultado = ResultadoImportacion.TieneErrores
+                ? "XLSX imported with errors"
+                : "XLSX import completed";
+
+            var resumenResultado =
+                $"Books created: {ResultadoImportacion.LibrosCreados}. " +
+                $"Assignments created: {ResultadoImportacion.AsignacionesCreadas}. " +
+                $"Duplicated: {ResultadoImportacion.AsignacionesDuplicadas}. " +
+                $"Skipped rows: {ResultadoImportacion.FilasOmitidas}.";
+
+            ImportandoXlsx = false;
+
             await CargarDatosAsync();
 
-            MostrarMensaje(
-                $"XLSX import completed. Books created: {ResultadoImportacion.LibrosCreados}. Assignments created: {ResultadoImportacion.AsignacionesCreadas}. Duplicated: {ResultadoImportacion.AsignacionesDuplicadas}. Skipped rows: {ResultadoImportacion.FilasOmitidas}.",
-                "success");
+            await InvokeAsync(StateHasChanged);
+
+            await JS.InvokeVoidAsync("assignmentImportModal.show", new
+            {
+                title = tituloResultado,
+                summary = resumenResultado,
+                type = tipoResultado,
+                booksCreated = ResultadoImportacion.LibrosCreados,
+                assignmentsCreated = ResultadoImportacion.AsignacionesCreadas,
+                duplicated = ResultadoImportacion.AsignacionesDuplicadas,
+                skippedRows = ResultadoImportacion.FilasOmitidas,
+                errors = ResultadoImportacion.Errores,
+                warnings = ResultadoImportacion.Advertencias
+            });
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error importing XLSX file: {ex.Message}", "error");
+            ResultadoImportacion ??= new ImportacionAsignacionesResultado();
+
+            var mensajeError = ex.InnerException?.Message ?? ex.Message;
+
+            ResultadoImportacion.Errores.Add($"General import error: {mensajeError}");
+
+            await JS.InvokeVoidAsync("assignmentImportModal.show", new
+            {
+                title = "XLSX import failed",
+                summary = "The file could not be imported. Review the error details below.",
+                type = "error",
+                booksCreated = ResultadoImportacion.LibrosCreados,
+                assignmentsCreated = ResultadoImportacion.AsignacionesCreadas,
+                duplicated = ResultadoImportacion.AsignacionesDuplicadas,
+                skippedRows = ResultadoImportacion.FilasOmitidas,
+                errors = ResultadoImportacion.Errores,
+                warnings = ResultadoImportacion.Advertencias
+            });
         }
         finally
         {
             ImportandoXlsx = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -1063,7 +1204,7 @@
             worksheet.Cell(1, 19).Value = "SRL Suppression";
             worksheet.Cell(1, 20).Value = "NWP";
 
-            var header = worksheet.Range(1, 1, 1, 21);
+            var header = worksheet.Range(1, 1, 1, 20);
             header.Style.Font.Bold = true;
             header.Style.Fill.BackgroundColor = XLColor.FromHtml("#111827");
             header.Style.Font.FontColor = XLColor.White;
@@ -1101,7 +1242,7 @@
                 row++;
             }
 
-            var dataRange = worksheet.Range(1, 1, row - 1, 21);
+            var dataRange = worksheet.Range(1, 1, row - 1, 20);
             dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
@@ -1293,6 +1434,87 @@
         return defaultValue;
     }
 
+    private static DateOnly ReadDateWithValidation(
+        IXLRow row,
+        Dictionary<string, int> headerMap,
+        DateOnly defaultValue,
+        List<string> errors,
+        int rowNumber,
+        bool required,
+        params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+        var columnName = names.FirstOrDefault() ?? "Date";
+
+        if (cell is null || cell.IsEmpty())
+        {
+            if (required)
+            {
+                errors.Add($"Row {rowNumber}: The column '{columnName}' is required and is empty.");
+            }
+
+            return defaultValue;
+        }
+
+        if (cell.TryGetValue<DateTime>(out var dateTime))
+            return DateOnly.FromDateTime(dateTime);
+
+        if (cell.TryGetValue<double>(out var numberValue))
+        {
+            try
+            {
+                var excelDate = DateTime.FromOADate(numberValue);
+                return DateOnly.FromDateTime(excelDate);
+            }
+            catch
+            {
+                errors.Add($"Row {rowNumber}: The value in column '{columnName}' is not a valid Excel date.");
+                return defaultValue;
+            }
+        }
+
+        var text = cell.GetFormattedString()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            text = cell.GetString().Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            if (required)
+            {
+                errors.Add($"Row {rowNumber}: The column '{columnName}' is required and is empty.");
+            }
+
+            return defaultValue;
+        }
+
+        string[] formats =
+        {
+            "MM/dd/yyyy",
+            "M/d/yyyy",
+            "yyyy-MM-dd",
+            "dd/MM/yyyy",
+            "d/M/yyyy",
+            "M/d/yy",
+            "MM/dd/yy",
+            "dd/MM/yy",
+            "d/M/yy"
+        };
+
+        if (DateOnly.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exactDate))
+            return exactDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+            return parsedDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.None, out var currentCultureDate))
+            return currentCultureDate;
+
+        errors.Add($"Row {rowNumber}: The value '{text}' in column '{columnName}' is not a valid date.");
+
+        return defaultValue;
+    }
+
     private static bool ReadYesNoBool(IXLRow row, Dictionary<string, int> headerMap, params string[] names)
     {
         var cell = GetCell(row, headerMap, names);
@@ -1330,7 +1552,7 @@
 
         if (id is null)
         {
-            warnings.Add($"Row {rowNumber}: {catalogName} '{value}' was not found.");
+            warnings.Add($"Row {rowNumber}: The value '{value}' in column '{catalogName}' was not found in the catalog.");
         }
     }
 
@@ -1452,6 +1674,23 @@
         TipoMensaje = "success";
     }
 
+    // private async Task MostrarModalImportacionJsAsync(string titulo, string resumen, string tipo)
+    // {
+    //     TituloModalImportacion = titulo;
+    //     ResumenModalImportacion = resumen;
+    //     TipoModalImportacion = tipo;
+    //     MostrarModalImportacion = true;
+
+    //     await InvokeAsync(StateHasChanged);
+    // }
+
+    // private async Task CerrarModalImportacionAsync()
+    // {
+    //     MostrarModalImportacion = false;
+
+    //     await InvokeAsync(StateHasChanged);
+    // }
+
     private string EmpleadoFiltroId { get; set; } = string.Empty;
 
     private IEnumerable<AsignacionViewModel> EmpleadosParaFiltro
@@ -1496,6 +1735,11 @@
         public int AsignacionesCreadas { get; set; }
         public int AsignacionesDuplicadas { get; set; }
         public int FilasOmitidas { get; set; }
-        public List<string> Observaciones { get; set; } = new();
+
+        public List<string> Errores { get; set; } = new();
+        public List<string> Advertencias { get; set; } = new();
+
+        public bool TieneErrores => Errores.Any();
+        public bool TieneAdvertencias => Advertencias.Any();
     }
 }

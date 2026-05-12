@@ -18,7 +18,6 @@ namespace Pagination_Project.Services
             await using var db = await _dbFactory.CreateDbContextAsync();
 
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var yesterday = today.AddDays(-1);
 
             await ActualizarFinalizadosPorDirxionAsync(db, today);
 
@@ -89,25 +88,30 @@ namespace Pagination_Project.Services
 
                     var excluirMemoPorBindPlant =
                         bindPlantName == "PREM" ||
-                        bindPlantName == "DIRX";
+                        bindPlantName == "DIRX" ||
+                        bindPlantName == "WSTR";
 
                     string stage = string.Empty;
                     DateOnly? stageDate = null;
 
-                    if (x.ProofExtract == yesterday)
+                    var proofDisplayDate = GetNextBusinessDay(x.ProofExtract);
+                    var finalDisplayDate = GetNextBusinessDay(x.FinalExtract);
+                    var memoDisplayDate = GetNextBusinessDay(x.MemoExtract);
+
+                    if (proofDisplayDate == today)
                     {
                         stage = "Proof Extract";
-                        stageDate = x.ProofExtract.AddDays(1);
+                        stageDate = proofDisplayDate;
                     }
-                    else if (x.FinalExtract == yesterday)
+                    else if (finalDisplayDate == today)
                     {
                         stage = "Final Extract";
-                        stageDate = x.FinalExtract.AddDays(1);
+                        stageDate = finalDisplayDate;
                     }
-                    else if (x.MemoExtract == yesterday && !excluirMemoPorBindPlant)
+                    else if (memoDisplayDate == today && !excluirMemoPorBindPlant)
                     {
                         stage = "Memo Extract";
-                        stageDate = x.MemoExtract.AddDays(1);
+                        stageDate = memoDisplayDate;
                     }
                     else if (x.DirxionDate == today)
                     {
@@ -146,6 +150,21 @@ namespace Pagination_Project.Services
                 Stats = stats,
                 AssignedBooks = assignedBooks
             };
+        }
+
+        private static DateOnly GetNextBusinessDay(DateOnly sourceDate)
+        {
+            if (sourceDate == default)
+                return default;
+
+            var result = sourceDate.AddDays(1);
+
+            while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            {
+                result = result.AddDays(1);
+            }
+
+            return result;
         }
 
         private static async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db, DateOnly today)

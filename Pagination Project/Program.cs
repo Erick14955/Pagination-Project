@@ -134,16 +134,20 @@ app.MapPost("/account/login", async (
         claims.Add(new("CreateBook", usuario.Permisos.CreateBook.ToString()));
         claims.Add(new("EditBook", usuario.Permisos.EditBook.ToString()));
         claims.Add(new("DeleteBook", usuario.Permisos.DeleteBook.ToString()));
-        claims.Add(new("AsignBook", usuario.Permisos.AsignBook.ToString()));
         claims.Add(new("BooksView", usuario.Permisos.BooksView.ToString()));
+
+        claims.Add(new("CreateAssignations", usuario.Permisos.CreateAssignations.ToString()));
+        claims.Add(new("AsignBook", usuario.Permisos.AsignBook.ToString()));
+        claims.Add(new("ViewAssignations", usuario.Permisos.ViewAssignations.ToString()));
+
         claims.Add(new("QualifyBook", usuario.Permisos.QualifyBook.ToString()));
 
         claims.Add(new("CreateEmployees", usuario.Permisos.CreateEmployees.ToString()));
         claims.Add(new("EditEmployees", usuario.Permisos.EditEmployees.ToString()));
         claims.Add(new("DeleteEmployees", usuario.Permisos.DeleteEmployees.ToString()));
+        claims.Add(new("ViewEmployees", usuario.Permisos.ViewEmployees.ToString()));
 
         claims.Add(new("EditPermissionLevels", usuario.Permisos.EditPermissionLevels.ToString()));
-        claims.Add(new("ViewAssignations", usuario.Permisos.ViewAssignations.ToString()));
     }
 
     var identity = new ClaimsIdentity(

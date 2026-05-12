@@ -15,6 +15,8 @@
 
 <PageTitle>Dashboard - Evaluations</PageTitle>
 
+<link href="style/dashboard.css" rel="stylesheet" />
+
 <div class="thryv-dashboard-page">
     <div class="thryv-dashboard-header">
         <div>
@@ -103,8 +105,32 @@
                 <p>Live view of active assignments based on the current stage of the day.</p>
             </div>
 
-            <div class="thryv-section-badge">
-                @assignedBooks.Count records
+            <div class="thryv-section-actions">
+                <div class="thryv-filter-group">
+                    <label>Filter by employee</label>
+
+                    <select class="thryv-filter-select" @bind="SelectedEmployeeFilter">
+                        <option value="">All Employees</option>
+
+                        @foreach (var employee in EmployeeFilterOptions)
+                        {
+                            <option value="@employee">@employee</option>
+                        }
+                    </select>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(SelectedEmployeeFilter))
+                {
+                    <button type="button"
+                            class="thryv-clear-filter-btn"
+                            @onclick="ClearEmployeeFilter">
+                        Clear
+                    </button>
+                }
+
+                <div class="thryv-section-badge">
+                    @AssignedBooksFiltered.Count records
+                </div>
             </div>
         </div>
 
@@ -122,7 +148,7 @@
                 </thead>
 
                 <tbody>
-                    @if (assignedBooks.Count == 0)
+                    @if (AssignedBooksFiltered.Count == 0)
                     {
                         <tr>
                             <td colspan="6" class="thryv-empty-row">
@@ -132,7 +158,7 @@
                     }
                     else
                     {
-                        @foreach (var item in assignedBooks)
+                        @foreach (var item in AssignedBooksFiltered)
                         {
                             <tr>
                                 <td>
@@ -172,7 +198,10 @@
 
 @code {
     private DashboardStatsDto stats = new DashboardStatsDto();
+
     private List<AssignedBookDashboardDto> assignedBooks = new();
+
+    private string SelectedEmployeeFilter { get; set; } = string.Empty;
 
     private ClaimsPrincipal? _user;
 
@@ -183,6 +212,34 @@
     private bool PuedeVerLibros { get; set; }
     private bool PuedeVerEvaluaciones { get; set; }
     private bool PuedeVerAsignaciones { get; set; }
+
+    private List<AssignedBookDashboardDto> AssignedBooksFiltered
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(SelectedEmployeeFilter))
+                return assignedBooks;
+
+            return assignedBooks
+                .Where(x => string.Equals(
+                    x.EmployeeName?.Trim(),
+                    SelectedEmployeeFilter.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private IEnumerable<string> EmployeeFilterOptions
+    {
+        get
+        {
+            return assignedBooks
+                .Where(x => !string.IsNullOrWhiteSpace(x.EmployeeName))
+                .Select(x => x.EmployeeName.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x);
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -245,6 +302,11 @@
             HasPermission(_user, "CreateAssignations") ||
             HasPermission(_user, "AsignBook") ||
             HasPermission(_user, "ViewAssignations");
+    }
+
+    private void ClearEmployeeFilter()
+    {
+        SelectedEmployeeFilter = string.Empty;
     }
 
     private static bool HasPermission(ClaimsPrincipal? user, string claimType)
