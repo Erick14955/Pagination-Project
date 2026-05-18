@@ -23,6 +23,7 @@ namespace Pagination_Project.Data
         public DbSet<State> States => Set<State>();
         public DbSet<Trim_Size> Trim_Sizes => Set<Trim_Size>();
         public DbSet<TemporaryAssignment> TemporaryAssignments { get; set; }
+        public DbSet<LateWorkActivity> LateWorkActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -89,6 +90,61 @@ namespace Pagination_Project.Data
                     .WithMany()
                     .HasForeignKey(e => e.TemporaryEmployeeId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<LateWorkActivity>(entity =>
+            {
+                entity.ToTable("Late_Work_Activities");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id");
+
+                entity.Property(e => e.AssignmentId)
+                    .HasColumnName("Assignment_Id");
+
+                entity.Property(e => e.LateWorkId)
+                    .HasColumnName("Late_Work_Id");
+
+                entity.Property(e => e.ClientId)
+                    .HasColumnName("Client_Id")
+                    .IsRequired();
+
+                entity.Property(e => e.Completed)
+                    .HasColumnName("Completed")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CompletedAt)
+                    .HasColumnName("Completed_At");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("Created_At")
+                    .HasDefaultValueSql("now()");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnName("Updated_At");
+
+                entity.HasIndex(e => e.AssignmentId)
+                    .HasDatabaseName("IX_Late_Work_Activities_Assignment_Id");
+
+                entity.HasIndex(e => e.LateWorkId)
+                    .HasDatabaseName("IX_Late_Work_Activities_Late_Work_Id");
+
+                entity.HasIndex(e => e.ClientId)
+                    .HasDatabaseName("IX_Late_Work_Activities_Client_Id");
+
+                entity.HasIndex(e => e.Completed)
+                    .HasDatabaseName("IX_Late_Work_Activities_Completed");
+
+                entity.HasIndex(e => new { e.AssignmentId, e.LateWorkId, e.ClientId })
+                    .IsUnique()
+                    .HasDatabaseName("UQ_Late_Work_Assignment_LateWork_Client");
+
+                entity.HasOne(e => e.Assignment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Empleados>(entity =>
@@ -253,6 +309,11 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.Name).HasColumnName("Permission_Name");
                 entity.Property(e => e.CreateAssignations).HasColumnName("Create_Assignation");
                 entity.Property(e => e.ViewEmployees).HasColumnName("View_Employees");
+                entity.Property(e => e.LateWork).HasColumnName("Late_Work");
+                entity.Property(e => e.CreateLateWork).HasColumnName("Create_Late_Work");
+                entity.Property(e => e.EditLateWork).HasColumnName("Edit_Late_Work");
+                entity.Property(e => e.DeleteLateWork).HasColumnName("Delete_Late_Work");
+                entity.Property(e => e.CompleteLateWork).HasColumnName("Complete_Late_Work");
 
                 entity.Property(e => e.Name)
                     .HasColumnName("Permission_Name")

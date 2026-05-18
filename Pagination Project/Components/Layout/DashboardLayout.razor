@@ -85,6 +85,14 @@
                             <span class="thryv-menu-text">Permissions</span>
                         </NavLink>
                     }
+
+                    @if (HasPermission(auth.User, "LateWork"))
+                    {
+                        <NavLink href="/late-work-activities" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">⏱️</span>
+                            <span class="thryv-menu-text">Late Work Activities</span>
+                        </NavLink>
+                    }
                 </nav>
             </Authorized>
         </AuthorizeView>

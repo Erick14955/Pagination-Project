@@ -44,6 +44,11 @@
                 <span>Evaluations</span>
                 <strong>@EvaluacionesReporte.Count</strong>
             </div>
+
+            <div class="stat-card">
+                <span>Late Work</span>
+                <strong>@LateWorksReporte.Count</strong>
+            </div>
         </div>
     </section>
 
@@ -64,6 +69,7 @@
                     <option value="Libros">Finished Books</option>
                     <option value="Asignaciones">Finished Assignments</option>
                     <option value="Evaluaciones">Finished Evaluations</option>
+                    <option value="LateWork">Finished Late Work</option>
                 </select>
             </div>
 
@@ -270,6 +276,54 @@
                     </table>
                 </div>
             }
+
+            @if (TipoReporteSeleccionado == "LateWork")
+            {
+                <div class="table-shell">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Book Name</th>
+                                <th>KGEN</th>
+                                <th>LSA</th>
+                                <th>Late Work ID</th>
+                                <th>Client ID</th>
+                                <th>Dirxion Date</th>
+                                <th>Created At</th>
+                                <th>Completed</th>
+                                <th>Completed At</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in LateWorksReporte)
+                            {
+                                <tr>
+                                    <td class="strong-cell">@item.EmployeeName</td>
+                                    <td>@item.BookName</td>
+                                    <td>
+                                        <span class="kgen-pill">@item.Kgen</span>
+                                    </td>
+                                    <td>@item.Lsa</td>
+                                    <td>@item.LateWorkId</td>
+                                    <td>@item.ClientId</td>
+                                    <td>@FormatDate(item.DirxionDate)</td>
+                                    <td>@FormatDateTime(item.CreatedAt)</td>
+                                    <td>
+                                        @(item.Completed ? "Yes" : "No")
+                                    </td>
+                                    <td>@FormatDateTime(item.CompletedAt)</td>
+                                    <td>
+                                        <span class="status-pill">Finished Book</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         }
 
     </section>
@@ -292,13 +346,15 @@
     private List<LibroReporteDto> LibrosReporte { get; set; } = new();
     private List<AsignacionReporteDto> AsignacionesReporte { get; set; } = new();
     private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } = new();
+    private List<LateWorkReporteDto> LateWorksReporte { get; set; } = new();
     private List<Database> Databases { get; set; } = new();
     private List<Legacy_Code> LegacyCodes { get; set; } = new();
     private List<State> States { get; set; } = new();
 
     private bool PermiteFiltroEmpleado =>
         TipoReporteSeleccionado == "Asignaciones" ||
-        TipoReporteSeleccionado == "Evaluaciones";
+        TipoReporteSeleccionado == "Evaluaciones" ||
+        TipoReporteSeleccionado == "LateWork";
 
     private bool TieneDatos =>
         TipoReporteSeleccionado switch
@@ -306,6 +362,7 @@
             "Libros" => LibrosReporte.Any(),
             "Asignaciones" => AsignacionesReporte.Any(),
             "Evaluaciones" => EvaluacionesReporte.Any(),
+            "LateWork" => LateWorksReporte.Any(),
             _ => false
         };
 
@@ -315,6 +372,7 @@
             "Libros" => LibrosReporte.Count,
             "Asignaciones" => AsignacionesReporte.Count,
             "Evaluaciones" => EvaluacionesReporte.Count,
+            "LateWork" => LateWorksReporte.Count,
             _ => 0
         };
 
@@ -324,6 +382,7 @@
             "Libros" => "Finished Books List",
             "Asignaciones" => "Finished Assignments List",
             "Evaluaciones" => "Finished Evaluations List",
+            "LateWork" => "Finished Late Work List",
             _ => "Finished Report"
         };
 
@@ -333,6 +392,7 @@
             "Libros" => "Showing only finalized books.",
             "Asignaciones" => "Showing only finalized assignments.",
             "Evaluaciones" => "Showing only finalized evaluations.",
+            "LateWork" => "Showing Late Work activities from books already finalized by Dirxion date.",
             _ => string.Empty
         };
 
@@ -427,6 +487,7 @@
         LibrosReporte.Clear();
         AsignacionesReporte.Clear();
         EvaluacionesReporte.Clear();
+        LateWorksReporte.Clear();
 
         try
         {
@@ -445,6 +506,10 @@
             else if (TipoReporteSeleccionado == "Evaluaciones")
             {
                 await CargarEvaluacionesFinalizadasAsync(db);
+            }
+            else if (TipoReporteSeleccionado == "LateWork")
+            {
+                await CargarLateWorkFinalizadosAsync(db);
             }
         }
         finally
@@ -474,6 +539,10 @@
             {
                 GenerarHojaEvaluaciones(workbook);
             }
+            else if (TipoReporteSeleccionado == "LateWork")
+            {
+                GenerarHojaLateWork(workbook);
+            }
 
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
@@ -486,6 +555,7 @@
                 "Libros" => $"Finished_Books_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 "Asignaciones" => $"Finished_Assignments_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 "Evaluaciones" => $"Finished_Evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                "LateWork" => $"Finished_Late_Work_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 _ => $"Finished_Report_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
             };
 
@@ -499,6 +569,146 @@
         {
             Console.WriteLine($"Error generating XLSX: {ex.Message}");
         }
+    }
+
+    private async Task CargarLateWorkFinalizadosAsync(AppDbContext db)
+    {
+        var query = db.LateWorkActivities
+            .AsNoTracking()
+            .Include(x => x.Assignment)
+                .ThenInclude(a => a!.Empleado)
+            .Include(x => x.Assignment)
+                .ThenInclude(a => a!.Libro)
+            .Where(x =>
+                x.Assignment != null &&
+                x.Assignment.Libro != null &&
+                x.Assignment.Libro.Finalizado == true);
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            query = query.Where(x =>
+                x.Assignment != null &&
+                x.Assignment.IdEmpleado == EmpleadoIdSeleccionado.Value);
+        }
+
+        if (FechaDesde.HasValue)
+        {
+            var desde = DateOnly.FromDateTime(FechaDesde.Value);
+
+            query = query.Where(x =>
+                x.Assignment != null &&
+                x.Assignment.Libro != null &&
+                x.Assignment.Libro.DirxionDate >= desde);
+        }
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
+
+            query = query.Where(x =>
+                x.Assignment != null &&
+                x.Assignment.Libro != null &&
+                x.Assignment.Libro.DirxionDate <= hasta);
+        }
+
+        LateWorksReporte = await query
+            .OrderByDescending(x =>
+                x.Assignment != null && x.Assignment.Libro != null
+                    ? x.Assignment.Libro.DirxionDate
+                    : DateOnly.MinValue)
+            .Select(x => new LateWorkReporteDto
+            {
+                EmployeeName =
+                    x.Assignment != null && x.Assignment.Empleado != null
+                        ? x.Assignment.Empleado.Nombre
+                        : "",
+
+                BookName =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? x.Assignment.Libro.BookName
+                        : "",
+
+                Kgen =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? x.Assignment.Libro.KGENCode
+                        : "",
+
+                Lsa =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? x.Assignment.Libro.LSACode
+                        : "",
+
+                LateWorkId = x.LateWorkId,
+                ClientId = x.ClientId,
+                Completed = x.Completed,
+                CompletedAt = x.CompletedAt,
+                CreatedAt = x.CreatedAt,
+
+                DirxionDate =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? x.Assignment.Libro.DirxionDate
+                        : null
+            })
+            .ToListAsync();
+    }
+
+    private void GenerarHojaLateWork(XLWorkbook workbook)
+    {
+        var worksheet = workbook.Worksheets.Add("Finished Late Work");
+
+        worksheet.Cell(1, 1).Value = "Employee";
+        worksheet.Cell(1, 2).Value = "Book Name";
+        worksheet.Cell(1, 3).Value = "KGEN";
+        worksheet.Cell(1, 4).Value = "LSA";
+        worksheet.Cell(1, 5).Value = "Late Work ID";
+        worksheet.Cell(1, 6).Value = "Client ID";
+        worksheet.Cell(1, 7).Value = "Dirxion Date";
+        worksheet.Cell(1, 8).Value = "Created At";
+        worksheet.Cell(1, 9).Value = "Completed";
+        worksheet.Cell(1, 10).Value = "Completed At";
+        worksheet.Cell(1, 11).Value = "Status";
+
+        var row = 2;
+
+        foreach (var item in LateWorksReporte)
+        {
+            worksheet.Cell(row, 1).Value = item.EmployeeName;
+            worksheet.Cell(row, 2).Value = item.BookName;
+            worksheet.Cell(row, 3).Value = item.Kgen;
+            worksheet.Cell(row, 4).Value = item.Lsa;
+            worksheet.Cell(row, 5).Value = item.LateWorkId;
+            worksheet.Cell(row, 6).Value = item.ClientId;
+
+            EscribirFechaExcel(worksheet.Cell(row, 7), item.DirxionDate);
+
+            if (item.CreatedAt.HasValue)
+            {
+                worksheet.Cell(row, 8).Value = item.CreatedAt.Value;
+                worksheet.Cell(row, 8).Style.DateFormat.Format = "MM/dd/yyyy hh:mm AM/PM";
+            }
+            else
+            {
+                worksheet.Cell(row, 8).Value = "-";
+            }
+
+            worksheet.Cell(row, 9).Value = item.Completed ? "Yes" : "No";
+
+            if (item.CompletedAt.HasValue)
+            {
+                worksheet.Cell(row, 10).Value = item.CompletedAt.Value;
+                worksheet.Cell(row, 10).Style.DateFormat.Format = "MM/dd/yyyy hh:mm AM/PM";
+            }
+            else
+            {
+                worksheet.Cell(row, 10).Value = "-";
+            }
+
+            worksheet.Cell(row, 11).Value = "Finished Book";
+
+            row++;
+        }
+
+        AplicarEstiloExcel(worksheet, row - 1, 11);
     }
 
     private void GenerarHojaLibros(XLWorkbook workbook)
@@ -1118,5 +1328,28 @@
         public decimal? TaskMemo { get; set; }
 
         public decimal TotalPorcentaje { get; set; }
+    }
+
+    private sealed class LateWorkReporteDto
+    {
+        public string EmployeeName { get; set; } = string.Empty;
+
+        public string BookName { get; set; } = string.Empty;
+
+        public string Kgen { get; set; } = string.Empty;
+
+        public string Lsa { get; set; } = string.Empty;
+
+        public long LateWorkId { get; set; }
+
+        public long ClientId { get; set; }
+
+        public DateOnly? DirxionDate { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
+
+        public bool Completed { get; set; }
+
+        public DateTime? CompletedAt { get; set; }
     }
 }

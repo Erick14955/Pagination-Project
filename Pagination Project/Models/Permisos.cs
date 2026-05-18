@@ -26,6 +26,11 @@ namespace Pagination_Project.Models
         public bool EditPermissionLevels { get; set; }
         public bool ViewAssignations { get; set; }
         public bool CreateAssignations { get; set; }
+        public bool LateWork { get; set; }
+        public bool CreateLateWork { get; set; }
+        public bool EditLateWork { get; set; }
+        public bool DeleteLateWork { get; set; }
+        public bool CompleteLateWork { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();

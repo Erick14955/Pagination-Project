@@ -60,6 +60,12 @@ namespace Pagination_Project.Components.Account
                     claims.Add(new("DeleteEmployees", usuario.Permisos.DeleteEmployees.ToString()));
                     claims.Add(new("ViewEmployees", usuario.Permisos.ViewEmployees.ToString()));
 
+                    claims.Add(new("LateWork", usuario.Permisos.LateWork.ToString()));
+                    claims.Add(new("CreateLateWork", usuario.Permisos.CreateLateWork.ToString()));
+                    claims.Add(new("EditLateWork", usuario.Permisos.EditLateWork.ToString()));
+                    claims.Add(new("DeleteLateWork", usuario.Permisos.DeleteLateWork.ToString()));
+                    claims.Add(new("CompleteLateWork", usuario.Permisos.CompleteLateWork.ToString()));
+
                     claims.Add(new("EditPermissionLevels", usuario.Permisos.EditPermissionLevels.ToString()));
                 }
 

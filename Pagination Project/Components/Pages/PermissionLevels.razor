@@ -100,8 +100,20 @@
         </div>
 
         <div class="summary-card">
+            <span>Evaluations</span>
+            <strong>@TotalEvaluations</strong>
+            <small>permissions selected</small>
+        </div>
+
+        <div class="summary-card">
             <span>Employees</span>
             <strong>@TotalEmployees</strong>
+            <small>permissions selected</small>
+        </div>
+
+        <div class="summary-card late-work-summary">
+            <span>Late Work</span>
+            <strong>@TotalLateWork</strong>
             <small>permissions selected</small>
         </div>
 
@@ -324,6 +336,64 @@
             </div>
         </div>
 
+        <div class="permission-block late-work-block">
+            <div class="block-header">
+                <div>
+                    <h2>⏱️ Late Work</h2>
+                    <p>Manage access to late work activities registration, edition, deletion and completion.</p>
+                </div>
+
+                <div class="total-box">
+                    <span>Total</span>
+                    <strong>@TotalLateWork</strong>
+                </div>
+            </div>
+
+            <div class="toggles-container">
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.LateWork" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Late Work View</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.CreateLateWork" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Create Late Work</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.EditLateWork" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Edit Late Work</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.DeleteLateWork" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Delete Late Work</span>
+                </div>
+
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.CompleteLateWork" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>Complete Late Work</span>
+                </div>
+
+            </div>
+        </div>
+
         <div class="permission-block">
             <div class="block-header">
                 <div>
@@ -438,6 +508,7 @@
                             <th>Assignments</th>
                             <th>Evaluations</th>
                             <th>Employees</th>
+                            <th>Late Work</th>
                             <th>System</th>
                             <th>Total</th>
                         </tr>
@@ -463,6 +534,7 @@
                                 <td>@ContarGrupoAssignments(item)</td>
                                 <td>@ContarGrupoEvaluations(item)</td>
                                 <td>@ContarGrupoEmployees(item)</td>
+                                <td>@ContarGrupoLateWork(item)</td>
                                 <td>@ContarGrupoSystem(item)</td>
 
                                 <td>
@@ -651,6 +723,12 @@
                 permisoDb.ViewAssignations = PermisoActual.ViewAssignations;
                 permisoDb.CreateAssignations = PermisoActual.CreateAssignations;
 
+                permisoDb.LateWork = PermisoActual.LateWork;
+                permisoDb.CreateLateWork = PermisoActual.CreateLateWork;
+                permisoDb.EditLateWork = PermisoActual.EditLateWork;
+                permisoDb.DeleteLateWork = PermisoActual.DeleteLateWork;
+                permisoDb.CompleteLateWork = PermisoActual.CompleteLateWork;
+
                 await db.SaveChangesAsync();
 
                 PermisoActual = CopiarPermiso(permisoDb);
@@ -749,6 +827,12 @@
         PermisoActual.EditPermissionLevels = true;
         PermisoActual.ViewAssignations = true;
         PermisoActual.CreateAssignations = true;
+
+        PermisoActual.LateWork = true;
+        PermisoActual.CreateLateWork = true;
+        PermisoActual.EditLateWork = true;
+        PermisoActual.DeleteLateWork = true;
+        PermisoActual.CompleteLateWork = true;
     }
 
     private void QuitarTodos()
@@ -756,7 +840,6 @@
         PermisoActual.CreateUser = false;
         PermisoActual.EditUser = false;
         PermisoActual.DeleteUser = false;
-        PermisoActual.ViewEmployees = false;
 
         PermisoActual.CreateBook = false;
         PermisoActual.EditBook = false;
@@ -768,10 +851,17 @@
         PermisoActual.CreateEmployees = false;
         PermisoActual.EditEmployees = false;
         PermisoActual.DeleteEmployees = false;
+        PermisoActual.ViewEmployees = false;
 
         PermisoActual.EditPermissionLevels = false;
         PermisoActual.ViewAssignations = false;
         PermisoActual.CreateAssignations = false;
+
+        PermisoActual.LateWork = false;
+        PermisoActual.CreateLateWork = false;
+        PermisoActual.EditLateWork = false;
+        PermisoActual.DeleteLateWork = false;
+        PermisoActual.CompleteLateWork = false;
     }
 
     private void LimpiarFiltros()
@@ -803,8 +893,8 @@
         Contar(PermisoActual.BooksView);
 
     private int TotalAssignments =>
+        Contar(PermisoActual.CreateAssignations) +
         Contar(PermisoActual.AsignBook) +
-        Contar(PermisoActual.ViewAssignations) +
         Contar(PermisoActual.ViewAssignations);
 
     private int TotalEvaluations =>
@@ -814,7 +904,14 @@
         Contar(PermisoActual.CreateEmployees) +
         Contar(PermisoActual.EditEmployees) +
         Contar(PermisoActual.DeleteEmployees) +
-       Contar(PermisoActual.ViewEmployees);
+        Contar(PermisoActual.ViewEmployees);
+
+    private int TotalLateWork =>
+        Contar(PermisoActual.LateWork) +
+        Contar(PermisoActual.CreateLateWork) +
+        Contar(PermisoActual.EditLateWork) +
+        Contar(PermisoActual.DeleteLateWork) +
+        Contar(PermisoActual.CompleteLateWork);
 
     private int TotalSystem =>
         Contar(PermisoActual.EditPermissionLevels);
@@ -841,8 +938,8 @@
 
     private static int ContarGrupoAssignments(Permisos item)
     {
-        return Contar(item.AsignBook) +
-               Contar(item.ViewAssignations) +
+        return Contar(item.CreateAssignations) +
+               Contar(item.AsignBook) +
                Contar(item.ViewAssignations);
     }
 
@@ -859,6 +956,15 @@
                Contar(item.ViewEmployees);
     }
 
+    private static int ContarGrupoLateWork(Permisos item)
+    {
+        return Contar(item.LateWork) +
+               Contar(item.CreateLateWork) +
+               Contar(item.EditLateWork) +
+               Contar(item.DeleteLateWork) +
+               Contar(item.CompleteLateWork);
+    }
+
     private static int ContarGrupoSystem(Permisos item)
     {
         return Contar(item.EditPermissionLevels);
@@ -871,6 +977,7 @@
                ContarGrupoAssignments(item) +
                ContarGrupoEvaluations(item) +
                ContarGrupoEmployees(item) +
+               ContarGrupoLateWork(item) +
                ContarGrupoSystem(item);
     }
 
@@ -899,7 +1006,13 @@
 
             EditPermissionLevels = permiso.EditPermissionLevels,
             ViewAssignations = permiso.ViewAssignations,
-            CreateAssignations = permiso.CreateAssignations
+            CreateAssignations = permiso.CreateAssignations,
+
+            LateWork = permiso.LateWork,
+            CreateLateWork = permiso.CreateLateWork,
+            EditLateWork = permiso.EditLateWork,
+            DeleteLateWork = permiso.DeleteLateWork,
+            CompleteLateWork = permiso.CompleteLateWork
         };
     }
 }
