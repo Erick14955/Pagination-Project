@@ -22,6 +22,7 @@ namespace Pagination_Project.Data
         public DbSet<Print_Foot> Print_Foots => Set<Print_Foot>();
         public DbSet<State> States => Set<State>();
         public DbSet<Trim_Size> Trim_Sizes => Set<Trim_Size>();
+        public DbSet<TemporaryAssignment> TemporaryAssignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +47,47 @@ namespace Pagination_Project.Data
                     .WithMany(p => p.Usuarios)
                     .HasForeignKey(e => e.lvl_Id)
                     .HasPrincipalKey(p => p.Id)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<TemporaryAssignment>(entity =>
+            {
+                entity.ToTable("Temporary_Assignments");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.AssignmentId).HasColumnName("Assignment_Id");
+                entity.Property(e => e.OriginalEmployeeId).HasColumnName("Original_Employee_Id");
+                entity.Property(e => e.TemporaryEmployeeId).HasColumnName("Temporary_Employee_Id");
+
+                entity.Property(e => e.Proof).HasColumnName("Proof");
+                entity.Property(e => e.Final).HasColumnName("Final");
+                entity.Property(e => e.Memo).HasColumnName("Memo");
+                entity.Property(e => e.FinalPO).HasColumnName("Final_PO");
+                entity.Property(e => e.Shipping).HasColumnName("Shipping");
+                entity.Property(e => e.Dirxion).HasColumnName("Dirxion");
+                entity.Property(e => e.PubDate).HasColumnName("Pub_Date");
+
+                entity.Property(e => e.Reason).HasColumnName("Reason");
+                entity.Property(e => e.Active).HasColumnName("Active");
+                entity.Property(e => e.CreatedAt).HasColumnName("Created_At");
+                entity.Property(e => e.ClosedAt).HasColumnName("Closed_At");
+
+                entity.HasOne(e => e.Assignment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.OriginalEmployee)
+                    .WithMany()
+                    .HasForeignKey(e => e.OriginalEmployeeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.TemporaryEmployee)
+                    .WithMany()
+                    .HasForeignKey(e => e.TemporaryEmployeeId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 

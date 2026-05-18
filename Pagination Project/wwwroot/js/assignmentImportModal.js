@@ -31,22 +31,22 @@
 
                     <div class="assignment-modal-stats">
                         <div>
-                            <span>Books Created</span>
+                            <span>${escapeHtml(data.booksLabel || "Books Created")}</span>
                             <strong>${data.booksCreated ?? 0}</strong>
                         </div>
 
                         <div>
-                            <span>Assignments Created</span>
+                            <span>${escapeHtml(data.assignmentsLabel || "Assignments Created")}</span>
                             <strong>${data.assignmentsCreated ?? 0}</strong>
                         </div>
 
                         <div>
-                            <span>Duplicated</span>
+                            <span>${escapeHtml(data.duplicatedLabel || "Duplicated")}</span>
                             <strong>${data.duplicated ?? 0}</strong>
                         </div>
 
                         <div>
-                            <span>Skipped Rows</span>
+                            <span>${escapeHtml(data.skippedLabel || "Skipped Rows")}</span>
                             <strong>${data.skippedRows ?? 0}</strong>
                         </div>
                     </div>
@@ -93,6 +93,7 @@
 
         if (existing) {
             existing.remove();
+            window.location.reload();
         }
     }
 };

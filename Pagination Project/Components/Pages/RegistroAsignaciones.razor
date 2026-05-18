@@ -76,6 +76,22 @@
                         @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
                     </label>
 
+                    <InputFile @key="XlsxBooksUpdateInputKey"
+                               id="xlsxBooksUpdateUpload"
+                               class="file-input-hidden"
+                               OnChange="UpdateBooksFromXlsxAsync"
+                               accept=".xlsx" />
+
+                    <label for="xlsxBooksUpdateUpload" class="btn-update-xlsx @(ActualizandoLibrosXlsx ? "disabled" : "")">
+                        @(ActualizandoLibrosXlsx ? "Updating..." : "🔄 Update Books XLSX")
+                    </label>
+
+                    <button type="button"
+                            class="btn-light"
+                            @onclick="AbrirFormularioAsignacionTemporal">
+                        🔁 Temporary Assignment
+                    </button>
+
                     <button type="button" class="btn-light" @onclick="LimpiarFormulario">
                         ✨ New
                     </button>
@@ -217,6 +233,7 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            <th>Temporary Assignment</th>
                             <th>Book Name</th>
                             <th>KGEN</th>
                             <th>LSA</th>
@@ -243,6 +260,21 @@
                                         <strong>@item.EmpleadoNombre</strong>
                                         <span>@item.EmpleadoEmail</span>
                                     </div>
+                                </td>
+
+                                <td>
+                                    @if (item.TieneAsignacionTemporal)
+                                    {
+                                        <div class="employee-title">
+                                            <strong>@item.EmpleadoTemporalNombre</strong>
+                                            <span>Covering: @item.EtapasTemporales</span>
+                                            <span>Original: @item.EmpleadoOriginalNombre</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill">No temporary assignment</span>
+                                    }
                                 </td>
 
                                 <td>
@@ -282,6 +314,114 @@
     </section>
 </div>
 
+@if (MostrarFormularioTemporal)
+{
+    <div class="temporary-modal-backdrop">
+        <div class="temporary-modal">
+
+            <div class="temporary-modal-header">
+                <div>
+                    <h2>Temporary Assignment</h2>
+                    <p>Select an existing assignment, temporary employee and the stages to cover.</p>
+                </div>
+
+                <button type="button"
+                        class="temporary-modal-close"
+                        @onclick="CerrarFormularioAsignacionTemporal">
+                    ✕
+                </button>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group large">
+                    <label>Assignment</label>
+                    <select class="form-control"
+                            value="@AsignacionTemporalSeleccionadaId"
+                            @onchange="OnAsignacionTemporalChanged">
+                        <option value="">Select assignment</option>
+
+                        @foreach (var item in AsignacionesListado)
+                        {
+                            <option value="@item.Id">
+                                @item.EmpleadoNombre - @item.BookName - KGEN: @item.KGENCode
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group large">
+                    <label>Temporary Employee</label>
+                    <select class="form-control"
+                            @bind="EmpleadoTemporalSeleccionadoId"
+                            disabled="@(AsignacionTemporalSeleccionadaId is null)">
+                        <option value="">Select employee</option>
+
+                        @foreach (var empleado in EmpleadosDisponiblesParaTemporal)
+                        {
+                            <option value="@empleado.Id">
+                                @empleado.Nombre | ID: @empleado.IdEmpleado
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            @if (AsignacionTemporalSeleccionadaId is null)
+            {
+                <div class="empty-state" style="margin-top: 18px;">
+                    <strong>Select an assignment first.</strong>
+                    <span>The pending stages will appear here.</span>
+                </div>
+            }
+            else if (!EtapasDisponiblesParaTemporal.Any())
+            {
+                <div class="empty-state" style="margin-top: 18px;">
+                    <strong>No pending stages available.</strong>
+                    <span>All stages for this book have already passed or are not applicable.</span>
+                </div>
+            }
+            else
+            {
+                <div class="temporary-stages">
+                    @foreach (var etapa in EtapasDisponiblesParaTemporal)
+                    {
+                        <label class="temporary-stage-card">
+                            <input type="checkbox"
+                                   checked="@EtapaSeleccionada(etapa.Codigo)"
+                                   @onchange="(e) => CambiarEtapaTemporal(etapa.Codigo, e)" />
+                            <strong>@etapa.Nombre</strong>
+                        </label>
+                    }
+                </div>
+            }
+
+            <div class="form-grid" style="margin-top: 18px;">
+                <div class="form-group large">
+                    <label>Reason</label>
+                    <input class="form-control"
+                           placeholder="Example: Vacation coverage, sick leave, temporary support..."
+                           @bind="MotivoTemporal"
+                           @bind:event="oninput" />
+                </div>
+            </div>
+
+            <div class="temporary-modal-actions">
+                <button type="button"
+                        class="btn-primary"
+                        @onclick="GuardarAsignacionTemporalAsync">
+                    Save Temporary Assignment
+                </button>
+
+                <button type="button"
+                        class="btn-secondary"
+                        @onclick="CerrarFormularioAsignacionTemporal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Empleados> Empleados { get; set; } = new();
     private List<Libros> Libros { get; set; } = new();
@@ -307,14 +447,32 @@
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
+    private bool ActualizandoLibrosXlsx { get; set; } = false;
+    private Guid XlsxBooksUpdateInputKey { get; set; } = Guid.NewGuid();
+    //private DotNetObjectReference<Asignaciones>? _dotNetRef;
 
     // private bool MostrarModalImportacion { get; set; } = false;
     // private string TituloModalImportacion { get; set; } = string.Empty;
     // private string ResumenModalImportacion { get; set; } = string.Empty;
     // private string TipoModalImportacion { get; set; } = "success";
 
-    private int XlsxInputKey { get; set; } = 0;
+    private Guid XlsxInputKey { get; set; } = Guid.NewGuid();
     private const long MaxXlsxSize = 20 * 1024 * 1024;
+    private bool MostrarFormularioTemporal { get; set; } = false;
+
+    private Guid? AsignacionTemporalSeleccionadaId { get; set; }
+    private Guid? EmpleadoTemporalSeleccionadoId { get; set; }
+
+    private bool TempProof { get; set; }
+    private bool TempFinal { get; set; }
+    private bool TempMemo { get; set; }
+    private bool TempFinalPO { get; set; }
+    private bool TempShipping { get; set; }
+    private bool TempDirxion { get; set; }
+    private bool TempPubDate { get; set; }
+
+    private string MotivoTemporal { get; set; } = string.Empty;
+
 
     private ImportacionAsignacionesResultado? ResultadoImportacion { get; set; }
 
@@ -331,6 +489,122 @@
         await CargarCatalogosAsync();
         await CargarDatosAsync();
     }
+    private bool EtapaSeleccionada(string etapa)
+    {
+        return etapa switch
+        {
+            "Proof" => TempProof,
+            "Final" => TempFinal,
+            "Memo" => TempMemo,
+            "FinalPO" => TempFinalPO,
+            "Shipping" => TempShipping,
+            "Dirxion" => TempDirxion,
+            "PubDate" => TempPubDate,
+            _ => false
+        };
+    }
+
+    private void CambiarEtapaTemporal(string etapa, ChangeEventArgs e)
+    {
+        var seleccionado = e.Value is bool value && value;
+
+        switch (etapa)
+        {
+            case "Proof":
+                TempProof = seleccionado;
+                break;
+
+            case "Final":
+                TempFinal = seleccionado;
+                break;
+
+            case "Memo":
+                TempMemo = seleccionado;
+                break;
+
+            case "FinalPO":
+                TempFinalPO = seleccionado;
+                break;
+
+            case "Shipping":
+                TempShipping = seleccionado;
+                break;
+
+            case "Dirxion":
+                TempDirxion = seleccionado;
+                break;
+
+            case "PubDate":
+                TempPubDate = seleccionado;
+                break;
+        }
+    }
+
+
+    private async Task OnAsignacionTemporalChanged(ChangeEventArgs e)
+    {
+        EmpleadoTemporalSeleccionadoId = null;
+
+        TempProof = false;
+        TempFinal = false;
+        TempMemo = false;
+        TempFinalPO = false;
+        TempShipping = false;
+        TempDirxion = false;
+        TempPubDate = false;
+
+        var valor = e.Value?.ToString();
+
+        if (Guid.TryParse(valor, out var asignacionId))
+        {
+            AsignacionTemporalSeleccionadaId = asignacionId;
+        }
+        else
+        {
+            AsignacionTemporalSeleccionadaId = null;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task AbrirFormularioAsignacionTemporal()
+    {
+        LimpiarFormularioTemporal();
+        MostrarFormularioTemporal = true;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CerrarFormularioAsignacionTemporal()
+    {
+        MostrarFormularioTemporal = false;
+        LimpiarFormularioTemporal();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void LimpiarFormularioTemporal()
+    {
+        AsignacionTemporalSeleccionadaId = null;
+        EmpleadoTemporalSeleccionadoId = null;
+
+        TempProof = false;
+        TempFinal = false;
+        TempMemo = false;
+        TempFinalPO = false;
+        TempShipping = false;
+        TempDirxion = false;
+        TempPubDate = false;
+
+        MotivoTemporal = string.Empty;
+    }
+
+    // [JSInvokable]
+    // public async Task OnAssignmentImportModalClosed()
+    // {
+    //     await CargarDatosAsync();
+    //     await InvokeAsync(StateHasChanged);
+    // }
 
     private static bool HasPermission(ClaimsPrincipal? user, string claimType)
     {
@@ -343,6 +617,266 @@
             StringComparison.OrdinalIgnoreCase);
     }
 
+    private async Task GuardarAsignacionTemporalAsync()
+    {
+        if (!CreateAssignations)
+        {
+            MostrarMensaje("You do not have permission to create temporary assignments.", "error");
+            return;
+        }
+
+        if (AsignacionTemporalSeleccionadaId is null)
+        {
+            MostrarMensaje("Select an assignment.", "error");
+            return;
+        }
+
+        if (EmpleadoTemporalSeleccionadoId is null)
+        {
+            MostrarMensaje("Select a temporary employee.", "error");
+            return;
+        }
+
+        if (!TempProof &&
+            !TempFinal &&
+            !TempMemo &&
+            !TempFinalPO &&
+            !TempShipping &&
+            !TempDirxion &&
+            !TempPubDate)
+        {
+            MostrarMensaje("Select at least one stage.", "error");
+            return;
+        }
+
+        var etapasPermitidas = EtapasDisponiblesParaTemporal
+            .Select(x => x.Codigo)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (TempProof && !etapasPermitidas.Contains("Proof"))
+        {
+            MostrarMensaje("Proof is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        if (TempFinal && !etapasPermitidas.Contains("Final"))
+        {
+            MostrarMensaje("Final is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        if (TempMemo && !etapasPermitidas.Contains("Memo"))
+        {
+            MostrarMensaje("Memo is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        if (TempFinalPO && !etapasPermitidas.Contains("FinalPO"))
+        {
+            MostrarMensaje("Final PO is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        if (TempShipping && !etapasPermitidas.Contains("Shipping"))
+        {
+            MostrarMensaje("Shipping is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        if (TempDirxion && !etapasPermitidas.Contains("Dirxion"))
+        {
+            MostrarMensaje("Dirxion is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        if (TempPubDate && !etapasPermitidas.Contains("PubDate"))
+        {
+            MostrarMensaje("Pub Date is no longer available for temporary assignment.", "error");
+            return;
+        }
+
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var asignacion = await db.Asignaciones
+                .Include(x => x.Empleado)
+                .Include(x => x.Libro)
+                .FirstOrDefaultAsync(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
+
+            if (asignacion is null)
+            {
+                MostrarMensaje("The selected assignment was not found.", "error");
+                return;
+            }
+
+            if (asignacion.IdEmpleado == EmpleadoTemporalSeleccionadoId.Value)
+            {
+                MostrarMensaje("The temporary employee cannot be the same as the original employee.", "error");
+                return;
+            }
+
+            var empleadoTemporalExiste = await db.Empleados
+                .AnyAsync(x => x.Id == EmpleadoTemporalSeleccionadoId.Value && x.Activo);
+
+            if (!empleadoTemporalExiste)
+            {
+                MostrarMensaje("The selected temporary employee was not found or is not active.", "error");
+                return;
+            }
+
+            var temporalExistente = await db.TemporaryAssignments
+                .FirstOrDefaultAsync(x => x.AssignmentId == asignacion.Id && x.Active);
+
+            if (temporalExistente is not null)
+            {
+                temporalExistente.Active = false;
+                temporalExistente.ClosedAt = DateTime.Now;
+            }
+
+            var temporal = new TemporaryAssignment
+            {
+                Id = Guid.NewGuid(),
+                AssignmentId = asignacion.Id,
+                OriginalEmployeeId = asignacion.IdEmpleado,
+                TemporaryEmployeeId = EmpleadoTemporalSeleccionadoId.Value,
+
+                Proof = TempProof,
+                Final = TempFinal,
+                Memo = TempMemo,
+                FinalPO = TempFinalPO,
+                Shipping = TempShipping,
+                Dirxion = TempDirxion,
+                PubDate = TempPubDate,
+
+                Reason = MotivoTemporal,
+                Active = true,
+                CreatedAt = DateTime.Now
+            };
+
+            db.TemporaryAssignments.Add(temporal);
+
+            await db.SaveChangesAsync();
+
+            MostrarMensaje("Temporary assignment saved successfully.", "success");
+
+            await CerrarFormularioAsignacionTemporal();
+
+            await CargarDatosAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error saving temporary assignment: {ex.Message}", "error");
+        }
+    }
+
+    private IEnumerable<Empleados> EmpleadosDisponiblesParaTemporal
+    {
+        get
+        {
+            if (AsignacionTemporalSeleccionadaId is null)
+                return Empleados.OrderBy(x => x.Nombre);
+
+            var asignacion = AsignacionesListado
+                .FirstOrDefault(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
+
+            if (asignacion is null)
+                return Empleados.OrderBy(x => x.Nombre);
+
+            return Empleados
+                .Where(x => x.Id != asignacion.EmpleadoId)
+                .OrderBy(x => x.Nombre);
+        }
+    }
+
+    private async Task ActualizarAsignacionesTemporalesVencidasAsync(AppDbContext db)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+        var temporales = await db.TemporaryAssignments
+            .Include(x => x.Assignment)
+                .ThenInclude(a => a!.Libro)
+            .Where(x => x.Active &&
+                        x.Assignment != null &&
+                        x.Assignment.Libro != null)
+            .ToListAsync();
+
+        foreach (var temporal in temporales)
+        {
+            var libro = temporal.Assignment!.Libro!;
+
+            var tieneEtapaPendiente = false;
+
+            if (temporal.Proof && libro.ProofExtract >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (temporal.Final && libro.FinalExtract >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (temporal.Memo && libro.MemoExtract >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (temporal.FinalPO && libro.FinalPODate >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (temporal.Shipping && libro.ShippingDate >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (temporal.Dirxion && libro.DirxionDate >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (temporal.PubDate && libro.PubDate >= hoy)
+                tieneEtapaPendiente = true;
+
+            if (!tieneEtapaPendiente)
+            {
+                temporal.Active = false;
+                temporal.ClosedAt = DateTime.Now;
+            }
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private async Task<Guid> ObtenerEmpleadoResponsableEtapaAsync(
+    AppDbContext db,
+    Guid assignmentId,
+    string etapa)
+    {
+        var asignacion = await db.Asignaciones
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == assignmentId);
+
+        if (asignacion is null)
+            return Guid.Empty;
+
+        var temporal = await db.TemporaryAssignments
+            .AsNoTracking()
+            .Where(x => x.AssignmentId == assignmentId && x.Active)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (temporal is null)
+            return asignacion.IdEmpleado;
+
+        var aplicaTemporal = etapa switch
+        {
+            "Proof" => temporal.Proof,
+            "Final" => temporal.Final,
+            "Memo" => temporal.Memo,
+            "FinalPO" => temporal.FinalPO,
+            "Shipping" => temporal.Shipping,
+            "Dirxion" => temporal.Dirxion,
+            "PubDate" => temporal.PubDate,
+            _ => false
+        };
+
+        return aplicaTemporal
+            ? temporal.TemporaryEmployeeId
+            : asignacion.IdEmpleado;
+    }
+
     private async Task CargarDatosAsync()
     {
         try
@@ -352,6 +886,7 @@
             await using var db = await DbFactory.CreateDbContextAsync();
 
             await ActualizarFinalizadosPorDirxionAsync(db);
+            await ActualizarAsignacionesTemporalesVencidasAsync(db);
 
             Empleados = await db.Empleados
                 .AsNoTracking()
@@ -376,29 +911,62 @@
                 .ThenBy(x => x.Libro!.BookName)
                 .ToListAsync();
 
-            AsignacionesListado = asignacionesDb.Select(x => new AsignacionViewModel
+            var asignacionIds = asignacionesDb
+                .Select(x => x.Id)
+                .ToList();
+
+            var temporalesDb = await db.TemporaryAssignments
+                .AsNoTracking()
+                .Include(x => x.TemporaryEmployee)
+                .Where(x => x.Active && asignacionIds.Contains(x.AssignmentId))
+                .ToListAsync();
+
+            AsignacionesListado = asignacionesDb.Select(x =>
             {
-                Id = x.Id,
+                var temporal = temporalesDb
+                    .Where(t => t.AssignmentId == x.Id)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .FirstOrDefault();
 
-                EmpleadoId = x.IdEmpleado,
-                EmpleadoNombre = x.Empleado?.Nombre ?? string.Empty,
-                EmpleadoCodigo = x.Empleado?.IdEmpleado ?? 0,
-                EmpleadoEmail = x.Empleado?.Email ?? string.Empty,
+                return new AsignacionViewModel
+                {
+                    Id = x.Id,
 
-                LibroId = x.IdLibro,
-                BookName = x.Libro?.BookName ?? string.Empty,
-                KGENCode = x.Libro?.KGENCode ?? string.Empty,
-                LSACode = x.Libro?.LSACode ?? string.Empty,
-                ProductIssue = x.Libro?.ProductIssue ?? string.Empty,
+                    EmpleadoId = x.IdEmpleado,
+                    EmpleadoNombre = x.Empleado?.Nombre ?? string.Empty,
+                    EmpleadoCodigo = x.Empleado?.IdEmpleado ?? 0,
+                    EmpleadoEmail = x.Empleado?.Email ?? string.Empty,
 
-                StateName = GetStateName(x.Libro?.StateId),
-                DatabaseName = GetDatabaseName(x.Libro?.DatabaseId),
-                LegacyCodeName = GetLegacyCodeName(x.Libro?.LegacyCodeId),
-                PrintFootName = GetPrintFootName(x.Libro?.PrintFootId),
-                TrimSizeName = GetTrimSizeName(x.Libro?.TrimSizeId),
-                BindPlantName = GetBindPlantName(x.Libro?.BindPlantId),
+                    LibroId = x.IdLibro,
+                    BookName = x.Libro?.BookName ?? string.Empty,
+                    KGENCode = x.Libro?.KGENCode ?? string.Empty,
+                    LSACode = x.Libro?.LSACode ?? string.Empty,
+                    ProductIssue = x.Libro?.ProductIssue ?? string.Empty,
 
-                PubDate = x.Libro?.PubDate ?? default
+                    StateName = GetStateName(x.Libro?.StateId),
+                    DatabaseName = GetDatabaseName(x.Libro?.DatabaseId),
+                    LegacyCodeName = GetLegacyCodeName(x.Libro?.LegacyCodeId),
+                    PrintFootName = GetPrintFootName(x.Libro?.PrintFootId),
+                    TrimSizeName = GetTrimSizeName(x.Libro?.TrimSizeId),
+                    BindPlantName = GetBindPlantName(x.Libro?.BindPlantId),
+
+                    PubDate = x.Libro?.PubDate ?? default,
+
+                    ProofExtract = x.Libro?.ProofExtract ?? default,
+                    FinalExtract = x.Libro?.FinalExtract ?? default,
+                    MemoExtract = x.Libro?.MemoExtract ?? default,
+                    FinalPODate = x.Libro?.FinalPODate ?? default,
+                    ShippingDate = x.Libro?.ShippingDate ?? default,
+                    DirxionDate = x.Libro?.DirxionDate ?? default,
+                    PubDateValue = x.Libro?.PubDate ?? default,
+
+                    BindPlantCode = GetBindPlantName(x.Libro?.BindPlantId),
+
+                    TieneAsignacionTemporal = temporal is not null,
+                    EmpleadoOriginalNombre = x.Empleado?.Nombre ?? string.Empty,
+                    EmpleadoTemporalNombre = temporal?.TemporaryEmployee?.Nombre ?? string.Empty,
+                    EtapasTemporales = temporal is null ? string.Empty : GetEtapasTemporalesTexto(temporal)
+                };
             }).ToList();
         }
         catch (Exception ex)
@@ -409,6 +977,147 @@
         {
             Cargando = false;
         }
+    }
+
+    private sealed class EtapaTemporalDisponible
+    {
+        public string Codigo { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
+        public DateOnly Fecha { get; set; }
+    }
+
+    private IEnumerable<EtapaTemporalDisponible> EtapasDisponiblesParaTemporal
+    {
+        get
+        {
+            if (AsignacionTemporalSeleccionadaId is null)
+                return Enumerable.Empty<EtapaTemporalDisponible>();
+
+            var asignacion = AsignacionesListado
+                .FirstOrDefault(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
+
+            if (asignacion is null)
+                return Enumerable.Empty<EtapaTemporalDisponible>();
+
+            var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+            var bindPlant = Normalizar(asignacion.BindPlantCode);
+
+            var omitirMemo =
+                bindPlant.Contains("PREM") ||
+                bindPlant.Contains("DIRX") ||
+                bindPlant.Contains("AU") ||
+                bindPlant.Contains("NZ");
+
+            var etapas = new List<EtapaTemporalDisponible>();
+
+            if (FechaPendiente(asignacion.ProofExtract, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "Proof",
+                    Nombre = $"Proof - {FormatoFecha(asignacion.ProofExtract)}",
+                    Fecha = asignacion.ProofExtract
+                });
+            }
+
+            if (FechaPendiente(asignacion.FinalExtract, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "Final",
+                    Nombre = $"Final - {FormatoFecha(asignacion.FinalExtract)}",
+                    Fecha = asignacion.FinalExtract
+                });
+            }
+
+            if (!omitirMemo && FechaPendiente(asignacion.MemoExtract, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "Memo",
+                    Nombre = $"Memo - {FormatoFecha(asignacion.MemoExtract)}",
+                    Fecha = asignacion.MemoExtract
+                });
+            }
+
+            if (FechaPendiente(asignacion.FinalPODate, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "FinalPO",
+                    Nombre = $"Final PO - {FormatoFecha(asignacion.FinalPODate)}",
+                    Fecha = asignacion.FinalPODate
+                });
+            }
+
+            if (FechaPendiente(asignacion.ShippingDate, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "Shipping",
+                    Nombre = $"Shipping - {FormatoFecha(asignacion.ShippingDate)}",
+                    Fecha = asignacion.ShippingDate
+                });
+            }
+
+            if (FechaPendiente(asignacion.DirxionDate, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "Dirxion",
+                    Nombre = $"Dirxion - {FormatoFecha(asignacion.DirxionDate)}",
+                    Fecha = asignacion.DirxionDate
+                });
+            }
+
+            if (FechaPendiente(asignacion.PubDateValue, hoy))
+            {
+                etapas.Add(new EtapaTemporalDisponible
+                {
+                    Codigo = "PubDate",
+                    Nombre = $"Pub Date - {FormatoFecha(asignacion.PubDateValue)}",
+                    Fecha = asignacion.PubDateValue
+                });
+            }
+
+            return etapas
+                .OrderBy(x => x.Fecha)
+                .ToList();
+        }
+    }
+
+    private static bool FechaPendiente(DateOnly fecha, DateOnly hoy)
+    {
+        return fecha != default && fecha >= hoy;
+    }
+
+    private static string GetEtapasTemporalesTexto(TemporaryAssignment temporal)
+    {
+        var etapas = new List<string>();
+
+        if (temporal.Proof)
+            etapas.Add("Proof");
+
+        if (temporal.Final)
+            etapas.Add("Final");
+
+        if (temporal.Memo)
+            etapas.Add("Memo");
+
+        if (temporal.FinalPO)
+            etapas.Add("Final PO");
+
+        if (temporal.Shipping)
+            etapas.Add("Shipping");
+
+        if (temporal.Dirxion)
+            etapas.Add("Dirxion");
+
+        if (temporal.PubDate)
+            etapas.Add("Pub Date");
+
+        return etapas.Any() ? string.Join(", ", etapas) : "-";
     }
 
     private async Task CargarCatalogosAsync()
@@ -1023,7 +1732,7 @@
 
             await db.SaveChangesAsync();
 
-            XlsxInputKey++;
+            XlsxInputKey = Guid.NewGuid();
 
             var tipoResultado = ResultadoImportacion.TieneErrores ? "error" : "success";
 
@@ -1704,6 +2413,367 @@
         }
     }
 
+    private async Task UpdateBooksFromXlsxAsync(InputFileChangeEventArgs e)
+    {
+        if (!CreateAssignations)
+        {
+            MostrarMensaje("You do not have permission to update books.", "error");
+            return;
+        }
+
+        var resultado = new ActualizacionLibrosResultado();
+
+        try
+        {
+            ActualizandoLibrosXlsx = true;
+            LimpiarMensaje();
+
+            await JS.InvokeVoidAsync("assignmentImportModal.close");
+
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            if (!BindPlants.Any() ||
+                !Databases.Any() ||
+                !LegacyCodes.Any() ||
+                !PrintFeet.Any() ||
+                !TrimSizes.Any() ||
+                !States.Any())
+            {
+                await CargarCatalogosAsync();
+            }
+
+            var file = e.File;
+
+            if (file is null)
+            {
+                resultado.Errores.Add("No file was selected.");
+
+                await MostrarModalUpdateBooksJsAsync(
+                    resultado,
+                    "XLSX update failed",
+                    "No file was selected.",
+                    "error");
+
+                return;
+            }
+
+            if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                resultado.Errores.Add($"The selected file '{file.Name}' is not valid. Only .xlsx files are allowed.");
+
+                await MostrarModalUpdateBooksJsAsync(
+                    resultado,
+                    "XLSX update failed",
+                    "Only .xlsx files are allowed.",
+                    "error");
+
+                return;
+            }
+
+            await using var stream = file.OpenReadStream(MaxXlsxSize);
+            using var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using var workbook = new XLWorkbook(memoryStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+
+            if (worksheet is null)
+            {
+                resultado.Errores.Add("The XLSX file does not contain any worksheet.");
+
+                await MostrarModalUpdateBooksJsAsync(
+                    resultado,
+                    "XLSX update failed",
+                    "The XLSX file does not contain any worksheet.",
+                    "error");
+
+                return;
+            }
+
+            var headerRow = worksheet.FirstRowUsed();
+
+            if (headerRow is null)
+            {
+                resultado.Errores.Add("The XLSX file is empty.");
+
+                await MostrarModalUpdateBooksJsAsync(
+                    resultado,
+                    "XLSX update failed",
+                    "The XLSX file is empty.",
+                    "error");
+
+                return;
+            }
+
+            var headerMap = BuildHeaderMap(headerRow);
+
+            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code") &&
+                !HeaderExists(headerMap, "LSA Code", "LSA"))
+            {
+                resultado.Errores.Add("Missing required column: 'KGEN Code' or 'LSA Code'. At least one is required to find the book.");
+
+                await MostrarModalUpdateBooksJsAsync(
+                    resultado,
+                    "XLSX update failed",
+                    "The file is missing the required book code columns.",
+                    "error");
+
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var librosDb = await db.Libros
+                .ToListAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
+            {
+                var rowNumber = row.RowNumber();
+
+                var bookName = ReadText(row, headerMap, "Product Name", "Book Name");
+                var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code");
+                var lsaCode = ReadText(row, headerMap, "LSA Code", "LSA");
+                var productIssue = ReadText(row, headerMap, "Product Issue");
+
+                if (string.IsNullOrWhiteSpace(bookName) &&
+                    string.IsNullOrWhiteSpace(kgenCode) &&
+                    string.IsNullOrWhiteSpace(lsaCode))
+                {
+                    resultado.FilasOmitidas++;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(kgenCode) &&
+                    string.IsNullOrWhiteSpace(lsaCode))
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: KGEN Code or LSA Code is required to update the book.");
+                    continue;
+                }
+
+                var libro = BuscarLibroPorCodigos(librosDb, kgenCode, lsaCode);
+
+                if (libro is null)
+                {
+                    resultado.LibrosNoEncontrados++;
+                    resultado.Advertencias.Add(
+                        $"Row {rowNumber}: Book was not found. KGEN: '{kgenCode}', LSA: '{lsaCode}', Product Name: '{bookName}'.");
+                    continue;
+                }
+
+                var footPrintText = ReadText(row, headerMap, "Foot Print");
+                var legacyCoText = ReadText(row, headerMap, "Legacy Co");
+                var stateText = ReadText(row, headerMap, "State");
+                var graphicsDatabaseText = ReadText(row, headerMap, "Graphics Database", "Database");
+                var trimSizeText = ReadText(row, headerMap, "Trim Size");
+                var bindPlantText = ReadText(row, headerMap, "Bind Plant");
+
+                var printFootId = FindPrintFootId(footPrintText);
+                var legacyCodeId = FindLegacyCodeId(legacyCoText);
+                var stateId = FindStateId(stateText);
+                var databaseId = FindDatabaseId(graphicsDatabaseText);
+                var trimSizeId = FindTrimSizeId(trimSizeText);
+                var bindPlantId = FindBindPlantId(bindPlantText);
+
+                AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Foot Print", footPrintText, printFootId);
+                AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Legacy Co", legacyCoText, legacyCodeId);
+                AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "State", stateText, stateId);
+                AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Graphics Database", graphicsDatabaseText, databaseId);
+                AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Trim Size", trimSizeText, trimSizeId);
+                AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Bind Plant", bindPlantText, bindPlantId);
+
+                var erroresAntesDeFechas = resultado.Errores.Count;
+
+                var firstDuePrinterDate = ReadDateWithValidation(
+                    row,
+                    headerMap,
+                    today,
+                    resultado.Errores,
+                    rowNumber,
+                    false,
+                    "First Due Printer",
+                    "YP First Due Printer",
+                    "WP Due Printer",
+                    "East WP Final Due Printer");
+
+                var proofExtract = ReadDateWithValidation(
+                    row,
+                    headerMap,
+                    today,
+                    resultado.Errores,
+                    rowNumber,
+                    false,
+                    "Proof Extract",
+                    "Extract - Proof",
+                    "WP Proof Extract",
+                    "YP Proof Extract");
+
+                var finalExtract = ReadDateWithValidation(
+                    row,
+                    headerMap,
+                    today,
+                    resultado.Errores,
+                    rowNumber,
+                    false,
+                    "Extract - Final",
+                    "Final Extract",
+                    "WP Extract - Final",
+                    "YP Extract - Final");
+
+                var memoExtract = ReadDateWithValidation(
+                    row,
+                    headerMap,
+                    today,
+                    resultado.Errores,
+                    rowNumber,
+                    false,
+                    "Memo Extract",
+                    "Extract - Memo");
+
+                var dirxionDate = ReadDateWithValidation(
+                    row,
+                    headerMap,
+                    today,
+                    resultado.Errores,
+                    rowNumber,
+                    false,
+                    "Dirxion",
+                    "File Due Online/LSA/Galley Update Summary RPT",
+                    "File Due Online",
+                    "Galley Update Summary RPT");
+
+                var pubDate = ReadDateWithValidation(
+                    row,
+                    headerMap,
+                    today,
+                    resultado.Errores,
+                    rowNumber,
+                    false,
+                    "Pub Date",
+                    "Publication Date");
+
+                if (resultado.Errores.Count > erroresAntesDeFechas)
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: The row was skipped because it contains invalid date values.");
+                    continue;
+                }
+
+                var finalPoDate = CalculateFinalPoDate(firstDuePrinterDate);
+
+                if (!string.IsNullOrWhiteSpace(bookName))
+                    libro.BookName = bookName;
+
+                if (!string.IsNullOrWhiteSpace(kgenCode))
+                    libro.KGENCode = kgenCode;
+
+                if (!string.IsNullOrWhiteSpace(lsaCode))
+                    libro.LSACode = lsaCode;
+
+                if (!string.IsNullOrWhiteSpace(productIssue))
+                    libro.ProductIssue = productIssue;
+
+                libro.ProofExtract = proofExtract;
+                libro.FinalExtract = finalExtract;
+                libro.MemoExtract = memoExtract;
+                libro.FinalPODate = finalPoDate;
+                libro.ShippingDate = firstDuePrinterDate;
+                libro.DirxionDate = dirxionDate;
+                libro.PubDate = pubDate;
+
+                libro.PrintFootId = printFootId;
+                libro.LegacyCodeId = legacyCodeId;
+                libro.StateId = stateId;
+                libro.DatabaseId = databaseId;
+                libro.TrimSizeId = trimSizeId;
+                libro.BindPlantId = bindPlantId;
+
+                libro.SRLSuppression = ReadYesNoBool(row, headerMap, "SRL Suppression Flag");
+                libro.NWP = ReadYesNoBool(row, headerMap, "NWP");
+
+                libro.Finalizado = false;
+
+                resultado.LibrosActualizados++;
+            }
+
+            await db.SaveChangesAsync();
+
+            XlsxBooksUpdateInputKey = Guid.NewGuid();
+
+            await CargarDatosAsync();
+
+            await InvokeAsync(StateHasChanged);
+
+            var tipoResultado = resultado.TieneErrores ? "error" : "success";
+
+            var tituloResultado = resultado.TieneErrores
+                ? "XLSX books update completed with errors"
+                : "XLSX books update completed";
+
+            var resumenResultado =
+                $"Books updated: {resultado.LibrosActualizados}. " +
+                $"Books not found: {resultado.LibrosNoEncontrados}. " +
+                $"Skipped rows: {resultado.FilasOmitidas}.";
+
+            await MostrarModalUpdateBooksJsAsync(
+                resultado,
+                tituloResultado,
+                resumenResultado,
+                tipoResultado);
+        }
+        catch (Exception ex)
+        {
+            var mensajeError = ex.InnerException?.Message ?? ex.Message;
+
+            resultado.Errores.Add($"General update error: {mensajeError}");
+
+            await MostrarModalUpdateBooksJsAsync(
+                resultado,
+                "XLSX books update failed",
+                "The file could not be processed. Review the error details below.",
+                "error");
+        }
+        finally
+        {
+            ActualizandoLibrosXlsx = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task MostrarModalUpdateBooksJsAsync(
+        ActualizacionLibrosResultado resultado,
+        string titulo,
+        string resumen,
+        string tipo)
+    {
+        await JS.InvokeVoidAsync("assignmentImportModal.show", new
+        {
+            title = titulo,
+            summary = resumen,
+            type = tipo,
+
+            booksLabel = "Books Updated",
+            booksCreated = resultado.LibrosActualizados,
+
+            assignmentsLabel = "Not Found",
+            assignmentsCreated = resultado.LibrosNoEncontrados,
+
+            duplicatedLabel = "Warnings",
+            duplicated = resultado.Advertencias.Count,
+
+            skippedLabel = "Skipped Rows",
+            skippedRows = resultado.FilasOmitidas,
+
+            errors = resultado.Errores,
+            warnings = resultado.Advertencias
+        });
+    }
+
     private sealed class AsignacionViewModel
     {
         public Guid Id { get; set; }
@@ -1727,6 +2797,34 @@
         public string BindPlantName { get; set; } = string.Empty;
 
         public DateOnly PubDate { get; set; }
+
+        public bool TieneAsignacionTemporal { get; set; }
+        public string EmpleadoOriginalNombre { get; set; } = string.Empty;
+        public string EmpleadoTemporalNombre { get; set; } = string.Empty;
+        public string EtapasTemporales { get; set; } = string.Empty;
+
+        public DateOnly ProofExtract { get; set; }
+        public DateOnly FinalExtract { get; set; }
+        public DateOnly MemoExtract { get; set; }
+        public DateOnly FinalPODate { get; set; }
+        public DateOnly ShippingDate { get; set; }
+        public DateOnly DirxionDate { get; set; }
+        public DateOnly PubDateValue { get; set; }
+
+        public string BindPlantCode { get; set; } = string.Empty;
+    }
+
+    private sealed class ActualizacionLibrosResultado
+    {
+        public int LibrosActualizados { get; set; }
+        public int LibrosNoEncontrados { get; set; }
+        public int FilasOmitidas { get; set; }
+
+        public List<string> Errores { get; set; } = new();
+        public List<string> Advertencias { get; set; } = new();
+
+        public bool TieneErrores => Errores.Any();
+        public bool TieneAdvertencias => Advertencias.Any();
     }
 
     private sealed class ImportacionAsignacionesResultado

@@ -73,6 +73,16 @@
                         <label for="xlsxUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
                             @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
                         </label>
+
+                        <InputFile @key="XlsxUpdateInputKey"
+                                   id="xlsxBooksUpdateUpload"
+                                   class="file-input-hidden"
+                                   OnChange="UpdateBooksFromXlsxAsync"
+                                   accept=".xlsx" />
+
+                        <label for="xlsxBooksUpdateUpload" class="btn-update-xlsx @(ActualizandoLibrosXlsx ? "disabled" : "")">
+                            @(ActualizandoLibrosXlsx ? "Updating..." : "🔄 Update with XLSX")
+                        </label>
                     }
 
                     @if (CreateBook || EditBook)
@@ -527,6 +537,9 @@
 
     private int XlsxInputKey { get; set; } = 0;
 
+    private bool ActualizandoLibrosXlsx { get; set; } = false;
+    private Guid XlsxUpdateInputKey { get; set; } = Guid.NewGuid();
+
     private const long MaxXlsxSize = 20 * 1024 * 1024;
 
     private string SelectedPubMonth { get; set; } = string.Empty;
@@ -563,6 +576,429 @@
 
             return query;
         }
+    }
+    private async Task UpdateBooksFromXlsxAsync(InputFileChangeEventArgs e)
+    {
+        if (!EditBook)
+        {
+            MostrarMensaje("You do not have permission to update books.", "error");
+            return;
+        }
+
+        var resultado = new ActualizacionLibrosResultado();
+
+        try
+        {
+            ActualizandoLibrosXlsx = true;
+            LimpiarMensaje();
+
+            if (!BindPlants.Any() ||
+                !Databases.Any() ||
+                !LegacyCodes.Any() ||
+                !PrintFeet.Any() ||
+                !TrimSizes.Any() ||
+                !States.Any())
+            {
+                await CargarCatalogosAsync();
+            }
+
+            var file = e.File;
+
+            if (file is null)
+            {
+                MostrarMensaje("No file was selected.", "error");
+                return;
+            }
+
+            if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                MostrarMensaje("Only .xlsx files are allowed.", "error");
+                return;
+            }
+
+            await using var stream = file.OpenReadStream(MaxXlsxSize);
+            using var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using var workbook = new XLWorkbook(memoryStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+
+            if (worksheet is null)
+            {
+                MostrarMensaje("The XLSX file does not contain any worksheet.", "error");
+                return;
+            }
+
+            var headerRow = worksheet.FirstRowUsed();
+
+            if (headerRow is null)
+            {
+                MostrarMensaje("The XLSX file is empty.", "error");
+                return;
+            }
+
+            var headerMap = BuildHeaderMap(headerRow);
+
+            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code") &&
+                !HeaderExists(headerMap, "LSA Code", "LSA"))
+            {
+                MostrarMensaje("The XLSX file must contain KGEN Code or LSA Code to find the book.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            // Importante: se cargan todos, incluso finalizados, para poder reactivar si las fechas nuevas aplican.
+            var librosDb = await db.Libros.ToListAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
+            {
+                var rowNumber = row.RowNumber();
+
+                var bookName = ReadText(row, headerMap, "Product Name", "Book Name");
+                var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code");
+                var lsaCode = ReadText(row, headerMap, "LSA Code", "LSA");
+                var productIssue = ReadText(row, headerMap, "Product Issue");
+
+                if (string.IsNullOrWhiteSpace(bookName) &&
+                    string.IsNullOrWhiteSpace(kgenCode) &&
+                    string.IsNullOrWhiteSpace(lsaCode))
+                {
+                    resultado.FilasOmitidas++;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(kgenCode) &&
+                    string.IsNullOrWhiteSpace(lsaCode))
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: KGEN Code or LSA Code is required to update the book.");
+                    continue;
+                }
+
+                var libro = BuscarLibroPorCodigos(librosDb, kgenCode, lsaCode);
+
+                if (libro is null)
+                {
+                    resultado.LibrosNoEncontrados++;
+                    resultado.Advertencias.Add(
+                        $"Row {rowNumber}: Book was not found. KGEN: '{kgenCode}', LSA: '{lsaCode}', Product Name: '{bookName}'.");
+                    continue;
+                }
+
+                var erroresAntesDeFechas = resultado.Errores.Count;
+
+                var firstDuePrinterDate = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "First Due Printer",
+                    "YP First Due Printer",
+                    "WP Due Printer",
+                    "East WP Final Due Printer");
+
+                var proofExtract = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Proof Extract",
+                    "Extract - Proof",
+                    "WP Proof Extract",
+                    "YP Proof Extract");
+
+                var finalExtract = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Extract - Final",
+                    "Final Extract",
+                    "WP Extract - Final",
+                    "YP Extract - Final");
+
+                var memoExtract = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Memo Extract",
+                    "Extract - Memo");
+
+                var finalPoDate = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Final PO Date",
+                    "Final PO",
+                    "Finished PO Date");
+
+                var shippingDate = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Shipping Date",
+                    "Shipping",
+                    "First Due Printer");
+
+                var dirxionDate = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Dirxion",
+                    "Dirxion Date",
+                    "File Due Online/LSA/Galley Update Summary RPT",
+                    "File Due Online",
+                    "Galley Update Summary RPT");
+
+                var pubDate = ReadOptionalDateWithValidation(
+                    row,
+                    headerMap,
+                    resultado.Errores,
+                    rowNumber,
+                    "Pub Date",
+                    "Publication Date");
+
+                if (resultado.Errores.Count > erroresAntesDeFechas)
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: The row was skipped because it contains invalid date values.");
+                    continue;
+                }
+
+                // Datos principales
+                if (!string.IsNullOrWhiteSpace(bookName))
+                    libro.BookName = bookName;
+
+                if (!string.IsNullOrWhiteSpace(kgenCode))
+                    libro.KGENCode = kgenCode;
+
+                if (!string.IsNullOrWhiteSpace(lsaCode))
+                    libro.LSACode = lsaCode;
+
+                if (!string.IsNullOrWhiteSpace(productIssue))
+                    libro.ProductIssue = productIssue;
+
+                // Fechas: solo actualiza si la columna existe y trae valor válido.
+                if (proofExtract.HasValue)
+                    libro.ProofExtract = proofExtract.Value;
+
+                if (finalExtract.HasValue)
+                    libro.FinalExtract = finalExtract.Value;
+
+                if (memoExtract.HasValue)
+                    libro.MemoExtract = memoExtract.Value;
+
+                if (firstDuePrinterDate.HasValue)
+                {
+                    libro.ShippingDate = firstDuePrinterDate.Value;
+                    libro.FinalPODate = CalculateFinalPoDate(firstDuePrinterDate.Value);
+                }
+                else
+                {
+                    if (shippingDate.HasValue)
+                        libro.ShippingDate = shippingDate.Value;
+
+                    if (finalPoDate.HasValue)
+                        libro.FinalPODate = finalPoDate.Value;
+                }
+
+                if (dirxionDate.HasValue)
+                    libro.DirxionDate = dirxionDate.Value;
+
+                if (pubDate.HasValue)
+                    libro.PubDate = pubDate.Value;
+
+                // Catálogos: solo actualiza si el XLSX trae valor.
+                var footPrintText = ReadText(row, headerMap, "Foot Print");
+                var legacyCoText = ReadText(row, headerMap, "Legacy Co");
+                var stateText = ReadText(row, headerMap, "State");
+                var graphicsDatabaseText = ReadText(row, headerMap, "Graphics Database", "Database");
+                var trimSizeText = ReadText(row, headerMap, "Trim Size");
+                var bindPlantText = ReadText(row, headerMap, "Bind Plant");
+
+                if (!string.IsNullOrWhiteSpace(footPrintText))
+                {
+                    var id = FindPrintFootId(footPrintText);
+                    AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Foot Print", footPrintText, id);
+                    libro.PrintFootId = id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(legacyCoText))
+                {
+                    var id = FindLegacyCodeId(legacyCoText);
+                    AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Legacy Co", legacyCoText, id);
+                    libro.LegacyCodeId = id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(stateText))
+                {
+                    var id = FindStateId(stateText);
+                    AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "State", stateText, id);
+                    libro.StateId = id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(graphicsDatabaseText))
+                {
+                    var id = FindDatabaseId(graphicsDatabaseText);
+                    AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Graphics Database", graphicsDatabaseText, id);
+                    libro.DatabaseId = id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(trimSizeText))
+                {
+                    var id = FindTrimSizeId(trimSizeText);
+                    AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Trim Size", trimSizeText, id);
+                    libro.TrimSizeId = id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(bindPlantText))
+                {
+                    var id = FindBindPlantId(bindPlantText);
+                    AddCatalogWarningIfNeeded(resultado.Advertencias, rowNumber, "Bind Plant", bindPlantText, id);
+                    libro.BindPlantId = id;
+                }
+
+                if (HeaderExists(headerMap, "SRL Suppression Flag"))
+                    libro.SRLSuppression = ReadYesNoBool(row, headerMap, "SRL Suppression Flag");
+
+                if (HeaderExists(headerMap, "NWP"))
+                    libro.NWP = ReadYesNoBool(row, headerMap, "NWP");
+
+                // Si la nueva fecha Dirxion ya pasó, queda finalizado. Si se actualiza a futuro, se reactiva.
+                libro.Finalizado = libro.DirxionDate != default && libro.DirxionDate < today;
+
+                resultado.LibrosActualizados++;
+            }
+
+            await db.SaveChangesAsync();
+
+            XlsxUpdateInputKey = Guid.NewGuid();
+
+            await CargarLibrosAsync();
+
+            var tipo = resultado.TieneErrores ? "error" : "success";
+
+            var mensaje =
+                $"XLSX books update completed. " +
+                $"Updated: {resultado.LibrosActualizados}. " +
+                $"Not found: {resultado.LibrosNoEncontrados}. " +
+                $"Skipped rows: {resultado.FilasOmitidas}.";
+
+            if (resultado.Advertencias.Any())
+            {
+                var preview = string.Join(" | ", resultado.Advertencias.Take(6));
+                mensaje += $" Warnings: {preview}";
+
+                if (resultado.Advertencias.Count > 6)
+                    mensaje += $" and {resultado.Advertencias.Count - 6} more.";
+            }
+
+            if (resultado.Errores.Any())
+            {
+                var preview = string.Join(" | ", resultado.Errores.Take(6));
+                mensaje += $" Errors: {preview}";
+
+                if (resultado.Errores.Count > 6)
+                    mensaje += $" and {resultado.Errores.Count - 6} more.";
+            }
+
+            MostrarMensaje(mensaje, tipo);
+        }
+        catch (Exception ex)
+        {
+            var mensajeError = ex.InnerException?.Message ?? ex.Message;
+            MostrarMensaje($"Error updating books from XLSX: {mensajeError}", "error");
+        }
+        finally
+        {
+            ActualizandoLibrosXlsx = false;
+        }
+    }
+
+    private static Libros? BuscarLibroPorCodigos(List<Libros> libros, string kgenCode, string lsaCode)
+    {
+        var kgen = kgenCode?.Trim();
+        var lsa = lsaCode?.Trim();
+
+        return libros.FirstOrDefault(x =>
+            (!string.IsNullOrWhiteSpace(kgen) &&
+             string.Equals(x.KGENCode?.Trim(), kgen, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrWhiteSpace(lsa) &&
+             string.Equals(x.LSACode?.Trim(), lsa, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static DateOnly? ReadOptionalDateWithValidation(
+    IXLRow row,
+    Dictionary<string, int> headerMap,
+    List<string> errors,
+    int rowNumber,
+    params string[] names)
+    {
+        var cell = GetCell(row, headerMap, names);
+        var columnName = names.FirstOrDefault() ?? "Date";
+
+        if (cell is null || cell.IsEmpty())
+            return null;
+
+        if (cell.TryGetValue<DateTime>(out var dateTime))
+            return DateOnly.FromDateTime(dateTime);
+
+        if (cell.TryGetValue<double>(out var numberValue))
+        {
+            try
+            {
+                var excelDate = DateTime.FromOADate(numberValue);
+                return DateOnly.FromDateTime(excelDate);
+            }
+            catch
+            {
+                errors.Add($"Row {rowNumber}: The value in column '{columnName}' is not a valid Excel date.");
+                return null;
+            }
+        }
+
+        var text = cell.GetFormattedString()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            text = cell.GetString().Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        string[] formats =
+        {
+        "MM/dd/yyyy",
+        "M/d/yyyy",
+        "yyyy-MM-dd",
+        "dd/MM/yyyy",
+        "d/M/yyyy",
+        "M/d/yy",
+        "MM/dd/yy",
+        "dd/MM/yy",
+        "d/M/yy"
+    };
+
+        if (DateOnly.TryParseExact(text, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exactDate))
+            return exactDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+            return parsedDate;
+
+        if (DateOnly.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.None, out var currentCultureDate))
+            return currentCultureDate;
+
+        errors.Add($"Row {rowNumber}: The value '{text}' in column '{columnName}' is not a valid date.");
+
+        return null;
     }
 
     private void OnDobleClickLibro(Libros libro)
@@ -1613,4 +2049,18 @@
         public string Label { get; set; } = string.Empty;
         public int Count { get; set; }
     }
+
+    private sealed class ActualizacionLibrosResultado
+    {
+        public int LibrosActualizados { get; set; }
+        public int LibrosNoEncontrados { get; set; }
+        public int FilasOmitidas { get; set; }
+
+        public List<string> Errores { get; set; } = new();
+        public List<string> Advertencias { get; set; } = new();
+
+        public bool TieneErrores => Errores.Any();
+        public bool TieneAdvertencias => Advertencias.Any();
+    }
+
 }
