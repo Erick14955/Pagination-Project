@@ -18,85 +18,67 @@
 <link href="style/dashboard.css" rel="stylesheet" />
 
 <div class="thryv-dashboard-page">
-    <div class="thryv-dashboard-header">
-        <div>
+
+    <section class="thryv-dashboard-header">
+        <div class="thryv-dashboard-hero-content">
             <h2 class="thryv-dashboard-title">General Dashboard</h2>
             <p class="thryv-dashboard-subtitle">
                 Quick system summary and current list of assigned books.
             </p>
         </div>
-    </div>
 
-    @if (loading)
-    {
-        <div class="thryv-loading-card">
-            <div class="thryv-loading-text">Loading statistics...</div>
-        </div>
-    }
-    else
-    {
-        @if (PuedeVerUsuarios || PuedeVerEmpleados || PuedeVerLibros || PuedeVerEvaluaciones || PuedeVerAsignaciones)
-        {
-            <div class="thryv-stats-grid">
-
+        <div class="thryv-dashboard-hero-stats">
+            @if (loading)
+            {
+                <div class="thryv-hero-stat-card">
+                    <span>LOADING</span>
+                    <strong>...</strong>
+                </div>
+            }
+            else
+            {
                 @if (PuedeVerUsuarios)
                 {
-                    <div class="thryv-stat-card">
-                        <div class="thryv-stat-info">
-                            <span class="thryv-stat-label">Total Users</span>
-                            <div class="thryv-stat-number">@stats.TotalUsers</div>
-                        </div>
-                        <div class="thryv-stat-icon users">👥</div>
+                    <div class="thryv-hero-stat-card">
+                        <span>TOTAL USERS</span>
+                        <strong>@stats.TotalUsers</strong>
                     </div>
                 }
 
                 @if (PuedeVerEmpleados)
                 {
-                    <div class="thryv-stat-card">
-                        <div class="thryv-stat-info">
-                            <span class="thryv-stat-label">Total Employees</span>
-                            <div class="thryv-stat-number">@stats.TotalEmployees</div>
-                        </div>
-                        <div class="thryv-stat-icon employees">👤</div>
+                    <div class="thryv-hero-stat-card">
+                        <span>EMPLOYEES</span>
+                        <strong>@stats.TotalEmployees</strong>
                     </div>
                 }
 
                 @if (PuedeVerLibros)
                 {
-                    <div class="thryv-stat-card">
-                        <div class="thryv-stat-info">
-                            <span class="thryv-stat-label">Active Books</span>
-                            <div class="thryv-stat-number">@stats.TotalBooks</div>
-                        </div>
-                        <div class="thryv-stat-icon books">📚</div>
+                    <div class="thryv-hero-stat-card">
+                        <span>ACTIVE BOOKS</span>
+                        <strong>@stats.TotalBooks</strong>
                     </div>
                 }
 
                 @if (PuedeVerEvaluaciones)
                 {
-                    <div class="thryv-stat-card">
-                        <div class="thryv-stat-info">
-                            <span class="thryv-stat-label">Active Evaluations</span>
-                            <div class="thryv-stat-number">@stats.TotalEvaluations</div>
-                        </div>
-                        <div class="thryv-stat-icon evaluations">⭐</div>
+                    <div class="thryv-hero-stat-card">
+                        <span>EVALUATIONS</span>
+                        <strong>@stats.TotalEvaluations</strong>
                     </div>
                 }
 
                 @if (PuedeVerAsignaciones)
                 {
-                    <div class="thryv-stat-card">
-                        <div class="thryv-stat-info">
-                            <span class="thryv-stat-label">Active Assignments Today</span>
-                            <div class="thryv-stat-number">@assignedBooks.Count</div>
-                        </div>
-                        <div class="thryv-stat-icon books">📌</div>
+                    <div class="thryv-hero-stat-card">
+                        <span>ASSIGNMENTS TODAY</span>
+                        <strong>@assignedBooks.Count</strong>
                     </div>
                 }
-
-            </div>
-        }
-    }
+            }
+        </div>
+    </section>
 
     <div class="thryv-section-card">
         <div class="thryv-section-header">
@@ -148,7 +130,15 @@
                 </thead>
 
                 <tbody>
-                    @if (AssignedBooksFiltered.Count == 0)
+                    @if (loading)
+                    {
+                        <tr>
+                            <td colspan="6" class="thryv-empty-row">
+                                Loading statistics...
+                            </td>
+                        </tr>
+                    }
+                    else if (AssignedBooksFiltered.Count == 0)
                     {
                         <tr>
                             <td colspan="6" class="thryv-empty-row">

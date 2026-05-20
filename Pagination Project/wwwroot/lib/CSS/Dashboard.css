@@ -8,118 +8,90 @@
     box-sizing: border-box;
 }
 
+/* =========================
+   DASHBOARD HERO / TITLE
+   Cards dentro del title
+========================= */
+
 .thryv-dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    width: 100%;
+    background: linear-gradient(115deg, #081827 0%, #08263a 42%, #006452 100%);
+    border-radius: 24px;
+    padding: 34px 44px;
+    min-height: 230px;
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(520px, 740px);
+    gap: 36px;
+    align-items: start;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+}
+
+.thryv-dashboard-hero-content {
+    padding-top: 10px;
 }
 
 .thryv-dashboard-title {
     margin: 0;
-    font-size: 32px;
-    font-weight: 800;
-    color: #111111;
+    color: #ffffff;
+    font-size: 38px;
+    font-weight: 900;
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.6px;
 }
 
 .thryv-dashboard-subtitle {
-    margin: 8px 0 0 0;
-    color: #6b7280;
-    font-size: 15px;
-    line-height: 1.6;
-    max-width: 720px;
+    margin: 18px 0 0 0;
+    color: #f1f5f9;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.45;
+    max-width: 760px;
 }
 
-.thryv-loading-card {
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 28px;
-    border: 1px solid rgba(17,17,17,0.06);
-    box-shadow: 0 12px 30px rgba(15,23,42,0.05);
-}
-
-.thryv-loading-text {
-    color: #6b7280;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.thryv-stats-grid {
+.thryv-dashboard-hero-stats {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+    gap: 18px 20px;
+    justify-content: end;
 }
 
-.thryv-stat-card {
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    box-shadow: 0 12px 30px rgba(15,23,42,0.05);
-    border: 1px solid rgba(17,17,17,0.06);
-    min-height: 132px;
-    transition: transform .18s ease, box-shadow .18s ease;
-}
-
-    .thryv-stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 16px 34px rgba(15,23,42,0.08);
-    }
-
-.thryv-stat-info {
+.thryv-hero-stat-card {
+    min-height: 112px;
+    padding: 22px 26px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    min-width: 0;
-}
-
-.thryv-stat-label {
-    color: #6b7280;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.35;
-}
-
-.thryv-stat-number {
-    font-size: 42px;
-    line-height: 1;
-    font-weight: 800;
-    color: #111111;
-    letter-spacing: -0.03em;
-}
-
-.thryv-stat-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 30px;
-    flex-shrink: 0;
-    border: 1px solid rgba(17,17,17,0.04);
 }
 
-    .thryv-stat-icon.users {
-        background: rgba(255,80,0,0.12);
+    .thryv-hero-stat-card span {
+        display: block;
+        color: #cbd5e1;
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
     }
 
-    .thryv-stat-icon.employees {
-        background: rgba(17,17,17,0.08);
+    .thryv-hero-stat-card strong {
+        display: block;
+        color: #ffffff;
+        font-size: 34px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 4px;
     }
 
-    .thryv-stat-icon.books {
-        background: rgba(255,106,31,0.16);
-    }
-
-    .thryv-stat-icon.evaluations {
-        background: rgba(255,80,0,0.10);
-    }
+/* =========================
+   SECTION CARD
+========================= */
 
 .thryv-section-card {
     background: #ffffff;
@@ -165,6 +137,10 @@
     flex-wrap: wrap;
 }
 
+/* =========================
+   FILTERS
+========================= */
+
 .thryv-filter-group {
     display: flex;
     flex-direction: column;
@@ -192,8 +168,8 @@
 }
 
     .thryv-filter-select:focus {
-        border-color: #ff5000;
-        box-shadow: 0 0 0 4px rgba(255,80,0,0.12);
+        border-color: #006452;
+        box-shadow: 0 0 0 4px rgba(0, 100, 82, 0.14);
     }
 
 .thryv-clear-filter-btn {
@@ -215,20 +191,24 @@
     }
 
 .thryv-section-badge {
-    background: rgba(255,80,0,0.10);
-    color: #c2410c;
+    background: rgba(0, 100, 82, 0.10);
+    color: #006452;
     padding: 10px 14px;
     border-radius: 999px;
     font-weight: 800;
     font-size: 13px;
     white-space: nowrap;
     flex-shrink: 0;
-    border: 1px solid rgba(255,80,0,0.14);
+    border: 1px solid rgba(0, 100, 82, 0.14);
     height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
+
+/* =========================
+   TABLE
+========================= */
 
 .thryv-table-wrapper {
     width: 100%;
@@ -263,7 +243,7 @@
     }
 
     .thryv-custom-table tbody tr:hover {
-        background: rgba(255,80,0,0.03);
+        background: rgba(0, 100, 82, 0.03);
     }
 
 .thryv-employee-cell {
@@ -278,7 +258,7 @@
     height: 40px;
     border-radius: 14px;
     background: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
-    color: #ff5000;
+    color: #22c55e;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -296,12 +276,12 @@
     display: inline-block;
     padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(255,80,0,0.10);
-    color: #c2410c;
+    background: rgba(0, 100, 82, 0.10);
+    color: #006452;
     font-weight: 800;
     font-size: 12px;
     white-space: nowrap;
-    border: 1px solid rgba(255,80,0,0.10);
+    border: 1px solid rgba(0, 100, 82, 0.10);
 }
 
     .thryv-code-pill.secondary {
@@ -319,9 +299,9 @@
     font-size: 12px;
     font-weight: 800;
     white-space: nowrap;
-    background: #fff7ed;
-    color: #c2410c;
-    border: 1px solid rgba(255,80,0,0.12);
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid rgba(0, 100, 82, 0.12);
 }
 
 .thryv-empty-row {
@@ -349,9 +329,24 @@
         margin: 0 auto;
     }
 
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1400px) {
+    .thryv-dashboard-header {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .thryv-dashboard-hero-stats {
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+    }
+}
+
 @media (max-width: 1200px) {
-    .thryv-stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .thryv-dashboard-hero-stats {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
     }
 
     .thryv-section-header {
@@ -369,47 +364,41 @@
     }
 
     .thryv-dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+        padding: 24px;
+        border-radius: 22px;
+        gap: 24px;
     }
 
     .thryv-dashboard-title {
-        font-size: 24px;
+        font-size: 30px;
         line-height: 1.12;
     }
 
     .thryv-dashboard-subtitle {
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.5;
         max-width: 100%;
     }
 
-    .thryv-stats-grid {
+    .thryv-dashboard-hero-stats {
         grid-template-columns: 1fr;
-        gap: 14px;
+        gap: 12px;
     }
 
-    .thryv-stat-card {
-        min-height: auto;
-        padding: 18px;
-        border-radius: 20px;
+    .thryv-hero-stat-card {
+        min-height: 96px;
+        padding: 18px 20px;
+        border-radius: 18px;
     }
 
-    .thryv-stat-label {
-        font-size: 14px;
-    }
+        .thryv-hero-stat-card span {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
 
-    .thryv-stat-number {
-        font-size: 34px;
-    }
-
-    .thryv-stat-icon {
-        width: 54px;
-        height: 54px;
-        font-size: 24px;
-        border-radius: 16px;
-    }
+        .thryv-hero-stat-card strong {
+            font-size: 30px;
+        }
 
     .thryv-section-card {
         border-radius: 20px;
@@ -484,32 +473,17 @@
 }
 
 @media (max-width: 480px) {
+    .thryv-dashboard-header {
+        border-radius: 18px;
+        padding: 20px;
+    }
+
     .thryv-dashboard-title {
-        font-size: 21px;
+        font-size: 26px;
     }
 
     .thryv-dashboard-subtitle {
-        font-size: 13px;
-    }
-
-    .thryv-stat-card {
-        padding: 16px;
-        gap: 12px;
-    }
-
-    .thryv-stat-label {
-        font-size: 13px;
-    }
-
-    .thryv-stat-number {
-        font-size: 30px;
-    }
-
-    .thryv-stat-icon {
-        width: 48px;
-        height: 48px;
-        font-size: 22px;
-        border-radius: 14px;
+        font-size: 14px;
     }
 
     .thryv-section-header {
