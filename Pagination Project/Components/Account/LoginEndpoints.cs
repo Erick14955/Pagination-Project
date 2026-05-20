@@ -22,12 +22,24 @@ namespace Pagination_Project.Components.Account
                 if (string.IsNullOrWhiteSpace(returnUrl))
                     returnUrl = "/dashboard";
 
-                var usuario = await authService.ValidarLoginAsync(username, password);
+                var resultado = await authService.ValidarLoginDetalladoAsync(username, password);
 
-                if (usuario is null)
+                if (!resultado.Exitoso || resultado.Usuario is null)
                 {
-                    return Results.Redirect($"/login?error=1");
+                    var error = resultado.Estado switch
+                    {
+                        LoginEstado.UsuarioNoExiste => "usuario",
+                        LoginEstado.ContrasenaIncorrecta => "password",
+                        LoginEstado.UsuarioInactivo => "inactivo",
+                        _ => "general"
+                    };
+
+                    return Results.Redirect($"/login?error={error}");
                 }
+
+                var usuario = resultado.Usuario;
+
+                var requiereCambioPassword = usuario.RequirePasswordChange;
 
                 var claims = new List<Claim>
                 {
@@ -35,7 +47,8 @@ namespace Pagination_Project.Components.Account
                     new(ClaimTypes.Name, usuario.Name ?? string.Empty),
                     new("Username", usuario.Username ?? string.Empty),
                     new(ClaimTypes.Email, usuario.email ?? string.Empty),
-                    new("Lvl_Id", usuario.lvl_Id.ToString())
+                    new("LvlId", usuario.lvl_Id.ToString()),
+                    new("RequirePasswordChange", requiereCambioPassword.ToString())
                 };
 
                 if (usuario.Permisos is not null)
@@ -85,8 +98,57 @@ namespace Pagination_Project.Components.Account
                         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
                     });
 
+                if (requiereCambioPassword)
+                {
+                    return Results.Redirect("/cambiar-password");
+                }
+
                 return Results.Redirect(returnUrl);
             });
+
+            endpoints.MapPost("/account/change-password", async (
+                HttpContext httpContext,
+                IUsuarioService usuarioService) =>
+            {
+                if (httpContext.User?.Identity?.IsAuthenticated != true)
+                {
+                    return Results.Redirect("/login?error=general");
+                }
+
+                var userIdClaim = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!Guid.TryParse(userIdClaim, out var usuarioId))
+                {
+                    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    return Results.Redirect("/login?error=general");
+                }
+
+                var form = await httpContext.Request.ReadFormAsync();
+
+                var nuevaPassword = form["NewPassword"].ToString();
+                var confirmarPassword = form["ConfirmPassword"].ToString();
+
+                if (string.IsNullOrWhiteSpace(nuevaPassword) || nuevaPassword.Length < 6)
+                {
+                    return Results.Redirect("/cambiar-password?error=short");
+                }
+
+                if (nuevaPassword != confirmarPassword)
+                {
+                    return Results.Redirect("/cambiar-password?error=mismatch");
+                }
+
+                var actualizado = await usuarioService.CambiarPasswordAsync(usuarioId, nuevaPassword);
+
+                if (!actualizado)
+                {
+                    return Results.Redirect("/cambiar-password?error=notfound");
+                }
+
+                await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                return Results.Redirect("/login?changed=1");
+            }).RequireAuthorization();
 
             endpoints.MapPost("/account/logout", async (HttpContext httpContext) =>
             {

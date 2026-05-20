@@ -45,6 +45,7 @@ namespace Pagination_Project.Services
 
             var usuario = await db.Users
                 .Include(u => u.Permisos)
+                .Include(u => u.Empleado)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == usernameLimpio);
 

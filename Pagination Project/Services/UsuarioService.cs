@@ -1,5 +1,7 @@
-﻿using Isopoh.Cryptography.Argon2;
+﻿using DocumentFormat.OpenXml.InkML;
+using Isopoh.Cryptography.Argon2;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Pagination_Project.Data;
 using Pagination_Project.Models;
 
@@ -16,11 +18,12 @@ namespace Pagination_Project.Services
 
         public async Task<List<UsuarioListDto>> ObtenerTodosAsync()
         {
-            await using var db = await _dbFactory.CreateDbContextAsync();
+            await using var context = await _dbFactory.CreateDbContextAsync();
 
-            return await db.Users
+            return await context.Users
                 .AsNoTracking()
                 .Include(u => u.Permisos)
+                .Include(u => u.Empleado)
                 .OrderBy(u => u.Username)
                 .Select(u => new UsuarioListDto
                 {
@@ -30,9 +33,30 @@ namespace Pagination_Project.Services
                     Name = u.Name,
                     Lvl_Id = u.lvl_Id,
                     NivelNombre = u.Permisos != null ? u.Permisos.Name : string.Empty,
-                    Activo = u.Activo
+                    Activo = u.Activo,
+                    EmployeeId = u.EmployeeId,
+                    EmployeeName = u.Empleado != null ? u.Empleado.Nombre : string.Empty,
+                    EmployeeCode = u.Empleado != null ? u.Empleado.IdEmpleado : null,
+                    RequirePasswordChange = u.RequirePasswordChange
                 })
                 .ToListAsync();
+        }
+
+        public async Task<bool> CambiarPasswordAsync(Guid usuarioId, string nuevaPassword)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            var usuario = await db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            if (usuario == null)
+                return false;
+
+            usuario.password = Argon2.Hash(nuevaPassword);
+            usuario.RequirePasswordChange = false;
+
+            await db.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<List<PermisoComboDto>> ObtenerPermisosAsync()
@@ -91,6 +115,21 @@ namespace Pagination_Project.Services
             if (!permisoExiste)
                 throw new Exception("The selected permission level does not exist.");
 
+            if (dto.EmployeeId.HasValue)
+            {
+                var empleadoExiste = await db.Empleados
+                    .AnyAsync(e => e.Id == dto.EmployeeId.Value);
+
+                if (!empleadoExiste)
+                    throw new Exception("The selected employee does not exist.");
+
+                var empleadoYaTieneUsuario = await db.Users
+                    .AnyAsync(u => u.EmployeeId == dto.EmployeeId.Value);
+
+                if (empleadoYaTieneUsuario)
+                    throw new Exception("This employee already has an assigned user.");
+            }
+
             var usuario = new Usuario
             {
                 Id = Guid.NewGuid(),
@@ -99,7 +138,9 @@ namespace Pagination_Project.Services
                 password = Argon2.Hash(dto.Password),
                 Name = dto.Name,
                 lvl_Id = dto.Lvl_Id,
-                Activo = dto.Activo
+                Activo = dto.Activo,
+                EmployeeId = dto.EmployeeId,
+                RequirePasswordChange = dto.RequirePasswordChange
             };
 
             db.Users.Add(usuario);
@@ -165,11 +206,28 @@ namespace Pagination_Project.Services
             if (!permisoExiste)
                 throw new Exception("The selected permission level does not exist.");
 
+            if (dto.EmployeeId.HasValue)
+            {
+                var empleadoExiste = await db.Empleados
+                    .AnyAsync(e => e.Id == dto.EmployeeId.Value);
+
+                if (!empleadoExiste)
+                    throw new Exception("The selected employee does not exist.");
+
+                var empleadoYaTieneOtroUsuario = await db.Users
+                    .AnyAsync(u => u.EmployeeId == dto.EmployeeId.Value && u.Id != dto.Id);
+
+                if (empleadoYaTieneOtroUsuario)
+                    throw new Exception("This employee already has an assigned user.");
+            }
+
             usuario.Username = dto.Username;
             usuario.email = dto.Email;
             usuario.Name = dto.Name;
             usuario.lvl_Id = dto.Lvl_Id;
             usuario.Activo = dto.Activo;
+            usuario.EmployeeId = dto.EmployeeId;
+            usuario.RequirePasswordChange = dto.RequirePasswordChange;
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
@@ -192,7 +250,8 @@ namespace Pagination_Project.Services
                 Name = usuario.Name,
                 Lvl_Id = usuario.lvl_Id,
                 NivelNombre = permisoNombre,
-                Activo = usuario.Activo
+                Activo = usuario.Activo,
+                EmployeeId = usuario.EmployeeId
             };
         }
 
@@ -208,6 +267,40 @@ namespace Pagination_Project.Services
             await db.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<List<EmpleadoUsuarioComboDto>> ObtenerEmpleadosDisponiblesAsync(Guid? usuarioActualId = null)
+        {
+            await using var context = await _dbFactory.CreateDbContextAsync();
+
+            Guid? empleadoActualId = null;
+
+            if (usuarioActualId.HasValue)
+            {
+                empleadoActualId = await context.Users
+                    .Where(u => u.Id == usuarioActualId.Value)
+                    .Select(u => u.EmployeeId)
+                    .FirstOrDefaultAsync();
+            }
+
+            var empleadosUsados = context.Users
+                .Where(u => u.EmployeeId != null)
+                .Where(u => !usuarioActualId.HasValue || u.Id != usuarioActualId.Value)
+                .Select(u => u.EmployeeId!.Value);
+
+            return await context.Empleados
+                .AsNoTracking()
+                .Where(e => e.Activo)
+                .Where(e => !empleadosUsados.Contains(e.Id) || e.Id == empleadoActualId)
+                .OrderBy(e => e.Nombre)
+                .Select(e => new EmpleadoUsuarioComboDto
+                {
+                    Id = e.Id,
+                    Nombre = e.Nombre,
+                    IdEmpleado = e.IdEmpleado,
+                    Email = e.Email
+                })
+                .ToListAsync();
         }
     }
 }

@@ -41,14 +41,30 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.Name).HasColumnName("Name");
                 entity.Property(e => e.lvl_Id).HasColumnName("Lvl_Id");
                 entity.Property(e => e.Activo).HasColumnName("Active").IsRequired();
+                entity.Property(e => e.EmployeeId)
+                    .HasColumnName("Employee_Id")
+                    .HasColumnType("uuid");
+                entity.Property(e => e.RequirePasswordChange)
+                    .HasColumnName("Require_Password_Change");
 
                 entity.HasIndex(e => e.Username).IsUnique();
+
+                entity.HasIndex(e => e.EmployeeId)
+                    .IsUnique()
+                    .HasDatabaseName("UX_Users_Employee_Id");
 
                 entity.HasOne(e => e.Permisos)
                     .WithMany(p => p.Usuarios)
                     .HasForeignKey(e => e.lvl_Id)
                     .HasPrincipalKey(p => p.Id)
                     .OnDelete(DeleteBehavior.Restrict);
+
+
+                entity.HasOne(e => e.Empleado)
+                    .WithOne(e => e.Usuario)
+                    .HasForeignKey<Usuario>(e => e.EmployeeId)
+                    .HasPrincipalKey<Empleados>(e => e.Id)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<TemporaryAssignment>(entity =>

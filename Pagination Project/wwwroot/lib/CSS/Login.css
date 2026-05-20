@@ -27,6 +27,28 @@
     max-width: 610px;
 }
 
+.thryv-success {
+    margin: 12px 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid #a7f3d0;
+}
+
+.thryv-password-rules {
+    margin: 10px 0 16px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    border: 1px solid #e2e8f0;
+}
+
 .thryv-logo-row {
     display: flex;
     align-items: center;

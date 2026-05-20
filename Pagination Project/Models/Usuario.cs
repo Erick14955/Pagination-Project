@@ -29,5 +29,13 @@ namespace Pagination_Project.Models
 
         [ForeignKey(nameof(lvl_Id))]
         public Permisos? Permisos { get; set; }
+
+        [Column("Employee_Id")]
+        public Guid? EmployeeId { get; set; }
+
+        [ForeignKey(nameof(EmployeeId))]
+        public Empleados? Empleado { get; set; }
+
+        public bool RequirePasswordChange { get; set; } = false;
     }
 }

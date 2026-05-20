@@ -8,5 +8,6 @@
         public string Email { get; set; } = string.Empty;
         public bool Activo { get; set; }
         public ICollection<Asignaciones> Asignaciones { get; set; } = new List<Asignaciones>();
+        public Usuario? Usuario { get; set; }
     }
 }

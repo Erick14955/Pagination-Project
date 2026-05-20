@@ -79,6 +79,47 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.UseAuthentication();
+
+// =====================================================
+// Middleware obligatorio para cambio de contraseña
+// =====================================================
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLower() ?? string.Empty;
+
+    var estaAutenticado = context.User?.Identity?.IsAuthenticated == true;
+
+    var requiereCambioPassword =
+        string.Equals(
+            context.User?.FindFirst("RequirePasswordChange")?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
+
+    var esRutaPermitida =
+        path.StartsWith("/cambiar-password") ||
+        path.StartsWith("/account/change-password") ||
+        path.StartsWith("/account/logout") ||
+        path.StartsWith("/account/login") ||
+        path.StartsWith("/login") ||
+        path.StartsWith("/_framework") ||
+        path.StartsWith("/_blazor") ||
+        path.StartsWith("/_content") ||
+        path.StartsWith("/css") ||
+        path.StartsWith("/js") ||
+        path.StartsWith("/style") ||
+        path.StartsWith("/lib") ||
+        path.StartsWith("/images") ||
+        path.StartsWith("/favicon");
+
+    if (estaAutenticado && requiereCambioPassword && !esRutaPermitida)
+    {
+        context.Response.Redirect("/cambiar-password");
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 // ================================
@@ -95,6 +136,11 @@ app.MapPost("/account/login", async (
     var returnUrl = form["ReturnUrl"].ToString();
 
     if (string.IsNullOrWhiteSpace(returnUrl))
+    {
+        returnUrl = "/dashboard";
+    }
+
+    if (!returnUrl.StartsWith("/") || returnUrl.StartsWith("//"))
     {
         returnUrl = "/dashboard";
     }
@@ -116,14 +162,29 @@ app.MapPost("/account/login", async (
 
     var usuario = resultado.Usuario;
 
+    var requiereCambioPassword = usuario.RequirePasswordChange;
+
     var claims = new List<Claim>
     {
         new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
         new(ClaimTypes.Name, usuario.Name ?? string.Empty),
         new("Username", usuario.Username ?? string.Empty),
         new(ClaimTypes.Email, usuario.email ?? string.Empty),
-        new("LvlId", usuario.lvl_Id.ToString())
+        new("LvlId", usuario.lvl_Id.ToString()),
+        new("RequirePasswordChange", requiereCambioPassword.ToString())
     };
+
+    if (usuario.EmployeeId.HasValue)
+    {
+        claims.Add(new("EmployeeId", usuario.EmployeeId.Value.ToString()));
+    }
+
+    if (usuario.Empleado is not null)
+    {
+        claims.Add(new("EmployeeCode", usuario.Empleado.IdEmpleado.ToString()));
+        claims.Add(new("EmployeeName", usuario.Empleado.Nombre ?? string.Empty));
+        claims.Add(new("EmployeeEmail", usuario.Empleado.Email ?? string.Empty));
+    }
 
     if (usuario.Permisos is not null)
     {
@@ -172,20 +233,67 @@ app.MapPost("/account/login", async (
             ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
         });
 
-    if (!returnUrl.StartsWith("/") || returnUrl.StartsWith("//"))
+    if (requiereCambioPassword)
     {
-        returnUrl = "/dashboard";
+        return Results.Redirect("/cambiar-password");
     }
 
     return Results.Redirect(returnUrl);
 })
 .DisableAntiforgery();
 
+app.MapPost("/account/change-password", async (
+    HttpContext httpContext,
+    IUsuarioService usuarioService) =>
+{
+    if (httpContext.User?.Identity?.IsAuthenticated != true)
+    {
+        return Results.Redirect("/login?error=general");
+    }
+
+    var userIdClaim = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (!Guid.TryParse(userIdClaim, out var usuarioId))
+    {
+        await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Results.Redirect("/login?error=general");
+    }
+
+    var form = await httpContext.Request.ReadFormAsync();
+
+    var nuevaPassword = form["NewPassword"].ToString();
+    var confirmarPassword = form["ConfirmPassword"].ToString();
+
+    if (string.IsNullOrWhiteSpace(nuevaPassword) || nuevaPassword.Length < 6)
+    {
+        return Results.Redirect("/cambiar-password?error=short");
+    }
+
+    if (nuevaPassword != confirmarPassword)
+    {
+        return Results.Redirect("/cambiar-password?error=mismatch");
+    }
+
+    var actualizado = await usuarioService.CambiarPasswordAsync(usuarioId, nuevaPassword);
+
+    if (!actualizado)
+    {
+        return Results.Redirect("/cambiar-password?error=notfound");
+    }
+
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+    return Results.Redirect("/login?changed=1");
+})
+.RequireAuthorization()
+.DisableAntiforgery();
+
 app.MapPost("/account/logout", async (HttpContext httpContext) =>
 {
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/login");
-});
+})
+.DisableAntiforgery();
 
 // ================================
 // Controllers API

@@ -9,5 +9,7 @@ namespace Pagination_Project.Services
         Task<UsuarioListDto> CrearAsync(UsuarioCreateDto dto);
         Task<UsuarioListDto?> ActualizarAsync(UsuarioUpdateDto dto);
         Task<bool> EliminarAsync(Guid id);
+        Task<List<EmpleadoUsuarioComboDto>> ObtenerEmpleadosDisponiblesAsync(Guid? usuarioActualId = null);
+        Task<bool> CambiarPasswordAsync(Guid usuarioId, string nuevaPassword);
     }
 }
