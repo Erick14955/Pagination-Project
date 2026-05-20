@@ -81,32 +81,38 @@
     <section class="summary-grid">
         <div class="summary-card">
             <span>Motif YP</span>
-            <strong>@PorcentajeVista(TotalMotifYpVista, 8)%</strong>
+            <strong>@PorcentajeMotifYpVista.ToString("0.00")%</strong>
             <small>@TotalMotifYpVista errors marked</small>
         </div>
 
         <div class="summary-card">
             <span>Motif WP</span>
-            <strong>@PorcentajeVista(TotalMotifWpVista, 3)%</strong>
+            <strong>@PorcentajeMotifWpVista.ToString("0.00")%</strong>
             <small>@TotalMotifWpVista errors marked</small>
         </div>
 
         <div class="summary-card">
             <span>Inventory Report</span>
-            <strong>@PorcentajeVista(TotalInventoryVista, 4)%</strong>
+            <strong>@PorcentajeInventoryVista.ToString("0.00")%</strong>
             <small>@TotalInventoryVista errors marked</small>
         </div>
 
         <div class="summary-card">
             <span>Shipping Folder</span>
-            <strong>@PorcentajeVista(TotalShippingVista, 8)%</strong>
+            <strong>@PorcentajeShippingVista.ToString("0.00")%</strong>
             <small>@TotalShippingVista errors marked</small>
         </div>
 
         <div class="summary-card">
             <span>Task Memo</span>
-            <strong>@PorcentajeVista(TotalTaskVista, 3)%</strong>
+            <strong>@PorcentajeTaskVista.ToString("0.00")%</strong>
             <small>@TotalTaskVista errors marked</small>
+        </div>
+
+        <div class="summary-card total-summary-card">
+            <span>Total Average</span>
+            <strong>@PorcentajeGeneralVista.ToString("0.00")%</strong>
+            <small>Average of all 5 evaluation areas</small>
         </div>
     </section>
 
@@ -703,6 +709,12 @@
                 return;
             }
 
+            Evaluacion.MotifYp = PorcentajeMotifYpVista;
+            Evaluacion.MotifWp = PorcentajeMotifWpVista;
+            Evaluacion.InventoryReport = PorcentajeInventoryVista;
+            Evaluacion.ProductShippingFolder = PorcentajeShippingVista;
+            Evaluacion.TaskMemo = PorcentajeTaskVista;
+
             await using var db = await DbFactory.CreateDbContextAsync();
 
             if (Evaluacion.Id == Guid.Empty)
@@ -947,6 +959,44 @@
         Contar(Evaluacion.WhpsNoAnchors) +
         Contar(Evaluacion.WfpsNoAnchors) +
         Contar(Evaluacion.WdqcsNoAnchors);
+
+    private decimal PorcentajeMotifYpVista =>
+CalcularPorcentajeVistaDecimal(TotalMotifYpVista, 8);
+
+    private decimal PorcentajeMotifWpVista =>
+        CalcularPorcentajeVistaDecimal(TotalMotifWpVista, 3);
+
+    private decimal PorcentajeInventoryVista =>
+        CalcularPorcentajeVistaDecimal(TotalInventoryVista, 4);
+
+    private decimal PorcentajeShippingVista =>
+        CalcularPorcentajeVistaDecimal(TotalShippingVista, 8);
+
+    private decimal PorcentajeTaskVista =>
+        CalcularPorcentajeVistaDecimal(TotalTaskVista, 3);
+
+    private decimal PorcentajeGeneralVista =>
+        Math.Round(new[]
+        {
+        PorcentajeMotifYpVista,
+        PorcentajeMotifWpVista,
+        PorcentajeInventoryVista,
+        PorcentajeShippingVista,
+        PorcentajeTaskVista
+        }.Average(), 2);
+
+    private static decimal CalcularPorcentajeVistaDecimal(int errores, int total)
+    {
+        if (total <= 0)
+            return 0;
+
+        var porcentaje = ((total - errores) * 100m) / total;
+
+        if (porcentaje < 0)
+            porcentaje = 0;
+
+        return Math.Round(porcentaje, 2);
+    }
 
     private int TotalInventoryVista =>
         Contar(Evaluacion.MissingCornerAd) +

@@ -24,6 +24,7 @@ namespace Pagination_Project.Data
         public DbSet<Trim_Size> Trim_Sizes => Set<Trim_Size>();
         public DbSet<TemporaryAssignment> TemporaryAssignments { get; set; }
         public DbSet<LateWorkActivity> LateWorkActivities { get; set; }
+        public DbSet<AsignacionTrabajada> AsignacionesTrabajadas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -106,6 +107,56 @@ namespace Pagination_Project.Data
                     .WithMany()
                     .HasForeignKey(e => e.TemporaryEmployeeId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<AsignacionTrabajada>(entity =>
+            {
+                entity.ToTable("Assignments_Worked");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.IdAsignacion)
+                    .HasColumnName("Assignment_Id")
+                    .IsRequired();
+
+                entity.Property(e => e.FechaTrabajo)
+                    .HasColumnName("Work_Date")
+                    .IsRequired();
+
+                entity.Property(e => e.ProofExtractWorked)
+                    .HasColumnName("Proof_Extract_Worked")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.FinalExtractWorked)
+                    .HasColumnName("Final_Extract_Worked")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.MemoExtractWorked)
+                    .HasColumnName("Memo_Extract_Worked")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.FinalPOWorked)
+                    .HasColumnName("Final_PO_Worked")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.ShippingWorked)
+                    .HasColumnName("Shipping_Worked")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.DirxionWorked)
+                    .HasColumnName("Dirxion_Worked")
+                    .HasDefaultValue(false);
+
+                entity.HasIndex(e => new { e.IdAsignacion, e.FechaTrabajo })
+                    .IsUnique();
+
+                entity.HasOne(e => e.Asignacion)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdAsignacion)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<LateWorkActivity>(entity =>

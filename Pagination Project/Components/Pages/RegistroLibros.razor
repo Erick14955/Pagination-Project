@@ -52,6 +52,105 @@
         </div>
     }
 
+    @if (MostrarModalActualizacionXlsx && ResultadoActualizacionModal is not null)
+    {
+        <div class="xlsx-modal-backdrop">
+            <div class="xlsx-modal-card @(TipoModalActualizacionXlsx == "error" ? "xlsx-modal-error" : "xlsx-modal-success")">
+
+                <div class="xlsx-modal-header">
+                    <div>
+                        <h2>@TituloModalActualizacionXlsx</h2>
+                        <p>
+                            The XLSX update process has finished.
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="xlsx-modal-close"
+                            @onclick="CerrarModalActualizacionXlsx">
+                        ✕
+                    </button>
+                </div>
+
+                <div class="xlsx-modal-stats">
+                    <div>
+                        <span>Updated</span>
+                        <strong>@ResultadoActualizacionModal.LibrosActualizados</strong>
+                    </div>
+
+                    <div>
+                        <span>Not Found</span>
+                        <strong>@ResultadoActualizacionModal.LibrosNoEncontrados</strong>
+                    </div>
+
+                    <div>
+                        <span>Skipped Rows</span>
+                        <strong>@ResultadoActualizacionModal.FilasOmitidas</strong>
+                    </div>
+                </div>
+
+                @if (ResultadoActualizacionModal.Advertencias.Any())
+                {
+                    <div class="xlsx-modal-section warning">
+                        <h3>Warnings</h3>
+
+                        <ul>
+                            @foreach (var warning in ResultadoActualizacionModal.Advertencias.Take(20))
+                            {
+                                <li>@warning</li>
+                            }
+                        </ul>
+
+                        @if (ResultadoActualizacionModal.Advertencias.Count > 20)
+                        {
+                            <p class="xlsx-modal-more">
+                                And @(ResultadoActualizacionModal.Advertencias.Count - 20) more warnings.
+                            </p>
+                        }
+                    </div>
+                }
+
+                @if (ResultadoActualizacionModal.Errores.Any())
+                {
+                    <div class="xlsx-modal-section error">
+                        <h3>Errors</h3>
+
+                        <ul>
+                            @foreach (var error in ResultadoActualizacionModal.Errores.Take(20))
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
+
+                        @if (ResultadoActualizacionModal.Errores.Count > 20)
+                        {
+                            <p class="xlsx-modal-more">
+                                And @(ResultadoActualizacionModal.Errores.Count - 20) more errors.
+                            </p>
+                        }
+                    </div>
+                }
+
+                @if (!ResultadoActualizacionModal.Advertencias.Any() &&
+                            !ResultadoActualizacionModal.Errores.Any())
+                {
+                    <div class="xlsx-modal-section clean">
+                        <h3>Update completed successfully</h3>
+                        <p>No warnings or errors were found during the update.</p>
+                    </div>
+                }
+
+                <div class="xlsx-modal-actions">
+                    <button type="button"
+                            class="xlsx-modal-ok"
+                            @onclick="CerrarModalActualizacionXlsx">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (PuedeVerFormularioLibro)
     {
         <section class="form-card">
@@ -332,6 +431,13 @@
                 <button type="button" class="btn-filter-clear" @onclick="ClearListFilters">
                     Clear
                 </button>
+
+                <button type="button"
+                        class="btn-export-xlsx"
+                        disabled="@(ExportandoXlsx || !LibrosFiltrados.Any())"
+                        @onclick="ExportBooksToXlsxAsync">
+                    @(ExportandoXlsx ? "Exporting..." : "📤 Export XLSX")
+                </button>
             </div>
         </div>
 
@@ -530,6 +636,7 @@
     private string Busqueda { get; set; } = string.Empty;
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
+    private bool ExportandoXlsx { get; set; } = false;
 
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
@@ -545,6 +652,11 @@
     private string SelectedPubMonth { get; set; } = string.Empty;
     private string SortColumn { get; set; } = "BookName";
     private bool SortDescending { get; set; } = false;
+
+    private bool MostrarModalActualizacionXlsx { get; set; } = false;
+    private ActualizacionLibrosResultado? ResultadoActualizacionModal { get; set; }
+    private string TituloModalActualizacionXlsx { get; set; } = "XLSX Books Update";
+    private string TipoModalActualizacionXlsx { get; set; } = "success";
 
     private IEnumerable<Libros> LibrosFiltrados
     {
@@ -577,6 +689,182 @@
             return query;
         }
     }
+
+    private void MostrarModalActualizacionLibros(ActualizacionLibrosResultado resultado)
+    {
+        ResultadoActualizacionModal = resultado;
+
+        TipoModalActualizacionXlsx = resultado.TieneErrores ? "error" : "success";
+
+        TituloModalActualizacionXlsx = resultado.TieneErrores
+            ? "XLSX Books Update Completed with Errors"
+            : "XLSX Books Update Completed";
+
+        MostrarModalActualizacionXlsx = true;
+    }
+
+    private void MostrarModalErrorActualizacionLibros(string error)
+    {
+        ResultadoActualizacionModal = new ActualizacionLibrosResultado
+        {
+            Errores = new List<string> { error }
+        };
+
+        TipoModalActualizacionXlsx = "error";
+        TituloModalActualizacionXlsx = "XLSX Books Update Error";
+        MostrarModalActualizacionXlsx = true;
+    }
+
+    private void CerrarModalActualizacionXlsx()
+    {
+        MostrarModalActualizacionXlsx = false;
+        ResultadoActualizacionModal = null;
+    }
+
+    private async Task ExportBooksToXlsxAsync()
+    {
+        try
+        {
+            ExportandoXlsx = true;
+            LimpiarMensaje();
+
+            var librosExportar = LibrosOrdenados.ToList();
+
+            if (!librosExportar.Any())
+            {
+                MostrarMensaje("There are no books to export.", "error");
+                return;
+            }
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Books");
+
+            const int lastColumn = 19;
+
+            worksheet.Cell(1, 1).Value = "Books Export";
+            worksheet.Range(1, 1, 1, lastColumn).Merge();
+
+            worksheet.Cell(2, 1).Value = $"Generated: {DateTime.Now:MM/dd/yyyy hh:mm tt}";
+            worksheet.Range(2, 1, 2, lastColumn).Merge();
+
+            worksheet.Cell(3, 1).Value =
+                $"Search: {(string.IsNullOrWhiteSpace(Busqueda) ? "All" : Busqueda)} | " +
+                $"Pub Date Month: {(string.IsNullOrWhiteSpace(SelectedPubMonth) ? "All" : SelectedPubMonth)} | " +
+                $"Total: {librosExportar.Count}";
+
+            worksheet.Range(3, 1, 3, lastColumn).Merge();
+
+            var headerRow = 5;
+
+            worksheet.Cell(headerRow, 1).Value = "Book Name";
+            worksheet.Cell(headerRow, 2).Value = "KGEN";
+            worksheet.Cell(headerRow, 3).Value = "LSA";
+            worksheet.Cell(headerRow, 4).Value = "State";
+            worksheet.Cell(headerRow, 5).Value = "Database";
+            worksheet.Cell(headerRow, 6).Value = "Legacy Code";
+            worksheet.Cell(headerRow, 7).Value = "Print Foot";
+            worksheet.Cell(headerRow, 8).Value = "Trim Size";
+            worksheet.Cell(headerRow, 9).Value = "Bind Plant";
+            worksheet.Cell(headerRow, 10).Value = "Product Issue";
+            worksheet.Cell(headerRow, 11).Value = "Proof";
+            worksheet.Cell(headerRow, 12).Value = "Final";
+            worksheet.Cell(headerRow, 13).Value = "Memo";
+            worksheet.Cell(headerRow, 14).Value = "Final PO";
+            worksheet.Cell(headerRow, 15).Value = "Shipping";
+            worksheet.Cell(headerRow, 16).Value = "Dirxion";
+            worksheet.Cell(headerRow, 17).Value = "Pub Date";
+            worksheet.Cell(headerRow, 18).Value = "SRL";
+            worksheet.Cell(headerRow, 19).Value = "NWP";
+
+            var row = headerRow + 1;
+
+            foreach (var libro in librosExportar)
+            {
+                worksheet.Cell(row, 1).Value = libro.BookName ?? string.Empty;
+                worksheet.Cell(row, 2).Value = libro.KGENCode ?? string.Empty;
+                worksheet.Cell(row, 3).Value = libro.LSACode ?? string.Empty;
+                worksheet.Cell(row, 4).Value = GetStateName(libro.StateId);
+                worksheet.Cell(row, 5).Value = GetDatabaseName(libro.DatabaseId);
+                worksheet.Cell(row, 6).Value = GetLegacyCodeName(libro.LegacyCodeId);
+                worksheet.Cell(row, 7).Value = GetPrintFootName(libro.PrintFootId);
+                worksheet.Cell(row, 8).Value = GetTrimSizeName(libro.TrimSizeId);
+                worksheet.Cell(row, 9).Value = GetBindPlantName(libro.BindPlantId);
+                worksheet.Cell(row, 10).Value = libro.ProductIssue ?? string.Empty;
+
+                SetExcelDate(worksheet.Cell(row, 11), libro.ProofExtract);
+                SetExcelDate(worksheet.Cell(row, 12), libro.FinalExtract);
+                SetExcelDate(worksheet.Cell(row, 13), libro.MemoExtract);
+                SetExcelDate(worksheet.Cell(row, 14), libro.FinalPODate);
+                SetExcelDate(worksheet.Cell(row, 15), libro.ShippingDate);
+                SetExcelDate(worksheet.Cell(row, 16), libro.DirxionDate);
+                SetExcelDate(worksheet.Cell(row, 17), libro.PubDate);
+
+                worksheet.Cell(row, 18).Value = libro.SRLSuppression ? "Yes" : "No";
+                worksheet.Cell(row, 19).Value = libro.NWP ? "Yes" : "No";
+
+                row++;
+            }
+
+            var titleRange = worksheet.Range(1, 1, 1, lastColumn);
+            titleRange.Style.Font.Bold = true;
+            titleRange.Style.Font.FontSize = 16;
+            titleRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            worksheet.Range(2, 1, 3, lastColumn).Style.Font.Italic = true;
+            worksheet.Range(2, 1, 3, lastColumn).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            var headerRange = worksheet.Range(headerRow, 1, headerRow, lastColumn);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            var dataRange = worksheet.Range(headerRow, 1, row - 1, lastColumn);
+            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            worksheet.Range(headerRow + 1, 11, row - 1, 17).Style.DateFormat.Format = "MM/dd/yyyy";
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            var bytes = stream.ToArray();
+            var base64 = Convert.ToBase64String(bytes);
+
+            var fileName = $"Books_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+
+            MostrarMensaje($"Books exported successfully. Total: {librosExportar.Count}.", "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error exporting books to XLSX: {ex.Message}", "error");
+        }
+        finally
+        {
+            ExportandoXlsx = false;
+        }
+    }
+
+    private static void SetExcelDate(IXLCell cell, DateOnly date)
+    {
+        if (date == default)
+        {
+            cell.Value = string.Empty;
+            return;
+        }
+
+        cell.Value = date.ToDateTime(TimeOnly.MinValue);
+    }
+
     private async Task UpdateBooksFromXlsxAsync(InputFileChangeEventArgs e)
     {
         if (!EditBook)
@@ -912,11 +1200,15 @@
             }
 
             MostrarMensaje(mensaje, tipo);
+            MostrarModalActualizacionLibros(resultado);
         }
         catch (Exception ex)
         {
             var mensajeError = ex.InnerException?.Message ?? ex.Message;
-            MostrarMensaje($"Error updating books from XLSX: {mensajeError}", "error");
+            var mensajeCompleto = $"Error updating books from XLSX: {mensajeError}";
+
+            MostrarMensaje(mensajeCompleto, "error");
+            MostrarModalErrorActualizacionLibros(mensajeCompleto);
         }
         finally
         {

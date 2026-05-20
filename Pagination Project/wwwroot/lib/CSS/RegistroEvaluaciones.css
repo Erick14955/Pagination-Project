@@ -18,6 +18,20 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
+.total-summary-card {
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #eef2ff 100%);
+}
+
+    .total-summary-card span {
+        color: #1d4ed8;
+        font-weight: 800;
+    }
+
+    .total-summary-card strong {
+        color: #1e3a8a;
+    }
+
         .evaluations-page .page-hero h1 {
             margin: 0;
             color: #ffffff;
