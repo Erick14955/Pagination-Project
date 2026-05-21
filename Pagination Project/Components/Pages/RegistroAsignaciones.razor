@@ -642,8 +642,7 @@
             !TempMemo &&
             !TempFinalPO &&
             !TempShipping &&
-            !TempDirxion &&
-            !TempPubDate)
+            !TempDirxion)
         {
             MostrarMensaje("Select at least one stage.", "error");
             return;
@@ -689,12 +688,6 @@
             return;
         }
 
-        if (TempPubDate && !etapasPermitidas.Contains("PubDate"))
-        {
-            MostrarMensaje("Pub Date is no longer available for temporary assignment.", "error");
-            return;
-        }
-
         try
         {
             await using var db = await DbFactory.CreateDbContextAsync();
@@ -731,7 +724,7 @@
             if (temporalExistente is not null)
             {
                 temporalExistente.Active = false;
-                temporalExistente.ClosedAt = DateTime.Now;
+                temporalExistente.ClosedAt = DateTime.UtcNow;
             }
 
             var temporal = new TemporaryAssignment
@@ -747,11 +740,11 @@
                 FinalPO = TempFinalPO,
                 Shipping = TempShipping,
                 Dirxion = TempDirxion,
-                PubDate = TempPubDate,
+                PubDate = false,
 
                 Reason = MotivoTemporal,
                 Active = true,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             db.TemporaryAssignments.Add(temporal);
@@ -826,13 +819,10 @@
             if (temporal.Dirxion && libro.DirxionDate >= hoy)
                 tieneEtapaPendiente = true;
 
-            if (temporal.PubDate && libro.PubDate >= hoy)
-                tieneEtapaPendiente = true;
-
             if (!tieneEtapaPendiente)
             {
                 temporal.Active = false;
-                temporal.ClosedAt = DateTime.Now;
+                temporal.ClosedAt = DateTime.UtcNow;
             }
         }
 
@@ -868,7 +858,6 @@
             "FinalPO" => temporal.FinalPO,
             "Shipping" => temporal.Shipping,
             "Dirxion" => temporal.Dirxion,
-            "PubDate" => temporal.PubDate,
             _ => false
         };
 
@@ -1075,16 +1064,6 @@
                 });
             }
 
-            if (FechaPendiente(asignacion.PubDateValue, hoy))
-            {
-                etapas.Add(new EtapaTemporalDisponible
-                {
-                    Codigo = "PubDate",
-                    Nombre = $"Pub Date - {FormatoFecha(asignacion.PubDateValue)}",
-                    Fecha = asignacion.PubDateValue
-                });
-            }
-
             return etapas
                 .OrderBy(x => x.Fecha)
                 .ToList();
@@ -1117,9 +1096,6 @@
 
         if (temporal.Dirxion)
             etapas.Add("Dirxion");
-
-        if (temporal.PubDate)
-            etapas.Add("Pub Date");
 
         return etapas.Any() ? string.Join(", ", etapas) : "-";
     }
