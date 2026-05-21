@@ -183,7 +183,9 @@
             <div class="list-filters">
 
                 <select class="employee-filter-select"
-                        @bind="EmpleadoFiltroId">
+                        value="@EmpleadoFiltroId"
+                        @onchange="OnEmpleadoFiltroChanged">
+
                     <option value="">All Employees</option>
 
                     @foreach (var empleado in EmpleadosParaFiltro)
@@ -514,6 +516,12 @@
             "PubDate" => TempPubDate,
             _ => false
         };
+    }
+
+    private void OnEmpleadoFiltroChanged(ChangeEventArgs e)
+    {
+        EmpleadoFiltroId = e.Value?.ToString() ?? string.Empty;
+        SelectedPubMonth = string.Empty;
     }
 
     private void CambiarEtapaTemporal(string etapa, ChangeEventArgs e)
@@ -1871,7 +1879,15 @@
     {
         get
         {
-            return AsignacionesListado
+            IEnumerable<AsignacionViewModel> query = AsignacionesListado;
+
+            if (!string.IsNullOrWhiteSpace(EmpleadoFiltroId) &&
+                Guid.TryParse(EmpleadoFiltroId, out var empleadoId))
+            {
+                query = query.Where(x => x.EmpleadoId == empleadoId);
+            }
+
+            return query
                 .Where(x => x.PubDate != default)
                 .GroupBy(x => GetPubMonthValue(x.PubDate))
                 .Select(g =>
@@ -1885,7 +1901,8 @@
                         Count = g.Count()
                     };
                 })
-                .OrderByDescending(x => x.Value);
+                .OrderByDescending(x => x.Value)
+                .ToList();
         }
     }
 
