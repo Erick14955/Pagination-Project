@@ -896,7 +896,11 @@
 
             Libros = await db.Libros
                 .AsNoTracking()
-                .Where(x => !x.Finalizado)
+                .Where(x =>
+                    !x.Finalizado &&
+                    !db.Asignaciones.Any(a =>
+                        a.IdLibro == x.Id &&
+                        !a.Finalizado))
                 .OrderBy(x => x.BookName)
                 .ToListAsync();
 
@@ -1263,12 +1267,16 @@
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            var existe = await db.Asignaciones
-                .AnyAsync(x => x.IdEmpleado == empleado.Id && x.IdLibro == libro.Id);
+            var libroYaAsignado = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Empleado)
+                .AnyAsync(x =>
+                    x.IdLibro == libro.Id &&
+                    !x.Finalizado);
 
-            if (existe)
+            if (libroYaAsignado)
             {
-                MostrarMensaje("This book is already assigned to this employee.", "error");
+                MostrarMensaje("This book is already assigned to another employee.", "error");
                 return;
             }
 
