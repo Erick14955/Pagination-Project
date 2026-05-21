@@ -331,126 +331,123 @@
         </div>
     }
 
-    @if (PuedeVerEvaluaciones)
-    {
-        <div class="thryv-section-card weekly-evaluations-section-card">
-            <div class="thryv-section-header">
-                <div>
-                    <h3>Weekly Evaluations</h3>
-                    <p>Evaluations from last week based on the book shipping date.</p>
-                </div>
-
-                <div class="thryv-section-actions">
-                    <div class="thryv-filter-group">
-                        <label>Filter by employee</label>
-
-                        <select class="thryv-filter-select" @bind="SelectedWeeklyEmployeeFilter">
-                            <option value="">All Employees</option>
-
-                            @foreach (var employee in WeeklyEmployeeFilterOptions)
-                            {
-                                <option value="@employee">@employee</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="thryv-search-box">
-                        <span>🔎</span>
-                        <input placeholder="Search by KGEN or book..."
-                               @bind="WeeklySearch"
-                               @bind:event="oninput" />
-                    </div>
-
-                    @if (!string.IsNullOrWhiteSpace(SelectedWeeklyEmployeeFilter) ||
-                                    !string.IsNullOrWhiteSpace(WeeklySearch))
-                    {
-                        <button type="button"
-                                class="thryv-clear-filter-btn"
-                                @onclick="ClearWeeklyFilters">
-                            Clear
-                        </button>
-                    }
-
-                    <div class="thryv-section-badge">
-                        @WeeklyEvaluationsFiltered.Count records
-                    </div>
-                </div>
+    <div class="thryv-section-card weekly-evaluations-section-card">
+        <div class="thryv-section-header">
+            <div>
+                <h3>Weekly Evaluations</h3>
+                <p>Evaluations from last week based on the book shipping date.</p>
             </div>
 
-            <div class="thryv-table-wrapper">
-                <table class="thryv-custom-table">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>KGEN Code</th>
-                            <th>Book</th>
-                            <th>Shipping Date</th>
-                            <th>Total Accuracy</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
+            <div class="thryv-section-actions">
+                <div class="thryv-filter-group">
+                    <label>Filter by employee</label>
 
-                    <tbody>
-                        @if (loading)
+                    <select class="thryv-filter-select" @bind="SelectedWeeklyEmployeeFilter">
+                        <option value="">All Employees</option>
+
+                        @foreach (var employee in WeeklyEmployeeFilterOptions)
                         {
-                            <tr>
-                                <td colspan="6" class="thryv-empty-row">
-                                    Loading weekly evaluations...
-                                </td>
-                            </tr>
+                            <option value="@employee">@employee</option>
                         }
-                        else if (WeeklyEvaluationsFiltered.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="6" class="thryv-empty-row">
-                                    No weekly evaluations to display.
-                                </td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var item in WeeklyEvaluationsFiltered)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="thryv-employee-cell">
-                                            <div class="thryv-employee-avatar weekly-avatar">📊</div>
-                                            <div>
-                                                <div class="thryv-employee-name">@item.EmployeeName</div>
-                                            </div>
-                                        </div>
-                                    </td>
+                    </select>
+                </div>
 
-                                    <td>
-                                        <span class="thryv-code-pill">@item.KgenCode</span>
-                                    </td>
+                <div class="thryv-search-box">
+                    <span>🔎</span>
+                    <input placeholder="Search by KGEN or book..."
+                            @bind="WeeklySearch"
+                            @bind:event="oninput" />
+                </div>
 
-                                    <td>@item.BookName</td>
+                @if (!string.IsNullOrWhiteSpace(SelectedWeeklyEmployeeFilter) ||
+                                !string.IsNullOrWhiteSpace(WeeklySearch))
+                {
+                    <button type="button"
+                            class="thryv-clear-filter-btn"
+                            @onclick="ClearWeeklyFilters">
+                        Clear
+                    </button>
+                }
 
-                                    <td>@item.ShippingDate.ToString("dd/MM/yyyy")</td>
-
-                                    <td>
-                                        <span class="thryv-percent-pill @GetAccuracyClass(item.PercentageAverage)">
-                                            @item.PercentageAverage.ToString("0.00")%
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <button type="button"
-                                                class="thryv-paper-btn"
-                                                title="View evaluation details"
-                                                @onclick="() => OpenWeeklyEvaluationModal(item)">
-                                            📄
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+                <div class="thryv-section-badge">
+                    @WeeklyEvaluationsFiltered.Count records
+                </div>
             </div>
         </div>
-    }
+
+        <div class="thryv-table-wrapper">
+            <table class="thryv-custom-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>KGEN Code</th>
+                        <th>Book</th>
+                        <th>Shipping Date</th>
+                        <th>Total Accuracy</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (loading)
+                    {
+                        <tr>
+                            <td colspan="6" class="thryv-empty-row">
+                                Loading weekly evaluations...
+                            </td>
+                        </tr>
+                    }
+                    else if (WeeklyEvaluationsFiltered.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="thryv-empty-row">
+                                No weekly evaluations to display.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in WeeklyEvaluationsFiltered)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="thryv-employee-cell">
+                                        <div class="thryv-employee-avatar weekly-avatar">📊</div>
+                                        <div>
+                                            <div class="thryv-employee-name">@item.EmployeeName</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="thryv-code-pill">@item.KgenCode</span>
+                                </td>
+
+                                <td>@item.BookName</td>
+
+                                <td>@item.ShippingDate.ToString("dd/MM/yyyy")</td>
+
+                                <td>
+                                    <span class="thryv-percent-pill @GetAccuracyClass(item.PercentageAverage)">
+                                        @item.PercentageAverage.ToString("0.00")%
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <button type="button"
+                                            class="thryv-paper-btn"
+                                            title="View evaluation details"
+                                            @onclick="() => OpenWeeklyEvaluationModal(item)">
+                                        📄
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 @if (showWeeklyEvaluationModal && selectedWeeklyEvaluation is not null)

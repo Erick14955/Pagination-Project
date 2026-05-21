@@ -315,6 +315,19 @@
                 }
             ).ToListAsync();
 
+            var assignmentIds = data
+                .Select(x => x.AssignmentId)
+                .Distinct()
+                .ToList();
+
+            var temporalesActivas = await db.TemporaryAssignments
+                .AsNoTracking()
+                .Include(x => x.TemporaryEmployee)
+                .Where(x => x.Active &&
+                            assignmentIds.Contains(x.AssignmentId))
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+
             var trabajadasHoy = await db.AsignacionesTrabajadas
                 .AsNoTracking()
                 .Where(x => x.FechaTrabajo == Hoy)
@@ -329,16 +342,29 @@
                 if (etapa is null)
                     continue;
 
+                var temporalAplicable = temporalesActivas
+                    .FirstOrDefault(x =>
+                        x.AssignmentId == item.AssignmentId &&
+                        AsignacionTemporalAplicaEtapa(x, etapa.Key));
+
+                var empleadoResponsableId = temporalAplicable?.TemporaryEmployeeId ?? item.EmployeeId;
+
+                var empleadoResponsableNombre =
+                    temporalAplicable?.TemporaryEmployee?.Nombre;
+
+                if (string.IsNullOrWhiteSpace(empleadoResponsableNombre))
+                    empleadoResponsableNombre = item.EmployeeName;
+
                 var registroTrabajado = trabajadasHoy
                     .FirstOrDefault(x => x.IdAsignacion == item.AssignmentId);
 
                 AsignacionesDia.Add(new AsignacionDiaVm
                 {
                     AssignmentId = item.AssignmentId,
-                    EmployeeId = item.EmployeeId,
+                    EmployeeId = empleadoResponsableId,
                     BookId = item.BookId,
 
-                    EmployeeName = item.EmployeeName,
+                    EmployeeName = empleadoResponsableNombre,
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
@@ -362,6 +388,22 @@
         {
             Cargando = false;
         }
+    }
+
+    private static bool AsignacionTemporalAplicaEtapa(
+    TemporaryAssignment temporal,
+    string etapaKey)
+    {
+        return etapaKey switch
+        {
+            "ProofExtract" => temporal.Proof,
+            "FinalExtract" => temporal.Final,
+            "MemoExtract" => temporal.Memo,
+            "FinalPO" => temporal.FinalPO,
+            "Shipping" => temporal.Shipping,
+            "Dirxion" => temporal.Dirxion,
+            _ => false
+        };
     }
 
     private EtapaDia? ObtenerEtapaDelDia(RawAssignmentVm item)

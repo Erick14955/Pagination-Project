@@ -88,6 +88,21 @@ namespace Pagination_Project.Services
                 }
             ).ToListAsync();
 
+            var assignmentIds = data
+                .Select(x => x.AssignmentId)
+                .Distinct()
+                .ToList();
+
+            var temporalesActivas = assignmentIds.Any()
+                ? await db.TemporaryAssignments
+                    .AsNoTracking()
+                    .Include(x => x.TemporaryEmployee)
+                    .Where(x => x.Active &&
+                                assignmentIds.Contains(x.AssignmentId))
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToListAsync()
+                : new List<TemporaryAssignment>();
+
             var assignedBooks = new List<AssignedBookDashboardDto>();
             var completedAssignments = new List<AssignedBookDashboardDto>();
 
@@ -102,13 +117,25 @@ namespace Pagination_Project.Services
 
                 var etapaCompletada = EstaEtapaCompletada(registroTrabajado, stageInfo.StageKey);
 
+                var temporalAplicable = temporalesActivas
+                    .FirstOrDefault(x =>
+                        x.AssignmentId == item.AssignmentId &&
+                        AsignacionTemporalAplicaEtapa(x, stageInfo.StageKey));
+
+                var employeeId = temporalAplicable?.TemporaryEmployeeId ?? item.EmployeeId;
+
+                var employeeName = temporalAplicable?.TemporaryEmployee?.Nombre;
+
+                if (string.IsNullOrWhiteSpace(employeeName))
+                    employeeName = item.EmployeeName;
+
                 var dto = new AssignedBookDashboardDto
                 {
                     AssignmentId = item.AssignmentId,
                     BookId = item.BookId,
-                    EmployeeId = item.EmployeeId,
+                    EmployeeId = employeeId,
 
-                    EmployeeName = item.EmployeeName,
+                    EmployeeName = employeeName,
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
@@ -145,6 +172,22 @@ namespace Pagination_Project.Services
                 AssignedBooks = assignedBooks,
                 CompletedAssignments = completedAssignments,
                 WeeklyEvaluations = weeklyEvaluations
+            };
+        }
+
+        private static bool AsignacionTemporalAplicaEtapa(
+            TemporaryAssignment temporal,
+            string stageKey)
+        {
+            return stageKey switch
+            {
+                "ProofExtract" => temporal.Proof,
+                "FinalExtract" => temporal.Final,
+                "MemoExtract" => temporal.Memo,
+                "FinalPO" => temporal.FinalPO,
+                "Shipping" => temporal.Shipping,
+                "Dirxion" => temporal.Dirxion,
+                _ => false
             };
         }
 
@@ -213,10 +256,34 @@ namespace Pagination_Project.Services
                 }
             ).ToListAsync();
 
+            var assignmentIds = data
+                .Select(x => x.AssignmentId)
+                .Distinct()
+                .ToList();
+
+            var temporalesShipping = await db.TemporaryAssignments
+                .AsNoTracking()
+                .Include(x => x.TemporaryEmployee)
+                .Where(x => x.Active &&
+                            x.Shipping &&
+                            assignmentIds.Contains(x.AssignmentId))
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+
             var result = new List<WeeklyEvaluationDashboardDto>();
 
             foreach (var item in data)
             {
+                var temporalAplicable = temporalesShipping
+                    .FirstOrDefault(x => x.AssignmentId == item.AssignmentId);
+
+                var employeeId = temporalAplicable?.TemporaryEmployeeId ?? item.EmployeeId;
+
+                var employeeName = temporalAplicable?.TemporaryEmployee?.Nombre;
+
+                if (string.IsNullOrWhiteSpace(employeeName))
+                    employeeName = item.EmployeeName;
+
                 var motifYp = item.MotifYp ?? CalcularPorcentaje(
                     CountErrors(
                         item.TouchingRule,
@@ -275,9 +342,9 @@ namespace Pagination_Project.Services
                     EvaluationId = item.EvaluationId,
                     AssignmentId = item.AssignmentId,
                     BookId = item.BookId,
-                    EmployeeId = item.EmployeeId,
+                    EmployeeId = employeeId,
 
-                    EmployeeName = item.EmployeeName,
+                    EmployeeName = employeeName,
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
