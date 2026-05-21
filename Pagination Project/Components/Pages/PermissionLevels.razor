@@ -686,9 +686,9 @@
                 db.Set<Permisos>().Add(nuevo);
                 await db.SaveChangesAsync();
 
-                PermisoActual = CopiarPermiso(nuevo);
+                NuevoPermiso();
 
-                MostrarMensaje("Permission level created successfully.", "success");
+                MostrarMensaje("Permission level updated successfully.", "success");
             }
             else
             {
@@ -731,7 +731,7 @@
 
                 await db.SaveChangesAsync();
 
-                PermisoActual = CopiarPermiso(permisoDb);
+                NuevoPermiso();
 
                 MostrarMensaje("Permission level updated successfully.", "success");
             }
