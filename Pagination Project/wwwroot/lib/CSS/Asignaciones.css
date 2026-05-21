@@ -24,6 +24,23 @@
         font-weight: 800;
     }
 
+.month-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 190px;
+}
+
+    .month-filter label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+    }
+
+.filter-select {
+    min-height: 42px;
+}
+
     .page-hero p {
         margin: 8px 0 0;
         color: #6b7280;
