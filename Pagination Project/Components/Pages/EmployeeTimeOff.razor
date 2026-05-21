@@ -1,0 +1,1277 @@
+﻿@page "/employee-time-off"
+@page "/vacations"
+@page "/vacaciones-free-day"
+
+@using System.Globalization
+@using System.Security.Claims
+@using System.Text
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JS
+
+<PageTitle>Employee Time Off</PageTitle>
+
+<link href="style/employee-time-off.css" rel="stylesheet" />
+
+<div class="timeoff-page">
+
+    <section class="page-hero">
+        <div>
+            <h1>Employee Time Off</h1>
+            <p>
+                Register vacations, free days, sick leave and other HR absences with optional automatic temporary assignment coverage.
+            </p>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-card">
+                <span>Total Records</span>
+                <strong>@TimeOffList.Count</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Active</span>
+                <strong>@TimeOffList.Count(x => x.Active)</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Auto Covered</span>
+                <strong>@TimeOffList.Count(x => x.AutomaticCoverage)</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert-box @MessageType">
+            @Message
+        </div>
+    }
+
+    @if (CanManage)
+    {
+        <section class="form-card">
+            <div class="section-header">
+                <div>
+                    <h2>@(EditingId is null ? "Register Time Off" : "Edit Time Off")</h2>
+                    <p>
+                        Select the employee, absence type, date range and choose whether the system should assign temporary coverage automatically.
+                    </p>
+                </div>
+
+                <button type="button" class="btn-light" @onclick="ClearForm">
+                    ✨ New
+                </button>
+            </div>
+
+            <EditForm Model="FormModel" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="form-grid">
+
+                    <div class="form-group large">
+                        <label>Employee</label>
+                        <select class="form-control" @bind="FormModel.EmployeeIdText">
+                            <option value="">Select employee</option>
+
+                            @foreach (var employee in Employees)
+                            {
+                                <option value="@employee.Id">
+                                    @employee.Nombre | ID: @employee.IdEmpleado
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Time Off Type</label>
+                        <select class="form-control" @bind="FormModel.LeaveType">
+                            @foreach (var type in LeaveTypes)
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <InputDate class="form-control" @bind-Value="FormModel.StartDate" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <InputDate class="form-control" @bind-Value="FormModel.EndDate" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Automatic Assignment</label>
+                        <select class="form-control" @bind="FormModel.AutomaticCoverageText">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Notes</label>
+                        <textarea class="form-control notes"
+                                  placeholder="Optional notes for HR..."
+                                  @bind="FormModel.Notes"
+                                  @bind:event="oninput"></textarea>
+                    </div>
+
+                </div>
+
+                @if (FormModel.AutomaticCoverage)
+                {
+                    <div class="coverage-info">
+                        <strong>Automatic assignment is enabled.</strong>
+                        <span>
+                            The system will review this employee's active books. If any pending stage falls inside the selected date range,
+                            it will create temporary assignments using the employees with the lowest workload for that extraction date.
+                        </span>
+                    </div>
+                }
+
+                <div class="button-row">
+                    <button type="submit" class="btn-primary" disabled="@Saving">
+                        @(Saving ? "Saving..." : EditingId is null ? "Save Time Off" : "Update Time Off")
+                    </button>
+
+                    <button type="button" class="btn-secondary" @onclick="ClearForm">
+                        Clear
+                    </button>
+                </div>
+            </EditForm>
+        </section>
+    }
+
+    <section class="list-card">
+        <div class="section-header table-header">
+            <div>
+                <h2>Time Off List</h2>
+                <p>Review registered vacations, free days, sick leave and automatic temporary coverages.</p>
+            </div>
+
+            <div class="list-filters">
+                <select class="filter-select" @bind="EmployeeFilter">
+                    <option value="">All Employees</option>
+
+                    @foreach (var employee in Employees)
+                    {
+                        <option value="@employee.Id">@employee.Nombre</option>
+                    }
+                </select>
+
+                <select class="filter-select" @bind="TypeFilter">
+                    <option value="">All Types</option>
+
+                    @foreach (var type in LeaveTypes)
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+
+                <select class="filter-select" @bind="StatusFilter">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Closed">Closed</option>
+                </select>
+
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input placeholder="Search employee, type, notes, book..."
+                           @bind="SearchText"
+                           @bind:event="oninput" />
+                </div>
+
+                <button type="button" class="btn-filter-clear" @onclick="ClearFilters">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        @if (Loading)
+        {
+            <div class="loading-state">
+                Loading time off records...
+            </div>
+        }
+        else if (!FilteredTimeOff.Any())
+        {
+            <div class="empty-state">
+                <strong>No records to display.</strong>
+                <span>Create a new record or change the filters.</span>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="timeoff-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Date Range</th>
+                            <th>Days</th>
+                            <th>Auto Assignment</th>
+                            <th>Coverage Details</th>
+                            <th>Status</th>
+
+                            @if (CanManage)
+                            {
+                                <th></th>
+                            }
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in FilteredTimeOff)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="employee-title">
+                                        <strong>@item.EmployeeName</strong>
+                                        <span>ID: @item.EmployeeCode</span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="pill type">@item.LeaveType</span>
+                                </td>
+
+                                <td>
+                                    <div class="date-title">
+                                        <strong>@FormatDate(item.StartDate) - @FormatDate(item.EndDate)</strong>
+                                        <span>Created: @item.CreatedAt.ToString("MM/dd/yyyy hh:mm tt", CultureInfo.InvariantCulture)</span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <strong>@item.TotalDays</strong>
+                                </td>
+
+                                <td>
+                                    @if (item.AutomaticCoverage)
+                                    {
+                                        <span class="pill success">Enabled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill muted">No</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (!item.Details.Any())
+                                    {
+                                        <span class="pill muted">No temporary assignments</span>
+                                    }
+                                    else
+                                    {
+                                        <div class="coverage-details">
+                                            @foreach (var detail in item.Details)
+                                            {
+                                                <div class="coverage-detail-card">
+                                                    <strong>@detail.BookName</strong>
+                                                    <span>KGEN: @detail.KGENCode | LSA: @detail.LSACode</span>
+                                                    <span>Temporary: @detail.TemporaryEmployeeName</span>
+                                                    <span>Stages: @detail.Stages</span>
+                                                    <small>@FormatDate(detail.FirstStageDate) - @FormatDate(detail.LastStageDate)</small>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (item.Active)
+                                    {
+                                        <span class="pill success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill danger">Closed</span>
+                                    }
+                                </td>
+
+                                @if (CanManage)
+                                {
+                                    <td class="actions-cell">
+                                        <button type="button"
+                                                class="icon-btn"
+                                                title="Edit"
+                                                @onclick="() => Edit(item.Id)">
+                                            ✏️
+                                        </button>
+
+                                        @if (item.Active)
+                                        {
+                                            <button type="button"
+                                                    class="icon-btn warning"
+                                                    title="Close"
+                                                    @onclick="() => CloseAsync(item.Id)">
+                                                🔒
+                                            </button>
+                                        }
+
+                                        <button type="button"
+                                                class="icon-btn danger"
+                                                title="Delete"
+                                                @onclick="() => DeleteAsync(item.Id)">
+                                            🗑️
+                                        </button>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private List<Empleados> Employees { get; set; } = new();
+    private List<Bind_Plant> BindPlants { get; set; } = new();
+    private List<TimeOffViewModel> TimeOffList { get; set; } = new();
+
+    private TimeOffFormModel FormModel { get; set; } = new();
+
+    private ClaimsPrincipal? CurrentUser { get; set; }
+
+    private bool CanManage { get; set; }
+    private bool Loading { get; set; } = true;
+    private bool Saving { get; set; }
+
+    private Guid? EditingId { get; set; }
+
+    private string Message { get; set; } = string.Empty;
+    private string MessageType { get; set; } = "success";
+
+    private string EmployeeFilter { get; set; } = string.Empty;
+    private string TypeFilter { get; set; } = string.Empty;
+    private string StatusFilter { get; set; } = string.Empty;
+    private string SearchText { get; set; } = string.Empty;
+
+    private readonly List<string> LeaveTypes = new()
+    {
+        "Vacation",
+        "Free Day",
+        "Sick Leave",
+        "Medical Appointment",
+        "Personal Leave",
+        "Family Emergency",
+        "Maternity Leave",
+        "Paternity Leave",
+        "Bereavement",
+        "Training",
+        "Administrative Leave",
+        "Other"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        CurrentUser = authState.User;
+        CanManage = HasPermission(CurrentUser, "CreateAssignations");
+
+        await LoadCatalogsAsync();
+        await LoadDataAsync();
+    }
+
+    private static bool HasPermission(ClaimsPrincipal? user, string claimType)
+    {
+        if (user is null)
+            return false;
+
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task LoadCatalogsAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        Employees = await db.Empleados
+            .AsNoTracking()
+            .Where(x => x.Activo)
+            .OrderBy(x => x.Nombre)
+            .ToListAsync();
+
+        BindPlants = await db.Bind_Plants
+            .AsNoTracking()
+            .OrderBy(x => x.Bind_Plant_Name)
+            .ToListAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Loading = true;
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            await UpdateExpiredTemporaryAssignmentsAsync(db);
+
+            var records = await db.EmployeeLeaveCoverages
+                .AsNoTracking()
+                .Include(x => x.Employee)
+                .Include(x => x.Details)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+
+            var temporaryEmployeeIds = records
+                .SelectMany(x => x.Details)
+                .Select(x => x.TemporaryEmployeeId)
+                .Distinct()
+                .ToList();
+
+            var temporaryEmployees = await db.Empleados
+                .AsNoTracking()
+                .Where(x => temporaryEmployeeIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, x => x.Nombre);
+
+            TimeOffList = records.Select(x => new TimeOffViewModel
+            {
+                Id = x.Id,
+                EmployeeId = x.EmployeeId,
+                EmployeeName = x.Employee?.Nombre ?? "-",
+                EmployeeCode = x.Employee?.IdEmpleado ?? 0,
+                LeaveType = x.LeaveType,
+                StartDate = x.StartDate,
+                EndDate = x.EndDate,
+                AutomaticCoverage = x.AutomaticCoverage,
+                Notes = x.Notes ?? string.Empty,
+                Active = x.Active,
+                CreatedAt = x.CreatedAt,
+                TotalDays = CalculateDays(x.StartDate, x.EndDate),
+                Details = x.Details
+                    .OrderBy(d => d.FirstStageDate)
+                    .Select(d => new TimeOffDetailViewModel
+                    {
+                        BookName = d.BookName ?? "-",
+                        KGENCode = d.KGENCode ?? "-",
+                        LSACode = d.LSACode ?? "-",
+                        Stages = d.Stages,
+                        FirstStageDate = d.FirstStageDate,
+                        LastStageDate = d.LastStageDate,
+                        TemporaryEmployeeName = temporaryEmployees.TryGetValue(d.TemporaryEmployeeId, out var name)
+                            ? name
+                            : "-"
+                    })
+                    .ToList()
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"Error loading time off records: {ex.Message}", "error");
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private IEnumerable<TimeOffViewModel> FilteredTimeOff
+    {
+        get
+        {
+            IEnumerable<TimeOffViewModel> query = TimeOffList;
+
+            if (!string.IsNullOrWhiteSpace(EmployeeFilter) &&
+                Guid.TryParse(EmployeeFilter, out var employeeId))
+            {
+                query = query.Where(x => x.EmployeeId == employeeId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(TypeFilter))
+            {
+                query = query.Where(x => string.Equals(x.LeaveType, TypeFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(StatusFilter))
+            {
+                if (StatusFilter == "Active")
+                    query = query.Where(x => x.Active);
+
+                if (StatusFilter == "Closed")
+                    query = query.Where(x => !x.Active);
+            }
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var filter = Normalize(SearchText);
+
+                query = query.Where(x =>
+                    Normalize(x.EmployeeName).Contains(filter) ||
+                    x.EmployeeCode.ToString(CultureInfo.InvariantCulture).Contains(filter) ||
+                    Normalize(x.LeaveType).Contains(filter) ||
+                    Normalize(x.Notes).Contains(filter) ||
+                    x.Details.Any(d =>
+                        Normalize(d.BookName).Contains(filter) ||
+                        Normalize(d.KGENCode).Contains(filter) ||
+                        Normalize(d.LSACode).Contains(filter) ||
+                        Normalize(d.TemporaryEmployeeName).Contains(filter) ||
+                        Normalize(d.Stages).Contains(filter)));
+            }
+
+            return query;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (!CanManage)
+        {
+            ShowMessage("You do not have permission to manage employee time off.", "error");
+            return;
+        }
+
+        if (!Guid.TryParse(FormModel.EmployeeIdText, out var employeeId))
+        {
+            ShowMessage("Select a valid employee.", "error");
+            return;
+        }
+
+        if (FormModel.EndDate < FormModel.StartDate)
+        {
+            ShowMessage("End date cannot be earlier than start date.", "error");
+            return;
+        }
+
+        try
+        {
+            Saving = true;
+            ClearMessage();
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            EmployeeLeaveCoverage record;
+
+            if (EditingId is null)
+            {
+                record = new EmployeeLeaveCoverage
+                {
+                    Id = Guid.NewGuid(),
+                    EmployeeId = employeeId,
+                    LeaveType = FormModel.LeaveType,
+                    StartDate = FormModel.StartDate,
+                    EndDate = FormModel.EndDate,
+                    AutomaticCoverage = FormModel.AutomaticCoverage,
+                    Notes = FormModel.Notes,
+                    Active = true,
+                    CreatedAt = DateTime.Now
+                };
+
+                db.EmployeeLeaveCoverages.Add(record);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                record = await db.EmployeeLeaveCoverages
+                    .Include(x => x.Details)
+                    .FirstOrDefaultAsync(x => x.Id == EditingId.Value)
+                    ?? throw new InvalidOperationException("The selected record was not found.");
+
+                await CloseTemporaryAssignmentsFromRecordAsync(db, record.Id);
+
+                if (record.Details.Any())
+                    db.EmployeeLeaveCoverageDetails.RemoveRange(record.Details);
+
+                record.EmployeeId = employeeId;
+                record.LeaveType = FormModel.LeaveType;
+                record.StartDate = FormModel.StartDate;
+                record.EndDate = FormModel.EndDate;
+                record.AutomaticCoverage = FormModel.AutomaticCoverage;
+                record.Notes = FormModel.Notes;
+                record.Active = true;
+                record.UpdatedAt = DateTime.Now;
+                record.ClosedAt = null;
+
+                await db.SaveChangesAsync();
+            }
+
+            var autoResult = new AutoCoverageResult();
+
+            if (record.AutomaticCoverage)
+            {
+                autoResult = await CreateAutomaticCoverageAsync(db, record);
+                await db.SaveChangesAsync();
+            }
+
+            if (record.AutomaticCoverage)
+            {
+                ShowMessage(
+                    $"Time off saved successfully. Temporary assignments created: {autoResult.Created}. Skipped books: {autoResult.Skipped}.",
+                    autoResult.Created > 0 ? "success" : "warning");
+            }
+            else
+            {
+                ShowMessage("Time off saved successfully.", "success");
+            }
+
+            ClearForm();
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            var error = ex.InnerException?.Message ?? ex.Message;
+            ShowMessage($"Error saving time off: {error}", "error");
+        }
+        finally
+        {
+            Saving = false;
+        }
+    }
+
+    private async Task<AutoCoverageResult> CreateAutomaticCoverageAsync(
+        AppDbContext db,
+        EmployeeLeaveCoverage record)
+    {
+        var result = new AutoCoverageResult();
+
+        var assignments = await db.Asignaciones
+            .Include(x => x.Empleado)
+            .Include(x => x.Libro)
+            .Where(x =>
+                !x.Finalizado &&
+                x.IdEmpleado == record.EmployeeId &&
+                x.Libro != null &&
+                !x.Libro.Finalizado)
+            .OrderBy(x => x.Libro!.DirxionDate)
+            .ThenBy(x => x.Libro!.BookName)
+            .ToListAsync();
+
+        var localWorkload = new Dictionary<string, int>();
+
+        foreach (var assignment in assignments)
+        {
+            if (assignment.Libro is null)
+                continue;
+
+            var stages = GetStagesToCover(assignment.Libro, record.StartDate, record.EndDate);
+
+            if (!stages.Any())
+            {
+                result.Skipped++;
+                continue;
+            }
+
+            var firstStage = stages.First();
+            var temporaryEmployeeId = await GetBestTemporaryEmployeeAsync(
+                db,
+                record.EmployeeId,
+                firstStage.StageDate,
+                firstStage.Code,
+                localWorkload);
+
+            if (temporaryEmployeeId is null)
+            {
+                result.Skipped++;
+                continue;
+            }
+
+            var existingTemporaryAssignments = await db.TemporaryAssignments
+                .Where(x => x.AssignmentId == assignment.Id && x.Active)
+                .ToListAsync();
+
+            foreach (var temp in existingTemporaryAssignments)
+            {
+                temp.Active = false;
+                temp.ClosedAt = DateTime.Now;
+            }
+
+            var temporary = new TemporaryAssignment
+            {
+                Id = Guid.NewGuid(),
+                AssignmentId = assignment.Id,
+                OriginalEmployeeId = assignment.IdEmpleado,
+                TemporaryEmployeeId = temporaryEmployeeId.Value,
+
+                Proof = stages.Any(x => x.Code == "Proof"),
+                Final = stages.Any(x => x.Code == "Final"),
+                Memo = stages.Any(x => x.Code == "Memo"),
+                FinalPO = stages.Any(x => x.Code == "FinalPO"),
+                Shipping = stages.Any(x => x.Code == "Shipping"),
+                Dirxion = stages.Any(x => x.Code == "Dirxion"),
+                PubDate = false,
+
+                Reason = $"{record.LeaveType} automatic coverage: {FormatDate(record.StartDate)} - {FormatDate(record.EndDate)}",
+                Active = true,
+                CreatedAt = DateTime.Now
+            };
+
+            db.TemporaryAssignments.Add(temporary);
+
+            var detail = new EmployeeLeaveCoverageDetail
+            {
+                Id = Guid.NewGuid(),
+                EmployeeLeaveCoverageId = record.Id,
+                AssignmentId = assignment.Id,
+                TemporaryAssignmentId = temporary.Id,
+                OriginalEmployeeId = assignment.IdEmpleado,
+                TemporaryEmployeeId = temporaryEmployeeId.Value,
+                BookId = assignment.IdLibro,
+
+                BookName = assignment.Libro.BookName,
+                KGENCode = assignment.Libro.KGENCode,
+                LSACode = assignment.Libro.LSACode,
+
+                Stages = string.Join(", ", stages.Select(x => x.Name)),
+                FirstStageDate = stages.Min(x => x.StageDate),
+                LastStageDate = stages.Max(x => x.StageDate),
+                CreatedAt = DateTime.Now
+            };
+
+            db.EmployeeLeaveCoverageDetails.Add(detail);
+
+            foreach (var stage in stages)
+            {
+                AddLocalWorkload(localWorkload, temporaryEmployeeId.Value, stage.StageDate, stage.Code);
+            }
+
+            result.Created++;
+        }
+
+        return result;
+    }
+
+    private List<BookStageInfo> GetStagesToCover(Libros book, DateOnly startDate, DateOnly endDate)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var bindPlant = Normalize(GetBindPlantName(book.BindPlantId));
+
+        var omitMemo =
+            bindPlant.Contains("PREM") ||
+            bindPlant.Contains("DIRX") ||
+            bindPlant.Contains("IVEAU") ||
+            bindPlant.Contains("WSTR");
+
+        var stages = new List<BookStageInfo>();
+
+        AddStageIfValid(stages, "Proof", "Proof", book.ProofExtract, today);
+        AddStageIfValid(stages, "Final", "Final", book.FinalExtract, today);
+
+        if (!omitMemo)
+            AddStageIfValid(stages, "Memo", "Memo", book.MemoExtract, today);
+
+        AddStageIfValid(stages, "FinalPO", "Final PO", book.FinalPODate, today);
+        AddStageIfValid(stages, "Shipping", "Shipping", book.ShippingDate, today);
+        AddStageIfValid(stages, "Dirxion", "Dirxion", book.DirxionDate, today);
+
+        stages = stages
+            .Where(x => x.StageDate <= book.DirxionDate)
+            .OrderBy(x => x.StageDate)
+            .ThenBy(x => GetStageOrder(x.Code))
+            .ToList();
+
+        var firstAffectedIndex = stages.FindIndex(x =>
+            x.StageDate >= startDate &&
+            x.StageDate <= endDate);
+
+        if (firstAffectedIndex < 0)
+            return new List<BookStageInfo>();
+
+        return stages
+            .Skip(firstAffectedIndex)
+            .ToList();
+    }
+
+    private static void AddStageIfValid(
+        List<BookStageInfo> stages,
+        string code,
+        string name,
+        DateOnly date,
+        DateOnly today)
+    {
+        if (date == default)
+            return;
+
+        if (date < today)
+            return;
+
+        stages.Add(new BookStageInfo
+        {
+            Code = code,
+            Name = name,
+            StageDate = date
+        });
+    }
+
+    private async Task<Guid?> GetBestTemporaryEmployeeAsync(
+        AppDbContext db,
+        Guid originalEmployeeId,
+        DateOnly stageDate,
+        string stageCode,
+        Dictionary<string, int> localWorkload)
+    {
+        var absentEmployees = await db.EmployeeLeaveCoverages
+            .AsNoTracking()
+            .Where(x =>
+                x.Active &&
+                x.StartDate <= stageDate &&
+                x.EndDate >= stageDate)
+            .Select(x => x.EmployeeId)
+            .ToListAsync();
+
+        var candidates = await db.Empleados
+            .AsNoTracking()
+            .Where(x =>
+                x.Activo &&
+                x.Id != originalEmployeeId &&
+                !absentEmployees.Contains(x.Id))
+            .OrderBy(x => x.Nombre)
+            .ToListAsync();
+
+        if (!candidates.Any())
+            return null;
+
+        var candidateIds = candidates.Select(x => x.Id).ToHashSet();
+
+        var activeAssignments = await db.Asignaciones
+            .AsNoTracking()
+            .Include(x => x.Libro)
+            .Where(x =>
+                !x.Finalizado &&
+                x.Libro != null &&
+                !x.Libro.Finalizado)
+            .ToListAsync();
+
+        activeAssignments = activeAssignments
+            .Where(x => GetStageDate(x.Libro!, stageCode) == stageDate)
+            .ToList();
+
+        var assignmentIds = activeAssignments.Select(x => x.Id).ToList();
+
+        var temporaries = await db.TemporaryAssignments
+            .AsNoTracking()
+            .Where(x => x.Active && assignmentIds.Contains(x.AssignmentId))
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
+        var workload = candidates.ToDictionary(x => x.Id, _ => 0);
+
+        foreach (var assignment in activeAssignments)
+        {
+            var responsibleEmployeeId = assignment.IdEmpleado;
+
+            var temporary = temporaries
+                .Where(x => x.AssignmentId == assignment.Id)
+                .OrderByDescending(x => x.CreatedAt)
+                .FirstOrDefault();
+
+            if (temporary is not null && TemporaryAppliesToStage(temporary, stageCode))
+            {
+                responsibleEmployeeId = temporary.TemporaryEmployeeId;
+            }
+
+            if (candidateIds.Contains(responsibleEmployeeId))
+            {
+                workload[responsibleEmployeeId]++;
+            }
+        }
+
+        var topTwo = candidates
+            .Select(x => new EmployeeWorkload
+            {
+                EmployeeId = x.Id,
+                EmployeeName = x.Nombre,
+                ExistingWorkload = workload.TryGetValue(x.Id, out var count) ? count : 0,
+                LocalWorkload = GetLocalWorkload(localWorkload, x.Id, stageDate, stageCode)
+            })
+            .OrderBy(x => x.ExistingWorkload)
+            .ThenBy(x => x.LocalWorkload)
+            .ThenBy(x => x.EmployeeName)
+            .Take(2)
+            .ToList();
+
+        var selected = topTwo
+            .OrderBy(x => x.ExistingWorkload + x.LocalWorkload)
+            .ThenBy(x => x.LocalWorkload)
+            .ThenBy(x => x.EmployeeName)
+            .FirstOrDefault();
+
+        return selected?.EmployeeId;
+    }
+
+    private static bool TemporaryAppliesToStage(TemporaryAssignment temporary, string stageCode)
+    {
+        return stageCode switch
+        {
+            "Proof" => temporary.Proof,
+            "Final" => temporary.Final,
+            "Memo" => temporary.Memo,
+            "FinalPO" => temporary.FinalPO,
+            "Shipping" => temporary.Shipping,
+            "Dirxion" => temporary.Dirxion,
+            "PubDate" => temporary.PubDate,
+            _ => false
+        };
+    }
+
+    private static DateOnly GetStageDate(Libros book, string stageCode)
+    {
+        return stageCode switch
+        {
+            "Proof" => book.ProofExtract,
+            "Final" => book.FinalExtract,
+            "Memo" => book.MemoExtract,
+            "FinalPO" => book.FinalPODate,
+            "Shipping" => book.ShippingDate,
+            "Dirxion" => book.DirxionDate,
+            "PubDate" => book.PubDate,
+            _ => default
+        };
+    }
+
+    private static int GetStageOrder(string stageCode)
+    {
+        return stageCode switch
+        {
+            "Proof" => 1,
+            "Final" => 2,
+            "Memo" => 3,
+            "FinalPO" => 4,
+            "Shipping" => 5,
+            "Dirxion" => 6,
+            "PubDate" => 7,
+            _ => 99
+        };
+    }
+
+    private static void AddLocalWorkload(
+        Dictionary<string, int> localWorkload,
+        Guid employeeId,
+        DateOnly stageDate,
+        string stageCode)
+    {
+        var key = GetLocalWorkloadKey(employeeId, stageDate, stageCode);
+
+        if (!localWorkload.ContainsKey(key))
+            localWorkload[key] = 0;
+
+        localWorkload[key]++;
+    }
+
+    private static int GetLocalWorkload(
+        Dictionary<string, int> localWorkload,
+        Guid employeeId,
+        DateOnly stageDate,
+        string stageCode)
+    {
+        var key = GetLocalWorkloadKey(employeeId, stageDate, stageCode);
+
+        return localWorkload.TryGetValue(key, out var count) ? count : 0;
+    }
+
+    private static string GetLocalWorkloadKey(Guid employeeId, DateOnly stageDate, string stageCode)
+    {
+        return $"{employeeId:N}|{stageDate:yyyyMMdd}|{stageCode}";
+    }
+
+    private async Task CloseTemporaryAssignmentsFromRecordAsync(AppDbContext db, Guid recordId)
+    {
+        var temporaryIds = await db.EmployeeLeaveCoverageDetails
+            .Where(x => x.EmployeeLeaveCoverageId == recordId && x.TemporaryAssignmentId != null)
+            .Select(x => x.TemporaryAssignmentId!.Value)
+            .ToListAsync();
+
+        if (!temporaryIds.Any())
+            return;
+
+        var temporaries = await db.TemporaryAssignments
+            .Where(x => temporaryIds.Contains(x.Id) && x.Active)
+            .ToListAsync();
+
+        foreach (var temporary in temporaries)
+        {
+            temporary.Active = false;
+            temporary.ClosedAt = DateTime.Now;
+        }
+    }
+
+    private async Task CloseAsync(Guid id)
+    {
+        if (!CanManage)
+        {
+            ShowMessage("You do not have permission to close this record.", "error");
+            return;
+        }
+
+        var confirm = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Are you sure you want to close this time off record and its temporary assignments?");
+
+        if (!confirm)
+            return;
+
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var record = await db.EmployeeLeaveCoverages
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (record is null)
+            {
+                ShowMessage("The selected record was not found.", "error");
+                return;
+            }
+
+            await CloseTemporaryAssignmentsFromRecordAsync(db, id);
+
+            record.Active = false;
+            record.ClosedAt = DateTime.Now;
+            record.UpdatedAt = DateTime.Now;
+
+            await db.SaveChangesAsync();
+
+            ShowMessage("Time off record closed successfully.", "success");
+
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"Error closing record: {ex.Message}", "error");
+        }
+    }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        if (!CanManage)
+        {
+            ShowMessage("You do not have permission to delete this record.", "error");
+            return;
+        }
+
+        var confirm = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Are you sure you want to delete this record? Temporary assignments created by this record will be closed.");
+
+        if (!confirm)
+            return;
+
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var record = await db.EmployeeLeaveCoverages
+                .Include(x => x.Details)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (record is null)
+            {
+                ShowMessage("The selected record was not found.", "error");
+                return;
+            }
+
+            await CloseTemporaryAssignmentsFromRecordAsync(db, id);
+
+            db.EmployeeLeaveCoverages.Remove(record);
+            await db.SaveChangesAsync();
+
+            ShowMessage("Time off record deleted successfully.", "success");
+
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"Error deleting record: {ex.Message}", "error");
+        }
+    }
+
+    private void Edit(Guid id)
+    {
+        var item = TimeOffList.FirstOrDefault(x => x.Id == id);
+
+        if (item is null)
+            return;
+
+        EditingId = item.Id;
+
+        FormModel = new TimeOffFormModel
+        {
+            EmployeeIdText = item.EmployeeId.ToString(),
+            LeaveType = item.LeaveType,
+            StartDate = item.StartDate,
+            EndDate = item.EndDate,
+            AutomaticCoverageText = item.AutomaticCoverage ? "Yes" : "No",
+            Notes = item.Notes
+        };
+
+        ClearMessage();
+    }
+
+    private void ClearForm()
+    {
+        EditingId = null;
+        FormModel = new TimeOffFormModel();
+        ClearMessage();
+    }
+
+    private void ClearFilters()
+    {
+        EmployeeFilter = string.Empty;
+        TypeFilter = string.Empty;
+        StatusFilter = string.Empty;
+        SearchText = string.Empty;
+    }
+
+    private async Task UpdateExpiredTemporaryAssignmentsAsync(AppDbContext db)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var expiredRecords = await db.EmployeeLeaveCoverages
+            .Where(x => x.Active && x.EndDate < today)
+            .ToListAsync();
+
+        if (!expiredRecords.Any())
+            return;
+
+        foreach (var record in expiredRecords)
+        {
+            await CloseTemporaryAssignmentsFromRecordAsync(db, record.Id);
+
+            record.Active = false;
+            record.ClosedAt = DateTime.Now;
+            record.UpdatedAt = DateTime.Now;
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private string GetBindPlantName(Guid? id)
+    {
+        if (id is null)
+            return string.Empty;
+
+        return BindPlants.FirstOrDefault(x => x.Id == id)?.Bind_Plant_Name ?? string.Empty;
+    }
+
+    private static int CalculateDays(DateOnly start, DateOnly end)
+    {
+        return end.DayNumber - start.DayNumber + 1;
+    }
+
+    private static string FormatDate(DateOnly date)
+    {
+        if (date == default)
+            return "-";
+
+        return date.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+    }
+
+    private static string Normalize(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+
+        var normalized = text.Trim().ToUpperInvariant().Normalize(NormalizationForm.FormD);
+
+        var chars = normalized
+            .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+            .ToArray();
+
+        return new string(chars).Normalize(NormalizationForm.FormC);
+    }
+
+    private void ShowMessage(string message, string type)
+    {
+        Message = message;
+        MessageType = type;
+    }
+
+    private void ClearMessage()
+    {
+        Message = string.Empty;
+        MessageType = "success";
+    }
+
+    private sealed class TimeOffFormModel
+    {
+        public string EmployeeIdText { get; set; } = string.Empty;
+        public string LeaveType { get; set; } = "Vacation";
+
+        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
+        public string AutomaticCoverageText { get; set; } = "No";
+
+        public bool AutomaticCoverage =>
+            string.Equals(AutomaticCoverageText, "Yes", StringComparison.OrdinalIgnoreCase);
+
+        public string? Notes { get; set; }
+    }
+
+    private sealed class TimeOffViewModel
+    {
+        public Guid Id { get; set; }
+        public Guid EmployeeId { get; set; }
+
+        public string EmployeeName { get; set; } = string.Empty;
+        public int EmployeeCode { get; set; }
+
+        public string LeaveType { get; set; } = string.Empty;
+
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
+
+        public int TotalDays { get; set; }
+
+        public bool AutomaticCoverage { get; set; }
+        public string Notes { get; set; } = string.Empty;
+
+        public bool Active { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public List<TimeOffDetailViewModel> Details { get; set; } = new();
+    }
+
+    private sealed class TimeOffDetailViewModel
+    {
+        public string BookName { get; set; } = string.Empty;
+        public string KGENCode { get; set; } = string.Empty;
+        public string LSACode { get; set; } = string.Empty;
+        public string TemporaryEmployeeName { get; set; } = string.Empty;
+        public string Stages { get; set; } = string.Empty;
+        public DateOnly FirstStageDate { get; set; }
+        public DateOnly LastStageDate { get; set; }
+    }
+
+    private sealed class BookStageInfo
+    {
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public DateOnly StageDate { get; set; }
+    }
+
+    private sealed class EmployeeWorkload
+    {
+        public Guid EmployeeId { get; set; }
+        public string EmployeeName { get; set; } = string.Empty;
+        public int ExistingWorkload { get; set; }
+        public int LocalWorkload { get; set; }
+    }
+
+    private sealed class AutoCoverageResult
+    {
+        public int Created { get; set; }
+        public int Skipped { get; set; }
+    }
+}

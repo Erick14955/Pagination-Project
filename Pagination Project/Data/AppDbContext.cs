@@ -25,6 +25,8 @@ namespace Pagination_Project.Data
         public DbSet<TemporaryAssignment> TemporaryAssignments { get; set; }
         public DbSet<LateWorkActivity> LateWorkActivities { get; set; }
         public DbSet<AsignacionTrabajada> AsignacionesTrabajadas { get; set; }
+        public DbSet<EmployeeLeaveCoverage> EmployeeLeaveCoverages { get; set; }
+        public DbSet<EmployeeLeaveCoverageDetail> EmployeeLeaveCoverageDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,6 +67,67 @@ namespace Pagination_Project.Data
                     .WithOne(e => e.Usuario)
                     .HasForeignKey<Usuario>(e => e.EmployeeId)
                     .HasPrincipalKey<Empleados>(e => e.Id)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<EmployeeLeaveCoverage>(entity =>
+            {
+                entity.ToTable("Employee_Leave_Coverages");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.EmployeeId).HasColumnName("Employee_Id");
+                entity.Property(e => e.LeaveType).HasColumnName("Leave_Type");
+                entity.Property(e => e.StartDate).HasColumnName("Start_Date");
+                entity.Property(e => e.EndDate).HasColumnName("End_Date");
+                entity.Property(e => e.AutomaticCoverage).HasColumnName("Automatic_Coverage");
+                entity.Property(e => e.Notes).HasColumnName("Notes");
+                entity.Property(e => e.Active).HasColumnName("Active");
+                entity.Property(e => e.CreatedAt).HasColumnName("Created_At");
+                entity.Property(e => e.UpdatedAt).HasColumnName("Updated_At");
+                entity.Property(e => e.ClosedAt).HasColumnName("Closed_At");
+
+                entity.HasOne(e => e.Employee)
+                    .WithMany()
+                    .HasForeignKey(e => e.EmployeeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.Details)
+                    .WithOne(e => e.EmployeeLeaveCoverage)
+                    .HasForeignKey(e => e.EmployeeLeaveCoverageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<EmployeeLeaveCoverageDetail>(entity =>
+            {
+                entity.ToTable("Employee_Leave_Coverage_Details");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id).HasColumnName("Id");
+                entity.Property(e => e.EmployeeLeaveCoverageId).HasColumnName("Employee_Leave_Coverage_Id");
+                entity.Property(e => e.AssignmentId).HasColumnName("Assignment_Id");
+                entity.Property(e => e.TemporaryAssignmentId).HasColumnName("Temporary_Assignment_Id");
+                entity.Property(e => e.OriginalEmployeeId).HasColumnName("Original_Employee_Id");
+                entity.Property(e => e.TemporaryEmployeeId).HasColumnName("Temporary_Employee_Id");
+                entity.Property(e => e.BookId).HasColumnName("Book_Id");
+                entity.Property(e => e.BookName).HasColumnName("Book_Name");
+                entity.Property(e => e.KGENCode).HasColumnName("KGEN_Code");
+                entity.Property(e => e.LSACode).HasColumnName("LSA_Code");
+                entity.Property(e => e.Stages).HasColumnName("Stages");
+                entity.Property(e => e.FirstStageDate).HasColumnName("First_Stage_Date");
+                entity.Property(e => e.LastStageDate).HasColumnName("Last_Stage_Date");
+                entity.Property(e => e.CreatedAt).HasColumnName("Created_At");
+
+                entity.HasOne(e => e.Assignment)
+                    .WithMany()
+                    .HasForeignKey(e => e.AssignmentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.TemporaryAssignment)
+                    .WithMany()
+                    .HasForeignKey(e => e.TemporaryAssignmentId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 

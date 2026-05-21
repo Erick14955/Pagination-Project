@@ -98,6 +98,14 @@
                             <span class="thryv-menu-text">Late Work Activities</span>
                         </NavLink>
                     }
+
+                    @if (PuedeVerEmployeeTimeOff(auth.User))
+                    {
+                        <NavLink href="/employee-time-off" class="thryv-menu-link">
+                            <span class="thryv-menu-icon">🌴</span>
+                            <span class="thryv-menu-text">Employee Time Off</span>
+                        </NavLink>
+                    }
                 </nav>
             </Authorized>
         </AuthorizeView>
@@ -178,6 +186,15 @@
     }
 
     private static bool PuedeVerReportes(ClaimsPrincipal user)
+    {
+        var rol = ObtenerRol(user);
+
+        return rol == "Administrator" ||
+               rol == "Supervisor" ||
+               rol == "Assistant";
+    }
+
+    private static bool PuedeVerEmployeeTimeOff(ClaimsPrincipal user)
     {
         var rol = ObtenerRol(user);
 
