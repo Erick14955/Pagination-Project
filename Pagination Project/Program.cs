@@ -5,20 +5,15 @@ using Pagination_Project.Components;
 using Pagination_Project.Data;
 using Pagination_Project.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ================================
-// Razor Components
-// ================================
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpClient();
 
-// ================================
-// EF Core + PostgreSQL
-// ================================
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("SupabaseConnection"),
@@ -32,9 +27,6 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
             npgsqlOptions.CommandTimeout(60);
         }));
 
-// ================================
-// Servicios de aplicación
-// ================================
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -42,9 +34,6 @@ builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 
 builder.Services.AddControllers();
 
-// ================================
-// Auth con cookies
-// ================================
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -60,14 +49,23 @@ builder.Services
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-// ================================
-// Pipeline
-// ================================
+app.UseForwardedHeaders();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -80,9 +78,6 @@ app.UseAntiforgery();
 
 app.UseAuthentication();
 
-// =====================================================
-// Middleware obligatorio para cambio de contraseña
-// =====================================================
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLower() ?? string.Empty;
@@ -122,9 +117,6 @@ app.Use(async (context, next) =>
 
 app.UseAuthorization();
 
-// ================================
-// Endpoints de login/logout
-// ================================
 app.MapPost("/account/login", async (
     HttpContext httpContext,
     IAuthService authService) =>
@@ -295,14 +287,8 @@ app.MapPost("/account/logout", async (HttpContext httpContext) =>
 })
 .DisableAntiforgery();
 
-// ================================
-// Controllers API
-// ================================
 app.MapControllers();
 
-// ================================
-// Blazor
-// ================================
 app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
