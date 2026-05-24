@@ -393,16 +393,6 @@
         background: #f9fafb;
     }
 
-    .assignments-table th:last-child,
-    .assignments-table td.actions-cell {
-        width: 74px;
-        min-width: 74px;
-        max-width: 74px;
-        text-align: center;
-        vertical-align: middle;
-        padding: 0 14px;
-    }
-
 .employee-title strong,
 .book-title strong {
     display: block;
@@ -428,9 +418,7 @@
 }
 
 .actions-cell {
-    display: table-cell;
     text-align: center;
-    vertical-align: middle;
 }
 
 .icon-btn {
@@ -1052,3 +1040,58 @@
     opacity: 0.65;
     pointer-events: none;
 }
+
+/* ========================================================= */
+/* FIX FINAL: BOTÓN ELIMINAR ALINEADO EN REGISTRO ASIGNACIONES */
+/* ========================================================= */
+
+.assignments-table th,
+.assignments-table td {
+    vertical-align: middle !important;
+}
+
+    .assignments-table th:last-child,
+    .assignments-table td.actions-cell {
+        width: 78px !important;
+        min-width: 78px !important;
+        max-width: 78px !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    .assignments-table td.actions-cell {
+        display: table-cell !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 13px 14px !important;
+        line-height: normal !important;
+        position: static !important;
+    }
+
+        .assignments-table td.actions-cell .icon-btn,
+        .assignments-table td.actions-cell button.icon-btn {
+            position: static !important;
+            transform: none !important;
+            margin: 0 auto !important;
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
+            min-height: 42px !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: 14px !important;
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+            font-size: 16px !important;
+            cursor: pointer !important;
+        }
+
+            .assignments-table td.actions-cell .icon-btn:hover,
+            .assignments-table td.actions-cell button.icon-btn:hover {
+                background: #fecaca !important;
+                transform: none !important;
+            }

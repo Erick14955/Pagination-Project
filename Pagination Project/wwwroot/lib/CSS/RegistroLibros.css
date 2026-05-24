@@ -437,16 +437,6 @@ button:disabled {
             background: #f8fbff;
         }
 
-    .books-table th:last-child,
-    .books-table td.actions-cell {
-        width: 84px;
-        min-width: 84px;
-        max-width: 84px;
-        text-align: center;
-        vertical-align: middle;
-        padding: 0 16px;
-    }
-
 .selected-row {
     background: #eff6ff !important;
     box-shadow: inset 4px 0 0 #0a66c2;
@@ -583,33 +573,6 @@ button:disabled {
     font-size: 12px;
     font-weight: 800;
 }
-
-.actions-cell {
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.icon-btn {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    min-height: 56px;
-    padding: 0;
-    background: #e0f2fe;
-    color: #0a66c2;
-    border-radius: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    font-size: 17px;
-}
-
-    .icon-btn:hover {
-        background: #dbeafe;
-        transform: translateY(-1px);
-    }
 
 .loading-state,
 .empty-state {
@@ -804,6 +767,60 @@ button:disabled {
     .xlsx-modal-ok:hover {
         transform: translateY(-1px);
     }
+
+/* ========================================================= */
+/* FIX FINAL: BOTÓN DE EDITAR ALINEADO EN REGISTRO DE LIBROS */
+/* ========================================================= */
+
+.books-table th,
+.books-table td {
+    vertical-align: middle !important;
+}
+
+    .books-table th:last-child,
+    .books-table td.actions-cell {
+        width: 76px !important;
+        min-width: 76px !important;
+        max-width: 76px !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    .books-table td.actions-cell {
+        display: table-cell !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 14px 16px !important;
+        line-height: normal !important;
+        position: static !important;
+    }
+
+        .books-table td.actions-cell .icon-btn,
+        .books-table td.actions-cell button.icon-btn {
+            position: static !important;
+            transform: none !important;
+            margin: 0 auto !important;
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
+            min-height: 42px !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: 14px !important;
+            background: #e0f2fe !important;
+            color: #0a66c2 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+            font-size: 16px !important;
+        }
+
+            .books-table td.actions-cell .icon-btn:hover,
+            .books-table td.actions-cell button.icon-btn:hover {
+                background: #dbeafe !important;
+                transform: none !important;
+            }
 
 @media (max-width: 1100px) {
     .page-hero {
