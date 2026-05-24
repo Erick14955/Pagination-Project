@@ -389,7 +389,7 @@ button:disabled {
 
 .table-container {
     width: 100%;
-    max-height: 620px;
+    max-height: 650px;
     overflow: auto;
     border: 1px solid #e2e8f0;
     border-radius: 18px;
@@ -412,6 +412,7 @@ button:disabled {
         text-transform: uppercase;
         letter-spacing: .04em;
         border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
     }
 
     .books-table thead th {
@@ -436,46 +437,57 @@ button:disabled {
             background: #f8fbff;
         }
 
+    .books-table th:last-child,
+    .books-table td.actions-cell {
+        width: 84px;
+        min-width: 84px;
+        max-width: 84px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0 16px;
+    }
+
 .selected-row {
     background: #eff6ff !important;
     box-shadow: inset 4px 0 0 #0a66c2;
 }
 
-.table-container::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-}
-
 .list-filters {
     display: flex;
-    align-items: end;
-    justify-content: flex-end;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     flex-wrap: wrap;
-    width: min(820px, 100%);
 }
 
 .month-filter {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-width: 210px;
+    gap: 4px;
+    margin-top: -18px;
 }
 
     .month-filter label {
         font-size: 12px;
         font-weight: 800;
-        color: #475569;
+        color: #334155;
+        margin: 0;
+        line-height: 1;
     }
 
+.search-box,
+.filter-select,
+.btn-filter-clear {
+    height: 46px;
+}
+
 .filter-select {
-    min-height: 44px;
-    border-radius: 14px;
+    min-width: 210px;
+    padding: 0 14px;
 }
 
 .btn-filter-clear {
     min-height: 44px;
-    padding: 0 16px;
+    padding: 0 18px;
     border: none;
     border-radius: 14px;
     background: #f1f5f9;
@@ -483,6 +495,9 @@ button:disabled {
     font-weight: 800;
     cursor: pointer;
     transition: all .18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
     .btn-filter-clear:hover {
@@ -517,52 +532,9 @@ button:disabled {
         color: #0a66c2;
     }
 
-.table-container {
-    width: 100%;
-    max-height: 650px;
-    overflow: auto;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    background: #ffffff;
-}
-
-.books-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
-
 .table-container::-webkit-scrollbar {
     height: 10px;
     width: 10px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 999px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 999px;
-    border: 2px solid #f1f5f9;
-}
-
-    .table-container::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
-
-@media (max-width: 900px) {
-    .list-filters {
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .search-box,
-    .month-filter,
-    .btn-filter-clear {
-        width: 100%;
-    }
 }
 
 .table-container::-webkit-scrollbar-track {
@@ -613,18 +585,30 @@ button:disabled {
 }
 
 .actions-cell {
-    text-align: right;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .icon-btn {
-    width: 38px;
-    min-height: 38px;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
     padding: 0;
-    background: #eef4fb;
+    background: #e0f2fe;
+    color: #0a66c2;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 17px;
 }
 
     .icon-btn:hover {
         background: #dbeafe;
+        transform: translateY(-1px);
     }
 
 .loading-state,
@@ -642,112 +626,6 @@ button:disabled {
         color: #10223f;
         margin-bottom: 5px;
     }
-
-@media (max-width: 1100px) {
-    .page-hero {
-        flex-direction: column;
-    }
-
-    .hero-stats {
-        width: 100%;
-    }
-
-    .stat-card {
-        flex: 1;
-    }
-
-    .form-grid,
-    .dates-grid {
-        grid-template-columns: repeat(2, minmax(160px, 1fr));
-    }
-
-        .form-grid .large {
-            grid-column: span 2;
-        }
-
-    .section-header {
-        flex-direction: column;
-    }
-
-    .search-box {
-        width: 100%;
-    }
-}
-
-@media (max-width: 700px) {
-    .books-page {
-        padding: 14px;
-    }
-
-    .page-hero,
-    .form-card,
-    .list-card {
-        border-radius: 18px;
-        padding: 18px;
-    }
-
-    .form-grid,
-    .dates-grid,
-    .switch-row {
-        grid-template-columns: 1fr;
-    }
-
-        .form-grid .large {
-            grid-column: span 1;
-        }
-
-    .hero-stats {
-        flex-direction: column;
-    }
-
-    .button-row {
-        flex-direction: column;
-    }
-
-        .button-row button {
-            width: 100%;
-        }
-}
-
-.list-filters {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.month-filter {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: -18px;
-}
-
-    .month-filter label {
-        font-size: 12px;
-        font-weight: 800;
-        color: #334155;
-        margin: 0;
-        line-height: 1;
-    }
-
-.search-box,
-.filter-select,
-.btn-filter-clear {
-    height: 46px;
-}
-
-.filter-select {
-    min-width: 210px;
-    padding: 0 14px;
-}
-
-.btn-filter-clear {
-    padding: 0 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
 
 .xlsx-modal-backdrop {
     position: fixed;
@@ -926,6 +804,85 @@ button:disabled {
     .xlsx-modal-ok:hover {
         transform: translateY(-1px);
     }
+
+@media (max-width: 1100px) {
+    .page-hero {
+        flex-direction: column;
+    }
+
+    .hero-stats {
+        width: 100%;
+    }
+
+    .stat-card {
+        flex: 1;
+    }
+
+    .form-grid,
+    .dates-grid {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+    }
+
+        .form-grid .large {
+            grid-column: span 2;
+        }
+
+    .section-header {
+        flex-direction: column;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .list-filters {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .search-box,
+    .month-filter,
+    .btn-filter-clear {
+        width: 100%;
+    }
+}
+
+@media (max-width: 700px) {
+    .books-page {
+        padding: 14px;
+    }
+
+    .page-hero,
+    .form-card,
+    .list-card {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .form-grid,
+    .dates-grid,
+    .switch-row {
+        grid-template-columns: 1fr;
+    }
+
+        .form-grid .large {
+            grid-column: span 1;
+        }
+
+    .hero-stats {
+        flex-direction: column;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
+
+        .button-row button {
+            width: 100%;
+        }
+}
 
 @media (max-width: 640px) {
     .xlsx-modal-stats {

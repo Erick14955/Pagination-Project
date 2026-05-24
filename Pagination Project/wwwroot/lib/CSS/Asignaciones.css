@@ -41,10 +41,10 @@
     min-height: 42px;
 }
 
-    .page-hero p {
-        margin: 8px 0 0;
-        color: #6b7280;
-    }
+.page-hero p {
+    margin: 8px 0 0;
+    color: #6b7280;
+}
 
 .hero-stats {
     display: flex;
@@ -377,6 +377,7 @@
         padding: 13px 14px;
         font-size: 13px;
         white-space: nowrap;
+        vertical-align: middle;
     }
 
     .assignments-table td {
@@ -385,10 +386,21 @@
         color: #374151;
         font-size: 14px;
         white-space: nowrap;
+        vertical-align: middle;
     }
 
     .assignments-table tbody tr:hover {
         background: #f9fafb;
+    }
+
+    .assignments-table th:last-child,
+    .assignments-table td.actions-cell {
+        width: 74px;
+        min-width: 74px;
+        max-width: 74px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0 14px;
     }
 
 .employee-title strong,
@@ -416,18 +428,27 @@
 }
 
 .actions-cell {
+    display: table-cell;
     text-align: center;
+    vertical-align: middle;
 }
 
 .icon-btn {
     border: none;
     background: #eef2ff;
     color: #1e40af;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 16px;
 }
 
     .icon-btn:hover {
@@ -1022,12 +1043,12 @@
         }
 }
 
-    .btn-update-xlsx:hover {
-        transform: translateY(-1px);
-        background: #6d28d9;
-    }
+.btn-update-xlsx:hover {
+    transform: translateY(-1px);
+    background: #6d28d9;
+}
 
-    .btn-update-xlsx.disabled {
-        opacity: 0.65;
-        pointer-events: none;
-    }
+.btn-update-xlsx.disabled {
+    opacity: 0.65;
+    pointer-events: none;
+}
