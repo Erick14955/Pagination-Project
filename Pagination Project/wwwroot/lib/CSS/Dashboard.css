@@ -838,3 +838,68 @@
         width: 96vw;
     }
 }
+
+.thryv-stage-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.thryv-stage-proofextract {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+}
+
+.thryv-stage-finalextract {
+    background: #ede9fe;
+    color: #6d28d9;
+    border-color: #c4b5fd;
+}
+
+.thryv-stage-memoextract {
+    background: #ffedd5;
+    color: #c2410c;
+    border-color: #fdba74;
+}
+
+.thryv-stage-finalpo {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+}
+
+.thryv-stage-shipping {
+    background: #fef3c7;
+    color: #b45309;
+    border-color: #fcd34d;
+}
+
+.thryv-stage-dirxion {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+.completed-stage-pill.thryv-stage-proofextract,
+.completed-stage-pill.thryv-stage-finalextract,
+.completed-stage-pill.thryv-stage-memoextract,
+.completed-stage-pill.thryv-stage-finalpo,
+.completed-stage-pill.thryv-stage-shipping,
+.completed-stage-pill.thryv-stage-dirxion {
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+.completed-stage-pill::after {
+    content: " ✓";
+    margin-left: 4px;
+    font-weight: 900;
+}

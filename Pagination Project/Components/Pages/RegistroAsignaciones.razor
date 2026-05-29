@@ -493,6 +493,14 @@
     private Empleados? EmpleadoSeleccionado => BuscarEmpleadoSeleccionado();
     private Libros? LibroSeleccionado => BuscarLibroSeleccionado();
 
+    private static readonly string[] RolesPermitidosParaAsignaciones =
+    {
+        "EMPLOYEE",
+        "ASSISTANT"
+    };
+
+    private HashSet<Guid> EmpleadosPermitidosAsignacionesIds { get; set; } = new();
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -503,6 +511,7 @@
         await CargarCatalogosAsync();
         await CargarDatosAsync();
     }
+
     private bool EtapaSeleccionada(string etapa)
     {
         return etapa switch
@@ -516,6 +525,24 @@
             "PubDate" => TempPubDate,
             _ => false
         };
+    }
+
+    private async Task<HashSet<Guid>> ObtenerEmpleadosPermitidosParaAsignacionesAsync(AppDbContext db)
+    {
+        var empleadosIds = await (
+            from usuario in db.Users.AsNoTracking()
+            join nivel in db.PermissionLevels.AsNoTracking()
+                on usuario.lvl_Id equals nivel.Id
+            where usuario.Activo &&
+                  usuario.EmployeeId != null &&
+                  RolesPermitidosParaAsignaciones.Contains(
+                      (nivel.Name ?? string.Empty).Trim().ToUpper())
+            select usuario.EmployeeId!.Value
+        )
+        .Distinct()
+        .ToListAsync();
+
+        return empleadosIds.ToHashSet();
     }
 
     private void OnEmpleadoFiltroChanged(ChangeEventArgs e)
@@ -729,12 +756,15 @@
                 return;
             }
 
-            var empleadoTemporalExiste = await db.Empleados
-                .AnyAsync(x => x.Id == EmpleadoTemporalSeleccionadoId.Value && x.Activo);
+            var empleadosPermitidosIds =
+                await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
 
-            if (!empleadoTemporalExiste)
+            var empleadoTemporalPermitido =
+                empleadosPermitidosIds.Contains(EmpleadoTemporalSeleccionadoId.Value);
+
+            if (!empleadoTemporalPermitido)
             {
-                MostrarMensaje("The selected temporary employee was not found or is not active.", "error");
+                MostrarMensaje("The selected temporary employee is not allowed to work assignments.", "error");
                 return;
             }
 
@@ -788,18 +818,20 @@
     {
         get
         {
-            if (AsignacionTemporalSeleccionadaId is null)
-                return Empleados.OrderBy(x => x.Nombre);
+            IEnumerable<Empleados> query = Empleados;
 
-            var asignacion = AsignacionesListado
-                .FirstOrDefault(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
+            if (AsignacionTemporalSeleccionadaId is not null)
+            {
+                var asignacion = AsignacionesListado
+                    .FirstOrDefault(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
 
-            if (asignacion is null)
-                return Empleados.OrderBy(x => x.Nombre);
+                if (asignacion is not null)
+                {
+                    query = query.Where(x => x.Id != asignacion.EmpleadoId);
+                }
+            }
 
-            return Empleados
-                .Where(x => x.Id != asignacion.EmpleadoId)
-                .OrderBy(x => x.Nombre);
+            return query.OrderBy(x => x.Nombre);
         }
     }
 
@@ -897,9 +929,13 @@
             await ActualizarFinalizadosPorDirxionAsync(db);
             await ActualizarAsignacionesTemporalesVencidasAsync(db);
 
+            EmpleadosPermitidosAsignacionesIds =
+                await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
+
             Empleados = await db.Empleados
                 .AsNoTracking()
-                .Where(x => x.Activo)
+                .Where(x => x.Activo &&
+                            EmpleadosPermitidosAsignacionesIds.Contains(x.Id))
                 .OrderBy(x => x.Nombre)
                 .ToListAsync();
 
@@ -1534,8 +1570,12 @@
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
+            var empleadosPermitidosIds =
+                await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
+
             var empleadosDb = await db.Empleados
-                .Where(x => x.Activo)
+                .Where(x => x.Activo &&
+                            empleadosPermitidosIds.Contains(x.Id))
                 .ToListAsync();
 
             var librosDb = await db.Libros
@@ -1628,6 +1668,7 @@
                         ResultadoImportacion.Errores,
                         rowNumber,
                         false,
+                        "Shipping Date",
                         "First Due Printer");
 
                     var proofExtract = ReadDateWithValidation(
@@ -1647,6 +1688,7 @@
                         ResultadoImportacion.Errores,
                         rowNumber,
                         false,
+                        "Final Extract",
                         "Extract - Final");
 
                     var memoExtract = ReadDateWithValidation(
@@ -1666,6 +1708,7 @@
                         ResultadoImportacion.Errores,
                         rowNumber,
                         false,
+                        "Dirxion Date",
                         "Dirxion");
 
                     var pubDate = ReadDateWithValidation(
@@ -2487,6 +2530,7 @@
         get
         {
             return AsignacionesListado
+                .Where(x => EmpleadosPermitidosAsignacionesIds.Contains(x.EmpleadoId))
                 .GroupBy(x => x.EmpleadoId)
                 .Select(g => g.First())
                 .OrderBy(x => x.EmpleadoNombre);

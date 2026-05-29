@@ -197,9 +197,11 @@
                                     <td>@item.BookName</td>
 
                                     <td>
-                                        <span class="thryv-stage-pill">
+                                    <td>
+                                        <span class="@GetStagePillClass(item.StageKey)">
                                             @item.Stage
                                         </span>
+                                    </td>
                                     </td>
 
                                     <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
@@ -316,9 +318,11 @@
                                     <td>@item.BookName</td>
 
                                     <td>
-                                        <span class="thryv-stage-pill completed-stage-pill">
+                                    <td>
+                                        <span class="@GetStagePillClass(item.StageKey, true)">
                                             @item.CompletionStatus
                                         </span>
+                                    </td>
                                     </td>
 
                                     <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
@@ -681,6 +685,17 @@
 
             return query.ToList();
         }
+    }
+
+    private static string GetStagePillClass(string? stageKey, bool completed = false)
+    {
+        var key = (stageKey ?? string.Empty)
+            .Trim()
+            .ToLowerInvariant();
+
+        var completedClass = completed ? " completed-stage-pill" : string.Empty;
+
+        return $"thryv-stage-pill thryv-stage-{key}{completedClass}";
     }
 
     private List<AssignedBookDashboardDto> CompletedAssignmentsFiltered

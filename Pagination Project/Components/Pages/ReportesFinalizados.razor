@@ -1022,8 +1022,21 @@
                 a.Libro.PubDate <= hasta);
         }
 
-        AsignacionesReporte = await query
+        var asignacionesDb = await query
             .OrderByDescending(a => a.Libro != null ? a.Libro.PubDate : DateOnly.MinValue)
+            .ToListAsync();
+
+        AsignacionesReporte = asignacionesDb
+            .GroupBy(a => new
+            {
+                a.IdEmpleado,
+                BookName = a.Libro != null ? a.Libro.BookName : "",
+                Kgen = a.Libro != null ? a.Libro.KGENCode : "",
+                Lsa = a.Libro != null ? a.Libro.LSACode : "",
+                PubDate = a.Libro != null ? (DateOnly?)a.Libro.PubDate : null,
+                DirxionDate = a.Libro != null ? (DateOnly?)a.Libro.DirxionDate : null
+            })
+            .Select(g => g.First())
             .Select(a => new AsignacionReporteDto
             {
                 EmployeeName = a.Empleado != null ? a.Empleado.Nombre : "",
@@ -1033,9 +1046,10 @@
                 DirectionDate = a.Libro != null ? a.Libro.DirxionDate : null,
                 ProofDate = a.Libro != null ? a.Libro.ProofExtract : null,
                 FinalDate = a.Libro != null ? a.Libro.FinalExtract : null,
-                MemoDate = a.Libro != null ? a.Libro.MemoExtract : null,
+                MemoDate = a.Libro != null ? a.Libro.MemoExtract : null
             })
-            .ToListAsync();
+            .OrderByDescending(a => a.PubDate ?? DateOnly.MinValue)
+            .ToList();
     }
 
     private async Task CargarEvaluacionesFinalizadasAsync(AppDbContext db)
