@@ -103,7 +103,10 @@
                     <div class="thryv-filter-group">
                         <label>Filter by employee</label>
 
-                        <select class="thryv-filter-select" @bind="SelectedAssignedEmployeeFilter">
+                        <select class="thryv-filter-select"
+                                value="@SelectedAssignedEmployeeFilter"
+                                @onchange="OnAssignedEmployeeChanged">
+
                             <option value="">All Employees</option>
 
                             @foreach (var employee in AssignedEmployeeFilterOptions)
@@ -116,10 +119,13 @@
                     <div class="thryv-filter-group">
                         <label>Filter by stage</label>
 
-                        <select class="thryv-filter-select" @bind="SelectedAssignedStageFilter">
+                        <select class="thryv-filter-select"
+                                value="@SelectedAssignedStageFilter"
+                                @onchange="OnAssignedStageChanged">
+
                             <option value="">All Stages</option>
 
-                            @foreach (var stage in StageFilterOptions)
+                            @foreach (var stage in AssignedStageFilterOptions)
                             {
                                 <option value="@stage.Key">@stage.Label</option>
                             }
@@ -197,11 +203,9 @@
                                     <td>@item.BookName</td>
 
                                     <td>
-                                    <td>
                                         <span class="@GetStagePillClass(item.StageKey)">
                                             @item.Stage
                                         </span>
-                                    </td>
                                     </td>
 
                                     <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
@@ -224,7 +228,10 @@
                     <div class="thryv-filter-group">
                         <label>Filter by employee</label>
 
-                        <select class="thryv-filter-select" @bind="SelectedCompletedEmployeeFilter">
+                        <select class="thryv-filter-select"
+                                value="@SelectedCompletedEmployeeFilter"
+                                @onchange="OnCompletedEmployeeChanged">
+
                             <option value="">All Employees</option>
 
                             @foreach (var employee in CompletedEmployeeFilterOptions)
@@ -237,10 +244,13 @@
                     <div class="thryv-filter-group">
                         <label>Filter by completed stage</label>
 
-                        <select class="thryv-filter-select" @bind="SelectedCompletedStageFilter">
+                        <select class="thryv-filter-select"
+                                value="@SelectedCompletedStageFilter"
+                                @onchange="OnCompletedStageChanged">
+
                             <option value="">All Completed Stages</option>
 
-                            @foreach (var stage in CompletedStageFilterOptions)
+                            @foreach (var stage in CompletedStageFilterOptionsForEmployee)
                             {
                                 <option value="@stage.Key">@stage.Label</option>
                             }
@@ -318,11 +328,9 @@
                                     <td>@item.BookName</td>
 
                                     <td>
-                                    <td>
                                         <span class="@GetStagePillClass(item.StageKey, true)">
                                             @item.CompletionStatus
                                         </span>
-                                    </td>
                                     </td>
 
                                     <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
@@ -722,6 +730,96 @@
 
             return query.ToList();
         }
+    }
+
+    private IEnumerable<StageFilterOption> AssignedStageFilterOptions
+    {
+        get
+        {
+            var query = assignedBooks.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SelectedAssignedEmployeeFilter))
+            {
+                query = query.Where(x => string.Equals(
+                    x.EmployeeName?.Trim(),
+                    SelectedAssignedEmployeeFilter.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            var availableStageKeys = query
+                .Where(x => !string.IsNullOrWhiteSpace(x.StageKey))
+                .Select(x => x.StageKey!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            return StageFilterOptions
+                .Where(stage => availableStageKeys.Contains(stage.Key, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private IEnumerable<StageFilterOption> CompletedStageFilterOptionsForEmployee
+    {
+        get
+        {
+            var query = completedAssignments.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SelectedCompletedEmployeeFilter))
+            {
+                query = query.Where(x => string.Equals(
+                    x.EmployeeName?.Trim(),
+                    SelectedCompletedEmployeeFilter.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            var availableStageKeys = query
+                .Where(x => !string.IsNullOrWhiteSpace(x.StageKey))
+                .Select(x => x.StageKey!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            return CompletedStageFilterOptions
+                .Where(stage => availableStageKeys.Contains(stage.Key, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void OnAssignedEmployeeChanged(ChangeEventArgs e)
+    {
+        SelectedAssignedEmployeeFilter = e.Value?.ToString() ?? string.Empty;
+
+        var stageStillAvailable = AssignedStageFilterOptions.Any(stage =>
+            string.Equals(
+                stage.Key,
+                SelectedAssignedStageFilter,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (!stageStillAvailable)
+            SelectedAssignedStageFilter = string.Empty;
+    }
+
+    private void OnAssignedStageChanged(ChangeEventArgs e)
+    {
+        SelectedAssignedStageFilter = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void OnCompletedEmployeeChanged(ChangeEventArgs e)
+    {
+        SelectedCompletedEmployeeFilter = e.Value?.ToString() ?? string.Empty;
+
+        var stageStillAvailable = CompletedStageFilterOptionsForEmployee.Any(stage =>
+            string.Equals(
+                stage.Key,
+                SelectedCompletedStageFilter,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (!stageStillAvailable)
+            SelectedCompletedStageFilter = string.Empty;
+    }
+
+    private void OnCompletedStageChanged(ChangeEventArgs e)
+    {
+        SelectedCompletedStageFilter = e.Value?.ToString() ?? string.Empty;
     }
 
     private List<WeeklyEvaluationDashboardDto> WeeklyEvaluationsFiltered
