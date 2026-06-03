@@ -428,6 +428,18 @@
                     </select>
                 </div>
 
+                <div class="month-filter">
+                    <label>From</label>
+                    <InputDate class="form-control filter-select"
+                               @bind-Value="FechaDesdeFiltro" />
+                </div>
+
+                <div class="month-filter">
+                    <label>To</label>
+                    <InputDate class="form-control filter-select"
+                               @bind-Value="FechaHastaFiltro" />
+                </div>
+
                 <button type="button" class="btn-filter-clear" @onclick="ClearListFilters">
                     Clear
                 </button>
@@ -652,6 +664,8 @@
     private string SelectedPubMonth { get; set; } = string.Empty;
     private string SortColumn { get; set; } = "BookName";
     private bool SortDescending { get; set; } = false;
+    private DateOnly? FechaDesdeFiltro { get; set; }
+    private DateOnly? FechaHastaFiltro { get; set; }
 
     private bool MostrarModalActualizacionXlsx { get; set; } = false;
     private ActualizacionLibrosResultado? ResultadoActualizacionModal { get; set; }
@@ -686,8 +700,46 @@
                 query = query.Where(l => GetPubMonthValue(l.PubDate) == SelectedPubMonth);
             }
 
+            var fechaDesde = FechaDesdeFiltro;
+            var fechaHasta = FechaHastaFiltro;
+
+            if (fechaDesde.HasValue &&
+                fechaHasta.HasValue &&
+                fechaDesde.Value > fechaHasta.Value)
+            {
+                (fechaDesde, fechaHasta) = (fechaHasta, fechaDesde);
+            }
+
+            if (fechaDesde.HasValue || fechaHasta.HasValue)
+            {
+                query = query.Where(l =>
+                    FechaEtapaDentroDelRango(l.ProofExtract, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(l.FinalExtract, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(l.MemoExtract, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(l.FinalPODate, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(l.ShippingDate, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(l.DirxionDate, fechaDesde, fechaHasta));
+            }
+
             return query;
         }
+    }
+
+    private static bool FechaEtapaDentroDelRango(
+    DateOnly fecha,
+    DateOnly? fechaDesde,
+    DateOnly? fechaHasta)
+    {
+        if (fecha == default)
+            return false;
+
+        if (fechaDesde.HasValue && fecha < fechaDesde.Value)
+            return false;
+
+        if (fechaHasta.HasValue && fecha > fechaHasta.Value)
+            return false;
+
+        return true;
     }
 
     private void MostrarModalActualizacionLibros(ActualizacionLibrosResultado resultado)
@@ -747,9 +799,23 @@
             worksheet.Cell(2, 1).Value = $"Generated: {DateTime.Now:MM/dd/yyyy hh:mm tt}";
             worksheet.Range(2, 1, 2, lastColumn).Merge();
 
+            var pubDateFiltroTexto = string.IsNullOrWhiteSpace(SelectedPubMonth)
+                ? "All Pub Dates"
+                : PubDateMonths.FirstOrDefault(x => x.Value == SelectedPubMonth)?.Label ?? SelectedPubMonth;
+
+            var fechaDesdeTexto = FechaDesdeFiltro.HasValue
+                ? FormatoFecha(FechaDesdeFiltro.Value)
+                : "All";
+
+            var fechaHastaTexto = FechaHastaFiltro.HasValue
+                ? FormatoFecha(FechaHastaFiltro.Value)
+                : "All";
+
             worksheet.Cell(3, 1).Value =
                 $"Search: {(string.IsNullOrWhiteSpace(Busqueda) ? "All" : Busqueda)} | " +
-                $"Pub Date Month: {(string.IsNullOrWhiteSpace(SelectedPubMonth) ? "All" : SelectedPubMonth)} | " +
+                $"Pub Date Month: {pubDateFiltroTexto} | " +
+                $"Stage Dates From: {fechaDesdeTexto} | " +
+                $"Stage Dates To: {fechaHastaTexto} | " +
                 $"Total: {librosExportar.Count}";
 
             worksheet.Range(3, 1, 3, lastColumn).Merge();
@@ -834,7 +900,16 @@
             var bytes = stream.ToArray();
             var base64 = Convert.ToBase64String(bytes);
 
-            var fileName = $"Books_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            var pubDateArchivo = string.IsNullOrWhiteSpace(SelectedPubMonth)
+                ? "AllPubDates"
+                : SelectedPubMonth.Replace("-", "");
+
+            var rangoEtapasArchivo =
+                $"{(FechaDesdeFiltro.HasValue ? FechaDesdeFiltro.Value.ToString("yyyyMMdd") : "All")}" +
+                $"_to_" +
+                $"{(FechaHastaFiltro.HasValue ? FechaHastaFiltro.Value.ToString("yyyyMMdd") : "All")}";
+
+            var fileName = $"Books_Export_{pubDateArchivo}_{rangoEtapasArchivo}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
             await JS.InvokeVoidAsync(
                 "downloadFileFromBase64",
@@ -2313,6 +2388,8 @@
     {
         Busqueda = string.Empty;
         SelectedPubMonth = string.Empty;
+        FechaDesdeFiltro = null;
+        FechaHastaFiltro = null;
         SortColumn = "BookName";
         SortDescending = false;
     }

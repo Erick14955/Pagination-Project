@@ -208,6 +208,18 @@
                     </select>
                 </div>
 
+                <div class="month-filter">
+                    <label>From</label>
+                    <InputDate class="form-control filter-select"
+                               @bind-Value="FechaDesdeFiltro" />
+                </div>
+
+                <div class="month-filter">
+                    <label>To</label>
+                    <InputDate class="form-control filter-select"
+                               @bind-Value="FechaHastaFiltro" />
+                </div>
+
                 <div class="search-box">
                     <span>🔎</span>
                     <input placeholder="Search by employee, book, KGEN, LSA, state, database..."
@@ -1383,7 +1395,6 @@
                 .Take(100);
         }
     }
-
     private IEnumerable<AsignacionViewModel> AsignacionesFiltradas
     {
         get
@@ -1399,6 +1410,27 @@
             if (!string.IsNullOrWhiteSpace(SelectedPubMonth))
             {
                 query = query.Where(x => GetPubMonthValue(x.PubDate) == SelectedPubMonth);
+            }
+
+            var fechaDesde = FechaDesdeFiltro;
+            var fechaHasta = FechaHastaFiltro;
+
+            if (fechaDesde.HasValue &&
+                fechaHasta.HasValue &&
+                fechaDesde.Value > fechaHasta.Value)
+            {
+                (fechaDesde, fechaHasta) = (fechaHasta, fechaDesde);
+            }
+
+            if (fechaDesde.HasValue || fechaHasta.HasValue)
+            {
+                query = query.Where(x =>
+                    FechaEtapaDentroDelRango(x.ProofExtract, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(x.FinalExtract, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(x.MemoExtract, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(x.FinalPODate, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(x.ShippingDate, fechaDesde, fechaHasta) ||
+                    FechaEtapaDentroDelRango(x.DirxionDate, fechaDesde, fechaHasta));
             }
 
             if (!string.IsNullOrWhiteSpace(Busqueda))
@@ -1425,6 +1457,23 @@
 
             return query;
         }
+    }
+
+    private static bool FechaEtapaDentroDelRango(
+    DateOnly fecha,
+    DateOnly? fechaDesde,
+    DateOnly? fechaHasta)
+    {
+        if (fecha == default)
+            return false;
+
+        if (fechaDesde.HasValue && fecha < fechaDesde.Value)
+            return false;
+
+        if (fechaHasta.HasValue && fecha > fechaHasta.Value)
+            return false;
+
+        return true;
     }
 
     private async Task GuardarAsignacionAsync()
@@ -2067,6 +2116,8 @@
         Busqueda = string.Empty;
         EmpleadoFiltroId = string.Empty;
         SelectedPubMonth = string.Empty;
+        FechaDesdeFiltro = null;
+        FechaHastaFiltro = null;
     }
 
     private IEnumerable<PubMonthOption> PubDateMonths
@@ -2146,6 +2197,14 @@
                 ? "All Pub Dates"
                 : PubDateMonths.FirstOrDefault(x => x.Value == SelectedPubMonth)?.Label ?? SelectedPubMonth;
 
+            var fechaDesdeTexto = FechaDesdeFiltro.HasValue
+                ? FormatoFecha(FechaDesdeFiltro.Value)
+                : "All";
+
+            var fechaHastaTexto = FechaHastaFiltro.HasValue
+                ? FormatoFecha(FechaHastaFiltro.Value)
+                : "All";
+
             worksheet.Cell(1, 1).Value = "Assignments Export";
             worksheet.Range(1, 1, 1, lastColumn).Merge();
 
@@ -2155,6 +2214,8 @@
             worksheet.Cell(3, 1).Value =
                 $"Employee: {empleadoFiltroTexto} | " +
                 $"Pub Date Month: {pubDateFiltroTexto} | " +
+                $"Stage Dates From: {fechaDesdeTexto} | " +
+                $"Stage Dates To: {fechaHastaTexto} | " +
                 $"Search: {(string.IsNullOrWhiteSpace(Busqueda) ? "All" : Busqueda)} | " +
                 $"Total: {asignacionesCompletas.Count}";
 
@@ -2250,7 +2311,12 @@
                 ? "AllPubDates"
                 : SelectedPubMonth.Replace("-", "");
 
-            var fileName = $"Assignments_{empleadoNombreArchivo}_{pubDateArchivo}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            var rangoEtapasArchivo =
+                $"{(FechaDesdeFiltro.HasValue ? FechaDesdeFiltro.Value.ToString("yyyyMMdd") : "All")}" +
+                $"_to_" +
+                $"{(FechaHastaFiltro.HasValue ? FechaHastaFiltro.Value.ToString("yyyyMMdd") : "All")}";
+
+            var fileName = $"Assignments_{empleadoNombreArchivo}_{pubDateArchivo}_{rangoEtapasArchivo}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
             await JS.InvokeVoidAsync(
                 "downloadFileFromBase64",
@@ -2656,25 +2722,11 @@
         TipoMensaje = "success";
     }
 
-    // private async Task MostrarModalImportacionJsAsync(string titulo, string resumen, string tipo)
-    // {
-    //     TituloModalImportacion = titulo;
-    //     ResumenModalImportacion = resumen;
-    //     TipoModalImportacion = tipo;
-    //     MostrarModalImportacion = true;
-
-    //     await InvokeAsync(StateHasChanged);
-    // }
-
-    // private async Task CerrarModalImportacionAsync()
-    // {
-    //     MostrarModalImportacion = false;
-
-    //     await InvokeAsync(StateHasChanged);
-    // }
-
     private string EmpleadoFiltroId { get; set; } = string.Empty;
     private string SelectedPubMonth { get; set; } = string.Empty;
+
+    private DateOnly? FechaDesdeFiltro { get; set; }
+    private DateOnly? FechaHastaFiltro { get; set; }
 
     private IEnumerable<AsignacionViewModel> EmpleadosParaFiltro
     {
