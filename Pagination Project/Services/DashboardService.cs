@@ -440,21 +440,22 @@ namespace Pagination_Project.Services
                 .Trim()
                 .ToUpperInvariant();
 
-            var esIveau = bindPlantName == "IVEAU" || bindPlantName == "WSTR";
+            var esIveau = EsBindPlant(bindPlantName, "IVEAU", "WSTR");
+            var esAu = EsBindPlant(bindPlantName, "AU");
+            var esNz = EsBindPlant(bindPlantName, "NZ");
 
             var excluirMemoPorBindPlant =
-                bindPlantName == "PREM" ||
-                bindPlantName == "DIRX" ||
-                bindPlantName == "WSTR" ||
-                bindPlantName == "IVEAU";
+                EsBindPlant(bindPlantName, "PREM", "DIRX", "WSTR", "IVEAU", "AU", "NZ");
 
             var proofDisplayDate = GetNextBusinessDay(item.ProofExtract);
             var finalDisplayDate = GetNextBusinessDay(item.FinalExtract);
             var memoDisplayDate = GetNextBusinessDay(item.MemoExtract);
 
-            var finalPODisplayDate = esIveau
-                ? GetPreviousWorkDate(item.FinalPODate, 3)
-                : item.FinalPODate;
+            var finalPODisplayDate = ObtenerFinalPODisplayDate(
+                item,
+                esIveau,
+                esAu,
+                esNz);
 
             var shippingDisplayDate = esIveau
                 ? GetPreviousWorkDate(item.ShippingDate, 1)
@@ -529,6 +530,51 @@ namespace Pagination_Project.Services
             return null;
         }
 
+        private static DateOnly ObtenerFinalPODisplayDate(
+            RawAssignmentDashboardDto item,
+            bool esIveau,
+            bool esAu,
+            bool esNz)
+        {
+            if (esNz)
+            {
+                return GetSameOrNextBusinessDay(item.MemoExtract);
+            }
+
+            if (esAu)
+            {
+                if (item.MemoExtract == default)
+                    return default;
+
+                return GetSameOrNextBusinessDay(item.MemoExtract.AddDays(1));
+            }
+
+            if (esIveau)
+            {
+                return GetPreviousWorkDate(item.FinalPODate, 3);
+            }
+
+            return item.FinalPODate;
+        }
+
+        private static bool EsBindPlant(string bindPlantName, params string[] codigos)
+        {
+            if (string.IsNullOrWhiteSpace(bindPlantName))
+                return false;
+
+            var normalizado = bindPlantName.Trim().ToUpperInvariant();
+
+            if (codigos.Any(c => normalizado == c.Trim().ToUpperInvariant()))
+                return true;
+
+            var partes = normalizado.Split(
+                new[] { ' ', '-', '_', '/', '\\', ',', ';', '.', '|', '(', ')', '[', ']' },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            return partes.Any(parte =>
+                codigos.Any(c => parte == c.Trim().ToUpperInvariant()));
+        }
+
         private static DateOnly GetPreviousWorkDate(DateOnly sourceDate, int daysBefore)
         {
             if (sourceDate == default)
@@ -539,6 +585,21 @@ namespace Pagination_Project.Services
             while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
             {
                 result = result.AddDays(-1);
+            }
+
+            return result;
+        }
+
+        private static DateOnly GetSameOrNextBusinessDay(DateOnly sourceDate)
+        {
+            if (sourceDate == default)
+                return default;
+
+            var result = sourceDate;
+
+            while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            {
+                result = result.AddDays(1);
             }
 
             return result;

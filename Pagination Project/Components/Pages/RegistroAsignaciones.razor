@@ -851,24 +851,58 @@
         {
             var libro = temporal.Assignment!.Libro!;
 
+            var bindPlantName = GetBindPlantName(libro.BindPlantId);
+
+            var esIveau = EsBindPlant(bindPlantName, "IVEAU", "WSTR");
+            var esAu = EsBindPlant(bindPlantName, "AU");
+            var esNz = EsBindPlant(bindPlantName, "NZ");
+
+            var excluirMemoPorBindPlant = EsBindPlant(
+                bindPlantName,
+                "PREM",
+                "DIRX",
+                "WSTR",
+                "IVEAU",
+                "AU",
+                "NZ");
+
+            var proofDisplayDate = GetNextBusinessDay(libro.ProofExtract);
+            var finalDisplayDate = GetNextBusinessDay(libro.FinalExtract);
+            var memoDisplayDate = GetNextBusinessDay(libro.MemoExtract);
+
+            var finalPODisplayDate = ObtenerFinalPODisplayDate(
+                libro.ProofExtract,
+                libro.FinalExtract,
+                libro.MemoExtract,
+                libro.FinalPODate,
+                esIveau,
+                esAu,
+                esNz);
+
+            var shippingDisplayDate = esIveau
+                ? GetPreviousWorkDate(libro.ShippingDate, 1)
+                : libro.ShippingDate;
+
             var tieneEtapaPendiente = false;
 
-            if (temporal.Proof && libro.ProofExtract >= hoy)
+            if (temporal.Proof && FechaPendiente(proofDisplayDate, hoy))
                 tieneEtapaPendiente = true;
 
-            if (temporal.Final && libro.FinalExtract >= hoy)
+            if (temporal.Final && FechaPendiente(finalDisplayDate, hoy))
                 tieneEtapaPendiente = true;
 
-            if (temporal.Memo && libro.MemoExtract >= hoy)
+            if (temporal.Memo &&
+                !excluirMemoPorBindPlant &&
+                FechaPendiente(memoDisplayDate, hoy))
                 tieneEtapaPendiente = true;
 
-            if (temporal.FinalPO && libro.FinalPODate >= hoy)
+            if (temporal.FinalPO && FechaPendiente(finalPODisplayDate, hoy))
                 tieneEtapaPendiente = true;
 
-            if (temporal.Shipping && libro.ShippingDate >= hoy)
+            if (temporal.Shipping && FechaPendiente(shippingDisplayDate, hoy))
                 tieneEtapaPendiente = true;
 
-            if (temporal.Dirxion && libro.DirxionDate >= hoy)
+            if (temporal.Dirxion && FechaPendiente(libro.DirxionDate, hoy))
                 tieneEtapaPendiente = true;
 
             if (!tieneEtapaPendiente)
@@ -1050,63 +1084,87 @@
 
             var hoy = DateOnly.FromDateTime(DateTime.Today);
 
-            var bindPlant = Normalizar(asignacion.BindPlantCode);
+            var bindPlant = asignacion.BindPlantCode ?? string.Empty;
 
-            var omitirMemo =
-                bindPlant.Contains("PREM") ||
-                bindPlant.Contains("DIRX") ||
-                bindPlant.Contains("AU") ||
-                bindPlant.Contains("NZ");
+            var esIveau = EsBindPlant(bindPlant, "IVEAU", "WSTR");
+            var esAu = EsBindPlant(bindPlant, "AU");
+            var esNz = EsBindPlant(bindPlant, "NZ");
+
+            var omitirMemo = EsBindPlant(
+                bindPlant,
+                "PREM",
+                "DIRX",
+                "WSTR",
+                "IVEAU",
+                "AU",
+                "NZ");
+
+            var proofDisplayDate = GetNextBusinessDay(asignacion.ProofExtract);
+            var finalDisplayDate = GetNextBusinessDay(asignacion.FinalExtract);
+            var memoDisplayDate = GetNextBusinessDay(asignacion.MemoExtract);
+
+            var finalPODisplayDate = ObtenerFinalPODisplayDate(
+                asignacion.ProofExtract,
+                asignacion.FinalExtract,
+                asignacion.MemoExtract,
+                asignacion.FinalPODate,
+                esIveau,
+                esAu,
+                esNz);
+
+            var shippingDisplayDate = esIveau
+                ? GetPreviousWorkDate(asignacion.ShippingDate, 1)
+                : asignacion.ShippingDate;
 
             var etapas = new List<EtapaTemporalDisponible>();
 
-            if (FechaPendiente(asignacion.ProofExtract, hoy))
+            if (FechaPendiente(proofDisplayDate, hoy))
             {
                 etapas.Add(new EtapaTemporalDisponible
                 {
                     Codigo = "Proof",
-                    Nombre = $"Proof - {FormatoFecha(asignacion.ProofExtract)}",
-                    Fecha = asignacion.ProofExtract
+                    Nombre = $"Proof - {FormatoFecha(proofDisplayDate)}",
+                    Fecha = proofDisplayDate
                 });
             }
 
-            if (FechaPendiente(asignacion.FinalExtract, hoy))
+            if (FechaPendiente(finalDisplayDate, hoy))
             {
                 etapas.Add(new EtapaTemporalDisponible
                 {
                     Codigo = "Final",
-                    Nombre = $"Final - {FormatoFecha(asignacion.FinalExtract)}",
-                    Fecha = asignacion.FinalExtract
+                    Nombre = $"Final - {FormatoFecha(finalDisplayDate)}",
+                    Fecha = finalDisplayDate
                 });
             }
 
-            if (!omitirMemo && FechaPendiente(asignacion.MemoExtract, hoy))
+            if (!omitirMemo && FechaPendiente(memoDisplayDate, hoy))
             {
                 etapas.Add(new EtapaTemporalDisponible
                 {
                     Codigo = "Memo",
-                    Nombre = $"Memo - {FormatoFecha(asignacion.MemoExtract)}",
-                    Fecha = asignacion.MemoExtract
+                    Nombre = $"Memo - {FormatoFecha(memoDisplayDate)}",
+                    Fecha = memoDisplayDate
                 });
             }
 
-            if (FechaPendiente(asignacion.FinalPODate, hoy))
+            if (FechaPendiente(finalPODisplayDate, hoy))
             {
                 etapas.Add(new EtapaTemporalDisponible
                 {
                     Codigo = "FinalPO",
-                    Nombre = $"Final PO - {FormatoFecha(asignacion.FinalPODate)}",
-                    Fecha = asignacion.FinalPODate
+                    Nombre = $"Final PO - {FormatoFecha(finalPODisplayDate)}",
+                    Fecha = finalPODisplayDate
                 });
             }
 
-            if (FechaPendiente(asignacion.ShippingDate, hoy))
+            if (FechaPendiente(shippingDisplayDate, hoy))
             {
                 etapas.Add(new EtapaTemporalDisponible
                 {
                     Codigo = "Shipping",
-                    Nombre = $"Shipping - {FormatoFecha(asignacion.ShippingDate)}",
-                    Fecha = asignacion.ShippingDate
+                    Nombre = $"Shipping - {FormatoFecha(shippingDisplayDate)}",
+                    Fecha = shippingDisplayDate
                 });
             }
 
@@ -1124,6 +1182,99 @@
                 .OrderBy(x => x.Fecha)
                 .ToList();
         }
+    }
+
+    private static DateOnly ObtenerFinalPODisplayDate(
+    DateOnly proofExtract,
+    DateOnly finalExtract,
+    DateOnly memoExtract,
+    DateOnly finalPODate,
+    bool esIveau,
+    bool esAu,
+    bool esNz)
+    {
+        if (esNz)
+        {
+            return GetSameOrNextBusinessDay(memoExtract);
+        }
+
+        if (esAu)
+        {
+            if (memoExtract == default)
+                return default;
+
+            return GetSameOrNextBusinessDay(memoExtract.AddDays(1));
+        }
+
+        if (esIveau)
+        {
+            return GetPreviousWorkDate(finalPODate, 3);
+        }
+
+        return finalPODate;
+    }
+
+    private static bool EsBindPlant(string bindPlantName, params string[] codigos)
+    {
+        if (string.IsNullOrWhiteSpace(bindPlantName))
+            return false;
+
+        var normalizado = bindPlantName.Trim().ToUpperInvariant();
+
+        if (codigos.Any(c => normalizado == c.Trim().ToUpperInvariant()))
+            return true;
+
+        var partes = normalizado.Split(
+            new[] { ' ', '-', '_', '/', '\\', ',', ';', '.', '|', '(', ')', '[', ']' },
+            StringSplitOptions.RemoveEmptyEntries);
+
+        return partes.Any(parte =>
+            codigos.Any(c => parte == c.Trim().ToUpperInvariant()));
+    }
+
+    private static DateOnly GetNextBusinessDay(DateOnly sourceDate)
+    {
+        if (sourceDate == default)
+            return default;
+
+        var result = sourceDate.AddDays(1);
+
+        while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            result = result.AddDays(1);
+        }
+
+        return result;
+    }
+
+    private static DateOnly GetSameOrNextBusinessDay(DateOnly sourceDate)
+    {
+        if (sourceDate == default)
+            return default;
+
+        var result = sourceDate;
+
+        while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            result = result.AddDays(1);
+        }
+
+        return result;
+    }
+
+    private static DateOnly GetPreviousWorkDate(DateOnly sourceDate, int daysBefore)
+    {
+        if (sourceDate == default)
+            return default;
+
+        var result = sourceDate.AddDays(-daysBefore);
+
+        while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            result = result.AddDays(-1);
+        }
+
+        return result;
     }
 
     private static bool FechaPendiente(DateOnly fecha, DateOnly hoy)
