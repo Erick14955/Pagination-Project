@@ -11,5 +11,11 @@ namespace Pagination_Project.Services
         Task<bool> EliminarAsync(Guid id);
         Task<List<EmpleadoUsuarioComboDto>> ObtenerEmpleadosDisponiblesAsync(Guid? usuarioActualId = null);
         Task<bool> CambiarPasswordAsync(Guid usuarioId, string nuevaPassword);
+        Task<PerfilUsuarioDto?> ObtenerPerfilActualAsync(Guid userId);
+
+        Task<PerfilUsuarioDto?> ObtenerPerfilActualPorUsernameAsync(string username);
+
+        Task<bool> CambiarPasswordPerfilAsync(CambiarPasswordPerfilDto dto);
+        Task<bool> ActualizarThemePreferenceAsync(Guid userId, string themePreference);
     }
 }

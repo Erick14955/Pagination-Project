@@ -640,3 +640,333 @@ tbody tr:hover {
         padding: 14px;
     }
 }
+
+/* =========================================================
+   DARK MODE - LATE WORK
+========================================================= */
+
+html[data-theme="dark"] .late-page {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .late-hero {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .late-card,
+html[data-theme="dark"] .late-stat-card,
+html[data-theme="dark"] .access-card,
+html[data-theme="dark"] .access-denied-card,
+html[data-theme="dark"] .readonly-card {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+    html[data-theme="dark"] .card-title h2,
+    html[data-theme="dark"] .access-card h2,
+    html[data-theme="dark"] .access-denied-card h2,
+    html[data-theme="dark"] .readonly-card h2 {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .card-title p,
+    html[data-theme="dark"] .bulk-box p,
+    html[data-theme="dark"] .access-card p,
+    html[data-theme="dark"] .access-denied-card p,
+    html[data-theme="dark"] .readonly-card p,
+    html[data-theme="dark"] .form-group label,
+    html[data-theme="dark"] .bulk-box label,
+    html[data-theme="dark"] .check-all {
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .form-group input,
+html[data-theme="dark"] .form-group select,
+html[data-theme="dark"] .bulk-box textarea {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.14);
+}
+
+html[data-theme="dark"] .bulk-box {
+    border-top-color: rgba(255,255,255,.12);
+}
+
+html[data-theme="dark"] .table-wrap,
+html[data-theme="dark"] table {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+}
+
+html[data-theme="dark"] thead {
+    background: #020617;
+}
+
+html[data-theme="dark"] th {
+    color: #cbd5e1;
+    border-bottom-color: rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] td {
+    color: #e2e8f0;
+    border-bottom-color: rgba(255,255,255,.07);
+}
+
+html[data-theme="dark"] tbody tr:hover {
+    background: rgba(255,255,255,.04);
+}
+
+html[data-theme="dark"] .row-completed {
+    background: rgba(255,255,255,.04);
+}
+
+html[data-theme="dark"] .empty-cell {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .btn-light,
+html[data-theme="dark"] .btn-refresh {
+    background: #1e293b;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .btn-dark {
+    background: #020617;
+    color: #f8fafc;
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - LATE WORK
+========================================================= */
+
+html[data-theme="liquid glass"] .late-page {
+    background: transparent;
+    color: #111827;
+}
+
+html[data-theme="liquid glass"] .late-hero,
+html[data-theme="liquid glass"] .late-card,
+html[data-theme="liquid glass"] .late-stat-card,
+html[data-theme="liquid glass"] .access-card,
+html[data-theme="liquid glass"] .access-denied-card,
+html[data-theme="liquid glass"] .readonly-card {
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .late-hero,
+html[data-theme="liquid glass"] .late-card {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="liquid glass"] .late-hero::before,
+    html[data-theme="liquid glass"] .late-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
+        opacity: .82;
+    }
+
+    html[data-theme="liquid glass"] .late-hero > *,
+    html[data-theme="liquid glass"] .late-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="liquid glass"] .late-hero h1,
+    html[data-theme="liquid glass"] .late-stat-card strong,
+    html[data-theme="liquid glass"] .card-title h2,
+    html[data-theme="liquid glass"] .access-card h2,
+    html[data-theme="liquid glass"] .access-denied-card h2,
+    html[data-theme="liquid glass"] .readonly-card h2 {
+        color: #111827;
+        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+    }
+
+    html[data-theme="liquid glass"] .late-hero p,
+    html[data-theme="liquid glass"] .late-stat-card span,
+    html[data-theme="liquid glass"] .card-title p,
+    html[data-theme="liquid glass"] .bulk-box p,
+    html[data-theme="liquid glass"] .form-group label,
+    html[data-theme="liquid glass"] .bulk-box label,
+    html[data-theme="liquid glass"] .check-all {
+        color: #475569;
+    }
+
+html[data-theme="liquid glass"] .form-group input,
+html[data-theme="liquid glass"] .form-group select,
+html[data-theme="liquid glass"] .bulk-box textarea {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+html[data-theme="liquid glass"] .bulk-box {
+    border-top-color: rgba(255,255,255,.45);
+}
+
+html[data-theme="liquid glass"] .table-wrap,
+html[data-theme="liquid glass"] table {
+    background: rgba(255,255,255,.28);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border-color: rgba(255,255,255,.55);
+}
+
+html[data-theme="liquid glass"] thead {
+    background: rgba(17,24,39,.88);
+}
+
+html[data-theme="liquid glass"] th {
+    color: #ffffff;
+}
+
+html[data-theme="liquid glass"] td {
+    color: #334155;
+    border-bottom-color: rgba(255,255,255,.38);
+}
+
+html[data-theme="liquid glass"] tbody tr:hover {
+    background: rgba(255,255,255,.22);
+}
+
+html[data-theme="liquid glass"] .btn-light,
+html[data-theme="liquid glass"] .btn-refresh {
+    background: rgba(255,255,255,.42);
+    color: #1e3a8a;
+    border: 1px solid rgba(255,255,255,.62);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+/* =========================================================
+   DARK GLASS - LATE WORK
+========================================================= */
+
+html[data-theme="dark glass"] .late-page {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark glass"] .late-hero,
+html[data-theme="dark glass"] .late-card,
+html[data-theme="dark glass"] .late-stat-card,
+html[data-theme="dark glass"] .access-card,
+html[data-theme="dark glass"] .access-denied-card,
+html[data-theme="dark glass"] .readonly-card {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+}
+
+html[data-theme="dark glass"] .late-hero,
+html[data-theme="dark glass"] .late-card {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="dark glass"] .late-hero::before,
+    html[data-theme="dark glass"] .late-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.10), transparent 42%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.12), transparent 30%);
+        opacity: .85;
+    }
+
+    html[data-theme="dark glass"] .late-hero > *,
+    html[data-theme="dark glass"] .late-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="dark glass"] .late-hero h1,
+    html[data-theme="dark glass"] .late-stat-card strong,
+    html[data-theme="dark glass"] .card-title h2,
+    html[data-theme="dark glass"] .access-card h2,
+    html[data-theme="dark glass"] .access-denied-card h2,
+    html[data-theme="dark glass"] .readonly-card h2 {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .late-hero p,
+    html[data-theme="dark glass"] .late-stat-card span,
+    html[data-theme="dark glass"] .card-title p,
+    html[data-theme="dark glass"] .bulk-box p,
+    html[data-theme="dark glass"] .form-group label,
+    html[data-theme="dark glass"] .bulk-box label,
+    html[data-theme="dark glass"] .check-all {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .form-group input,
+html[data-theme="dark glass"] .form-group select,
+html[data-theme="dark glass"] .bulk-box textarea {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+html[data-theme="dark glass"] .bulk-box {
+    border-top-color: rgba(255,255,255,.12);
+}
+
+html[data-theme="dark glass"] .table-wrap,
+html[data-theme="dark glass"] table {
+    background: rgba(15,23,42,.50);
+    border-color: rgba(255,255,255,.10);
+}
+
+html[data-theme="dark glass"] thead {
+    background: rgba(2,6,23,.78);
+}
+
+html[data-theme="dark glass"] th {
+    color: #cbd5e1;
+    border-bottom-color: rgba(255,255,255,.08);
+}
+
+html[data-theme="dark glass"] td {
+    color: #e2e8f0;
+    border-bottom-color: rgba(255,255,255,.07);
+}
+
+html[data-theme="dark glass"] tbody tr:hover {
+    background: rgba(255,255,255,.05);
+}
+
+html[data-theme="dark glass"] .row-completed {
+    background: rgba(255,255,255,.04);
+}
+
+html[data-theme="dark glass"] .empty-cell {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .btn-light,
+html[data-theme="dark glass"] .btn-refresh {
+    background: rgba(15,23,42,.58);
+    color: #e5e7eb;
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}

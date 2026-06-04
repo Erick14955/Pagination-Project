@@ -37,5 +37,6 @@ namespace Pagination_Project.Models
         public Empleados? Empleado { get; set; }
 
         public bool RequirePasswordChange { get; set; } = false;
+        public string ThemePreference { get; set; } = "light";
     }
 }

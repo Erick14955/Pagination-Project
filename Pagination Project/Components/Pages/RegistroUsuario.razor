@@ -132,7 +132,9 @@
 
                         <InputSelect TValue="Guid?"
                                      class="thryv-input modern thryv-select-input thryv-linked-employee-select"
-                                     @bind-Value="modelo.EmployeeId">
+                                     Value="modelo.EmployeeId"
+                                     ValueChanged="OnEmpleadoSeleccionado"
+                                     ValueExpression="@(() => modelo.EmployeeId)">
                             <option value="">No linked employee</option>
 
                             @foreach (var empleado in empleadosDisponibles)
@@ -434,6 +436,23 @@
         _user = authState.User;
     }
 
+    private void OnEmpleadoSeleccionado(Guid? empleadoId)
+    {
+        modelo.EmployeeId = empleadoId;
+
+        if (!empleadoId.HasValue)
+            return;
+
+        var empleado = empleadosDisponibles
+            .FirstOrDefault(e => e.Id == empleadoId.Value);
+
+        if (empleado == null)
+            return;
+
+        modelo.Name = empleado.Nombre;
+        modelo.Email = empleado.Email;
+    }
+
     private static bool HasPermission(ClaimsPrincipal user, string claimType)
     {
         return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
@@ -442,6 +461,8 @@
     private void DesvincularEmpleado()
     {
         modelo.EmployeeId = null;
+        modelo.Name = string.Empty;
+        modelo.Email = string.Empty;
     }
 
     private async Task CargarDatosAsync()

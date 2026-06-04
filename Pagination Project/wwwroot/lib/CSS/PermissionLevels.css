@@ -659,3 +659,362 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   DARK MODE - PERMISSIONS
+========================================================= */
+
+html[data-theme="dark"] .permissions-page {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .page-hero {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .list-card,
+html[data-theme="dark"] .summary-card,
+html[data-theme="dark"] .permission-block,
+html[data-theme="dark"] .toggle-item,
+html[data-theme="dark"] .loading-state,
+html[data-theme="dark"] .empty-state {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+    html[data-theme="dark"] .section-header h2,
+    html[data-theme="dark"] .block-header h2,
+    html[data-theme="dark"] .summary-card strong,
+    html[data-theme="dark"] .permission-title strong,
+    html[data-theme="dark"] .empty-state strong,
+    html[data-theme="dark"] .toggle-item span:last-child {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .section-header p,
+    html[data-theme="dark"] .block-header p,
+    html[data-theme="dark"] .form-group label,
+    html[data-theme="dark"] .form-group small,
+    html[data-theme="dark"] .summary-card span,
+    html[data-theme="dark"] .summary-card small,
+    html[data-theme="dark"] .loading-state,
+    html[data-theme="dark"] .empty-state {
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .search-box {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.14);
+}
+
+    html[data-theme="dark"] .search-box input {
+        color: #f8fafc;
+    }
+
+html[data-theme="dark"] .table-container,
+html[data-theme="dark"] .permissions-table {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark"] .permissions-table thead {
+        background: #020617;
+    }
+
+    html[data-theme="dark"] .permissions-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+    html[data-theme="dark"] .permissions-table tbody tr:hover {
+        background: rgba(255,255,255,.04);
+    }
+
+    html[data-theme="dark"] .permissions-table tbody tr.selected-row {
+        background: rgba(37,99,235,.22);
+    }
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - PERMISSIONS
+========================================================= */
+
+html[data-theme="liquid glass"] .permissions-page {
+    background: transparent;
+    color: #111827;
+}
+
+html[data-theme="liquid glass"] .page-hero,
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card,
+html[data-theme="liquid glass"] .summary-card,
+html[data-theme="liquid glass"] .permission-block,
+html[data-theme="liquid glass"] .toggle-item,
+html[data-theme="liquid glass"] .loading-state,
+html[data-theme="liquid glass"] .empty-state {
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .page-hero,
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card,
+html[data-theme="liquid glass"] .permission-block {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="liquid glass"] .page-hero::before,
+    html[data-theme="liquid glass"] .form-card::before,
+    html[data-theme="liquid glass"] .list-card::before,
+    html[data-theme="liquid glass"] .permission-block::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
+        opacity: .82;
+    }
+
+    html[data-theme="liquid glass"] .page-hero > *,
+    html[data-theme="liquid glass"] .form-card > *,
+    html[data-theme="liquid glass"] .list-card > *,
+    html[data-theme="liquid glass"] .permission-block > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="liquid glass"] .page-hero h1,
+    html[data-theme="liquid glass"] .section-header h2,
+    html[data-theme="liquid glass"] .block-header h2,
+    html[data-theme="liquid glass"] .summary-card strong,
+    html[data-theme="liquid glass"] .permission-title strong,
+    html[data-theme="liquid glass"] .empty-state strong,
+    html[data-theme="liquid glass"] .toggle-item span:last-child {
+        color: #111827;
+        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+    }
+
+    html[data-theme="liquid glass"] .page-hero p,
+    html[data-theme="liquid glass"] .section-header p,
+    html[data-theme="liquid glass"] .block-header p,
+    html[data-theme="liquid glass"] .form-group label,
+    html[data-theme="liquid glass"] .form-group small,
+    html[data-theme="liquid glass"] .summary-card span,
+    html[data-theme="liquid glass"] .summary-card small,
+    html[data-theme="liquid glass"] .loading-state,
+    html[data-theme="liquid glass"] .empty-state {
+        color: #475569;
+    }
+
+html[data-theme="liquid glass"] .form-control,
+html[data-theme="liquid glass"] .search-box {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+    html[data-theme="liquid glass"] .search-box input {
+        color: #111827;
+    }
+
+html[data-theme="liquid glass"] .table-container,
+html[data-theme="liquid glass"] .permissions-table {
+    background: rgba(255,255,255,.28);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border-color: rgba(255,255,255,.55);
+}
+
+    html[data-theme="liquid glass"] .permissions-table thead {
+        background: rgba(17,24,39,.88);
+    }
+
+    html[data-theme="liquid glass"] .permissions-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.38);
+    }
+
+    html[data-theme="liquid glass"] .permissions-table tbody tr:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+    html[data-theme="liquid glass"] .permissions-table tbody tr.selected-row {
+        background: rgba(37,99,235,.18);
+    }
+
+/* =========================================================
+   DARK GLASS - PERMISSIONS
+========================================================= */
+
+html[data-theme="dark glass"] .permissions-page {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark glass"] .page-hero,
+html[data-theme="dark glass"] .form-card,
+html[data-theme="dark glass"] .list-card,
+html[data-theme="dark glass"] .summary-card,
+html[data-theme="dark glass"] .permission-block,
+html[data-theme="dark glass"] .toggle-item,
+html[data-theme="dark glass"] .loading-state,
+html[data-theme="dark glass"] .empty-state {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+}
+
+    html[data-theme="dark glass"] .section-header h2,
+    html[data-theme="dark glass"] .block-header h2,
+    html[data-theme="dark glass"] .summary-card strong,
+    html[data-theme="dark glass"] .permission-title strong,
+    html[data-theme="dark glass"] .empty-state strong,
+    html[data-theme="dark glass"] .toggle-item span:last-child {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .section-header p,
+    html[data-theme="dark glass"] .block-header p,
+    html[data-theme="dark glass"] .form-group label,
+    html[data-theme="dark glass"] .form-group small,
+    html[data-theme="dark glass"] .summary-card span,
+    html[data-theme="dark glass"] .summary-card small,
+    html[data-theme="dark glass"] .loading-state,
+    html[data-theme="dark glass"] .empty-state {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .form-control,
+html[data-theme="dark glass"] .search-box {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+    html[data-theme="dark glass"] .search-box input {
+        color: #f8fafc;
+    }
+
+html[data-theme="dark glass"] .table-container,
+html[data-theme="dark glass"] .permissions-table {
+    background: rgba(15,23,42,.50);
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark glass"] .permissions-table thead {
+        background: rgba(2,6,23,.78);
+    }
+
+    html[data-theme="dark glass"] .permissions-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.07);
+    }
+
+    html[data-theme="dark glass"] .permissions-table tbody tr:hover {
+        background: rgba(255,255,255,.05);
+    }
+
+    html[data-theme="dark glass"] .permissions-table tbody tr.selected-row {
+        background: rgba(37,99,235,.24);
+    }
+
+/* =========================================================
+   DARK MODE FIX - PERMISSIONS PLACEHOLDERS
+========================================================= */
+
+html[data-theme="dark"] .permissions-page .form-control::placeholder,
+html[data-theme="dark"] .permissions-page .search-box input::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html[data-theme="dark glass"] .permissions-page .form-control::placeholder,
+html[data-theme="dark glass"] .permissions-page .search-box input::placeholder {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+}
+
+/* =========================================================
+   DARK MODE FIX - PERMISSION LEVEL LIST HEADER + SEARCH LIKE EMPLOYEES
+========================================================= */
+
+html[data-theme="dark"] .permissions-page .list-card .section-header h2,
+html[data-theme="dark"] .permissions-page .list-card .section-header p {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .permissions-page .list-card .search-box {
+    background: #0f172a !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    border-radius: 14px !important;
+    min-width: 340px !important;
+    height: 46px !important;
+    box-shadow: none !important;
+}
+
+    html[data-theme="dark"] .permissions-page .list-card .search-box input {
+        color: #f8fafc !important;
+        background: transparent !important;
+    }
+
+        html[data-theme="dark"] .permissions-page .list-card .search-box input::placeholder {
+            color: #cbd5e1 !important;
+            opacity: 1 !important;
+        }
+
+    html[data-theme="dark"] .permissions-page .list-card .search-box:focus-within {
+        border-color: rgba(148, 163, 184, 0.38) !important;
+        box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08) !important;
+    }
+
+    html[data-theme="dark"] .permissions-page .list-card .search-box span {
+        color: #cbd5e1 !important;
+    }
+
+/* =========================================================
+   LIQUID GLASS FIX - PERMISSION LEVEL HERO READABILITY
+========================================================= */
+
+html[data-theme="liquid glass"] .permissions-page .page-hero h1 {
+    color: #0f172a !important;
+    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
+}
+
+html[data-theme="liquid glass"] .permissions-page .page-hero p {
+    color: #334155 !important;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="liquid glass"] .permissions-page .page-hero > div:first-child {
+    background: rgba(255, 255, 255, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    padding: 22px 24px;
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .permissions-page .page-hero .stat-card span {
+    color: #475569 !important;
+}
+
+html[data-theme="liquid glass"] .permissions-page .page-hero .stat-card strong {
+    color: #111827 !important;
+}

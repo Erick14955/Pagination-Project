@@ -1,0 +1,413 @@
+﻿@page "/perfil"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Pagination_Project.Models
+@using Pagination_Project.Services
+@using System.Security.Claims
+
+@inject IUsuarioService UsuarioService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JS
+
+@layout Pagination_Project.Components.Layout.DashboardLayout
+@rendermode InteractiveServer
+
+<PageTitle>My Profile - Evaluations</PageTitle>
+
+<link href="style/perfilusuario.css" rel="stylesheet" />
+
+<div class="thryv-profile-page">
+
+    <section class="thryv-profile-header">
+        <div>
+            <h2>My Profile</h2>
+            <p>Review your account information and update your password.</p>
+        </div>
+    </section>
+
+    <div class="thryv-profile-card">
+
+        @if (Cargando)
+        {
+            <div class="thryv-profile-loading">
+                Loading profile...
+            </div>
+        }
+        else
+        {
+            <div class="thryv-profile-top">
+                <div class="thryv-profile-avatar">
+                    @InicialesUsuario
+                </div>
+
+                <div>
+                    <h3 class="thryv-profile-name-gradient">@perfil.Name</h3>
+                    <span class="thryv-profile-username-gradient">@perfil.Username</span>
+                </div>
+            </div>
+
+            <EditForm Model="modelo" OnValidSubmit="CambiarPasswordAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="thryv-profile-grid">
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field readonly">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </span>
+                            <input class="thryv-input modern"
+                                   value="@perfil.Username"
+                                   readonly
+                                   placeholder=" " />
+                            <span class="thryv-floating-label always-float">Username</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field readonly">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </span>
+                            <input class="thryv-input modern"
+                                   value="@perfil.Name"
+                                   readonly
+                                   placeholder=" " />
+                            <span class="thryv-floating-label always-float">Full Name</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field readonly">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="m12 2 2.4 4.9 5.4.8-3.9 3.8.9 5.5L12 14.9 7.2 17l.9-5.5L4.2 7.7l5.4-.8Z"></path>
+                                </svg>
+                            </span>
+                            <input class="thryv-input modern"
+                                   value="@perfil.NivelNombre"
+                                   readonly
+                                   placeholder=" " />
+                            <span class="thryv-floating-label always-float">User Role</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                </svg>
+                            </span>
+                            <InputText type="password"
+                                       class="thryv-input modern"
+                                       @bind-Value="modelo.NewPassword"
+                                       placeholder=" " />
+                            <span class="thryv-floating-label">New Password</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                    <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+                                </svg>
+                            </span>
+                            <InputText type="password"
+                                       class="thryv-input modern"
+                                       @bind-Value="modelo.ConfirmPassword"
+                                       placeholder=" " />
+                            <span class="thryv-floating-label">Confirm Password</span>
+                        </label>
+                    </div>
+
+                    <div class="thryv-form-group">
+                        <label class="thryv-floating-field">
+                            <span class="thryv-input-icon thryv-svg-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"></path>
+                                </svg>
+                            </span>
+
+                            <InputSelect class="thryv-input modern"
+                                         @bind-Value="ThemePreference">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="liquid glass">Liquid Glass</option>
+                                <option value="dark glass">Dark Glass</option>
+                            </InputSelect>
+
+                            <span class="thryv-floating-label always-float">Theme Preference</span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="thryv-profile-actions">
+                    <button type="submit"
+                            class="thryv-primary-btn"
+                            disabled="@Guardando">
+                        @(Guardando ? "Saving..." : "Change Password")
+                    </button>
+
+                    <button type="button"
+                            class="thryv-secondary-btn"
+                            disabled="@GuardandoTema"
+                            @onclick="GuardarPreferenciaTemaAsync">
+                        @(GuardandoTema ? "Saving theme..." : "Save Theme Preference")
+                    </button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@if (MostrarModalResultado)
+{
+    <div class="thryv-modal-overlay" @onclick="CerrarModalResultado">
+        <div class="thryv-modal-card thryv-result-modal" @onclick:stopPropagation="true">
+            <div class="thryv-modal-header">
+                <h3>@TituloModalResultado</h3>
+            </div>
+
+            <div class="thryv-modal-body">
+                <p>@MensajeModalResultado</p>
+            </div>
+
+            <div class="thryv-modal-actions">
+                <button type="button"
+                        class="thryv-primary-btn"
+                        @onclick="CerrarModalResultado">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private PerfilUsuarioDto perfil = new();
+    private PerfilPasswordModel modelo = new();
+
+    private bool Cargando = true;
+    private bool Guardando = false;
+
+    private bool MostrarModalResultado = false;
+    private string TituloModalResultado = string.Empty;
+    private string MensajeModalResultado = string.Empty;
+
+    private string ThemePreference { get; set; } = "light";
+    private bool GuardandoTema = false;
+
+    private readonly string[] TemasPermitidos =
+    [
+        "light",
+        "dark",
+        "liquid glass",
+        "dark glass"
+    ];
+
+    private string InicialesUsuario
+    {
+        get
+        {
+            var nombre = string.IsNullOrWhiteSpace(perfil.Name)
+                ? perfil.Username
+                : perfil.Name;
+
+            if (string.IsNullOrWhiteSpace(nombre))
+                return "U";
+
+            var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (partes.Length == 1)
+                return partes[0].Substring(0, 1).ToUpper();
+
+            return $"{partes[0][0]}{partes[1][0]}".ToUpper();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPerfilAsync();
+    }
+
+    private async Task CargarPerfilAsync()
+    {
+        Cargando = true;
+
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = user.Identity?.Name ?? user.FindFirst(ClaimTypes.Name)?.Value;
+
+            PerfilUsuarioDto? resultado = null;
+
+            if (Guid.TryParse(userIdClaim, out var usuarioId))
+            {
+                resultado = await UsuarioService.ObtenerPerfilActualAsync(usuarioId);
+            }
+
+            if (resultado == null && !string.IsNullOrWhiteSpace(username))
+            {
+                resultado = await UsuarioService.ObtenerPerfilActualPorUsernameAsync(username);
+            }
+
+            if (resultado == null)
+            {
+                MostrarResultado("Profile not found", "Could not load your profile information.");
+                return;
+            }
+
+            perfil = resultado;
+
+            ThemePreference = string.IsNullOrWhiteSpace(perfil.ThemePreference)
+            ? "light"
+            : perfil.ThemePreference;
+
+            await JS.InvokeVoidAsync("thryvTheme.applyTheme", ThemePreference);
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", $"Error loading profile: {ex.Message}");
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task GuardarPreferenciaTemaAsync()
+    {
+        if (perfil.Id == Guid.Empty)
+        {
+            MostrarResultado("Error", "User profile is not loaded.");
+            return;
+        }
+
+        if (!TemasPermitidos.Contains(ThemePreference))
+        {
+            MostrarResultado("Invalid theme", "The selected theme is not allowed.");
+            return;
+        }
+
+        GuardandoTema = true;
+
+        try
+        {
+            var actualizado = await UsuarioService.ActualizarThemePreferenceAsync(perfil.Id, ThemePreference);
+
+            if (!actualizado)
+            {
+                MostrarResultado("Not found", "User not found.");
+                return;
+            }
+
+            await JS.InvokeVoidAsync("thryvTheme.applyTheme", ThemePreference);
+
+            MostrarResultado("Theme updated", "Your theme preference was saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", $"Error saving theme preference: {ex.Message}");
+        }
+        finally
+        {
+            GuardandoTema = false;
+        }
+    }
+
+    private async Task CambiarPasswordAsync()
+    {
+        if (perfil.Id == Guid.Empty)
+        {
+            MostrarResultado("Error", "User profile is not loaded.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(modelo.NewPassword))
+        {
+            MostrarResultado("Required field", "Enter the new password.");
+            return;
+        }
+
+        if (modelo.NewPassword.Length < 6)
+        {
+            MostrarResultado("Invalid password", "Password must have at least 6 characters.");
+            return;
+        }
+
+        if (modelo.NewPassword != modelo.ConfirmPassword)
+        {
+            MostrarResultado("Passwords do not match", "The password confirmation does not match.");
+            return;
+        }
+
+        Guardando = true;
+
+        try
+        {
+            var dto = new CambiarPasswordPerfilDto
+            {
+                UserId = perfil.Id,
+                NewPassword = modelo.NewPassword
+            };
+
+            var actualizado = await UsuarioService.CambiarPasswordPerfilAsync(dto);
+
+            if (!actualizado)
+            {
+                MostrarResultado("Not found", "User not found.");
+                return;
+            }
+
+            modelo = new PerfilPasswordModel();
+
+            MostrarResultado("Password updated", "Your password was changed successfully.");
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", $"Error changing password: {ex.Message}");
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void MostrarResultado(string titulo, string mensaje)
+    {
+        TituloModalResultado = titulo;
+        MensajeModalResultado = mensaje;
+        MostrarModalResultado = true;
+    }
+
+    private void CerrarModalResultado()
+    {
+        MostrarModalResultado = false;
+        TituloModalResultado = string.Empty;
+        MensajeModalResultado = string.Empty;
+    }
+
+    public class PerfilPasswordModel
+    {
+        public string NewPassword { get; set; } = string.Empty;
+
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

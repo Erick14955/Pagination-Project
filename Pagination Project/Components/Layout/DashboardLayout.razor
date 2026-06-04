@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="thryv-dashboard-layout">
     <div class="thryv-sidebar-overlay @(sidebarOpen ? "show" : "")" @onclick="CloseSidebar"></div>
@@ -130,13 +132,15 @@
             <AuthorizeView>
                 <Authorized Context="auth">
                     <div class="thryv-user-info">
-                        <div class="thryv-user-badge">
-                            <div class="thryv-user-avatar">👤</div>
+                        <NavLink href="/perfil"
+                                 class="thryv-user-badge thryv-user-profile-link"
+                                 title="My Profile">
+                            <div class="thryv-user-avatar">@InicialesUsuarioHeader</div>
                             <div class="thryv-user-details">
                                 <span class="thryv-user-label">@ObtenerRol(auth.User)</span>
                                 <span class="thryv-user-name">@GetDisplayName(auth.User)</span>
                             </div>
-                        </div>
+                        </NavLink>
 
                         <form method="post" action="/account/logout">
                             <button type="submit" class="thryv-logout-btn">Sign Out</button>
@@ -194,6 +198,75 @@
                rol == "Assistant";
     }
 
+    private bool _themeApplied = false;
+
+    private static readonly string[] TemasPermitidos =
+    [
+        "light",
+        "dark",
+        "liquid glass",
+        "dark glass"
+    ];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_themeApplied)
+        {
+            _themeApplied = true;
+            await AplicarTemaLayoutAsync();
+        }
+    }
+
+    private async Task AplicarTemaLayoutAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            var theme = user.FindFirst("ThemePreference")?.Value;
+
+            if (string.IsNullOrWhiteSpace(theme) || !TemasPermitidos.Contains(theme))
+            {
+                theme = await JS.InvokeAsync<string>("localStorage.getItem", "theme");
+            }
+
+            if (string.IsNullOrWhiteSpace(theme) || !TemasPermitidos.Contains(theme))
+            {
+                theme = "light";
+            }
+
+            await JS.InvokeVoidAsync("thryvTheme.applyTheme", theme);
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
+        }
+    }
+    private async Task AplicarTemaDesdeSesionAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            var theme = user.FindFirst("ThemePreference")?.Value;
+
+            if (string.IsNullOrWhiteSpace(theme) || !TemasPermitidos.Contains(theme))
+            {
+                theme = "light";
+            }
+
+            await JS.InvokeVoidAsync("thryvTheme.applyTheme", theme);
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
+        }
+    }
+
     private static bool PuedeVerEmployeeTimeOff(ClaimsPrincipal user)
     {
         var rol = ObtenerRol(user);
@@ -215,5 +288,26 @@
             "4" => "User",
             _ => "Usuario autenticado"
         };
+    }
+
+    private string InicialesUsuarioHeader
+    {
+        get
+        {
+            if (_user == null)
+                return "U";
+
+            var nombre = GetDisplayName(_user);
+
+            if (string.IsNullOrWhiteSpace(nombre))
+                return "U";
+
+            var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (partes.Length == 1)
+                return partes[0].Substring(0, 1).ToUpper();
+
+            return $"{partes[0][0]}{partes[1][0]}".ToUpper();
+        }
     }
 }

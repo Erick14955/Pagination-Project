@@ -14,10 +14,6 @@
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* =========================
-   SIDEBAR FIJO
-========================= */
-
 .thryv-sidebar {
     width: 290px;
     height: 100vh;
@@ -33,16 +29,31 @@
     flex-direction: column;
 }
 
-    .thryv-sidebar.open {
-        width: 290px;
+.thryv-user-profile-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+    .thryv-user-profile-link:hover {
+        transform: translateY(-1px);
+        opacity: 0.9;
     }
 
-    .thryv-sidebar.closed {
-        width: 0;
-        min-width: 0;
-        border-right: none;
-        box-shadow: none;
+    .thryv-user-profile-link.active {
+        box-shadow: 0 0 0 3px rgba(255, 80, 0, 0.18);
     }
+
+.thryv-sidebar.open {
+    width: 290px;
+}
+
+.thryv-sidebar.closed {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+    box-shadow: none;
+}
 
 .thryv-sidebar-header {
     display: flex;
@@ -110,7 +121,6 @@
         transform: translateY(-1px);
     }
 
-/* Menú con scroll propio si crece mucho */
 .thryv-sidebar-menu {
     display: flex;
     flex-direction: column;
@@ -176,10 +186,6 @@
     text-overflow: ellipsis;
 }
 
-/* =========================
-   MAIN CONTENT FIJO
-========================= */
-
 .thryv-main-content {
     flex: 1;
     min-width: 0;
@@ -189,12 +195,12 @@
     overflow: hidden;
 }
 
-/* Header superior fijo dentro del layout */
 .thryv-top-header {
     height: 88px;
     min-height: 88px;
     background: rgba(255,255,255,0.92);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -280,6 +286,7 @@
     align-items: center;
     justify-content: center;
     font-size: 19px;
+    font-weight: 800;
     flex-shrink: 0;
 }
 
@@ -321,7 +328,6 @@
         transform: translateY(-1px);
     }
 
-/* Esta es la única parte que baja/sube */
 .thryv-page-content {
     flex: 1;
     min-height: 0;
@@ -347,9 +353,296 @@
     display: none;
 }
 
-/* =========================
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+html[data-theme="dark"] .thryv-dashboard-layout {
+    background: radial-gradient(circle at top left, rgba(255, 80, 0, 0.12), transparent 28%), radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 30%), linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .thryv-sidebar {
+    background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+    border-right-color: rgba(148, 163, 184, 0.16);
+    box-shadow: 16px 0 42px rgba(0, 0, 0, 0.42);
+}
+
+html[data-theme="dark"] .thryv-top-header {
+    background: rgba(15, 23, 42, 0.92);
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+
+html[data-theme="dark"] .thryv-header-title h1 {
+    color: #f9fafb;
+}
+
+html[data-theme="dark"] .thryv-header-title span,
+html[data-theme="dark"] .thryv-user-label {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .thryv-user-badge {
+    background: #111827;
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
+}
+
+html[data-theme="dark"] .thryv-user-name {
+    color: #f9fafb;
+}
+
+html[data-theme="dark"] .thryv-logout-btn {
+    background: #1e293b;
+    color: #f9fafb;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+    html[data-theme="dark"] .thryv-logout-btn:hover {
+        background: #334155;
+    }
+
+html[data-theme="dark"] .thryv-page-content::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.34);
+}
+
+html[data-theme="dark"] .thryv-page-content::-webkit-scrollbar-track {
+    background: rgba(148, 163, 184, 0.08);
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM
+========================================================= */
+
+html[data-theme="liquid glass"] .thryv-dashboard-layout {
+    position: fixed;
+    color: #0f172a;
+    background: radial-gradient(circle at 8% 12%, rgba(255, 80, 0, 0.28), transparent 24%), radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.95), transparent 25%), radial-gradient(circle at 80% 88%, rgba(37, 99, 235, 0.16), transparent 34%), linear-gradient(135deg, #fff4ed 0%, #f8fafc 42%, #eaf0ff 100%);
+}
+
+    html[data-theme="liquid glass"] .thryv-dashboard-layout::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.70) 18%, transparent 34%), linear-gradient(290deg, transparent 0%, rgba(255,255,255,.42) 28%, transparent 46%);
+        opacity: .75;
+        z-index: 0;
+    }
+
+html[data-theme="liquid glass"] .thryv-sidebar,
+html[data-theme="liquid glass"] .thryv-main-content {
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme="liquid glass"] .thryv-sidebar {
+    background: rgba(17, 17, 17, 0.54);
+    backdrop-filter: blur(34px) saturate(190%) brightness(1.05);
+    -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 18px 0 58px rgba(15, 23, 42, 0.28), inset 1px 0 1px rgba(255, 255, 255, 0.16);
+}
+
+    html[data-theme="liquid glass"] .thryv-sidebar::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.03) 42%, rgba(255,80,0,.12)), radial-gradient(circle at 20% 0%, rgba(255,255,255,.22), transparent 28%);
+        z-index: 0;
+    }
+
+html[data-theme="liquid glass"] .thryv-sidebar-header,
+html[data-theme="liquid glass"] .thryv-sidebar-menu {
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme="liquid glass"] .thryv-top-header {
+    background: rgba(255, 255, 255, 0.34);
+    backdrop-filter: blur(34px) saturate(190%) brightness(1.08);
+    -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.66);
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.90);
+}
+
+html[data-theme="liquid glass"] .thryv-header-title h1 {
+    color: #111111;
+    text-shadow: 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .thryv-header-title span {
+    color: #64748b;
+}
+
+html[data-theme="liquid glass"] .thryv-brand-mark,
+html[data-theme="liquid glass"] .thryv-user-avatar {
+    background: linear-gradient(145deg, rgba(17,17,17,.92), rgba(45,45,45,.74));
+    border: 1px solid rgba(255,255,255,.30);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: 0 18px 36px rgba(15,23,42,.24), inset 0 1px 1px rgba(255,255,255,.24);
+}
+
+html[data-theme="liquid glass"] .thryv-user-badge {
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.70);
+    box-shadow: 0 14px 34px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .thryv-user-name {
+    color: #111827;
+}
+
+html[data-theme="liquid glass"] .thryv-user-label {
+    color: #64748b;
+}
+
+html[data-theme="liquid glass"] .thryv-menu-link {
+    color: rgba(255,255,255,0.86);
+    border-color: rgba(255,255,255,0.06);
+}
+
+    html[data-theme="liquid glass"] .thryv-menu-link:hover {
+        background: rgba(255,255,255,0.14);
+        border-color: rgba(255,255,255,0.16);
+    }
+
+    html[data-theme="liquid glass"] .thryv-menu-link.active {
+        background: linear-gradient(135deg, rgba(255,80,0,.98), rgba(255,122,47,.92));
+        box-shadow: 0 18px 38px rgba(255,80,0,.30), inset 0 1px 1px rgba(255,255,255,.34);
+    }
+
+html[data-theme="liquid glass"] .thryv-menu-toggle,
+html[data-theme="liquid glass"] .thryv-logout-btn {
+    background: linear-gradient(135deg, #ff5000, #ff7a2f);
+    box-shadow: 0 18px 38px rgba(255,80,0,.30), inset 0 1px 1px rgba(255,255,255,.34);
+}
+
+    html[data-theme="liquid glass"] .thryv-logout-btn:hover {
+        background: linear-gradient(135deg, #ff5c12, #ff8542);
+    }
+
+html[data-theme="liquid glass"] .thryv-page-content {
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme="liquid glass"] .thryv-sidebar-overlay.show {
+    background: rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   DARK GLASS MODE
+========================================================= */
+
+html[data-theme="dark glass"] .thryv-dashboard-layout {
+    color: #e5e7eb;
+    background: radial-gradient(circle at 10% 12%, rgba(255, 80, 0, 0.22), transparent 26%), radial-gradient(circle at 84% 14%, rgba(59, 130, 246, 0.14), transparent 30%), radial-gradient(circle at 70% 90%, rgba(255, 255, 255, 0.06), transparent 34%), linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+
+    html[data-theme="dark glass"] .thryv-dashboard-layout::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.08) 18%, transparent 34%), linear-gradient(290deg, transparent 0%, rgba(255,255,255,.05) 28%, transparent 46%);
+        opacity: .8;
+        z-index: 0;
+    }
+
+html[data-theme="dark glass"] .thryv-sidebar,
+html[data-theme="dark glass"] .thryv-main-content {
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme="dark glass"] .thryv-sidebar {
+    background: rgba(2, 6, 23, 0.62);
+    backdrop-filter: blur(30px) saturate(170%);
+    -webkit-backdrop-filter: blur(30px) saturate(170%);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 18px 0 62px rgba(0, 0, 0, 0.48), inset 1px 0 1px rgba(255,255,255,0.08);
+}
+
+html[data-theme="dark glass"] .thryv-top-header {
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255,255,255,0.08);
+}
+
+html[data-theme="dark glass"] .thryv-header-title h1,
+html[data-theme="dark glass"] .thryv-user-name {
+    color: #f9fafb;
+}
+
+html[data-theme="dark glass"] .thryv-header-title span,
+html[data-theme="dark glass"] .thryv-user-label {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .thryv-user-badge {
+    background: rgba(15, 23, 42, 0.56);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255,255,255,0.08);
+}
+
+html[data-theme="dark glass"] .thryv-brand-mark,
+html[data-theme="dark glass"] .thryv-user-avatar {
+    background: linear-gradient(145deg, rgba(17,17,17,.94), rgba(45,45,45,.68));
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 18px 38px rgba(0,0,0,.34), inset 0 1px 1px rgba(255,255,255,.10);
+}
+
+html[data-theme="dark glass"] .thryv-menu-link:hover {
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.10);
+}
+
+html[data-theme="dark glass"] .thryv-menu-link.active,
+html[data-theme="dark glass"] .thryv-menu-toggle {
+    background: linear-gradient(135deg, #ff5000, #ff7a2f);
+    box-shadow: 0 18px 38px rgba(255,80,0,.28), inset 0 1px 1px rgba(255,255,255,.22);
+}
+
+html[data-theme="dark glass"] .thryv-logout-btn {
+    background: rgba(15, 23, 42, 0.62);
+    color: #f9fafb;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+    html[data-theme="dark glass"] .thryv-logout-btn:hover {
+        background: rgba(30, 41, 59, 0.78);
+    }
+
+html[data-theme="dark glass"] .thryv-page-content::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.28);
+}
+
+html[data-theme="dark glass"] .thryv-page-content::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.06);
+}
+
+html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
+    background: rgba(2, 6, 23, 0.48);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* =========================================================
    RESPONSIVE
-========================= */
+========================================================= */
 
 @media (max-width: 992px) {
     .thryv-sidebar {

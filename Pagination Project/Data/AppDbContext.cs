@@ -44,6 +44,7 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.Name).HasColumnName("Name");
                 entity.Property(e => e.lvl_Id).HasColumnName("Lvl_Id");
                 entity.Property(e => e.Activo).HasColumnName("Active").IsRequired();
+                entity.Property(e => e.ThemePreference).HasColumnName("ThemePreference");
                 entity.Property(e => e.EmployeeId)
                     .HasColumnName("Employee_Id")
                     .HasColumnType("uuid");

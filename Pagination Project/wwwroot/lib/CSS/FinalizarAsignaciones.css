@@ -465,3 +465,350 @@
         width: 100%;
     }
 }
+
+/* =========================================================
+   DARK MODE - FINISH ASSIGNMENTS
+========================================================= */
+
+html[data-theme="dark"] .finish-assignments-page {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .finish-hero {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 18px 45px rgba(0,0,0,.35);
+}
+
+html[data-theme="dark"] .hero-kicker,
+html[data-theme="dark"] .hero-stat {
+    background: rgba(15,23,42,.88);
+    border-color: rgba(148,163,184,.18);
+}
+
+html[data-theme="dark"] .finish-panel,
+html[data-theme="dark"] .empty-state {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+    html[data-theme="dark"] .filter-group label,
+    html[data-theme="dark"] .finish-hero p,
+    html[data-theme="dark"] .hero-stat span,
+    html[data-theme="dark"] .employee-cell span,
+    html[data-theme="dark"] .book-cell span,
+    html[data-theme="dark"] .empty-state,
+    html[data-theme="dark"] .empty-state p {
+        color: #94a3b8;
+    }
+
+        html[data-theme="dark"] .employee-cell strong,
+        html[data-theme="dark"] .book-cell strong,
+        html[data-theme="dark"] .empty-state h3 {
+            color: #f8fafc;
+        }
+
+html[data-theme="dark"] .finish-input {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.14);
+}
+
+    html[data-theme="dark"] .finish-input:disabled {
+        background: #1e293b;
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .btn-soft {
+    background: #1e293b;
+    color: #e5e7eb;
+    border-color: rgba(255,255,255,.12);
+}
+
+    html[data-theme="dark"] .btn-soft:hover {
+        background: #334155;
+    }
+
+html[data-theme="dark"] .finish-table-wrapper,
+html[data-theme="dark"] .finish-table {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark"] .finish-table thead {
+        background: #020617;
+    }
+
+    html[data-theme="dark"] .finish-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+    html[data-theme="dark"] .finish-table tbody tr:hover {
+        background: rgba(255,255,255,.04);
+    }
+
+html[data-theme="dark"] .row-completed {
+    background: rgba(255,255,255,.04);
+}
+
+html[data-theme="dark"] .code-muted {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .empty-icon {
+    background: rgba(16,185,129,.14);
+    color: #34d399;
+}
+
+html[data-theme="dark"] .loader {
+    border-color: rgba(96,165,250,.22);
+    border-top-color: #60a5fa;
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - FINISH ASSIGNMENTS
+========================================================= */
+
+html[data-theme="liquid glass"] .finish-assignments-page {
+    background: transparent;
+    color: #111827;
+}
+
+html[data-theme="liquid glass"] .finish-hero,
+html[data-theme="liquid glass"] .finish-panel,
+html[data-theme="liquid glass"] .hero-stat,
+html[data-theme="liquid glass"] .empty-state {
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .finish-hero,
+html[data-theme="liquid glass"] .finish-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="liquid glass"] .finish-hero::before,
+    html[data-theme="liquid glass"] .finish-panel::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
+        opacity: .82;
+    }
+
+    html[data-theme="liquid glass"] .finish-hero > *,
+    html[data-theme="liquid glass"] .finish-panel > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="liquid glass"] .finish-hero h1,
+    html[data-theme="liquid glass"] .hero-stat strong,
+    html[data-theme="liquid glass"] .employee-cell strong,
+    html[data-theme="liquid glass"] .book-cell strong,
+    html[data-theme="liquid glass"] .empty-state h3 {
+        color: #111827;
+        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+    }
+
+    html[data-theme="liquid glass"] .finish-hero p,
+    html[data-theme="liquid glass"] .hero-stat span,
+    html[data-theme="liquid glass"] .employee-cell span,
+    html[data-theme="liquid glass"] .book-cell span,
+    html[data-theme="liquid glass"] .empty-state,
+    html[data-theme="liquid glass"] .empty-state p,
+    html[data-theme="liquid glass"] .filter-group label {
+        color: #475569;
+    }
+
+html[data-theme="liquid glass"] .hero-kicker {
+    background: rgba(255,255,255,.38);
+    color: #1d4ed8;
+    border: 1px solid rgba(255,255,255,.58);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .finish-input {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+    html[data-theme="liquid glass"] .finish-input:disabled {
+        background: rgba(255,255,255,.32);
+        color: #64748b;
+    }
+
+html[data-theme="liquid glass"] .btn-soft {
+    background: rgba(255,255,255,.42);
+    color: #334155;
+    border-color: rgba(255,255,255,.62);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .finish-table-wrapper,
+html[data-theme="liquid glass"] .finish-table {
+    background: rgba(255,255,255,.28);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border-color: rgba(255,255,255,.55);
+}
+
+    html[data-theme="liquid glass"] .finish-table thead {
+        background: rgba(17,24,39,.88);
+    }
+
+    html[data-theme="liquid glass"] .finish-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.38);
+    }
+
+    html[data-theme="liquid glass"] .finish-table tbody tr:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+html[data-theme="liquid glass"] .row-completed {
+    background: rgba(255,255,255,.20);
+}
+
+html[data-theme="liquid glass"] .empty-icon {
+    background: rgba(16,185,129,.16);
+    color: #059669;
+    border: 1px solid rgba(16,185,129,.20);
+}
+
+/* =========================================================
+   DARK GLASS - FINISH ASSIGNMENTS
+========================================================= */
+
+html[data-theme="dark glass"] .finish-assignments-page {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark glass"] .finish-hero,
+html[data-theme="dark glass"] .finish-panel,
+html[data-theme="dark glass"] .hero-stat,
+html[data-theme="dark glass"] .empty-state {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+}
+
+html[data-theme="dark glass"] .finish-hero {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="dark glass"] .finish-hero::before,
+    html[data-theme="dark glass"] .finish-panel::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.10), transparent 42%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.12), transparent 30%);
+        opacity: .85;
+    }
+
+    html[data-theme="dark glass"] .finish-hero > *,
+    html[data-theme="dark glass"] .finish-panel > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="dark glass"] .finish-hero h1,
+    html[data-theme="dark glass"] .hero-stat strong,
+    html[data-theme="dark glass"] .employee-cell strong,
+    html[data-theme="dark glass"] .book-cell strong,
+    html[data-theme="dark glass"] .empty-state h3 {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .finish-hero p,
+    html[data-theme="dark glass"] .hero-stat span,
+    html[data-theme="dark glass"] .employee-cell span,
+    html[data-theme="dark glass"] .book-cell span,
+    html[data-theme="dark glass"] .empty-state,
+    html[data-theme="dark glass"] .empty-state p,
+    html[data-theme="dark glass"] .filter-group label {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .hero-kicker {
+    background: rgba(255,255,255,.08);
+    color: #bfdbfe;
+    border: 1px solid rgba(255,255,255,.10);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+html[data-theme="dark glass"] .finish-input {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+    html[data-theme="dark glass"] .finish-input:disabled {
+        background: rgba(30,41,59,.62);
+        color: #94a3b8;
+    }
+
+html[data-theme="dark glass"] .btn-soft {
+    background: rgba(15,23,42,.58);
+    color: #e5e7eb;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+html[data-theme="dark glass"] .finish-table-wrapper,
+html[data-theme="dark glass"] .finish-table {
+    background: rgba(15,23,42,.50);
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark glass"] .finish-table thead {
+        background: rgba(2,6,23,.78);
+    }
+
+    html[data-theme="dark glass"] .finish-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.07);
+    }
+
+    html[data-theme="dark glass"] .finish-table tbody tr:hover {
+        background: rgba(255,255,255,.05);
+    }
+
+html[data-theme="dark glass"] .row-completed {
+    background: rgba(255,255,255,.04);
+}
+
+html[data-theme="dark glass"] .code-muted {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .empty-icon {
+    background: rgba(16,185,129,.14);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,.18);
+}

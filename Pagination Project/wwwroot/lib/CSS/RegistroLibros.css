@@ -910,3 +910,455 @@ button:disabled {
         padding: 1rem;
     }
 }
+
+/* =========================================================
+   DARK MODE - BOOKS
+========================================================= */
+
+html[data-theme="dark"] .books-page {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .page-hero {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 18px 45px rgba(0,0,0,.35);
+}
+
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .list-card,
+html[data-theme="dark"] .switch-card,
+html[data-theme="dark"] .loading-state,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .xlsx-modal-card,
+html[data-theme="dark"] .xlsx-modal-stats div {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+    html[data-theme="dark"] .section-header h2,
+    html[data-theme="dark"] .switch-card strong,
+    html[data-theme="dark"] .book-title strong,
+    html[data-theme="dark"] .empty-state strong,
+    html[data-theme="dark"] .xlsx-modal-header h2,
+    html[data-theme="dark"] .xlsx-modal-stats strong {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .section-header p,
+    html[data-theme="dark"] .form-group label,
+    html[data-theme="dark"] .switch-card small,
+    html[data-theme="dark"] .book-title span,
+    html[data-theme="dark"] .loading-state,
+    html[data-theme="dark"] .empty-state,
+    html[data-theme="dark"] .xlsx-modal-header p,
+    html[data-theme="dark"] .xlsx-modal-stats span,
+    html[data-theme="dark"] .xlsx-modal-more,
+    html[data-theme="dark"] .month-filter label {
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .search-box,
+html[data-theme="dark"] .filter-select {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.14);
+}
+
+    html[data-theme="dark"] .search-box input {
+        color: #f8fafc;
+    }
+
+html[data-theme="dark"] .subsection-title {
+    color: #38bdf8;
+}
+
+    html[data-theme="dark"] .subsection-title::after {
+        background: rgba(255,255,255,.12);
+    }
+
+html[data-theme="dark"] .table-container,
+html[data-theme="dark"] .books-table {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark"] .books-table th {
+        background: #020617;
+        color: #cbd5e1;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+    html[data-theme="dark"] .books-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.07);
+    }
+
+    html[data-theme="dark"] .books-table tbody tr:hover {
+        background: rgba(255,255,255,.04);
+    }
+
+html[data-theme="dark"] .selected-row {
+    background: rgba(37,99,235,.22) !important;
+}
+
+html[data-theme="dark"] .btn-light,
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .btn-filter-clear,
+html[data-theme="dark"] .xlsx-modal-close {
+    background: #1e293b;
+    color: #e5e7eb;
+    border-color: rgba(255,255,255,.12);
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - BOOKS
+========================================================= */
+
+html[data-theme="liquid glass"] .books-page {
+    background: transparent;
+    color: #111827;
+}
+
+html[data-theme="liquid glass"] .page-hero,
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card,
+html[data-theme="liquid glass"] .switch-card,
+html[data-theme="liquid glass"] .loading-state,
+html[data-theme="liquid glass"] .empty-state,
+html[data-theme="liquid glass"] .xlsx-modal-card,
+html[data-theme="liquid glass"] .xlsx-modal-stats div {
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .page-hero,
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="liquid glass"] .page-hero::before,
+    html[data-theme="liquid glass"] .form-card::before,
+    html[data-theme="liquid glass"] .list-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
+        opacity: .82;
+    }
+
+    html[data-theme="liquid glass"] .page-hero > *,
+    html[data-theme="liquid glass"] .form-card > *,
+    html[data-theme="liquid glass"] .list-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="liquid glass"] .page-hero h1,
+    html[data-theme="liquid glass"] .stat-card strong,
+    html[data-theme="liquid glass"] .section-header h2,
+    html[data-theme="liquid glass"] .switch-card strong,
+    html[data-theme="liquid glass"] .book-title strong,
+    html[data-theme="liquid glass"] .empty-state strong,
+    html[data-theme="liquid glass"] .xlsx-modal-header h2,
+    html[data-theme="liquid glass"] .xlsx-modal-stats strong {
+        color: #111827;
+        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+    }
+
+    html[data-theme="liquid glass"] .page-hero p,
+    html[data-theme="liquid glass"] .stat-card span,
+    html[data-theme="liquid glass"] .section-header p,
+    html[data-theme="liquid glass"] .form-group label,
+    html[data-theme="liquid glass"] .switch-card small,
+    html[data-theme="liquid glass"] .book-title span,
+    html[data-theme="liquid glass"] .loading-state,
+    html[data-theme="liquid glass"] .empty-state,
+    html[data-theme="liquid glass"] .xlsx-modal-header p,
+    html[data-theme="liquid glass"] .xlsx-modal-stats span,
+    html[data-theme="liquid glass"] .xlsx-modal-more,
+    html[data-theme="liquid glass"] .month-filter label {
+        color: #475569;
+    }
+
+html[data-theme="liquid glass"] .eyebrow,
+html[data-theme="liquid glass"] .stat-card {
+    background: rgba(255,255,255,.38);
+    border: 1px solid rgba(255,255,255,.58);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .form-control,
+html[data-theme="liquid glass"] .search-box,
+html[data-theme="liquid glass"] .filter-select {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+    html[data-theme="liquid glass"] .search-box input {
+        color: #111827;
+    }
+
+html[data-theme="liquid glass"] .table-container,
+html[data-theme="liquid glass"] .books-table {
+    background: rgba(255,255,255,.28);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border-color: rgba(255,255,255,.55);
+}
+
+    html[data-theme="liquid glass"] .books-table th {
+        background: rgba(17,24,39,.88);
+        color: #ffffff;
+    }
+
+    html[data-theme="liquid glass"] .books-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.38);
+    }
+
+    html[data-theme="liquid glass"] .books-table tbody tr:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+html[data-theme="liquid glass"] .selected-row {
+    background: rgba(37,99,235,.18) !important;
+}
+
+html[data-theme="liquid glass"] .xlsx-modal-backdrop {
+    background: rgba(15,23,42,.34);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   DARK GLASS - BOOKS
+========================================================= */
+
+html[data-theme="dark glass"] .books-page {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark glass"] .page-hero,
+html[data-theme="dark glass"] .form-card,
+html[data-theme="dark glass"] .list-card,
+html[data-theme="dark glass"] .switch-card,
+html[data-theme="dark glass"] .loading-state,
+html[data-theme="dark glass"] .empty-state,
+html[data-theme="dark glass"] .xlsx-modal-card,
+html[data-theme="dark glass"] .xlsx-modal-stats div {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+}
+
+    html[data-theme="dark glass"] .page-hero h1,
+    html[data-theme="dark glass"] .stat-card strong,
+    html[data-theme="dark glass"] .section-header h2,
+    html[data-theme="dark glass"] .switch-card strong,
+    html[data-theme="dark glass"] .book-title strong,
+    html[data-theme="dark glass"] .empty-state strong,
+    html[data-theme="dark glass"] .xlsx-modal-header h2,
+    html[data-theme="dark glass"] .xlsx-modal-stats strong {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .page-hero p,
+    html[data-theme="dark glass"] .stat-card span,
+    html[data-theme="dark glass"] .section-header p,
+    html[data-theme="dark glass"] .form-group label,
+    html[data-theme="dark glass"] .switch-card small,
+    html[data-theme="dark glass"] .book-title span,
+    html[data-theme="dark glass"] .loading-state,
+    html[data-theme="dark glass"] .empty-state,
+    html[data-theme="dark glass"] .xlsx-modal-header p,
+    html[data-theme="dark glass"] .xlsx-modal-stats span,
+    html[data-theme="dark glass"] .xlsx-modal-more,
+    html[data-theme="dark glass"] .month-filter label {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .form-control,
+html[data-theme="dark glass"] .search-box,
+html[data-theme="dark glass"] .filter-select {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+    html[data-theme="dark glass"] .search-box input {
+        color: #f8fafc;
+    }
+
+html[data-theme="dark glass"] .table-container,
+html[data-theme="dark glass"] .books-table {
+    background: rgba(15,23,42,.50);
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark glass"] .books-table th {
+        background: rgba(2,6,23,.78);
+        color: #cbd5e1;
+    }
+
+    html[data-theme="dark glass"] .books-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.07);
+    }
+
+    html[data-theme="dark glass"] .books-table tbody tr:hover {
+        background: rgba(255,255,255,.05);
+    }
+
+html[data-theme="dark glass"] .selected-row {
+    background: rgba(37,99,235,.24) !important;
+}
+
+html[data-theme="dark glass"] .btn-light,
+html[data-theme="dark glass"] .btn-secondary,
+html[data-theme="dark glass"] .btn-filter-clear,
+html[data-theme="dark glass"] .xlsx-modal-close {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border: 1px solid rgba(255,255,255,.12);
+}
+
+html[data-theme="dark glass"] .xlsx-modal-backdrop {
+    background: rgba(2,6,23,.52);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   DARK MODE FIX - BOOKS PLACEHOLDERS
+========================================================= */
+
+html[data-theme="dark"] .form-control::placeholder,
+html[data-theme="dark"] .search-box input::placeholder,
+html[data-theme="dark"] .filter-select::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html[data-theme="dark glass"] .form-control::placeholder,
+html[data-theme="dark glass"] .search-box input::placeholder,
+html[data-theme="dark glass"] .filter-select::placeholder {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+}
+
+html[data-theme="dark"] select.form-control,
+html[data-theme="dark"] select.filter-select,
+html[data-theme="dark glass"] select.form-control,
+html[data-theme="dark glass"] select.filter-select {
+    color: #f8fafc !important;
+}
+
+    html[data-theme="dark"] select.form-control option,
+    html[data-theme="dark"] select.filter-select option,
+    html[data-theme="dark glass"] select.form-control option,
+    html[data-theme="dark glass"] select.filter-select option {
+        background: #0f172a;
+        color: #f8fafc;
+    }
+
+/* =========================================================
+   DARK MODE FIX - BOOK LIST HEADER + SEARCH LIKE EMPLOYEES
+========================================================= */
+
+html[data-theme="dark"] .books-page .list-card .section-header h2,
+html[data-theme="dark"] .books-page .list-card .section-header p {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .books-page .list-card .search-box {
+    background: #0f172a !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    border-radius: 14px !important;
+    min-width: 340px !important;
+    height: 46px !important;
+    box-shadow: none !important;
+}
+
+    html[data-theme="dark"] .books-page .list-card .search-box input {
+        color: #f8fafc !important;
+        background: transparent !important;
+    }
+
+        html[data-theme="dark"] .books-page .list-card .search-box input::placeholder {
+            color: #cbd5e1 !important;
+            opacity: 1 !important;
+        }
+
+    html[data-theme="dark"] .books-page .list-card .search-box:focus-within {
+        border-color: rgba(148, 163, 184, 0.38) !important;
+        box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08) !important;
+    }
+
+    html[data-theme="dark"] .books-page .list-card .search-box span {
+        color: #cbd5e1 !important;
+    }
+
+/* =========================================================
+   LIQUID GLASS FIX - BOOKS HERO READABILITY
+========================================================= */
+
+html[data-theme="liquid glass"] .books-page .page-hero h1 {
+    color: #0f172a !important;
+    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
+}
+
+html[data-theme="liquid glass"] .books-page .page-hero p {
+    color: #334155 !important;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="liquid glass"] .books-page .page-hero > div:first-child {
+    background: rgba(255, 255, 255, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    padding: 22px 24px;
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+/* =========================================================
+   LIQUID GLASS FIX - HERO STAT CARDS READABILITY
+========================================================= */
+
+html[data-theme="liquid glass"] .books-page .page-hero .stat-card span {
+    color: #475569 !important;
+    opacity: 1 !important;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="liquid glass"] .books-page .page-hero .stat-card strong {
+    color: #0f172a !important;
+    opacity: 1 !important;
+    text-shadow: 0 2px 5px rgba(255, 255, 255, 0.9) !important;
+}
+
+html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
+    background: rgba(255, 255, 255, 0.48) !important;
+    border-color: rgba(255, 255, 255, 0.72) !important;
+}

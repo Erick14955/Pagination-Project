@@ -100,4 +100,23 @@ namespace Pagination_Project.Models
 
         public string DisplayName => $"{Nombre} - {IdEmpleado}";
     }
+
+    public class PerfilUsuarioDto
+    {
+        public Guid Id { get; set; }
+
+        public string Username { get; set; } = string.Empty;
+
+        public string Name { get; set; } = string.Empty;
+
+        public string NivelNombre { get; set; } = string.Empty;
+        public string ThemePreference { get; set; } = "light";
+    }
+
+    public class CambiarPasswordPerfilDto
+    {
+        public Guid UserId { get; set; }
+
+        public string NewPassword { get; set; } = string.Empty;
+    }
 }

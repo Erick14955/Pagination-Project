@@ -383,3 +383,490 @@
         font-size: 1.6rem;
     }
 }
+
+/* =========================================================
+   DARK MODE - EMPLOYEES
+========================================================= */
+
+html[data-theme="dark"] .employees-page {
+    background: #0f172a;
+}
+
+html[data-theme="dark"] .employee-form-card,
+html[data-theme="dark"] .employee-list-card,
+html[data-theme="dark"] .no-access-card {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+    html[data-theme="dark"] .employees-header h1,
+    html[data-theme="dark"] .card-title h2,
+    html[data-theme="dark"] .table-header h2,
+    html[data-theme="dark"] .no-access-card h3 {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .employees-header p,
+    html[data-theme="dark"] .card-title span,
+    html[data-theme="dark"] .table-header p,
+    html[data-theme="dark"] .no-access-card p,
+    html[data-theme="dark"] .form-group label {
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .form-input,
+html[data-theme="dark"] .search-box {
+    background: #0f172a;
+    border-color: rgba(255,255,255,.14);
+    color: #f8fafc;
+}
+
+    html[data-theme="dark"] .form-input:disabled {
+        background: #1e293b;
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .employee-table thead th {
+    background: #020617;
+    color: #cbd5e1;
+    border-bottom-color: rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .employee-table tbody td {
+    color: #e2e8f0;
+    border-bottom-color: rgba(255,255,255,.06);
+}
+
+html[data-theme="dark"] .employee-table tbody tr:hover {
+    background: rgba(255,255,255,.04);
+}
+
+html[data-theme="dark"] .empty-row {
+    color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .btn-secondary {
+    background: #1e293b;
+    color: #f8fafc;
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - EMPLOYEES
+========================================================= */
+
+html[data-theme="liquid glass"] .employees-page {
+    background: transparent;
+}
+
+html[data-theme="liquid glass"] .employee-form-card,
+html[data-theme="liquid glass"] .employee-list-card,
+html[data-theme="liquid glass"] .no-access-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+    html[data-theme="liquid glass"] .employee-form-card::before,
+    html[data-theme="liquid glass"] .employee-list-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
+        opacity: .82;
+    }
+
+    html[data-theme="liquid glass"] .employee-form-card > *,
+    html[data-theme="liquid glass"] .employee-list-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html[data-theme="liquid glass"] .employees-header h1,
+    html[data-theme="liquid glass"] .card-title h2,
+    html[data-theme="liquid glass"] .table-header h2,
+    html[data-theme="liquid glass"] .no-access-card h3 {
+        color: #111827;
+        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+    }
+
+    html[data-theme="liquid glass"] .employees-header p,
+    html[data-theme="liquid glass"] .card-title span,
+    html[data-theme="liquid glass"] .table-header p,
+    html[data-theme="liquid glass"] .no-access-card p,
+    html[data-theme="liquid glass"] .form-group label {
+        color: #475569;
+    }
+
+html[data-theme="liquid glass"] .form-input,
+html[data-theme="liquid glass"] .search-box {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+html[data-theme="liquid glass"] .employee-table thead th {
+    background: rgba(17,24,39,.88);
+    color: #ffffff;
+}
+
+html[data-theme="liquid glass"] .employee-table tbody td {
+    color: #334155;
+}
+
+html[data-theme="liquid glass"] .employee-table tbody tr:hover {
+    background: rgba(255,255,255,.22);
+}
+
+html[data-theme="liquid glass"] .btn-secondary {
+    background: rgba(255,255,255,.42);
+    border: 1px solid rgba(255,255,255,.62);
+    backdrop-filter: blur(18px);
+}
+
+/* =========================================================
+   DARK GLASS - EMPLOYEES
+========================================================= */
+
+html[data-theme="dark glass"] .employees-page {
+    background: transparent;
+}
+
+html[data-theme="dark glass"] .employee-form-card,
+html[data-theme="dark glass"] .employee-list-card,
+html[data-theme="dark glass"] .no-access-card {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+}
+
+    html[data-theme="dark glass"] .employees-header h1,
+    html[data-theme="dark glass"] .card-title h2,
+    html[data-theme="dark glass"] .table-header h2,
+    html[data-theme="dark glass"] .no-access-card h3 {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .employees-header p,
+    html[data-theme="dark glass"] .card-title span,
+    html[data-theme="dark glass"] .table-header p,
+    html[data-theme="dark glass"] .no-access-card p,
+    html[data-theme="dark glass"] .form-group label {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .form-input,
+html[data-theme="dark glass"] .search-box {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+    html[data-theme="dark glass"] .form-input:disabled {
+        background: rgba(30,41,59,.60);
+        color: #94a3b8;
+    }
+
+html[data-theme="dark glass"] .employee-table thead th {
+    background: rgba(2,6,23,.78);
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .employee-table tbody td {
+    color: #e2e8f0;
+    border-bottom-color: rgba(255,255,255,.07);
+}
+
+html[data-theme="dark glass"] .employee-table tbody tr:hover {
+    background: rgba(255,255,255,.05);
+}
+
+html[data-theme="dark glass"] .empty-row {
+    color: #cbd5e1 !important;
+}
+
+html[data-theme="dark glass"] .btn-secondary {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border: 1px solid rgba(255,255,255,.12);
+}
+
+/* =========================================================
+   DARK MODE FIX - EMPLOYEE REGISTER / EMPLOYEE LIST
+========================================================= */
+
+html[data-theme="dark"] .employees-page,
+body.dark .employees-page,
+html.dark .employees-page {
+    background: #07111f !important;
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .employee-form-card,
+html[data-theme="dark"] .employee-list-card,
+html[data-theme="dark"] .no-access-card,
+body.dark .employee-form-card,
+body.dark .employee-list-card,
+body.dark .no-access-card,
+html.dark .employee-form-card,
+html.dark .employee-list-card,
+html.dark .no-access-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18) !important;
+}
+
+html[data-theme="dark"] .employees-header h1,
+html[data-theme="dark"] .card-title h2,
+html[data-theme="dark"] .table-header h2,
+body.dark .employees-header h1,
+body.dark .card-title h2,
+body.dark .table-header h2,
+html.dark .employees-header h1,
+html.dark .card-title h2,
+html.dark .table-header h2 {
+    color: #020617 !important;
+}
+
+html[data-theme="dark"] .employees-header p,
+html[data-theme="dark"] .card-title span,
+html[data-theme="dark"] .table-header p,
+body.dark .employees-header p,
+body.dark .card-title span,
+body.dark .table-header p,
+html.dark .employees-header p,
+html.dark .card-title span,
+html.dark .table-header p {
+    color: #475569 !important;
+}
+
+html[data-theme="dark"] .form-input,
+body.dark .form-input,
+html.dark .form-input {
+    background: #0f172a !important;
+    border-color: rgba(148, 163, 184, 0.28) !important;
+    color: #ffffff !important;
+}
+
+    html[data-theme="dark"] .form-input::placeholder,
+    body.dark .form-input::placeholder,
+    html.dark .form-input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    html[data-theme="dark"] .form-input:disabled,
+    body.dark .form-input:disabled,
+    html.dark .form-input:disabled {
+        background: #0f172a !important;
+        color: #ffffff !important;
+        opacity: 1;
+    }
+
+html[data-theme="dark"] .form-group label,
+body.dark .form-group label,
+html.dark .form-group label {
+    color: #ff5a1f !important;
+}
+
+html[data-theme="dark"] .search-box,
+body.dark .search-box,
+html.dark .search-box {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+    html[data-theme="dark"] .search-box::placeholder,
+    body.dark .search-box::placeholder,
+    html.dark .search-box::placeholder {
+        color: #64748b !important;
+    }
+
+html[data-theme="dark"] .table-wrapper,
+body.dark .table-wrapper,
+html.dark .table-wrapper {
+    background: #0f172a;
+    border-radius: 18px;
+}
+
+html[data-theme="dark"] .employee-table thead th,
+body.dark .employee-table thead th,
+html.dark .employee-table thead th {
+    background: #f8fafc !important;
+    color: #cbd5e1 !important;
+    border-bottom-color: rgba(148, 163, 184, 0.20) !important;
+}
+
+html[data-theme="dark"] .employee-table tbody td,
+body.dark .employee-table tbody td,
+html.dark .employee-table tbody td {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-bottom-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+html[data-theme="dark"] .employee-table tbody tr:hover td,
+body.dark .employee-table tbody tr:hover td,
+html.dark .employee-table tbody tr:hover td {
+    background: #111c2f !important;
+}
+
+html[data-theme="dark"] .btn-primary,
+body.dark .btn-primary,
+html.dark .btn-primary {
+    background: linear-gradient(135deg, #ff5a1f, #ea580c) !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24) !important;
+}
+
+html[data-theme="dark"] .btn-secondary,
+body.dark .btn-secondary,
+html.dark .btn-secondary {
+    background: #fff1f2 !important;
+    color: #be123c !important;
+}
+
+html[data-theme="dark"] .btn-action.edit,
+body.dark .btn-action.edit,
+html.dark .btn-action.edit {
+    background: #f8fafc !important;
+    color: #020617 !important;
+}
+
+html[data-theme="dark"] .status-badge.active,
+body.dark .status-badge.active,
+html.dark .status-badge.active {
+    background: #ecfdf3 !important;
+    color: #15803d !important;
+}
+
+/* =========================================================
+   LIQUID GLASS FIX - EMPLOYEE ID + NEW EMPLOYEE BUTTON
+========================================================= */
+
+html[data-theme="liquid glass"] .employees-page .form-input:disabled {
+    background: rgba(255,255,255,.45) !important;
+    color: #475569 !important;
+    opacity: 1 !important;
+    border-color: rgba(255,255,255,.65) !important;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80) !important;
+}
+
+    html[data-theme="liquid glass"] .employees-page .form-input:disabled::placeholder {
+        color: #475569 !important;
+        opacity: 1 !important;
+    }
+
+html[data-theme="liquid glass"] .employees-page .btn-primary {
+    background: rgba(148, 163, 184, 0.82) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,.62) !important;
+    box-shadow: 0 12px 26px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.45) !important;
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+    html[data-theme="liquid glass"] .employees-page .btn-primary:hover {
+        background: rgba(100, 116, 139, 0.9) !important;
+        transform: translateY(-1px);
+    }
+
+/* =========================================================
+   DARK GLASS FIX - EMPLOYEES PAGE
+========================================================= */
+
+html[data-theme="dark glass"] .employees-page {
+    background: transparent !important;
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark glass"] .employee-form-card,
+html[data-theme="dark glass"] .employee-list-card,
+html[data-theme="dark glass"] .no-access-card {
+    background: rgba(15, 23, 42, 0.62) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(24px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+}
+
+html[data-theme="dark glass"] .employees-header h1,
+html[data-theme="dark glass"] .card-title h2,
+html[data-theme="dark glass"] .table-header h2 {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark glass"] .employees-header p,
+html[data-theme="dark glass"] .card-title span,
+html[data-theme="dark glass"] .table-header p {
+    color: #cbd5e1 !important;
+}
+
+html[data-theme="dark glass"] .form-input,
+html[data-theme="dark glass"] .search-box {
+    background: rgba(15, 23, 42, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #f8fafc !important;
+}
+
+    html[data-theme="dark glass"] .form-input:disabled {
+        background: rgba(15, 23, 42, 0.72) !important;
+        color: #f8fafc !important;
+        opacity: 1 !important;
+    }
+
+    html[data-theme="dark glass"] .form-input::placeholder,
+    html[data-theme="dark glass"] .search-box::placeholder {
+        color: #cbd5e1 !important;
+        opacity: 1 !important;
+    }
+
+html[data-theme="dark glass"] .form-group label {
+    color: #ff5a1f !important;
+}
+
+html[data-theme="dark glass"] .table-wrapper {
+    background: rgba(15, 23, 42, 0.72) !important;
+    border-radius: 18px !important;
+}
+
+html[data-theme="dark glass"] .employee-table thead th {
+    background: rgba(2, 6, 23, 0.78) !important;
+    color: #cbd5e1 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark glass"] .employee-table tbody td {
+    background: rgba(15, 23, 42, 0.54) !important;
+    color: #e2e8f0 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+html[data-theme="dark glass"] .employee-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+html[data-theme="dark glass"] .btn-primary {
+    background: linear-gradient(135deg, #ff5a1f, #ea580c) !important;
+    color: #ffffff !important;
+    box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24) !important;
+}
+
+html[data-theme="dark glass"] .btn-secondary {
+    background: rgba(244, 63, 94, 0.12) !important;
+    color: #fb7185 !important;
+    border: 1px solid rgba(244, 63, 94, 0.18) !important;
+}

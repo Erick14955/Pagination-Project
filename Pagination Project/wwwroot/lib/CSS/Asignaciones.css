@@ -133,6 +133,8 @@
     justify-content: center;
 }
 
+
+
 .btn-xlsx {
     background: #16a34a;
     color: #ffffff;
@@ -1095,3 +1097,464 @@
                 background: #fecaca !important;
                 transform: none !important;
             }
+
+/* =========================================================
+   DARK MODE - ASIGNACIONES
+========================================================= */
+
+html[data-theme="dark"] .assignments-page {
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark"] .page-hero,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .list-card,
+html[data-theme="dark"] .import-result-card,
+html[data-theme="dark"] .preview-card,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .import-stats div,
+html[data-theme="dark"] .import-details,
+html[data-theme="dark"] .loading-state,
+html[data-theme="dark"] .empty-state {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+    html[data-theme="dark"] .page-hero h1,
+    html[data-theme="dark"] .section-header h2,
+    html[data-theme="dark"] .stat-card strong,
+    html[data-theme="dark"] .preview-card strong,
+    html[data-theme="dark"] .import-stats strong,
+    html[data-theme="dark"] .employee-title strong,
+    html[data-theme="dark"] .book-title strong,
+    html[data-theme="dark"] .empty-state strong {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .page-hero p,
+    html[data-theme="dark"] .section-header p,
+    html[data-theme="dark"] .stat-card span,
+    html[data-theme="dark"] .preview-card span,
+    html[data-theme="dark"] .preview-card small,
+    html[data-theme="dark"] .import-stats span,
+    html[data-theme="dark"] .employee-title span,
+    html[data-theme="dark"] .book-title span,
+    html[data-theme="dark"] .form-group label,
+    html[data-theme="dark"] .month-filter label {
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .search-box,
+html[data-theme="dark"] .search-box input,
+html[data-theme="dark"] .employee-filter-select,
+html[data-theme="dark"] .filter-select {
+    background: #0f172a;
+    border-color: rgba(255,255,255,.14);
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .table-container,
+html[data-theme="dark"] .assignments-table {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark"] .assignments-table th {
+        background: #020617;
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .assignments-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+    html[data-theme="dark"] .assignments-table tbody tr:hover {
+        background: rgba(255,255,255,.04);
+    }
+
+html[data-theme="dark"] .temporary-modal,
+html[data-theme="dark"] .assignment-modal,
+html[data-theme="dark"] .import-modal {
+    background: #111827 !important;
+    color: #e5e7eb !important;
+    border-color: rgba(255,255,255,.10) !important;
+}
+
+html[data-theme="dark"] .temporary-modal-header,
+html[data-theme="dark"] .assignment-modal-header,
+html[data-theme="dark"] .modal-header-custom,
+html[data-theme="dark"] .temporary-modal-actions,
+html[data-theme="dark"] .assignment-modal-actions,
+html[data-theme="dark"] .modal-actions {
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark"] .temporary-modal-header h2,
+    html[data-theme="dark"] .assignment-modal-header h2,
+    html[data-theme="dark"] .modal-header-custom h2,
+    html[data-theme="dark"] .assignment-modal-stats strong,
+    html[data-theme="dark"] .temporary-stage-card strong {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .temporary-modal-header p,
+    html[data-theme="dark"] .assignment-modal-header p,
+    html[data-theme="dark"] .modal-header-custom p,
+    html[data-theme="dark"] .assignment-modal-stats span {
+        color: #94a3b8;
+    }
+
+html[data-theme="dark"] .assignment-modal-stats div,
+html[data-theme="dark"] .temporary-stage-card {
+    background: #0f172a;
+    border-color: rgba(255,255,255,.10);
+    color: #e5e7eb;
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - ASIGNACIONES
+========================================================= */
+
+html[data-theme="liquid glass"] .assignments-page {
+    background: transparent;
+    color: #111827;
+}
+
+html[data-theme="liquid glass"] .page-hero,
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card,
+html[data-theme="liquid glass"] .import-result-card,
+html[data-theme="liquid glass"] .preview-card,
+html[data-theme="liquid glass"] .stat-card,
+html[data-theme="liquid glass"] .import-stats div,
+html[data-theme="liquid glass"] .import-details,
+html[data-theme="liquid glass"] .loading-state,
+html[data-theme="liquid glass"] .empty-state {
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+html[data-theme="liquid glass"] .page-hero {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="liquid glass"] .page-hero::before,
+    html[data-theme="liquid glass"] .form-card::before,
+    html[data-theme="liquid glass"] .list-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255,255,255,.55), transparent 38%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.70), transparent 28%);
+        opacity: .75;
+    }
+
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card {
+    position: relative;
+    overflow: hidden;
+}
+
+    html[data-theme="liquid glass"] .form-card > *,
+    html[data-theme="liquid glass"] .list-card > *,
+    html[data-theme="liquid glass"] .page-hero > * {
+        position: relative;
+        z-index: 1;
+    }
+
+html[data-theme="liquid glass"] .form-control,
+html[data-theme="liquid glass"] .search-box,
+html[data-theme="liquid glass"] .employee-filter-select,
+html[data-theme="liquid glass"] .filter-select {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+    html[data-theme="liquid glass"] .search-box input {
+        color: #111827;
+        background: transparent;
+    }
+
+html[data-theme="liquid glass"] .table-container,
+html[data-theme="liquid glass"] .assignments-table {
+    background: rgba(255,255,255,.28);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border-color: rgba(255,255,255,.55);
+}
+
+    html[data-theme="liquid glass"] .assignments-table th {
+        background: rgba(17,24,39,.88);
+        color: #ffffff;
+    }
+
+    html[data-theme="liquid glass"] .assignments-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.38);
+    }
+
+    html[data-theme="liquid glass"] .assignments-table tbody tr:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+html[data-theme="liquid glass"] .temporary-modal,
+html[data-theme="liquid glass"] .assignment-modal,
+html[data-theme="liquid glass"] .import-modal {
+    background: rgba(255,255,255,.42) !important;
+    backdrop-filter: blur(34px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(190%) !important;
+    border: 1px solid rgba(255,255,255,.65) !important;
+    box-shadow: 0 30px 80px rgba(15,23,42,.20), inset 0 1px 1px rgba(255,255,255,.86) !important;
+}
+
+html[data-theme="liquid glass"] .temporary-stage-card,
+html[data-theme="liquid glass"] .assignment-modal-stats div {
+    background: rgba(255,255,255,.42);
+    border-color: rgba(255,255,255,.62);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .modal-backdrop-custom,
+html[data-theme="liquid glass"] .assignment-modal-backdrop,
+html[data-theme="liquid glass"] .temporary-modal-backdrop {
+    background: rgba(15,23,42,.34) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   DARK GLASS - ASIGNACIONES
+========================================================= */
+
+html[data-theme="dark glass"] .assignments-page {
+    background: transparent;
+    color: #e5e7eb;
+}
+
+html[data-theme="dark glass"] .page-hero,
+html[data-theme="dark glass"] .form-card,
+html[data-theme="dark glass"] .list-card,
+html[data-theme="dark glass"] .import-result-card,
+html[data-theme="dark glass"] .preview-card,
+html[data-theme="dark glass"] .stat-card,
+html[data-theme="dark glass"] .import-stats div,
+html[data-theme="dark glass"] .import-details,
+html[data-theme="dark glass"] .loading-state,
+html[data-theme="dark glass"] .empty-state {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+}
+
+    html[data-theme="dark glass"] .page-hero h1,
+    html[data-theme="dark glass"] .section-header h2,
+    html[data-theme="dark glass"] .stat-card strong,
+    html[data-theme="dark glass"] .preview-card strong,
+    html[data-theme="dark glass"] .import-stats strong,
+    html[data-theme="dark glass"] .employee-title strong,
+    html[data-theme="dark glass"] .book-title strong,
+    html[data-theme="dark glass"] .empty-state strong {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .page-hero p,
+    html[data-theme="dark glass"] .section-header p,
+    html[data-theme="dark glass"] .stat-card span,
+    html[data-theme="dark glass"] .preview-card span,
+    html[data-theme="dark glass"] .preview-card small,
+    html[data-theme="dark glass"] .import-stats span,
+    html[data-theme="dark glass"] .employee-title span,
+    html[data-theme="dark glass"] .book-title span,
+    html[data-theme="dark glass"] .form-group label,
+    html[data-theme="dark glass"] .month-filter label {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .form-control,
+html[data-theme="dark glass"] .search-box,
+html[data-theme="dark glass"] .employee-filter-select,
+html[data-theme="dark glass"] .filter-select {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+    html[data-theme="dark glass"] .search-box input {
+        color: #f8fafc;
+        background: transparent;
+    }
+
+html[data-theme="dark glass"] .table-container,
+html[data-theme="dark glass"] .assignments-table {
+    background: rgba(15,23,42,.50);
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark glass"] .assignments-table th {
+        background: rgba(2,6,23,.78);
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .assignments-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.07);
+    }
+
+    html[data-theme="dark glass"] .assignments-table tbody tr:hover {
+        background: rgba(255,255,255,.05);
+    }
+
+html[data-theme="dark glass"] .temporary-modal,
+html[data-theme="dark glass"] .assignment-modal,
+html[data-theme="dark glass"] .import-modal {
+    background: rgba(15,23,42,.72) !important;
+    color: #e5e7eb !important;
+    backdrop-filter: blur(28px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+}
+
+html[data-theme="dark glass"] .temporary-stage-card,
+html[data-theme="dark glass"] .assignment-modal-stats div {
+    background: rgba(15,23,42,.55);
+    border-color: rgba(255,255,255,.10);
+    color: #e5e7eb;
+}
+
+html[data-theme="dark glass"] .temporary-modal-header,
+html[data-theme="dark glass"] .assignment-modal-header,
+html[data-theme="dark glass"] .modal-header-custom,
+html[data-theme="dark glass"] .temporary-modal-actions,
+html[data-theme="dark glass"] .assignment-modal-actions,
+html[data-theme="dark glass"] .modal-actions {
+    border-color: rgba(255,255,255,.10);
+}
+
+    html[data-theme="dark glass"] .temporary-modal-header h2,
+    html[data-theme="dark glass"] .assignment-modal-header h2,
+    html[data-theme="dark glass"] .modal-header-custom h2,
+    html[data-theme="dark glass"] .assignment-modal-stats strong,
+    html[data-theme="dark glass"] .temporary-stage-card strong {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .temporary-modal-header p,
+    html[data-theme="dark glass"] .assignment-modal-header p,
+    html[data-theme="dark glass"] .modal-header-custom p,
+    html[data-theme="dark glass"] .assignment-modal-stats span {
+        color: #cbd5e1;
+    }
+
+html[data-theme="dark glass"] .modal-backdrop-custom,
+html[data-theme="dark glass"] .assignment-modal-backdrop,
+html[data-theme="dark glass"] .temporary-modal-backdrop {
+    background: rgba(2,6,23,.52) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   DARK MODE FIX - ASSIGNMENTS PLACEHOLDERS
+========================================================= */
+
+html[data-theme="dark"] .assignments-page .form-control::placeholder,
+html[data-theme="dark"] .assignments-page .search-box input::placeholder,
+html[data-theme="dark"] .assignments-page .employee-filter-select::placeholder,
+html[data-theme="dark"] .assignments-page .filter-select::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+html[data-theme="dark glass"] .assignments-page .form-control::placeholder,
+html[data-theme="dark glass"] .assignments-page .search-box input::placeholder,
+html[data-theme="dark glass"] .assignments-page .employee-filter-select::placeholder,
+html[data-theme="dark glass"] .assignments-page .filter-select::placeholder {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+}
+
+/* =========================================================
+   DARK MODE FIX - ASSIGNMENTS LIST HEADER + SEARCH LIKE EMPLOYEES
+========================================================= */
+
+html[data-theme="dark"] .assignments-page .list-card .section-header h2,
+html[data-theme="dark"] .assignments-page .list-card .section-header p {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .assignments-page .list-card .search-box {
+    background: #0f172a !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    border-radius: 14px !important;
+    min-width: 340px !important;
+    height: 46px !important;
+    box-shadow: none !important;
+}
+
+    html[data-theme="dark"] .assignments-page .list-card .search-box input {
+        color: #f8fafc !important;
+        background: transparent !important;
+    }
+
+        html[data-theme="dark"] .assignments-page .list-card .search-box input::placeholder {
+            color: #cbd5e1 !important;
+            opacity: 1 !important;
+        }
+
+    html[data-theme="dark"] .assignments-page .list-card .search-box:focus-within {
+        border-color: rgba(148, 163, 184, 0.38) !important;
+        box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08) !important;
+    }
+
+    html[data-theme="dark"] .assignments-page .list-card .search-box span {
+        color: #cbd5e1 !important;
+    }
+
+/* =========================================================
+   LIQUID GLASS FIX - ASSIGNMENTS HERO READABILITY
+========================================================= */
+
+html[data-theme="liquid glass"] .assignments-page .page-hero h1 {
+    color: #0f172a !important;
+    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
+}
+
+html[data-theme="liquid glass"] .assignments-page .page-hero p {
+    color: #334155 !important;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
+}
+
+html[data-theme="liquid glass"] .assignments-page .page-hero > div:first-child {
+    background: rgba(255, 255, 255, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    padding: 22px 24px;
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card span {
+    color: #475569 !important;
+}
+
+html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
+    color: #111827 !important;
+}

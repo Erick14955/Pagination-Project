@@ -42,6 +42,72 @@ namespace Pagination_Project.Services
                 .ToListAsync();
         }
 
+        public async Task<PerfilUsuarioDto?> ObtenerPerfilActualAsync(Guid userId)
+        {
+            await using var context = await _dbFactory.CreateDbContextAsync();
+
+            return await context.Users
+                .AsNoTracking()
+                .Include(u => u.Permisos)
+                .Where(u => u.Id == userId)
+                .Select(u => new PerfilUsuarioDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Name = u.Name,
+                    NivelNombre = u.Permisos != null ? u.Permisos.Name : "No role",
+                    ThemePreference = u.ThemePreference ?? "light"
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<PerfilUsuarioDto?> ObtenerPerfilActualPorUsernameAsync(string username)
+        {
+            await using var context = await _dbFactory.CreateDbContextAsync();
+
+            username = username.Trim();
+
+            return await context.Users
+                .AsNoTracking()
+                .Include(u => u.Permisos)
+                .Where(u => u.Username.ToLower() == username.ToLower())
+                .Select(u => new PerfilUsuarioDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Name = u.Name,
+                    NivelNombre = u.Permisos != null ? u.Permisos.Name : "No role",
+                    ThemePreference = u.ThemePreference ?? "light"
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> CambiarPasswordPerfilAsync(CambiarPasswordPerfilDto dto)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            if (dto.UserId == Guid.Empty)
+                throw new Exception("Invalid user.");
+
+            if (string.IsNullOrWhiteSpace(dto.NewPassword))
+                throw new Exception("Password is required.");
+
+            if (dto.NewPassword.Length < 6)
+                throw new Exception("Password must have at least 6 characters.");
+
+            var usuario = await db.Users.FirstOrDefaultAsync(u => u.Id == dto.UserId);
+
+            if (usuario == null)
+                return false;
+
+            usuario.password = Argon2.Hash(dto.NewPassword);
+            usuario.RequirePasswordChange = false;
+
+            await db.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<bool> CambiarPasswordAsync(Guid usuarioId, string nuevaPassword)
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
@@ -182,6 +248,7 @@ namespace Pagination_Project.Services
                 throw new Exception("You must select a user type.");
 
             var usuario = await db.Users.FirstOrDefaultAsync(u => u.Id == dto.Id);
+
             if (usuario == null)
                 return null;
 
@@ -260,6 +327,7 @@ namespace Pagination_Project.Services
             await using var db = await _dbFactory.CreateDbContextAsync();
 
             var usuario = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+
             if (usuario == null)
                 return false;
 
@@ -301,6 +369,41 @@ namespace Pagination_Project.Services
                     Email = e.Email
                 })
                 .ToListAsync();
+        }
+
+        public async Task<bool> ActualizarThemePreferenceAsync(Guid userId, string themePreference)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            if (userId == Guid.Empty)
+                throw new Exception("Invalid user.");
+
+            if (string.IsNullOrWhiteSpace(themePreference))
+                themePreference = "light";
+
+            themePreference = themePreference.Trim().ToLower();
+
+            var temasPermitidos = new[]
+            {
+                "light",
+                "dark",
+                "liquid glass",
+                "dark glass"
+            };
+
+            if (!temasPermitidos.Contains(themePreference))
+                throw new Exception("Invalid theme preference.");
+
+            var usuario = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (usuario == null)
+                return false;
+
+            usuario.ThemePreference = themePreference;
+
+            await db.SaveChangesAsync();
+
+            return true;
         }
     }
 }

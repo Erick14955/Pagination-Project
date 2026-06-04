@@ -285,3 +285,135 @@
         font-size: 14px;
     }
 }
+
+/* =========================================================
+   DARK MODE - LOGIN
+========================================================= */
+
+html[data-theme="dark"] .thryv-login-page {
+    background: radial-gradient(circle at top left, rgba(255,80,0,.12), transparent 28%), linear-gradient(135deg, #020617, #0f172a);
+}
+
+html[data-theme="dark"] .thryv-login-card,
+html[data-theme="dark"] .thryv-password-rules {
+    background: #111827;
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 25px 70px rgba(0,0,0,.35);
+}
+
+html[data-theme="dark"] .thryv-logo-text strong,
+html[data-theme="dark"] .thryv-login-title,
+html[data-theme="dark"] .thryv-form-group label {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .thryv-logo-text span,
+html[data-theme="dark"] .thryv-login-subtitle,
+html[data-theme="dark"] .thryv-panel-footer,
+html[data-theme="dark"] .thryv-password-rules {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .thryv-input {
+    background: #0f172a;
+    border-color: rgba(255,255,255,.14);
+    color: #f8fafc;
+}
+
+    html[data-theme="dark"] .thryv-input:focus {
+        background: #020617;
+    }
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - LOGIN
+========================================================= */
+
+html[data-theme="liquid glass"] .thryv-login-page {
+    background: radial-gradient(circle at 10% 15%, rgba(255,80,0,.28), transparent 24%), radial-gradient(circle at 80% 8%, rgba(255,255,255,.95), transparent 25%), radial-gradient(circle at 75% 85%, rgba(37,99,235,.16), transparent 34%), linear-gradient(135deg, #fff4ed 0%, #f8fafc 42%, #eaf0ff 100%);
+}
+
+html[data-theme="liquid glass"] .thryv-login-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,.34);
+    backdrop-filter: blur(34px) saturate(190%);
+    -webkit-backdrop-filter: blur(34px) saturate(190%);
+    border: 1px solid rgba(255,255,255,.62);
+    box-shadow: 0 30px 80px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.86);
+}
+
+    html[data-theme="liquid glass"] .thryv-login-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.62), transparent 42%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.78), transparent 34%);
+        opacity: .85;
+    }
+
+html[data-theme="liquid glass"] .thryv-login-panel {
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme="liquid glass"] .thryv-logo-text strong,
+html[data-theme="liquid glass"] .thryv-login-title,
+html[data-theme="liquid glass"] .thryv-form-group label {
+    color: #111827;
+    text-shadow: 0 1px 1px rgba(255,255,255,.85);
+}
+
+html[data-theme="liquid glass"] .thryv-logo-text span,
+html[data-theme="liquid glass"] .thryv-login-subtitle,
+html[data-theme="liquid glass"] .thryv-panel-footer {
+    color: #475569;
+}
+
+html[data-theme="liquid glass"] .thryv-input,
+html[data-theme="liquid glass"] .thryv-password-rules {
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255,255,255,.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+}
+
+/* =========================================================
+   DARK GLASS - LOGIN
+========================================================= */
+
+html[data-theme="dark glass"] .thryv-login-page {
+    background: radial-gradient(circle at 10% 12%, rgba(255,80,0,.22), transparent 26%), radial-gradient(circle at 84% 14%, rgba(59,130,246,.14), transparent 30%), linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+
+html[data-theme="dark glass"] .thryv-login-card,
+html[data-theme="dark glass"] .thryv-password-rules {
+    background: rgba(15,23,42,.58);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 30px 80px rgba(0,0,0,.30), inset 0 1px 1px rgba(255,255,255,.08);
+}
+
+html[data-theme="dark glass"] .thryv-logo-text strong,
+html[data-theme="dark glass"] .thryv-login-title,
+html[data-theme="dark glass"] .thryv-form-group label {
+    color: #f8fafc;
+}
+
+html[data-theme="dark glass"] .thryv-logo-text span,
+html[data-theme="dark glass"] .thryv-login-subtitle,
+html[data-theme="dark glass"] .thryv-panel-footer,
+html[data-theme="dark glass"] .thryv-password-rules {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .thryv-input {
+    background: rgba(15,23,42,.58);
+    color: #f8fafc;
+    border-color: rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}

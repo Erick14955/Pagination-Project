@@ -41,6 +41,10 @@ namespace Pagination_Project.Components.Account
 
                 var requiereCambioPassword = usuario.RequirePasswordChange;
 
+                var themePreference = string.IsNullOrWhiteSpace(usuario.ThemePreference)
+                    ? "light"
+                    : usuario.ThemePreference;
+
                 var claims = new List<Claim>
                 {
                     new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
@@ -48,7 +52,8 @@ namespace Pagination_Project.Components.Account
                     new("Username", usuario.Username ?? string.Empty),
                     new(ClaimTypes.Email, usuario.email ?? string.Empty),
                     new("LvlId", usuario.lvl_Id.ToString()),
-                    new("RequirePasswordChange", requiereCambioPassword.ToString())
+                    new("RequirePasswordChange", requiereCambioPassword.ToString()),
+                    new("ThemePreference", themePreference)
                 };
 
                 if (usuario.Permisos is not null)

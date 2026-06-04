@@ -776,3 +776,1043 @@ div.validation-message {
             font-size: 14px;
         }
 }
+
+:root {
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-soft: #f8fafc;
+    --bg-soft-2: #f1f5f9;
+    --border: #e2e8f0;
+    --border-strong: #dbe4ee;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --primary: #2563eb;
+    --primary-strong: #1d4ed8;
+    --primary-soft: rgba(37, 99, 235, 0.12);
+    --danger: #be123c;
+    --danger-soft: #fff1f2;
+    --success: #15803d;
+    --success-soft: #ecfdf3;
+    --shadow-card: 0 14px 40px rgba(15, 23, 42, 0.06);
+    --shadow-modal: 0 24px 60px rgba(15, 23, 42, 0.25);
+    --overlay: rgba(15, 23, 42, 0.45);
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --transition-fast: 0.18s ease;
+    --transition-normal: 0.24s ease;
+}
+
+.thryv-switch-card.password-change {
+    border-color: rgba(245, 158, 11, 0.35);
+    background: linear-gradient(135deg, #fff7ed, #ffffff);
+}
+
+    .thryv-switch-card.password-change .thryv-switch-title {
+        color: #92400e;
+    }
+
+.thryv-users-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    color: var(--text);
+}
+
+/*=======================*/
+
+.thryv-linked-employee-field {
+    position: relative;
+    width: 100%;
+}
+
+.thryv-linked-employee-select {
+    padding-right: 125px !important;
+}
+
+.thryv-unlink-inline-btn {
+    position: absolute;
+    right: 42px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 26px;
+    min-width: 74px;
+    padding: 0 12px;
+    margin: 0;
+    border: 0;
+    border-radius: 9px;
+    background: #edf3ff;
+    color: #2454d8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+    .thryv-unlink-inline-btn:hover {
+        background: #2454d8;
+        color: #ffffff;
+        box-shadow: 0 8px 18px rgba(36, 84, 216, .22);
+    }
+
+    .thryv-unlink-inline-btn:active {
+        transform: translateY(-50%) scale(.97);
+    }
+
+/* =========================
+   HEADER / TITLE
+   Diseño oscuro, solo title
+========================= */
+
+.thryv-users-header {
+    width: 100%;
+    background: linear-gradient(115deg, #081827 0%, #0f172a 48%, #111827 100%);
+    border-radius: 24px;
+    padding: 28px 30px;
+    min-height: 150px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+}
+
+    .thryv-users-header h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 34px;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -0.5px;
+    }
+
+    .thryv-users-header p {
+        margin: 10px 0 0;
+        color: #e5e7eb;
+        font-size: 17px;
+        font-weight: 400;
+        line-height: 1.4;
+        max-width: 780px;
+    }
+
+.thryv-header-btn {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    min-height: 44px;
+}
+
+    .thryv-header-btn:hover {
+        background: rgba(255, 255, 255, 0.18) !important;
+        transform: translateY(-1px);
+    }
+
+/* CARDS */
+.thryv-users-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    padding: 28px;
+    transition: background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.thryv-form-card-full,
+.thryv-list-large {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+tr {
+    cursor: default;
+}
+
+    tr[ondblclick] {
+        cursor: pointer;
+    }
+
+/* TITLES */
+.thryv-card-top {
+    margin-bottom: 24px;
+}
+
+    .thryv-card-top h3,
+    .thryv-list-header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .thryv-card-top span,
+    .thryv-list-header span {
+        display: block;
+        margin-top: 6px;
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+/* FORM LAYOUT */
+.thryv-form-grid-large {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+    gap: 18px 24px;
+}
+
+.thryv-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+    .thryv-form-group.full {
+        grid-column: 1 / -1;
+    }
+
+/* FLOATING INPUTS */
+.thryv-floating-field {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.thryv-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    opacity: 0.72;
+    pointer-events: none;
+    z-index: 2;
+    color: var(--text-muted);
+    transition: color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+    .thryv-input-icon svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+        stroke: currentColor;
+    }
+
+.thryv-floating-label {
+    position: absolute;
+    left: 42px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: all var(--transition-fast);
+    background: var(--bg-card);
+    padding: 0 6px;
+    z-index: 2;
+}
+
+    .thryv-floating-label.always-float {
+        top: -8px;
+        transform: none;
+        font-size: 12px;
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+.thryv-input,
+.thryv-search-input {
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-soft);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal), color var(--transition-normal), transform var(--transition-fast);
+    box-sizing: border-box;
+}
+
+    .thryv-input.modern {
+        width: 100%;
+        height: 42px;
+        padding: 8px 12px 8px 42px;
+    }
+
+.thryv-select-input {
+    padding-right: 38px;
+}
+
+.thryv-input.modern:focus,
+.thryv-search-input:focus {
+    background: var(--bg-card);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+    transform: translateY(-1px);
+}
+
+    .thryv-input.modern:focus ~ .thryv-input-icon,
+    .thryv-floating-field:focus-within .thryv-input-icon {
+        color: var(--primary);
+        opacity: 1;
+    }
+
+    .thryv-input.modern:focus + .thryv-floating-label,
+    .thryv-input.modern:not(:placeholder-shown) + .thryv-floating-label,
+    .thryv-select-input:focus + .thryv-floating-label {
+        top: -8px;
+        transform: none;
+        font-size: 12px;
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+.thryv-select-field .thryv-input-icon {
+    top: 50%;
+}
+
+/* SWITCH */
+.thryv-switch-card {
+    min-height: 42px;
+    width: fit-content;
+    max-width: 260px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-soft);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+.thryv-switch-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.thryv-switch-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.thryv-switch-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.1;
+}
+
+.thryv-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-left: 2px;
+}
+
+    .thryv-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+.thryv-slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background: #cbd5e1;
+    transition: .25s;
+    border-radius: 999px;
+}
+
+    .thryv-slider::before {
+        content: "";
+        position: absolute;
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        top: 3px;
+        background: #ffffff;
+        transition: .25s;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+.thryv-switch input:checked + .thryv-slider {
+    background: var(--primary);
+}
+
+    .thryv-switch input:checked + .thryv-slider::before {
+        transform: translateX(20px);
+    }
+
+/* BUTTONS */
+.thryv-form-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 26px;
+    flex-wrap: wrap;
+}
+
+.thryv-primary-btn,
+.thryv-secondary-btn,
+.thryv-danger-btn,
+.thryv-table-btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform var(--transition-fast), background var(--transition-normal), color var(--transition-normal), opacity var(--transition-fast), box-shadow var(--transition-normal);
+}
+
+.thryv-primary-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+}
+
+    .thryv-primary-btn:hover {
+        transform: translateY(-1px);
+    }
+
+.thryv-secondary-btn {
+    background: #eef4ff;
+    color: var(--primary);
+}
+
+    .thryv-secondary-btn:hover {
+        background: #dbeafe;
+    }
+
+.thryv-danger-btn {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+    .thryv-danger-btn:hover {
+        filter: brightness(0.98);
+    }
+
+.thryv-table-btn {
+    background: var(--bg-soft-2);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: var(--radius-sm);
+}
+
+    .thryv-table-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .thryv-primary-btn:disabled,
+    .thryv-secondary-btn:disabled,
+    .thryv-danger-btn:disabled,
+    .thryv-table-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+/* LIST */
+.thryv-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.thryv-search-input {
+    max-width: 340px;
+    min-height: 44px;
+    padding: 10px 14px;
+}
+
+/* TABLE */
+.thryv-table-wrap {
+    overflow-x: auto;
+}
+
+    .thryv-table-wrap.large {
+        max-height: 650px;
+        overflow-y: auto;
+        border-radius: 18px;
+    }
+
+.thryv-users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .thryv-users-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        text-align: left;
+        padding: 16px 14px;
+        background: var(--bg-soft);
+        color: var(--text-muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .thryv-users-table tbody td {
+        padding: 16px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+        color: var(--text);
+        vertical-align: middle;
+    }
+
+    .thryv-users-table.large th,
+    .thryv-users-table.large td {
+        padding: 16px 14px;
+        font-size: 14px;
+    }
+
+    .thryv-users-table tbody tr {
+        transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+
+        .thryv-users-table tbody tr:hover {
+            background: rgba(37, 99, 235, 0.04);
+        }
+
+        .thryv-users-table tbody tr.selected {
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        .thryv-users-table tbody tr td:first-child {
+            font-weight: 600;
+        }
+
+.thryv-role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.thryv-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+    .thryv-status-badge.active {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .thryv-status-badge.inactive {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+.thryv-empty-row {
+    text-align: center;
+    color: var(--text-muted) !important;
+    padding: 30px !important;
+}
+
+/* MODAL */
+.thryv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+    animation: thryvFadeIn var(--transition-fast);
+}
+
+.thryv-modal-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-modal);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    animation: thryvPopIn var(--transition-fast);
+}
+
+.thryv-result-modal {
+    max-width: 430px;
+}
+
+.thryv-modal-header {
+    padding: 22px 24px 12px;
+}
+
+    .thryv-modal-header h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+.thryv-modal-body {
+    padding: 0 24px 18px;
+    color: var(--text);
+    font-size: 14px;
+}
+
+    .thryv-modal-body p {
+        margin: 0 0 12px 0;
+    }
+
+.thryv-modal-userbox {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+.thryv-modal-warning {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.thryv-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 24px 24px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+/* VALIDATION */
+.validation-message,
+.validation-errors,
+.validation-summary-errors,
+div.validation-message {
+    color: var(--danger);
+    font-size: 12px;
+}
+
+.validation-message {
+    margin-top: 4px;
+}
+
+/* SVG HELPERS */
+.thryv-svg-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+    .thryv-svg-icon svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+/* ANIMATIONS */
+@keyframes thryvFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes thryvPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .thryv-users-card {
+        padding: 20px;
+    }
+
+    .thryv-users-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 24px;
+        min-height: auto;
+        border-radius: 22px;
+    }
+
+        .thryv-users-header h2 {
+            font-size: 28px;
+        }
+
+        .thryv-users-header p {
+            font-size: 15px;
+        }
+
+    .thryv-header-btn {
+        width: 100%;
+    }
+
+    .thryv-list-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .thryv-search-input {
+        max-width: 100%;
+    }
+
+    .thryv-form-grid-large {
+        grid-template-columns: 1fr;
+    }
+
+    .thryv-form-group.full {
+        grid-column: auto;
+    }
+
+    .thryv-form-actions {
+        flex-direction: column;
+    }
+
+    .thryv-modal-card {
+        max-width: 100%;
+    }
+
+    .thryv-modal-actions {
+        flex-direction: column;
+    }
+
+        .thryv-modal-actions .thryv-secondary-btn,
+        .thryv-modal-actions .thryv-danger-btn,
+        .thryv-modal-actions .thryv-primary-btn {
+            width: 100%;
+        }
+}
+
+@media (max-width: 480px) {
+    .thryv-users-header {
+        border-radius: 18px;
+        padding: 20px;
+    }
+
+        .thryv-users-header h2 {
+            font-size: 26px;
+        }
+
+        .thryv-users-header p {
+            font-size: 14px;
+        }
+}
+
+/* =========================
+   DARK MODE - USERS PAGE FIX
+========================= */
+
+html.dark .thryv-users-page,
+body.dark .thryv-users-page,
+[data-theme="dark"] .thryv-users-page {
+    --bg-page: #07111f;
+    --bg-card: #0f172a;
+    --bg-soft: #111c2f;
+    --bg-soft-2: #1e293b;
+    --border: rgba(148, 163, 184, 0.18);
+    --border-strong: rgba(148, 163, 184, 0.26);
+    --text: #f8fafc;
+    --text-muted: #cbd5e1;
+    --primary: #ff5a1f;
+    --primary-strong: #ea580c;
+    --primary-soft: rgba(255, 90, 31, 0.16);
+    --danger: #fb7185;
+    --danger-soft: rgba(244, 63, 94, 0.12);
+    --success: #22c55e;
+    --success-soft: rgba(34, 197, 94, 0.14);
+    --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+html.dark .thryv-users-card,
+body.dark .thryv-users-card,
+[data-theme="dark"] .thryv-users-card {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #f8fafc;
+}
+
+html.dark .thryv-card-top h3,
+html.dark .thryv-list-header h3,
+body.dark .thryv-card-top h3,
+body.dark .thryv-list-header h3,
+[data-theme="dark"] .thryv-card-top h3,
+[data-theme="dark"] .thryv-list-header h3 {
+    color: #ffffff;
+}
+
+html.dark .thryv-card-top span,
+html.dark .thryv-list-header span,
+body.dark .thryv-card-top span,
+body.dark .thryv-list-header span,
+[data-theme="dark"] .thryv-card-top span,
+[data-theme="dark"] .thryv-list-header span {
+    color: #94a3b8;
+}
+
+html.dark .thryv-input,
+html.dark .thryv-search-input,
+body.dark .thryv-input,
+body.dark .thryv-search-input,
+[data-theme="dark"] .thryv-input,
+[data-theme="dark"] .thryv-search-input {
+    background: #0b1324;
+    border-color: rgba(148, 163, 184, 0.22);
+    color: #ffffff;
+}
+
+    html.dark .thryv-input::placeholder,
+    html.dark .thryv-search-input::placeholder,
+    body.dark .thryv-input::placeholder,
+    body.dark .thryv-search-input::placeholder,
+    [data-theme="dark"] .thryv-input::placeholder,
+    [data-theme="dark"] .thryv-search-input::placeholder {
+        color: #94a3b8;
+    }
+
+html.dark .thryv-floating-label,
+body.dark .thryv-floating-label,
+[data-theme="dark"] .thryv-floating-label {
+    background: #0f172a;
+    color: #ff5a1f;
+}
+
+html.dark .thryv-input-icon,
+body.dark .thryv-input-icon,
+[data-theme="dark"] .thryv-input-icon {
+    color: #ff5a1f;
+    opacity: 1;
+}
+
+html.dark .thryv-switch-card,
+body.dark .thryv-switch-card,
+[data-theme="dark"] .thryv-switch-card {
+    background: #0b1324;
+    border-color: rgba(148, 163, 184, 0.22);
+}
+
+    html.dark .thryv-switch-card.password-change,
+    body.dark .thryv-switch-card.password-change,
+    [data-theme="dark"] .thryv-switch-card.password-change {
+        background: #0b1324;
+        border-color: rgba(255, 90, 31, 0.45);
+    }
+
+        html.dark .thryv-switch-title,
+        html.dark .thryv-switch-card.password-change .thryv-switch-title,
+        body.dark .thryv-switch-title,
+        body.dark .thryv-switch-card.password-change .thryv-switch-title,
+        [data-theme="dark"] .thryv-switch-title,
+        [data-theme="dark"] .thryv-switch-card.password-change .thryv-switch-title {
+            color: #ffffff;
+        }
+
+html.dark .thryv-switch-subtitle,
+body.dark .thryv-switch-subtitle,
+[data-theme="dark"] .thryv-switch-subtitle {
+    color: #cbd5e1;
+}
+
+html.dark .thryv-users-table thead th,
+body.dark .thryv-users-table thead th,
+[data-theme="dark"] .thryv-users-table thead th {
+    background: #111c2f;
+    color: #cbd5e1;
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+}
+
+html.dark .thryv-users-table tbody td,
+body.dark .thryv-users-table tbody td,
+[data-theme="dark"] .thryv-users-table tbody td {
+    color: #ffffff;
+    border-bottom-color: rgba(148, 163, 184, 0.14);
+}
+
+html.dark .thryv-users-table tbody tr:hover,
+body.dark .thryv-users-table tbody tr:hover,
+[data-theme="dark"] .thryv-users-table tbody tr:hover {
+    background: rgba(255, 90, 31, 0.08);
+}
+
+html.dark .thryv-users-table tbody tr.selected,
+body.dark .thryv-users-table tbody tr.selected,
+[data-theme="dark"] .thryv-users-table tbody tr.selected {
+    background: rgba(255, 90, 31, 0.12);
+}
+
+html.dark .thryv-role-badge,
+body.dark .thryv-role-badge,
+[data-theme="dark"] .thryv-role-badge {
+    background: rgba(219, 234, 254, 0.95);
+    color: #2563eb;
+}
+
+html.dark .thryv-table-btn,
+body.dark .thryv-table-btn,
+[data-theme="dark"] .thryv-table-btn {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+html.dark .thryv-danger-btn,
+body.dark .thryv-danger-btn,
+[data-theme="dark"] .thryv-danger-btn {
+    background: rgba(244, 63, 94, 0.12);
+    color: #fb7185;
+}
+
+html.dark .thryv-primary-btn,
+body.dark .thryv-primary-btn,
+[data-theme="dark"] .thryv-primary-btn {
+    background: linear-gradient(135deg, #ff5a1f, #ea580c);
+    box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24);
+}
+
+/* =========================================================
+   DARK GLASS FIX - USERS PAGE
+========================================================= */
+
+html[data-theme="dark glass"] .thryv-users-page {
+    --bg-card: rgba(15, 23, 42, 0.68);
+    --bg-soft: rgba(15, 23, 42, 0.74);
+    --bg-soft-2: rgba(30, 41, 59, 0.82);
+    --border: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #f8fafc;
+    --text-muted: #cbd5e1;
+    --primary: #ff5a1f;
+    --primary-strong: #ea580c;
+    --primary-soft: rgba(255, 90, 31, 0.16);
+    --danger: #fb7185;
+    --danger-soft: rgba(244, 63, 94, 0.14);
+    --success: #22c55e;
+    --success-soft: rgba(34, 197, 94, 0.16);
+}
+
+html[data-theme="dark glass"] .thryv-users-card {
+    background: rgba(15, 23, 42, 0.62) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+}
+
+html[data-theme="dark glass"] .thryv-card-top h3,
+html[data-theme="dark glass"] .thryv-list-header h3 {
+    color: #f8fafc !important;
+}
+
+html[data-theme="dark glass"] .thryv-card-top span,
+html[data-theme="dark glass"] .thryv-list-header span {
+    color: #cbd5e1 !important;
+}
+
+html[data-theme="dark glass"] .thryv-input,
+html[data-theme="dark glass"] .thryv-search-input {
+    background: rgba(15, 23, 42, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #f8fafc !important;
+}
+
+    html[data-theme="dark glass"] .thryv-input::placeholder,
+    html[data-theme="dark glass"] .thryv-search-input::placeholder {
+        color: #cbd5e1 !important;
+        opacity: 1 !important;
+    }
+
+html[data-theme="dark glass"] .thryv-floating-label {
+    background: rgba(15, 23, 42, 0.92) !important;
+    color: #ff5a1f !important;
+}
+
+html[data-theme="dark glass"] .thryv-input-icon {
+    color: #ff5a1f !important;
+    opacity: 1 !important;
+}
+
+html[data-theme="dark glass"] .thryv-switch-card,
+html[data-theme="dark glass"] .thryv-switch-card.password-change {
+    background: rgba(15, 23, 42, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+    html[data-theme="dark glass"] .thryv-switch-title,
+    html[data-theme="dark glass"] .thryv-switch-card.password-change .thryv-switch-title {
+        color: #f8fafc !important;
+    }
+
+html[data-theme="dark glass"] .thryv-switch-subtitle {
+    color: #cbd5e1 !important;
+}
+
+html[data-theme="dark glass"] .thryv-users-table thead th {
+    background: rgba(2, 6, 23, 0.78) !important;
+    color: #cbd5e1 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark glass"] .thryv-users-table tbody td {
+    color: #e2e8f0 !important;
+    border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+html[data-theme="dark glass"] .thryv-users-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}

@@ -1,0 +1,617 @@
+﻿.thryv-profile-page,
+.thryv-profile-page * {
+    box-sizing: border-box;
+}
+
+.thryv-profile-page {
+    padding: 24px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.thryv-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+    .thryv-profile-header h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+        color: #141414;
+        letter-spacing: -0.02em;
+    }
+
+    .thryv-profile-header p {
+        margin: 4px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+/* =========================
+   CARD PRINCIPAL
+========================= */
+
+.thryv-profile-card {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    max-width: 980px;
+}
+
+/* =========================
+   PERFIL SUPERIOR
+========================= */
+
+.thryv-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.thryv-profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
+    color: #ff5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    flex-shrink: 0;
+}
+
+.thryv-profile-top h3,
+.thryv-profile-name-gradient {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #111111;
+    letter-spacing: -0.02em;
+}
+
+.thryv-profile-top span,
+.thryv-profile-username-gradient {
+    display: block;
+    margin-top: 4px;
+    color: #ff5000;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* =========================
+   FORMULARIO
+========================= */
+
+.thryv-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.thryv-form-group {
+    width: 100%;
+}
+
+.thryv-floating-field {
+    position: relative;
+    display: block;
+}
+
+.thryv-input.modern {
+    width: 100%;
+    height: 54px;
+    border-radius: 14px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    padding: 18px 14px 6px 46px;
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+    .thryv-input.modern:focus {
+        border-color: #ff5000;
+        box-shadow: 0 0 0 4px rgba(255, 80, 0, 0.12);
+    }
+
+.thryv-floating-label {
+    position: absolute;
+    left: 46px;
+    top: 17px;
+    font-size: 14px;
+    color: #6b7280;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+    .thryv-input.modern:focus + .thryv-floating-label,
+    .thryv-input.modern:not(:placeholder-shown) + .thryv-floating-label,
+    .thryv-floating-label.always-float {
+        top: 7px;
+        font-size: 11px;
+        color: #ff5000;
+        font-weight: 700;
+    }
+
+.thryv-input-icon {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    z-index: 2;
+    color: #ff5000;
+}
+
+.thryv-svg-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.thryv-floating-field.readonly .thryv-input.modern {
+    background: #f9fafb;
+    color: #4b5563;
+    cursor: not-allowed;
+    border-color: rgba(17, 17, 17, 0.08);
+}
+
+.thryv-floating-field.readonly .thryv-input-icon {
+    color: #111111;
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.thryv-profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.thryv-primary-btn {
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff5000 0%, #ff6a1f 100%);
+    color: white;
+    padding: 13px 22px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(255, 80, 0, 0.22);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+    .thryv-primary-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+        box-shadow: 0 14px 28px rgba(255, 80, 0, 0.26);
+    }
+
+    .thryv-primary-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+/* =========================
+   LOADING
+========================= */
+
+.thryv-profile-loading {
+    padding: 40px;
+    text-align: center;
+    color: #6b7280;
+    font-weight: 700;
+}
+
+/* =========================
+   MODALES
+========================= */
+
+.thryv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.thryv-modal-card {
+    width: min(420px, 92vw);
+    background: white;
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(17, 17, 17, 0.06);
+}
+
+.thryv-modal-header h3 {
+    margin: 0;
+    color: #111111;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.thryv-modal-body {
+    margin-top: 14px;
+    color: #4b5563;
+}
+
+.thryv-modal-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+    .thryv-profile-page {
+        padding: 16px;
+    }
+
+    .thryv-profile-header h2 {
+        font-size: 24px;
+    }
+
+    .thryv-profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .thryv-profile-card {
+        padding: 20px;
+    }
+
+    .thryv-profile-top {
+        align-items: flex-start;
+    }
+
+    .thryv-profile-avatar {
+        width: 64px;
+        height: 64px;
+        font-size: 23px;
+        border-radius: 20px;
+    }
+
+    .thryv-profile-top h3,
+    .thryv-profile-name-gradient {
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 520px) {
+    .thryv-profile-page {
+        padding: 14px;
+    }
+
+    .thryv-profile-card {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .thryv-profile-top {
+        gap: 14px;
+    }
+
+    .thryv-profile-avatar {
+        width: 58px;
+        height: 58px;
+        font-size: 21px;
+        border-radius: 18px;
+    }
+
+    .thryv-input.modern {
+        height: 52px;
+        font-size: 13px;
+    }
+
+    .thryv-primary-btn {
+        width: 100%;
+    }
+
+    .thryv-profile-actions {
+        justify-content: stretch;
+    }
+}
+
+.thryv-profile-actions {
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.thryv-secondary-btn {
+    border: 1px solid rgba(255, 80, 0, 0.28);
+    border-radius: 14px;
+    background: #ffffff;
+    color: #ff5000;
+    padding: 13px 22px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+    .thryv-secondary-btn:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 80, 0, 0.06);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.10);
+    }
+
+    .thryv-secondary-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+html[data-theme="dark"] .thryv-profile-page {
+    background: #0f172a;
+    color: #e5e7eb;
+    min-height: 100vh;
+}
+
+html[data-theme="dark"] .thryv-profile-header h2,
+html[data-theme="dark"] .thryv-profile-top h3,
+html[data-theme="dark"] .thryv-profile-name-gradient,
+html[data-theme="dark"] .thryv-modal-header h3 {
+    color: #f9fafb;
+}
+
+html[data-theme="dark"] .thryv-profile-header p,
+html[data-theme="dark"] .thryv-modal-body {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .thryv-profile-card,
+html[data-theme="dark"] .thryv-modal-card {
+    background: #111827;
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .thryv-profile-top {
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+}
+
+html[data-theme="dark"] .thryv-input.modern {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.28);
+    color: #f9fafb;
+}
+
+html[data-theme="dark"] .thryv-floating-field.readonly .thryv-input.modern {
+    background: #1e293b;
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .thryv-floating-label {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .thryv-secondary-btn {
+    background: #0f172a;
+    color: #ff8a4c;
+    border-color: rgba(255, 80, 0, 0.35);
+}
+
+html[data-theme="dark glass"] .thryv-profile-page {
+    min-height: 100vh;
+    color: #e5e7eb;
+    background: radial-gradient(circle at top left, rgba(255, 80, 0, 0.20), transparent 32%), radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 34%), linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+
+html[data-theme="dark glass"] .thryv-profile-header h2,
+html[data-theme="dark glass"] .thryv-profile-top h3,
+html[data-theme="dark glass"] .thryv-profile-name-gradient,
+html[data-theme="dark glass"] .thryv-modal-header h3 {
+    color: #f9fafb;
+}
+
+html[data-theme="dark glass"] .thryv-profile-header p,
+html[data-theme="dark glass"] .thryv-modal-body {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .thryv-profile-card,
+html[data-theme="dark glass"] .thryv-modal-card {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark glass"] .thryv-profile-top {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark glass"] .thryv-input.modern {
+    background: rgba(15, 23, 42, 0.58);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #f9fafb;
+}
+
+html[data-theme="dark glass"] .thryv-floating-field.readonly .thryv-input.modern {
+    background: rgba(30, 41, 59, 0.60);
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .thryv-floating-label {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .thryv-secondary-btn {
+    background: rgba(15, 23, 42, 0.58);
+    color: #ff9b66;
+    border-color: rgba(255, 80, 0, 0.38);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+html[data-theme="dark"] .thryv-floating-label,
+html[data-theme="dark glass"] .thryv-floating-label {
+    background: transparent !important;
+    color: #ff5000;
+}
+
+    html[data-theme="dark"] .thryv-floating-label.always-float,
+    html[data-theme="dark glass"] .thryv-floating-label.always-float {
+        background: transparent !important;
+        color: #ff5000;
+    }
+
+html[data-theme="dark"] .thryv-input.modern,
+html[data-theme="dark glass"] .thryv-input.modern {
+    background-clip: padding-box;
+}
+
+/* =========================================================
+   LIQUID GLASS PREMIUM - PERFIL
+========================================================= */
+
+html[data-theme="liquid glass"] .thryv-profile-page {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    color: #0f172a;
+    background: radial-gradient(circle at 10% 15%, rgba(255, 80, 0, 0.28), transparent 22%), radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.95), transparent 24%), radial-gradient(circle at 75% 85%, rgba(37, 99, 235, 0.16), transparent 32%), linear-gradient(135deg, #fff4ed 0%, #f8fafc 42%, #eaf0ff 100%);
+}
+
+    html[data-theme="liquid glass"] .thryv-profile-page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.70) 18%, transparent 34%), linear-gradient(290deg, transparent 0%, rgba(255,255,255,.42) 28%, transparent 46%);
+        opacity: .75;
+    }
+
+html[data-theme="liquid glass"] .thryv-profile-header,
+html[data-theme="liquid glass"] .thryv-profile-card {
+    position: relative;
+    z-index: 1;
+}
+
+html[data-theme="liquid glass"] .thryv-profile-card,
+html[data-theme="liquid glass"] .thryv-modal-card {
+    background: rgba(255, 255, 255, 0.34) !important;
+    backdrop-filter: blur(34px) saturate(190%) brightness(1.08);
+    -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 32px 90px rgba(15, 23, 42, 0.20), inset 0 1px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.30);
+}
+
+    html[data-theme="liquid glass"] .thryv-profile-card::before,
+    html[data-theme="liquid glass"] .thryv-modal-card::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.08) 42%, rgba(255,80,0,.10)), radial-gradient(circle at 18% 0%, rgba(255,255,255,.85), transparent 28%);
+    }
+
+html[data-theme="liquid glass"] .thryv-profile-grid,
+html[data-theme="liquid glass"] .thryv-profile-top,
+html[data-theme="liquid glass"] .thryv-profile-actions,
+html[data-theme="liquid glass"] .thryv-modal-header,
+html[data-theme="liquid glass"] .thryv-modal-body,
+html[data-theme="liquid glass"] .thryv-modal-actions {
+    position: relative;
+    z-index: 2;
+}
+
+html[data-theme="liquid glass"] .thryv-profile-top {
+    border-bottom-color: rgba(255, 255, 255, 0.58);
+}
+
+html[data-theme="liquid glass"] .thryv-profile-avatar {
+    background: linear-gradient(145deg, rgba(17,17,17,.92), rgba(45,45,45,.74)) !important;
+    border: 1px solid rgba(255,255,255,.38);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: 0 18px 36px rgba(15,23,42,.24), inset 0 1px 1px rgba(255,255,255,.24);
+}
+
+html[data-theme="liquid glass"] .thryv-input.modern {
+    background: rgba(255, 255, 255, 0.50) !important;
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.78) !important;
+    color: #111827 !important;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.90), inset 0 -1px 1px rgba(15, 23, 42, 0.04);
+}
+
+html[data-theme="liquid glass"] .thryv-floating-field.readonly .thryv-input.modern {
+    background: rgba(255, 255, 255, 0.38) !important;
+    color: #475569 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-input.modern:focus {
+    background: rgba(255, 255, 255, 0.64) !important;
+    border-color: rgba(255, 80, 0, 0.85) !important;
+    box-shadow: 0 0 0 4px rgba(255, 80, 0, 0.14), 0 18px 38px rgba(255, 80, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+html[data-theme="liquid glass"] .thryv-floating-label,
+html[data-theme="liquid glass"] .thryv-floating-label.always-float {
+    background: transparent !important;
+    color: #64748b !important;
+}
+
+    html[data-theme="liquid glass"] .thryv-input.modern:focus + .thryv-floating-label,
+    html[data-theme="liquid glass"] .thryv-input.modern:not(:placeholder-shown) + .thryv-floating-label,
+    html[data-theme="liquid glass"] .thryv-floating-label.always-float {
+        color: #ff5000 !important;
+        font-weight: 800;
+        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+    }
+
+html[data-theme="liquid glass"] .thryv-input-icon {
+    color: #ff5000 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-floating-field.readonly .thryv-input-icon {
+    color: #111827 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-primary-btn {
+    background: linear-gradient(135deg, #ff5000, #ff7a2f);
+    box-shadow: 0 18px 38px rgba(255,80,0,.30), inset 0 1px 1px rgba(255,255,255,.34);
+}
+
+html[data-theme="liquid glass"] .thryv-secondary-btn {
+    background: rgba(255, 255, 255, 0.42) !important;
+    color: #ff5000;
+    border: 1px solid rgba(255, 80, 0, 0.30);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: 0 14px 34px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+}

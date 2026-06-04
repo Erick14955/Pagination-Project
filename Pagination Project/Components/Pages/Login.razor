@@ -2,6 +2,7 @@
 @page "/login"
 @inject NavigationManager Navigation
 @layout Pagination_Project.Components.Layout.LoginLayout
+@inject IJSRuntime JS
 
 <PageTitle>Iniciar Sesión</PageTitle>
 
@@ -73,6 +74,14 @@
 @code {
     private string? _mensajeError;
     private string? _mensajeExito;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
+        }
+    }
 
     protected override void OnInitialized()
     {
