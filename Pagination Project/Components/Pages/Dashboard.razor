@@ -185,7 +185,7 @@
                                 <tr>
                                     <td>
                                         <div class="thryv-employee-cell">
-                                            <div class="thryv-employee-avatar">👤</div>
+                                            <div class="thryv-employee-avatar">@GetInitials(item.EmployeeName)</div>
                                             <div>
                                                 <div class="thryv-employee-name">@item.EmployeeName</div>
                                             </div>
@@ -693,6 +693,19 @@
 
             return query.ToList();
         }
+    }
+
+    private static string GetInitials(string? fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return "U";
+
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 1)
+            return parts[0][0].ToString().ToUpper();
+
+        return $"{parts[0][0]}{parts[1][0]}".ToUpper();
     }
 
     private static string GetStagePillClass(string? stageKey, bool completed = false)
