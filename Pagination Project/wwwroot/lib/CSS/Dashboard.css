@@ -1186,3 +1186,22 @@ html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
     backdrop-filter: blur(18px) saturate(170%);
     -webkit-backdrop-filter: blur(18px) saturate(170%);
 }
+
+/* =========================================================
+   FIX - LSA CODE READABILITY (DARK + DARK GLASS)
+========================================================= */
+
+html[data-theme="dark"] .thryv-code-pill,
+html[data-theme="dark glass"] .thryv-code-pill {
+    background: rgba(59, 130, 246, 0.12) !important;
+    color: #f8fafc !important;
+    border-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+    /* Si usas la variante secondary */
+    html[data-theme="dark"] .thryv-code-pill.secondary,
+    html[data-theme="dark glass"] .thryv-code-pill.secondary {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #f8fafc !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
