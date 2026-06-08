@@ -156,6 +156,7 @@
                             <th>KGEN Code</th>
                             <th>LSA Code</th>
                             <th>Book</th>
+                            <th>Database</th>
                             <th>Stage</th>
                             <th>Stage Date</th>
                         </tr>
@@ -201,6 +202,12 @@
                                     </td>
 
                                     <td>@item.BookName</td>
+
+                                    <td>
+                                        <span class="thryv-code-pill secondary">
+                                            @(string.IsNullOrWhiteSpace(item.Database) ? "-" : item.Database)
+                                        </span>
+                                    </td>
 
                                     <td>
                                         <span class="@GetStagePillClass(item.StageKey)">

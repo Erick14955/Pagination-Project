@@ -10,6 +10,7 @@
         public string KgenCode { get; set; } = string.Empty;
         public string LsaCode { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
+        public string Database { get; set; } = string.Empty;
 
         public string StageKey { get; set; } = string.Empty;
         public string Stage { get; set; } = string.Empty;

@@ -58,6 +58,8 @@ namespace Pagination_Project.Services
                 from a in db.Asignaciones.AsNoTracking()
                 join l in db.Libros.AsNoTracking() on a.IdLibro equals l.Id
                 join e in db.Empleados.AsNoTracking() on a.IdEmpleado equals e.Id
+                join d in db.Databases.AsNoTracking() on l.DatabaseId equals d.Id into database
+                from d in database.DefaultIfEmpty()
 
                 join bpJoin in db.Bind_Plants.AsNoTracking()
                     on l.BindPlantId equals bpJoin.Id into bindPlantGroup
@@ -76,6 +78,7 @@ namespace Pagination_Project.Services
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
                     BookName = l.BookName ?? string.Empty,
+                    Database = d != null ? d.Database_Name : string.Empty,
 
                     ProofExtract = l.ProofExtract,
                     FinalExtract = l.FinalExtract,
@@ -139,6 +142,7 @@ namespace Pagination_Project.Services
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
+                    Database = item.Database,
 
                     StageKey = stageInfo.StageKey,
                     Stage = stageInfo.StageName,
@@ -679,6 +683,7 @@ namespace Pagination_Project.Services
             public string LsaCode { get; set; } = string.Empty;
             public string BookName { get; set; } = string.Empty;
             public string BindPlantName { get; set; } = string.Empty;
+            public string Database { get; set; } = string.Empty;
 
             public DateOnly ProofExtract { get; set; }
             public DateOnly FinalExtract { get; set; }
