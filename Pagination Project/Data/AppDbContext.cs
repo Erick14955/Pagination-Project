@@ -27,6 +27,7 @@ namespace Pagination_Project.Data
         public DbSet<AsignacionTrabajada> AsignacionesTrabajadas { get; set; }
         public DbSet<EmployeeLeaveCoverage> EmployeeLeaveCoverages { get; set; }
         public DbSet<EmployeeLeaveCoverageDetail> EmployeeLeaveCoverageDetails { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -69,6 +70,51 @@ namespace Pagination_Project.Data
                     .HasForeignKey<Usuario>(e => e.EmployeeId)
                     .HasPrincipalKey<Empleados>(e => e.Id)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.ToTable("PasswordResetTokens");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id");
+
+                entity.Property(e => e.UsuarioId)
+                    .HasColumnName("UsuarioId")
+                    .IsRequired();
+
+                entity.Property(e => e.TokenHash)
+                    .HasColumnName("TokenHash")
+                    .HasMaxLength(500)
+                    .IsRequired();
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("CreatedAt")
+                    .HasColumnType("timestamp without time zone")
+                    .IsRequired();
+
+                entity.Property(e => e.ExpiresAt)
+                    .HasColumnName("ExpiresAt")
+                    .HasColumnType("timestamp without time zone")
+                    .IsRequired();
+
+                entity.Property(e => e.Used)
+                    .HasColumnName("Used")
+                    .HasDefaultValue(false)
+                    .IsRequired();
+
+                entity.HasOne(e => e.Usuario)
+                    .WithMany()
+                    .HasForeignKey(e => e.UsuarioId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UsuarioId)
+                    .HasDatabaseName("IX_PasswordResetTokens_UsuarioId");
+
+                entity.HasIndex(e => e.TokenHash)
+                    .HasDatabaseName("IX_PasswordResetTokens_TokenHash");
             });
 
             modelBuilder.Entity<EmployeeLeaveCoverage>(entity =>

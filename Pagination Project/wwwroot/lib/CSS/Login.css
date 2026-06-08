@@ -38,6 +38,17 @@
     border: 1px solid #a7f3d0;
 }
 
+.thryv-forgot-row {
+    margin-top: 14px;
+    text-align: center;
+}
+
+    .thryv-forgot-row a {
+        color: #00796b;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
 .thryv-password-rules {
     margin: 10px 0 16px;
     padding: 10px 12px;

@@ -31,6 +31,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
 builder.Services.AddControllers();
 
@@ -104,7 +106,11 @@ app.Use(async (context, next) =>
         path.StartsWith("/style") ||
         path.StartsWith("/lib") ||
         path.StartsWith("/images") ||
-        path.StartsWith("/favicon");
+        path.StartsWith("/favicon") ||
+        path.StartsWith("/forgot-password") ||
+        path.StartsWith("/reset-password") ||
+        path.StartsWith("/account/forgot-password") ||
+        path.StartsWith("/account/reset-password");
 
     if (estaAutenticado && requiereCambioPassword && !esRutaPermitida)
     {
@@ -284,6 +290,55 @@ app.MapPost("/account/logout", async (HttpContext httpContext) =>
 {
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/login");
+})
+.DisableAntiforgery();
+
+app.MapPost("/account/forgot-password", async (
+    HttpContext httpContext,
+    IPasswordResetService passwordResetService) =>
+{
+    var form = await httpContext.Request.ReadFormAsync();
+
+    var username = form["Username"].ToString();
+
+    var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+
+    await passwordResetService.SolicitarRecuperacionAsync(username, baseUrl);
+
+    return Results.Redirect("/forgot-password?sent=1");
+})
+.DisableAntiforgery();
+
+app.MapPost("/account/reset-password", async (
+    HttpContext httpContext,
+    IPasswordResetService passwordResetService) =>
+{
+    var form = await httpContext.Request.ReadFormAsync();
+
+    var token = form["Token"].ToString();
+    var nuevaPassword = form["NewPassword"].ToString();
+    var confirmarPassword = form["ConfirmPassword"].ToString();
+
+    if (string.IsNullOrWhiteSpace(nuevaPassword) || nuevaPassword.Length < 6)
+    {
+        return Results.Redirect($"/reset-password?token={Uri.EscapeDataString(token)}&error=short");
+    }
+
+    if (nuevaPassword != confirmarPassword)
+    {
+        return Results.Redirect($"/reset-password?token={Uri.EscapeDataString(token)}&error=mismatch");
+    }
+
+    var actualizado = await passwordResetService.RestablecerPasswordAsync(token, nuevaPassword);
+
+    if (!actualizado)
+    {
+        return Results.Redirect("/reset-password?error=invalid");
+    }
+
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+    return Results.Redirect("/login?changed=1");
 })
 .DisableAntiforgery();
 

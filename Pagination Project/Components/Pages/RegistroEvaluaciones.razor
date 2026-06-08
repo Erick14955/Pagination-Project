@@ -64,18 +64,43 @@
 
         <div class="form-grid">
             <div class="form-group full">
-                <label>Assignment</label>
+                <label>Search Assignment</label>
 
-                <select class="form-control" @bind="Evaluacion.AssignationId">
-                    <option value="@Guid.Empty">-- Select assignment --</option>
+                <div class="search-assignment-box">
+                    <input class="form-control"
+                           placeholder="Search by KGEN Code or LSA Code..."
+                           @bind="TextoBusquedaAsignacion"
+                           @bind:event="oninput"
+                           @onkeydown="BuscarAsignacionConEnter" />
 
-                    @foreach (var item in Asignaciones)
-                    {
-                        <option value="@item.Id">@item.Descripcion</option>
-                    }
-                </select>
+                    <button type="button"
+                            class="btn-primary"
+                            @onclick="BuscarAsignacionAsync">
+                        Search
+                    </button>
+                </div>
             </div>
         </div>
+
+        @if (AsignacionSeleccionada is not null)
+        {
+            <div class="assignment-cards-grid">
+
+                <div class="summary-card assignment-card-fixed">
+                    <span>Employee</span>
+                    <strong>@AsignacionSeleccionada.EmpleadoNombre</strong>
+                    <small>Assigned employee</small>
+                </div>
+
+                <div class="summary-card assignment-card-fixed">
+                    <span>Book Information</span>
+                    <strong>@AsignacionSeleccionada.KGENCode</strong>
+                    <small>@AsignacionSeleccionada.BookName</small>
+                    <small>LSA: @AsignacionSeleccionada.LSACode</small>
+                </div>
+
+            </div>
+        }
     </section>
 
     <section class="summary-grid">
@@ -554,6 +579,9 @@
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
     private string Busqueda { get; set; } = string.Empty;
+    private string TextoBusquedaAsignacion { get; set; } = string.Empty;
+
+    private AsignacionSeleccionadaDto? AsignacionSeleccionada { get; set; }
 
     private string EmpleadoFiltroNombre { get; set; } = string.Empty;
 
@@ -602,6 +630,117 @@
         }
     }
 
+    private async Task BuscarAsignacionConEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await BuscarAsignacionAsync();
+    }
+
+    private async Task BuscarAsignacionAsync()
+    {
+        try
+        {
+            LimpiarMensaje();
+
+            var filtro = TextoBusquedaAsignacion?.Trim();
+
+            if (string.IsNullOrWhiteSpace(filtro))
+            {
+                MostrarMensaje("Enter a KGEN Code or LSA Code.", "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var filtroUpper = filtro.ToUpper();
+
+            var asignacion = await db.Asignaciones
+                .AsNoTracking()
+                .Include(a => a.Empleado)
+                .Include(a => a.Libro)
+                .Where(a => !a.Finalizado &&
+                            a.Libro != null &&
+                            !a.Libro.Finalizado &&
+                            !db.Evaluaciones.Any(e => e.AssignationId == a.Id) &&
+                            (
+                                (a.Libro!.KGENCode != null && a.Libro.KGENCode.ToUpper().Contains(filtroUpper)) ||
+                                (a.Libro!.LSACode != null && a.Libro.LSACode.ToUpper().Contains(filtroUpper))
+                            ))
+                .OrderBy(a => a.Empleado!.Nombre)
+                .ThenBy(a => a.Libro!.BookName)
+                .Select(a => new
+                {
+                    a.Id,
+                    EmpleadoNombre = a.Empleado != null ? a.Empleado.Nombre : "-",
+                    BookName = a.Libro != null ? a.Libro.BookName : "-",
+                    KGENCode = a.Libro != null ? a.Libro.KGENCode : "-",
+                    LSACode = a.Libro != null ? a.Libro.LSACode : "-"
+                })
+                .FirstOrDefaultAsync();
+
+            if (asignacion is null)
+            {
+                Evaluacion = new Evaluaciones
+                {
+                    Id = Guid.Empty,
+                    AssignationId = Guid.Empty,
+                    Finalizado = false
+                };
+
+                AsignacionSeleccionada = null;
+                ModoEdicion = false;
+
+                MostrarMensaje("No available assignment was found with that KGEN Code or LSA Code.", "error");
+                return;
+            }
+
+            var empleadoNombre = await ObtenerEmpleadoEvaluacionAsync(
+                db,
+                asignacion.Id,
+                asignacion.EmpleadoNombre ?? "-");
+
+            Evaluacion = new Evaluaciones
+            {
+                Id = Guid.Empty,
+                AssignationId = asignacion.Id,
+                Finalizado = false
+            };
+
+            AsignacionSeleccionada = new AsignacionSeleccionadaDto
+            {
+                Id = asignacion.Id,
+                EmpleadoNombre = empleadoNombre,
+                BookName = asignacion.BookName ?? "-",
+                KGENCode = asignacion.KGENCode ?? "-",
+                LSACode = asignacion.LSACode ?? "-"
+            };
+
+            ModoEdicion = false;
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"Error searching assignment: {ex.Message}", "error");
+        }
+    }
+
+    private async Task<string> ObtenerEmpleadoEvaluacionAsync(AppDbContext db, Guid assignmentId, string empleadoOriginal)
+    {
+        var temporal = await db.TemporaryAssignments
+            .AsNoTracking()
+            .Include(x => x.TemporaryEmployee)
+            .Where(x => x.AssignmentId == assignmentId && x.Active)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (temporal?.TemporaryEmployee is not null &&
+            !string.IsNullOrWhiteSpace(temporal.TemporaryEmployee.Nombre))
+        {
+            return temporal.TemporaryEmployee.Nombre;
+        }
+
+        return empleadoOriginal;
+    }
+
     private async Task CargarAsignacionesAsync(AppDbContext db)
     {
         var assignationIdActual = Evaluacion.AssignationId;
@@ -646,20 +785,43 @@
             .ThenBy(e => e.Asignacion.Libro!.KGENCode)
             .ToListAsync();
 
-        Historial = evaluacionesDb.Select(e => new EvaluacionListadoDto
+        var assignmentIds = evaluacionesDb
+            .Select(e => e.AssignationId)
+            .Distinct()
+            .ToList();
+
+        var temporalesDb = await db.TemporaryAssignments
+            .AsNoTracking()
+            .Include(x => x.TemporaryEmployee)
+            .Where(x => x.Active && assignmentIds.Contains(x.AssignmentId))
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
+        Historial = evaluacionesDb.Select(e =>
         {
-            Id = e.Id,
-            AssignationId = e.AssignationId,
+            var temporal = temporalesDb
+                .FirstOrDefault(t => t.AssignmentId == e.AssignationId);
 
-            EmpleadoNombre = e.Asignacion?.Empleado?.Nombre ?? "-",
+            var empleadoNombre = temporal?.TemporaryEmployee?.Nombre;
 
-            KGENCode = e.Asignacion?.Libro?.KGENCode ?? "-",
+            if (string.IsNullOrWhiteSpace(empleadoNombre))
+                empleadoNombre = e.Asignacion?.Empleado?.Nombre ?? "-";
 
-            MotifYp = e.MotifYp,
-            MotifWp = e.MotifWp,
-            InventoryReport = e.InventoryReport,
-            ProductShippingFolder = e.ProductShippingFolder,
-            TaskMemo = e.TaskMemo
+            return new EvaluacionListadoDto
+            {
+                Id = e.Id,
+                AssignationId = e.AssignationId,
+
+                EmpleadoNombre = empleadoNombre,
+
+                KGENCode = e.Asignacion?.Libro?.KGENCode ?? "-",
+
+                MotifYp = e.MotifYp,
+                MotifWp = e.MotifWp,
+                InventoryReport = e.InventoryReport,
+                ProductShippingFolder = e.ProductShippingFolder,
+                TaskMemo = e.TaskMemo
+            };
         }).ToList();
 
         foreach (var item in Historial)
@@ -782,15 +944,7 @@
 
             await db.SaveChangesAsync();
 
-            var evaluacionGuardada = await db.Evaluaciones
-                .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == Evaluacion.Id);
-
-            if (evaluacionGuardada is not null)
-            {
-                Evaluacion = evaluacionGuardada;
-                ModoEdicion = true;
-            }
+            LimpiarFormulario();
 
             await CargarAsignacionesAsync(db);
             await CargarHistorialAsync(db);
@@ -817,6 +971,10 @@
 
             var item = await db.Evaluaciones
                 .AsNoTracking()
+                .Include(e => e.Asignacion)
+                    .ThenInclude(a => a.Empleado)
+                .Include(e => e.Asignacion)
+                    .ThenInclude(a => a.Libro)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (item is null)
@@ -827,6 +985,32 @@
 
             Evaluacion = item;
             ModoEdicion = true;
+
+            if (item.Asignacion?.Libro is not null)
+            {
+                var empleadoNombre = await ObtenerEmpleadoEvaluacionAsync(
+                    db,
+                    item.AssignationId,
+                    item.Asignacion?.Empleado?.Nombre ?? "-");
+
+                TextoBusquedaAsignacion = !string.IsNullOrWhiteSpace(item.Asignacion.Libro.KGENCode)
+                    ? item.Asignacion.Libro.KGENCode
+                    : item.Asignacion.Libro.LSACode ?? string.Empty;
+
+                AsignacionSeleccionada = new AsignacionSeleccionadaDto
+                {
+                    Id = item.AssignationId,
+                    EmpleadoNombre = empleadoNombre,
+                    BookName = item.Asignacion?.Libro?.BookName ?? "-",
+                    KGENCode = item.Asignacion?.Libro?.KGENCode ?? "-",
+                    LSACode = item.Asignacion?.Libro?.LSACode ?? "-"
+                };
+            }
+            else
+            {
+                TextoBusquedaAsignacion = string.Empty;
+                AsignacionSeleccionada = null;
+            }
         }
         catch (Exception ex)
         {
@@ -922,6 +1106,9 @@
             AssignationId = Guid.Empty,
             Finalizado = false
         };
+
+        TextoBusquedaAsignacion = string.Empty;
+        AsignacionSeleccionada = null;
 
         ModoEdicion = false;
         LimpiarMensaje();
@@ -1088,5 +1275,14 @@ CalcularPorcentajeVistaDecimal(TotalMotifYpVista, 8);
         public decimal? TaskMemo { get; set; }
 
         public decimal PorcentajeGeneral { get; set; }
+    }
+
+    private sealed class AsignacionSeleccionadaDto
+    {
+        public Guid Id { get; set; }
+        public string EmpleadoNombre { get; set; } = string.Empty;
+        public string BookName { get; set; } = string.Empty;
+        public string KGENCode { get; set; } = string.Empty;
+        public string LSACode { get; set; } = string.Empty;
     }
 }
