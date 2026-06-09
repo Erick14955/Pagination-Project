@@ -1,13 +1,21 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Pagination_Project.Components;
 using Pagination_Project.Data;
 using Pagination_Project.Services;
 using System.Security.Claims;
-using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Oculta el header "Server" generado por Kestrel.
+// Nota: Render u otro proxy todavía puede agregar sus propios headers.
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.AddServerHeader = false;
+});
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -36,6 +44,24 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
 builder.Services.AddControllers();
 
+// Asegura que las cookies generadas por el sistema salgan con políticas seguras.
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.HttpOnly = HttpOnlyPolicy.Always;
+    options.Secure = CookieSecurePolicy.Always;
+    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+});
+
+// Asegura también la cookie antiforgery.
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = "__Host-Pagination_Project.Antiforgery";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.Path = "/";
+});
+
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -43,14 +69,22 @@ builder.Services
         options.LoginPath = "/login";
         options.LogoutPath = "/account/logout";
         options.AccessDeniedPath = "/login";
-        options.Cookie.Name = "Pagination_Project.Auth";
+
+        // El prefijo __Host- obliga buenas prácticas:
+        // Secure, Path=/ y sin Domain.
+        options.Cookie.Name = "__Host-Pagination_Project.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.Path = "/";
+        options.Cookie.IsEssential = true;
+
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
+// Necesario en Render porque HTTPS normalmente llega por proxy.
+// Esto permite que ASP.NET Core reconozca correctamente X-Forwarded-Proto=https.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
@@ -75,7 +109,49 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Headers de seguridad + bloqueo de HTTP OPTIONS.
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        var headers = context.Response.Headers;
+
+        headers["X-Content-Type-Options"] = "nosniff";
+        headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+        headers["X-Frame-Options"] = "DENY";
+        headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+
+        headers["Content-Security-Policy"] =
+            "default-src 'self'; " +
+            "base-uri 'self'; " +
+            "object-src 'none'; " +
+            "frame-ancestors 'none'; " +
+            "form-action 'self'; " +
+            "script-src 'self'; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "img-src 'self' data: blob: https:; " +
+            "font-src 'self' data:; " +
+            "connect-src 'self' https: wss:; " +
+            "frame-src 'none'; " +
+            "upgrade-insecure-requests;";
+
+        return Task.CompletedTask;
+    });
+
+    if (HttpMethods.IsOptions(context.Request.Method))
+    {
+        context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+        return;
+    }
+
+    await next();
+});
+
+app.UseCookiePolicy();
+
 app.UseStaticFiles();
+
 app.UseAntiforgery();
 
 app.UseAuthentication();
@@ -110,7 +186,9 @@ app.Use(async (context, next) =>
         path.StartsWith("/forgot-password") ||
         path.StartsWith("/reset-password") ||
         path.StartsWith("/account/forgot-password") ||
-        path.StartsWith("/account/reset-password");
+        path.StartsWith("/account/reset-password") ||
+        path.StartsWith("/.well-known/security.txt") ||
+        path.StartsWith("/security.txt");
 
     if (estaAutenticado && requiereCambioPassword && !esRutaPermitida)
     {
@@ -138,7 +216,8 @@ app.MapPost("/account/login", async (
         returnUrl = "/dashboard";
     }
 
-    if (!returnUrl.StartsWith("/") || returnUrl.StartsWith("//"))
+    if (!returnUrl.StartsWith("/", StringComparison.Ordinal) ||
+        returnUrl.StartsWith("//", StringComparison.Ordinal))
     {
         returnUrl = "/dashboard";
     }
@@ -295,13 +374,18 @@ app.MapPost("/account/logout", async (HttpContext httpContext) =>
 
 app.MapPost("/account/forgot-password", async (
     HttpContext httpContext,
+    IConfiguration configuration,
     IPasswordResetService passwordResetService) =>
 {
     var form = await httpContext.Request.ReadFormAsync();
 
     var username = form["Username"].ToString();
 
-    var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+    var configuredBaseUrl = configuration["App:BaseUrl"];
+
+    var baseUrl = !string.IsNullOrWhiteSpace(configuredBaseUrl)
+        ? configuredBaseUrl.TrimEnd('/')
+        : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
 
     await passwordResetService.SolicitarRecuperacionAsync(username, baseUrl);
 
@@ -341,6 +425,37 @@ app.MapPost("/account/reset-password", async (
     return Results.Redirect("/login?changed=1");
 })
 .DisableAntiforgery();
+
+var securityTxtHandler = (IConfiguration configuration, HttpContext httpContext) =>
+{
+    var configuredBaseUrl = configuration["App:BaseUrl"];
+
+    var baseUrl = !string.IsNullOrWhiteSpace(configuredBaseUrl)
+        ? configuredBaseUrl.TrimEnd('/')
+        : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+
+    var contactEmail = configuration["Security:ContactEmail"];
+
+    if (string.IsNullOrWhiteSpace(contactEmail))
+    {
+        contactEmail = "soporte@tu-dominio.com";
+    }
+
+    var expires = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-ddTHH:mm:ss.000Z");
+
+    var content =
+$"""
+Contact: mailto:{contactEmail}
+Preferred-Languages: es,en
+Canonical: {baseUrl}/.well-known/security.txt
+Expires: {expires}
+""";
+
+    return Results.Text(content, "text/plain");
+};
+
+app.MapGet("/.well-known/security.txt", securityTxtHandler);
+app.MapGet("/security.txt", securityTxtHandler);
 
 app.MapControllers();
 

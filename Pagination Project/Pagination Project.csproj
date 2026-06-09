@@ -21,4 +21,8 @@
     <PackageReference Include="Resend" Version="0.5.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\.well-known\" />
+  </ItemGroup>
+
 </Project>
