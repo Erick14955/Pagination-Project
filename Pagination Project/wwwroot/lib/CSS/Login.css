@@ -153,6 +153,110 @@
         color: #9ca3af;
     }
 
+.thryv-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.thryv-modal-card {
+    width: min(420px, 100%);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 24px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);
+    color: #0f172a;
+}
+
+.thryv-modal-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 16px;
+    border-radius: 999px;
+    background: #00796b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+.thryv-modal-card h3 {
+    margin: 0 0 10px;
+    font-size: 22px;
+    font-weight: 900;
+    color: #0f172a;
+}
+
+.thryv-modal-card p {
+    margin: 0 0 22px;
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Dark */
+body.thryv-dark .thryv-modal-card,
+html.thryv-dark .thryv-modal-card,
+.thryv-dark .thryv-modal-card {
+    background: rgba(15, 23, 42, 0.96);
+    border-color: rgba(51, 65, 85, 0.95);
+    color: #f8fafc;
+}
+
+    body.thryv-dark .thryv-modal-card h3,
+    html.thryv-dark .thryv-modal-card h3,
+    .thryv-dark .thryv-modal-card h3 {
+        color: #f8fafc;
+    }
+
+    body.thryv-dark .thryv-modal-card p,
+    html.thryv-dark .thryv-modal-card p,
+    .thryv-dark .thryv-modal-card p {
+        color: #cbd5e1;
+    }
+
+/* Dark Glass / Glass */
+body.thryv-glass .thryv-modal-card,
+html.thryv-glass .thryv-modal-card,
+.thryv-glass .thryv-modal-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+}
+
+body.thryv-dark-glass .thryv-modal-card,
+html.thryv-dark-glass .thryv-modal-card,
+.thryv-dark-glass .thryv-modal-card {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.25);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    color: #f8fafc;
+}
+
+    body.thryv-dark-glass .thryv-modal-card h3,
+    html.thryv-dark-glass .thryv-modal-card h3,
+    .thryv-dark-glass .thryv-modal-card h3 {
+        color: #f8fafc;
+    }
+
+    body.thryv-dark-glass .thryv-modal-card p,
+    html.thryv-dark-glass .thryv-modal-card p,
+    .thryv-dark-glass .thryv-modal-card p {
+        color: #dbeafe;
+    }
+
 .thryv-error {
     margin: 8px 0 20px;
     padding: 14px 16px;
