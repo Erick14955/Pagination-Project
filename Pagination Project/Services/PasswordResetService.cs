@@ -79,10 +79,17 @@ namespace Pagination_Project.Services
                     <p>If you did not request this, you can ignore this email.</p>
                 </div>";
 
-            await _emailService.EnviarCorreoAsync(
-                correo,
-                "Evaluations - Password Recovery",
-                cuerpo);
+            try
+            {
+                await _emailService.EnviarCorreoAsync(
+                    correo,
+                    "Evaluations - Password Recovery",
+                    cuerpo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public async Task<bool> RestablecerPasswordAsync(string token, string nuevaPassword)
