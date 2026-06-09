@@ -6,7 +6,6 @@ using Pagination_Project.Data;
 using Pagination_Project.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
-using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,11 +13,6 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpClient();
-
-builder.Services.Configure<ResendClientOptions>(o =>
-{
-    o.ApiToken = builder.Configuration["Resend:ApiKey"];
-});
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseNpgsql(
@@ -37,7 +31,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
-builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddHttpClient<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
 builder.Services.AddControllers();

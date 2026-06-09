@@ -125,8 +125,13 @@ namespace Pagination_Project.Services
                                             <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-top:24px;background-color:#f9fafb;border:1px solid #e5e7eb;'>
                                                 <tr>
                                                     <td style='padding:16px;'>
-                                                        <p style='margin:0;font-size:13px;line-height:22px;color:#6b7280;'>
+                                                        <p style='margin:0 0 10px;font-size:13px;line-height:22px;color:#6b7280;'>
                                                             If the reset button does not work, please contact your system administrator.
+                                                        </p>
+
+                                                        <p style='margin:0;font-size:13px;line-height:22px;color:#6b7280;'>
+                                                            If your browser displays a security warning when opening the link,
+                                                            please contact your system administrator before proceeding.
                                                         </p>
                                                     </td>
                                                 </tr>

@@ -16,7 +16,7 @@ namespace Pagination_Project.Services
 
         public async Task EnviarCorreoAsync(string destinatario, string asunto, string cuerpoHtml)
         {
-            var apiKey = _configuration["Resend:ApiKey"];
+            var apiKey = _configuration["Brevo:ApiKey"]; ;
             var from = _configuration["Email:From"];
             var fromName = _configuration["Email:FromName"] ?? "Evaluations";
 
@@ -44,7 +44,7 @@ namespace Pagination_Project.Services
 
             using var request = new HttpRequestMessage(
                 HttpMethod.Post,
-                "https://api.resend.com/emails");
+                "https://api.brevo.com/v3/smtp/email");
 
             request.Headers.Add("Authorization", $"Bearer {apiKey}");
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
