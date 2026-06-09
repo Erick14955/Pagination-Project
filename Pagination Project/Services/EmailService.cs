@@ -35,7 +35,12 @@ namespace Pagination_Project.Services
                     new { email = destinatario }
                 },
                 subject = asunto,
-                htmlContent = cuerpoHtml
+                htmlContent = cuerpoHtml,
+
+                headers = new Dictionary<string, string>
+                {
+                    { "X-Mailin-track", "0" }
+                }
             };
 
             var json = JsonSerializer.Serialize(payload);
