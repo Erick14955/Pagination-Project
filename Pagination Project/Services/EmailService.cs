@@ -16,40 +16,37 @@ namespace Pagination_Project.Services
 
         public async Task EnviarCorreoAsync(string destinatario, string asunto, string cuerpoHtml)
         {
-            var apiKey = _configuration["Brevo:ApiKey"];
+            var apiKey = _configuration["Resend:ApiKey"];
             var from = _configuration["Email:From"];
             var fromName = _configuration["Email:FromName"] ?? "Evaluations";
 
-            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(from))
-                throw new InvalidOperationException("Brevo API configuration is incomplete.");
+            if (string.IsNullOrWhiteSpace(apiKey))
+                throw new InvalidOperationException("Resend API Key is missing.");
+
+            if (string.IsNullOrWhiteSpace(from))
+                throw new InvalidOperationException("Email From is missing.");
+
+            if (string.IsNullOrWhiteSpace(destinatario))
+                throw new InvalidOperationException("Email recipient is missing.");
 
             var payload = new
             {
-                sender = new
-                {
-                    name = fromName,
-                    email = from
-                },
+                from = $"{fromName} <{from}>",
                 to = new[]
                 {
-                    new { email = destinatario }
+                    destinatario
                 },
                 subject = asunto,
-                htmlContent = cuerpoHtml,
-
-                headers = new Dictionary<string, string>
-                {
-                    { "X-Mailin-track", "0" }
-                }
+                html = cuerpoHtml
             };
 
             var json = JsonSerializer.Serialize(payload);
 
             using var request = new HttpRequestMessage(
                 HttpMethod.Post,
-                "https://api.brevo.com/v3/smtp/email");
+                "https://api.resend.com/emails");
 
-            request.Headers.Add("api-key", apiKey);
+            request.Headers.Add("Authorization", $"Bearer {apiKey}");
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.SendAsync(request);
@@ -57,7 +54,11 @@ namespace Pagination_Project.Services
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Brevo API error: {response.StatusCode} - {error}");
+
+                Console.WriteLine("ERROR ENVIANDO CORREO CON RESEND:");
+                Console.WriteLine(error);
+
+                throw new Exception($"Resend API error: {response.StatusCode} - {error}");
             }
         }
     }
