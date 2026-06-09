@@ -251,6 +251,22 @@ html.thryv-dark-glass .thryv-modal-card,
         color: #f8fafc;
     }
 
+.thryv-modal-card,
+.thryv-modal-card h3,
+.thryv-modal-card p {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+.thryv-modal-card {
+    background: rgba(15, 23, 42, 0.92) !important;
+}
+
+    .thryv-modal-card .thryv-login-button {
+        color: #ffffff !important;
+        font-weight: 900 !important;
+    }
+
     body.thryv-dark-glass .thryv-modal-card p,
     html.thryv-dark-glass .thryv-modal-card p,
     .thryv-dark-glass .thryv-modal-card p {
