@@ -153,7 +153,9 @@ namespace Pagination_Project.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("ERROR ENVIANDO CORREO:");
+                Console.WriteLine(ex.ToString());
+                throw;
             }
         }
 

@@ -19,6 +19,7 @@ namespace Pagination_Project.Services
             var username = _configuration["Email:Username"];
             var password = _configuration["Email:Password"];
             var from = _configuration["Email:From"];
+            var fromName = _configuration["Email:FromName"] ?? "Evaluations";
 
             if (string.IsNullOrWhiteSpace(host) ||
                 string.IsNullOrWhiteSpace(username) ||
@@ -31,18 +32,25 @@ namespace Pagination_Project.Services
             using var client = new SmtpClient(host, port)
             {
                 EnableSsl = true,
-                Credentials = new NetworkCredential(username, password)
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(username, password),
+                Timeout = 20000
             };
 
             using var message = new MailMessage
             {
-                From = new MailAddress(from),
+                From = new MailAddress(from, fromName),
                 Subject = asunto,
                 Body = cuerpoHtml,
                 IsBodyHtml = true
             };
 
             message.To.Add(destinatario);
+
+            Console.WriteLine($"Enviando correo a: {destinatario}");
+            Console.WriteLine($"SMTP Host: {_configuration["Email:SmtpHost"]}");
+            Console.WriteLine($"SMTP User: {_configuration["Email:Username"]}");
+            Console.WriteLine($"SMTP From: {_configuration["Email:From"]}");
 
             await client.SendMailAsync(message);
         }
