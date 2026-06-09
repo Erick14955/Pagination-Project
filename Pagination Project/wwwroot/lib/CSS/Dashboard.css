@@ -1240,3 +1240,18 @@ html[data-theme="liquid glass"] .weekly-avatar {
     background: linear-gradient(135deg, #111827 0%, #1f2937 100%) !important;
     color: #ffffff !important;
 }
+
+html[data-theme="dark"] .thryv-clear-filter-btn,
+html[data-theme="dark glass"] .thryv-clear-filter-btn {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+    html[data-theme="dark"] .thryv-clear-filter-btn:hover,
+    html[data-theme="dark glass"] .thryv-clear-filter-btn:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.16) !important;
+        border-color: rgba(255, 255, 255, 0.22) !important;
+    }
