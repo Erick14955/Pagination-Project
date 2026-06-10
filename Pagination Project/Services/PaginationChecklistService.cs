@@ -11,7 +11,7 @@ namespace Pagination_Project.Services
     public class PaginationChecklistService : IPaginationChecklistService
     {
         private const string TemplateVivial = "Pagination Checklist Vivial.xlsm";
-        private const string TemplateWpur = "Pagination Checklist WPUR.xlsm";
+        private const string TemplateWpur = "Books assigned.xlsx";
         private const string TemplateAuNz = "Pagination Checklist AU-NZ.xlsm";
 
         private readonly IDbContextFactory<AppDbContext> _dbFactory;
