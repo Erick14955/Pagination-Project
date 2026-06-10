@@ -41,18 +41,29 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 builder.Services.AddHttpClient<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IPaginationChecklistService, PaginationChecklistService>();
 
 builder.Services.AddControllers();
 
-// Asegura que las cookies generadas por el sistema salgan con políticas seguras.
-builder.Services.Configure<CookiePolicyOptions>(options =>
+var isDevelopment = builder.Environment.IsDevelopment();
+
+builder.Services.AddAntiforgery(options =>
 {
-    options.HttpOnly = HttpOnlyPolicy.Always;
-    options.Secure = CookieSecurePolicy.Always;
-    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.Cookie.Name = isDevelopment
+        ? "Pagination_Project.Antiforgery"
+        : "__Host-Pagination_Project.Antiforgery";
+
+    options.Cookie.HttpOnly = true;
+
+    options.Cookie.SecurePolicy = isDevelopment
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.Path = "/";
 });
 
-// Asegura también la cookie antiforgery.
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = "__Host-Pagination_Project.Antiforgery";
@@ -110,7 +121,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Headers de seguridad + bloqueo de HTTP OPTIONS.
 app.Use(async (context, next) =>
 {
     context.Response.OnStarting(() =>

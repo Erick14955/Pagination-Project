@@ -159,6 +159,7 @@
                             <th>Database</th>
                             <th>Stage</th>
                             <th>Stage Date</th>
+                            <th>Checklist</th>
                         </tr>
                     </thead>
 
@@ -166,7 +167,7 @@
                         @if (loading)
                         {
                             <tr>
-                                <td colspan="6" class="thryv-empty-row">
+                                <td colspan="8" class="thryv-empty-row">
                                     Loading statistics...
                                 </td>
                             </tr>
@@ -216,6 +217,21 @@
                                     </td>
 
                                     <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+
+                                    <td>
+                                        @if (string.Equals(item.StageKey, "ProofExtract", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <a class="thryv-download-checklist-btn"
+                                               href="@GetChecklistDownloadUrl(item)"
+                                               download>
+                                                ⬇ Download
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="thryv-muted-cell">-</span>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         }
@@ -700,6 +716,11 @@
 
             return query.ToList();
         }
+    }
+
+    private static string GetChecklistDownloadUrl(AssignedBookDashboardDto item)
+    {
+        return $"/api/checklists/pagination/{item.BookId}?assignmentId={item.AssignmentId}";
     }
 
     private static string GetInitials(string? fullName)
