@@ -1284,3 +1284,28 @@ html[data-theme="dark glass"] .thryv-clear-filter-btn {
         background: rgba(255, 255, 255, 0.16) !important;
         border-color: rgba(255, 255, 255, 0.22) !important;
     }
+
+.thryv-custom-table thead th:last-child,
+.thryv-custom-table tbody td:last-child {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.thryv-custom-table tbody td:last-child {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+}
+
+    .thryv-custom-table tbody td:last-child .thryv-download-checklist-btn {
+        margin: 0 auto !important;
+        display: inline-flex !important;
+    }
+
+    .thryv-custom-table tbody td:last-child .thryv-muted-cell,
+    .thryv-custom-table tbody td:last-child span {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        text-align: center !important;
+    }

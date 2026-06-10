@@ -124,7 +124,7 @@ namespace Pagination_Project.Services
             var cleanKgen = SanitizeFilePart(book.KgenCode);
             var cleanBookName = SanitizeFilePart(book.BookName);
 
-            var fileName = $"Pagination_Checklist_{cleanKgen}_{cleanBookName}.xlsm";
+            var fileName = $"Pagination Checklist {cleanKgen}.xlsm";
 
             return new PaginationChecklistDownloadResult
             {
