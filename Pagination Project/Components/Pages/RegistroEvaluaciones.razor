@@ -993,9 +993,11 @@
                     item.AssignationId,
                     item.Asignacion?.Empleado?.Nombre ?? "-");
 
-                TextoBusquedaAsignacion = !string.IsNullOrWhiteSpace(item.Asignacion.Libro.KGENCode)
-                    ? item.Asignacion.Libro.KGENCode
-                    : item.Asignacion.Libro.LSACode ?? string.Empty;
+                var libroAsignacion = item.Asignacion?.Libro;
+
+                TextoBusquedaAsignacion = !string.IsNullOrWhiteSpace(libroAsignacion?.KGENCode)
+                    ? libroAsignacion.KGENCode
+                    : libroAsignacion?.LSACode ?? string.Empty;
 
                 AsignacionSeleccionada = new AsignacionSeleccionadaDto
                 {
