@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using Pagination_Project.Data;
 using Pagination_Project.Models;
+using System.IO.Compression;
 
 namespace Pagination_Project.Services
 {
@@ -122,16 +123,44 @@ namespace Pagination_Project.Services
             }
 
             var cleanKgen = SanitizeFilePart(book.KgenCode);
-            var cleanBookName = SanitizeFilePart(book.BookName);
 
-            var fileName = $"Pagination Checklist {cleanKgen}.xlsm";
+            var xlsmFileName = $"Pagination Checklist {cleanKgen}.xlsm";
+            var zipFileName = $"Pagination Checklist {cleanKgen}.zip";
+
+            var xlsmBytes = stream.ToArray();
+
+            var zipBytes = CrearZipConChecklist(
+                xlsmBytes,
+                xlsmFileName);
 
             return new PaginationChecklistDownloadResult
             {
-                Content = stream.ToArray(),
-                FileName = fileName,
-                ContentType = "application/vnd.ms-excel.sheet.macroEnabled.12"
+                Content = zipBytes,
+                FileName = zipFileName,
+                ContentType = "application/zip"
             };
+        }
+
+        private static byte[] CrearZipConChecklist(
+         byte[] checklistBytes,
+        string checklistFileName)
+        {
+            using var zipStream = new MemoryStream();
+
+            using (var archive = new ZipArchive(
+                zipStream,
+                ZipArchiveMode.Create,
+                leaveOpen: true))
+            {
+                var entry = archive.CreateEntry(
+                    checklistFileName,
+                    CompressionLevel.Fastest);
+
+                using var entryStream = entry.Open();
+                entryStream.Write(checklistBytes, 0, checklistBytes.Length);
+            }
+
+            return zipStream.ToArray();
         }
 
         private static string SeleccionarPlantilla(string bindPlantName)
