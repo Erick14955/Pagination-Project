@@ -115,6 +115,9 @@ namespace Pagination_Project.Services
                 MarcarNwp(workbookPart, templateName, book.Nwp);
                 MarcarSrlSuppression(workbookPart, templateName, book.SrlSuppression);
 
+                if (workbookPart.Workbook is null)
+                    throw new InvalidOperationException("Invalid Excel template. Workbook not found.");
+
                 workbookPart.Workbook.Save();
             }
 
@@ -297,6 +300,9 @@ namespace Pagination_Project.Services
             WorkbookPart workbookPart,
             string sheetName)
         {
+            if (workbookPart.Workbook is null)
+                return null;
+
             var sheet = workbookPart.Workbook
                 .Descendants<Sheet>()
                 .FirstOrDefault(s => string.Equals(
@@ -304,10 +310,10 @@ namespace Pagination_Project.Services
                     sheetName,
                     StringComparison.OrdinalIgnoreCase));
 
-            if (sheet?.Id is null)
+            if (sheet?.Id?.Value is null)
                 return null;
 
-            return workbookPart.GetPartById(sheet.Id!) as WorksheetPart;
+            return workbookPart.GetPartById(sheet.Id.Value) as WorksheetPart;
         }
 
         private static void SetCellText(
@@ -328,6 +334,9 @@ namespace Pagination_Project.Services
                     Space = SpaceProcessingModeValues.Preserve
                 });
 
+            if (worksheetPart.Worksheet is null)
+                throw new InvalidOperationException("Invalid Excel template. Worksheet not found.");
+
             worksheetPart.Worksheet.Save();
         }
 
@@ -344,6 +353,9 @@ namespace Pagination_Project.Services
             cell.DataType = CellValues.Boolean;
             cell.CellValue = new CellValue(value ? "1" : "0");
 
+            if (worksheetPart.Worksheet is null)
+                throw new InvalidOperationException("Invalid Excel template. Worksheet not found.");
+
             worksheetPart.Worksheet.Save();
         }
 
@@ -351,7 +363,11 @@ namespace Pagination_Project.Services
             WorksheetPart worksheetPart,
             string cellReference)
         {
+            if (worksheetPart.Worksheet is null)
+                throw new InvalidOperationException("Invalid Excel template. Worksheet not found.");
+
             var worksheet = worksheetPart.Worksheet;
+
             var sheetData = worksheet.GetFirstChild<SheetData>();
 
             if (sheetData is null)
@@ -395,8 +411,14 @@ namespace Pagination_Project.Services
                 .Elements<Cell>()
                 .FirstOrDefault(c =>
                 {
-                    var existingColumn = GetColumnName(c.CellReference?.Value ?? string.Empty);
+                    var existingCellReference = c.CellReference?.Value;
+
+                    if (string.IsNullOrWhiteSpace(existingCellReference))
+                        return false;
+
+                    var existingColumn = GetColumnName(existingCellReference);
                     var existingIndex = GetColumnIndex(existingColumn);
+
                     return existingIndex > columnIndex;
                 });
 
