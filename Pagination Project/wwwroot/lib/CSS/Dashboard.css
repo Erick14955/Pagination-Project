@@ -1309,3 +1309,14 @@ html[data-theme="dark glass"] .thryv-clear-filter-btn {
         width: 100%;
         text-align: center !important;
     }
+
+.thryv-download-checklist-btn {
+    border: none;
+    cursor: pointer;
+}
+
+    .thryv-download-checklist-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none !important;
+    }

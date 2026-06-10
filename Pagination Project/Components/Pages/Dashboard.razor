@@ -4,11 +4,14 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.JSInterop
 @using Pagination_Project.Models
 @using Pagination_Project.Services
 
 @inject IDashboardService DashboardService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IPaginationChecklistService ChecklistService
+@inject IJSRuntime JS
 
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
@@ -221,10 +224,12 @@
                                     <td>
                                         @if (string.Equals(item.StageKey, "ProofExtract", StringComparison.OrdinalIgnoreCase))
                                         {
-                                            <a class="thryv-download-checklist-btn"
-                                               href="@GetChecklistDownloadUrl(item)">
-                                                ⬇ Download
-                                            </a>
+                                            <button type="button"
+                                                    class="thryv-download-checklist-btn"
+                                                    disabled="@(DownloadingChecklistAssignmentId == item.AssignmentId)"
+                                                    @onclick="() => DownloadChecklistDirectAsync(item)">
+                                                @(DownloadingChecklistAssignmentId == item.AssignmentId ? "..." : "⬇ Download")
+                                            </button>
                                         }
                                         else
                                         {
@@ -389,8 +394,8 @@
                 <div class="thryv-search-box">
                     <span>🔎</span>
                     <input placeholder="Search by KGEN or book..."
-                            @bind="WeeklySearch"
-                            @bind:event="oninput" />
+                           @bind="WeeklySearch"
+                           @bind:event="oninput" />
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(SelectedWeeklyEmployeeFilter) ||
@@ -665,6 +670,8 @@
 
     private bool loading = true;
 
+    private Guid? DownloadingChecklistAssignmentId { get; set; }
+
     private bool PuedeVerUsuarios { get; set; }
     private bool PuedeVerEmpleados { get; set; }
     private bool PuedeVerLibros { get; set; }
@@ -717,9 +724,47 @@
         }
     }
 
-    private static string GetChecklistDownloadUrl(AssignedBookDashboardDto item)
+    private async Task DownloadChecklistDirectAsync(AssignedBookDashboardDto item)
     {
-        return $"/api/checklists/pagination/{item.BookId}?assignmentId={item.AssignmentId}";
+        if (DownloadingChecklistAssignmentId is not null)
+            return;
+
+        try
+        {
+            if (_user is null || _user.Identity?.IsAuthenticated != true)
+            {
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                _user = authState.User;
+            }
+
+            if (_user is null || _user.Identity?.IsAuthenticated != true)
+                return;
+
+            DownloadingChecklistAssignmentId = item.AssignmentId;
+            await InvokeAsync(StateHasChanged);
+
+            var result = await ChecklistService.GeneratePaginationChecklistAsync(
+                item.BookId,
+                item.AssignmentId,
+                _user);
+
+            var base64 = Convert.ToBase64String(result.Content);
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                result.FileName,
+                result.ContentType,
+                base64);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+        finally
+        {
+            DownloadingChecklistAssignmentId = null;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private static string GetInitials(string? fullName)
