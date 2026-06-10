@@ -64,15 +64,6 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.Path = "/";
 });
 
-builder.Services.AddAntiforgery(options =>
-{
-    options.Cookie.Name = "__Host-Pagination_Project.Antiforgery";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Strict;
-    options.Cookie.Path = "/";
-});
-
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -81,12 +72,17 @@ builder.Services
         options.LogoutPath = "/account/logout";
         options.AccessDeniedPath = "/login";
 
-        // El prefijo __Host- obliga buenas prácticas:
-        // Secure, Path=/ y sin Domain.
-        options.Cookie.Name = "__Host-Pagination_Project.Auth";
+        options.Cookie.Name = isDevelopment
+            ? "Pagination_Project.Auth"
+            : "__Host-Pagination_Project.Auth";
+
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
+        options.Cookie.SecurePolicy = isDevelopment
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+
         options.Cookie.Path = "/";
         options.Cookie.IsEssential = true;
 
@@ -94,8 +90,6 @@ builder.Services
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
-// Necesario en Render porque HTTPS normalmente llega por proxy.
-// Esto permite que ASP.NET Core reconozca correctamente X-Forwarded-Proto=https.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
@@ -162,9 +156,9 @@ app.UseCookiePolicy();
 
 app.UseStaticFiles();
 
-app.UseAntiforgery();
-
 app.UseAuthentication();
+app.UseAuthorization();
+app.UseAntiforgery();
 
 app.Use(async (context, next) =>
 {
