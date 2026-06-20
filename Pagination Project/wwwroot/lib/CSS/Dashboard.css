@@ -2021,3 +2021,48 @@ html[data-theme="dark glass"] .thryv-clear-filter-btn {
         -webkit-backdrop-filter: none !important;
     }
 }
+
+.thryv-dashboard-page .thryv-section-badge {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    background: rgba(0, 100, 82, 0.95) !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}
+
+.thryv-dashboard-page .thryv-percent-pill {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+    .thryv-dashboard-page .thryv-percent-pill.excellent {
+        background: #15803d !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(34, 197, 94, 0.45) !important;
+    }
+
+    .thryv-dashboard-page .thryv-percent-pill.warning {
+        background: #f59e0b !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(245, 158, 11, 0.45) !important;
+    }
+
+    .thryv-dashboard-page .thryv-percent-pill.danger {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(248, 113, 113, 0.55) !important;
+    }
+
+html[data-theme="dark"] .thryv-dashboard-page .thryv-section-badge,
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-badge,
+html[data-theme="dark"] .thryv-dashboard-page .thryv-percent-pill,
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-percent-pill {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-section-badge,
+html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-percent-pill {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    text-shadow: none !important;
+}

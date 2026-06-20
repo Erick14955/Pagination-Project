@@ -1005,3 +1005,16 @@ html[data-theme="dark glass"] .thryv-input {
         -webkit-backdrop-filter: blur(22px) saturate(170%);
     }
 }
+
+html[data-theme="dark"] .thryv-remember-option,
+html[data-theme="dark"] .thryv-remember-option span,
+html[data-theme="dark glass"] .thryv-remember-option,
+html[data-theme="dark glass"] .thryv-remember-option span {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+    html[data-theme="dark"] .thryv-remember-option input,
+    html[data-theme="dark glass"] .thryv-remember-option input {
+        accent-color: #ff5000 !important;
+    }

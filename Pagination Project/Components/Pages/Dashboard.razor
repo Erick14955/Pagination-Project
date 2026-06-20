@@ -1071,10 +1071,10 @@
 
     private static string GetAccuracyClass(decimal value)
     {
-        if (value >= 90)
+        if (value >= 80)
             return "excellent";
 
-        if (value >= 75)
+        if (value > 50)
             return "warning";
 
         return "danger";
