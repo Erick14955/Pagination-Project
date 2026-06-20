@@ -8,27 +8,23 @@
 
     <script src="js/themeManager.js"></script>
 
-    <script>
-        window.thryvTheme?.applySavedTheme();
-    </script>
-
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Pagination_Project.styles.css"]" />
     <link rel="stylesheet" href="@Assets["lib/CSS/Dashboard.css"]" />
     <link rel="stylesheet" href="@Assets["lib/CSS/DashboardLayout.css"]" />
     <link rel="stylesheet" href="@Assets["lib/CSS/Login.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/RegistroUsuario.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/RegistroEmpleados.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/RegistroLibros.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/Asignaciones.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/RegistroEvaluaciones.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/ReportesFinalizados.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/PermissionLevels.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/LateWorkActivities.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/FinalizarAsignaciones.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/EmployeeTimeOff.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/css/perfilusuario.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/RegistroUsuario.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/RegistroEmpleados.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/RegistroLibros.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/Asignaciones.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/RegistroEvaluaciones.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/ReportesFinalizados.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/PermissionLevels.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/LateWorkActivities.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/FinalizarAsignaciones.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/EmployeeTimeOff.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/CSS/perfilusuario.css"]" />
 
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -38,50 +34,7 @@
 <body>
     <Routes @rendermode="InteractiveServer" />
 
-    <script>
-        window.downloadFileFromBase64 = (fileName, contentType, base64Data) => {
-            try {
-                const byteCharacters = atob(base64Data);
-                const byteNumbers = new Array(byteCharacters.length);
-
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: contentType });
-
-                const url = URL.createObjectURL(blob);
-
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error("Download error:", error);
-                alert("Error downloading file.");
-            }
-        };
-
-        window.downloadFileFromText = (fileName, content) => {
-            const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        };
-    </script>
-
+    <script src="/js/downloadHelpers.js"></script>
     <script src="_framework/blazor.web.js"></script>
     <script src="js/assignmentImportModal.js"></script>
 </body>

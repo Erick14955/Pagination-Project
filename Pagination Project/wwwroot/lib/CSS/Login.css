@@ -571,10 +571,16 @@ html[data-theme="dark glass"] .thryv-input {
     overflow-x: hidden;
 }
 
-.thryv-login-card,
-.thryv-login-panel,
+.thryv-login-card {
+    max-width: 760px;
+}
+
+.thryv-login-panel {
+    max-width: 610px;
+}
+
 .thryv-modal-card {
-    max-width: 100%;
+    max-width: 420px;
 }
 
     .thryv-logo-text,

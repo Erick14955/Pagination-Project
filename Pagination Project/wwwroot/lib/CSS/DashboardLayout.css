@@ -928,15 +928,13 @@ html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
         position: fixed !important;
         top: 0;
         left: 0;
-        width: min(290px, 84vw) !important;
-        min-width: min(290px, 84vw) !important;
+        width: 290px !important;
+        min-width: 290px !important;
         max-width: 84vw !important;
         height: 100vh;
-        transform: translateX(-105%);
+        transform: translate3d(-105%, 0, 0);
         transition: transform 0.28s ease;
         z-index: 1200;
-        border-right: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 18px 0 46px rgba(0, 0, 0, 0.35);
     }
 
     @supports (height: 100dvh) {
@@ -1321,4 +1319,126 @@ html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
     background: rgba(2, 6, 23, 0.52);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+    html[data-theme="liquid glass"] .thryv-sidebar,
+    html[data-theme="dark glass"] .thryv-sidebar {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-sidebar {
+        background: rgba(17, 17, 17, 0.98) !important;
+    }
+
+    html[data-theme="dark glass"] .thryv-sidebar {
+        background: rgba(2, 6, 23, 0.98) !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-sidebar::before,
+    html[data-theme="dark glass"] .thryv-dashboard-layout::before,
+    html[data-theme="liquid glass"] .thryv-dashboard-layout::before {
+        display: none !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-sidebar-overlay.show,
+    html[data-theme="dark glass"] .thryv-sidebar-overlay.show,
+    .thryv-sidebar-overlay.show {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(15, 23, 42, 0.55) !important;
+    }
+
+    .thryv-sidebar,
+    .thryv-sidebar.open,
+    .thryv-sidebar.closed {
+        transform: translate3d(-105%, 0, 0);
+        backface-visibility: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
+
+        .thryv-sidebar.open {
+            transform: translate3d(0, 0, 0);
+        }
+}
+
+@media (max-width: 768px) {
+    .thryv-sidebar,
+    .thryv-sidebar.open,
+    .thryv-sidebar.closed {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 290px !important;
+        min-width: 290px !important;
+        max-width: 84vw !important;
+        height: 100vh !important;
+        z-index: 3000 !important;
+        overflow: hidden !important;
+        background: #020617 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: translate3d(-105%, 0, 0);
+        transition: transform 0.28s ease;
+        box-shadow: 18px 0 46px rgba(0, 0, 0, 0.45) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.10) !important;
+    }
+
+        .thryv-sidebar.open {
+            transform: translate3d(0, 0, 0) !important;
+        }
+
+        .thryv-sidebar.closed {
+            transform: translate3d(-105%, 0, 0) !important;
+        }
+
+    html[data-theme="dark"] .thryv-sidebar,
+    html[data-theme="dark"] .thryv-sidebar.open,
+    html[data-theme="dark glass"] .thryv-sidebar,
+    html[data-theme="dark glass"] .thryv-sidebar.open {
+        background: #020617 !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-sidebar,
+    html[data-theme="liquid glass"] .thryv-sidebar.open {
+        background: #111111 !important;
+    }
+
+        .thryv-sidebar::before,
+        html[data-theme="liquid glass"] .thryv-sidebar::before,
+        html[data-theme="dark glass"] .thryv-sidebar::before {
+            display: none !important;
+            content: none !important;
+        }
+
+    .thryv-sidebar-overlay {
+        display: none;
+    }
+
+        .thryv-sidebar-overlay.show {
+            display: block !important;
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 2500 !important;
+            background: rgba(2, 6, 23, 0.58) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+    .thryv-main-content {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+}
+
+@supports (height: 100dvh) {
+    @media (max-width: 768px) {
+        .thryv-sidebar,
+        .thryv-sidebar-overlay.show {
+            height: 100dvh !important;
+        }
+    }
 }

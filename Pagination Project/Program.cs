@@ -199,7 +199,7 @@ app.Use(async (context, next) =>
             "object-src 'none'; " +
             "frame-ancestors 'none'; " +
             "form-action 'self'; " +
-            "script-src 'self'; " +
+            "script-src 'self' 'unsafe-inline'; " +
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data: blob: https:; " +
             "font-src 'self' data:; " +
@@ -277,7 +277,7 @@ app.MapPost("/account/login", async (
 {
     var form = await httpContext.Request.ReadFormAsync();
 
-    var username = form["Username"].ToString();
+    var username = form["Username"].ToString().Trim().ToLowerInvariant();
     var password = form["Password"].ToString();
     var returnUrl = form["ReturnUrl"].ToString();
     var rememberMe =
@@ -543,7 +543,11 @@ app.MapGet("/security.txt", securityTxtHandler);
 
 app.MapControllers();
 
-app.MapStaticAssets();
+app.MapStaticAssets()
+   .Add(endpointBuilder =>
+   {
+       endpointBuilder.Metadata.Add(new AllowAnonymousAttribute());
+   });
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

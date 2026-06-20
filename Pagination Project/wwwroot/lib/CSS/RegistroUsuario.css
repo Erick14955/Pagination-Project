@@ -2551,3 +2551,92 @@ html[data-theme="dark glass"] .thryv-users-table tbody tr:hover {
             color: #475569;
         }
 }
+
+@media (max-width: 768px) {
+    .thryv-users-page .thryv-users-table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 18px !important;
+        width: 100% !important;
+    }
+
+        .thryv-users-page .thryv-users-table tbody tr {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            border-radius: 18px !important;
+        }
+
+            .thryv-users-page .thryv-users-table tbody tr:not(:last-child) {
+                margin-bottom: 0 !important;
+            }
+}
+
+@media (max-width: 520px) {
+    .thryv-users-page .thryv-users-table tbody {
+        gap: 16px !important;
+    }
+
+        .thryv-users-page .thryv-users-table tbody tr {
+            border-radius: 16px !important;
+        }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark glass"] .thryv-users-page .thryv-users-table tbody tr {
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+.thryv-users-page .thryv-table-wrap.large {
+    position: relative;
+    isolation: isolate;
+    background: var(--bg-card);
+}
+
+.thryv-users-page .thryv-users-table thead {
+    position: relative;
+    z-index: 30;
+}
+
+    .thryv-users-page .thryv-users-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 40 !important;
+        background: #f8fafc !important;
+        color: #64748b !important;
+        box-shadow: 0 1px 0 var(--border), 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+html[data-theme="dark"] .thryv-users-page .thryv-users-table thead th,
+html.dark .thryv-users-page .thryv-users-table thead th,
+body.dark .thryv-users-page .thryv-users-table thead th {
+    background: #0b1324 !important;
+    color: #cbd5e1 !important;
+    box-shadow: 0 1px 0 rgba(148, 163, 184, 0.18), 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark glass"] .thryv-users-page .thryv-users-table thead th {
+    background: #07111f !important;
+    color: #cbd5e1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.10), 0 12px 28px rgba(0, 0, 0, 0.42);
+}
+
+html[data-theme="liquid glass"] .thryv-users-page .thryv-users-table thead th {
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: #475569 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 1px 0 rgba(226, 232, 240, 0.9), 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+.thryv-users-page .thryv-users-table tbody tr,
+.thryv-users-page .thryv-users-table tbody td {
+    position: relative;
+    z-index: 1;
+}

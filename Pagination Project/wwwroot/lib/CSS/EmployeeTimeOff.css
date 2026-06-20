@@ -1470,3 +1470,51 @@ html[data-theme="liquid glass"] .timeoff-page .page-hero .stat-card strong {
             color: #475569;
         }
 }
+
+@media (max-width: 768px) {
+    .timeoff-page .timeoff-table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 18px !important;
+        width: 100% !important;
+    }
+
+        .timeoff-page .timeoff-table tbody tr {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            border-radius: 18px !important;
+        }
+
+            .timeoff-page .timeoff-table tbody tr:not(:last-child) {
+                margin-bottom: 0 !important;
+            }
+
+    .timeoff-page .timeoff-table {
+        border-spacing: 0 !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .timeoff-page .timeoff-table tbody {
+        gap: 16px !important;
+    }
+
+        .timeoff-page .timeoff-table tbody tr {
+            border-radius: 16px !important;
+        }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark glass"] .timeoff-page .timeoff-table tbody tr {
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    html[data-theme="liquid glass"] .timeoff-page .timeoff-table tbody tr {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
