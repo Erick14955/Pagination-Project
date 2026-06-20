@@ -16,6 +16,25 @@ namespace Pagination_Project.Services
             _dbFactory = dbFactory;
         }
 
+        public async Task<bool> DesbloquearUsuarioAsync(Guid usuarioId)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            var usuario = await db.Users
+                .FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            if (usuario is null)
+                return false;
+
+            usuario.LoginFailedAttempts = 0;
+            usuario.LoginBloqueado = false;
+            usuario.LoginBloqueadoAt = null;
+
+            await db.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task<List<UsuarioListDto>> ObtenerTodosAsync()
         {
             await using var context = await _dbFactory.CreateDbContextAsync();
@@ -35,9 +54,13 @@ namespace Pagination_Project.Services
                     NivelNombre = u.Permisos != null ? u.Permisos.Name : string.Empty,
                     Activo = u.Activo,
                     EmployeeId = u.EmployeeId,
-                    EmployeeName = u.Empleado != null ? u.Empleado.Nombre : string.Empty,
                     EmployeeCode = u.Empleado != null ? u.Empleado.IdEmpleado : null,
-                    RequirePasswordChange = u.RequirePasswordChange
+                    EmployeeName = u.Empleado != null ? u.Empleado.Nombre : string.Empty,
+                    RequirePasswordChange = u.RequirePasswordChange,
+
+                    LoginFailedAttempts = u.LoginFailedAttempts,
+                    LoginBloqueado = u.LoginBloqueado,
+                    LoginBloqueadoAt = u.LoginBloqueadoAt
                 })
                 .ToListAsync();
         }

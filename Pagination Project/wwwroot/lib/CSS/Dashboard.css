@@ -8,11 +8,6 @@
     box-sizing: border-box;
 }
 
-/* =========================
-   DASHBOARD HERO / TITLE
-   Cards dentro del title
-========================= */
-
 .thryv-dashboard-header {
     width: 100%;
     background: linear-gradient(115deg, #081827 0%, #08263a 42%, #006452 100%);
@@ -141,10 +136,6 @@
         letter-spacing: 4px;
     }
 
-/* =========================
-   SECTION CARD
-========================= */
-
 .thryv-section-card {
     background: #ffffff;
     border-radius: 26px;
@@ -188,10 +179,6 @@
     gap: 12px;
     flex-wrap: wrap;
 }
-
-/* =========================
-   FILTERS
-========================= */
 
 .thryv-filter-group {
     display: flex;
@@ -257,10 +244,6 @@
     align-items: center;
     justify-content: center;
 }
-
-/* =========================
-   TABLE
-========================= */
 
 .thryv-table-wrapper {
     width: 100%;
@@ -380,10 +363,6 @@
     .thryv-custom-table tbody td:nth-child(5) .thryv-stage-pill {
         margin: 0 auto;
     }
-
-/* =========================
-   RESPONSIVE
-========================= */
 
 @media (max-width: 1400px) {
     .thryv-dashboard-header {
@@ -1193,10 +1172,6 @@ html[data-theme="dark glass"] .thryv-hero-stat-card {
         color: #f8fafc;
     }
 
-/* =========================================================
-   LIQUID GLASS FIX - DASHBOARD HERO TITLE READABILITY
-========================================================= */
-
 html[data-theme="liquid glass"] .thryv-dashboard-title {
     color: #0f172a !important;
     text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
@@ -1216,10 +1191,6 @@ html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
     -webkit-backdrop-filter: blur(18px) saturate(170%);
 }
 
-/* =========================================================
-   FIX - LSA CODE READABILITY (DARK + DARK GLASS)
-========================================================= */
-
 html[data-theme="dark"] .thryv-code-pill,
 html[data-theme="dark glass"] .thryv-code-pill {
     background: rgba(59, 130, 246, 0.12) !important;
@@ -1227,7 +1198,6 @@ html[data-theme="dark glass"] .thryv-code-pill {
     border-color: rgba(59, 130, 246, 0.25) !important;
 }
 
-    /* Si usas la variante secondary */
     html[data-theme="dark"] .thryv-code-pill.secondary,
     html[data-theme="dark glass"] .thryv-code-pill.secondary {
         background: rgba(255, 255, 255, 0.08) !important;
@@ -1320,3 +1290,686 @@ html[data-theme="dark glass"] .thryv-clear-filter-btn {
         cursor: not-allowed;
         transform: none !important;
     }
+
+.thryv-dashboard-page,
+.thryv-dashboard-page * {
+    box-sizing: border-box;
+}
+
+.thryv-dashboard-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.thryv-dashboard-header,
+.thryv-section-card,
+.thryv-table-wrapper,
+.weekly-evaluation-modal {
+    max-width: 100%;
+}
+
+.thryv-employee-name,
+.thryv-custom-table td,
+.thryv-custom-table th {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 1280px) {
+    .thryv-dashboard-header {
+        grid-template-columns: 1fr;
+        padding: 30px;
+        gap: 26px;
+    }
+
+    .thryv-dashboard-hero-stats {
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+    }
+
+    .thryv-section-header {
+        align-items: flex-start;
+    }
+
+    .thryv-section-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 1024px) {
+    .thryv-dashboard-page {
+        gap: 20px;
+    }
+
+    .thryv-dashboard-header {
+        border-radius: 22px;
+        padding: 26px;
+    }
+
+    .thryv-dashboard-title {
+        font-size: 32px;
+    }
+
+    .thryv-dashboard-subtitle {
+        font-size: 16px;
+        max-width: 100%;
+    }
+
+    .thryv-dashboard-hero-stats {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+        gap: 14px;
+    }
+
+    .thryv-hero-stat-card {
+        min-height: 100px;
+        padding: 18px 20px;
+        border-radius: 18px;
+    }
+
+        .thryv-hero-stat-card strong {
+            font-size: 30px;
+            letter-spacing: 2px;
+        }
+
+    .thryv-section-card {
+        border-radius: 22px;
+    }
+
+    .thryv-section-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px;
+    }
+
+    .thryv-section-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+        align-items: end;
+    }
+
+    .thryv-filter-group,
+    .thryv-search-box {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .thryv-filter-select,
+    .thryv-clear-filter-btn,
+    .thryv-section-badge,
+    .thryv-search-box {
+        width: 100%;
+        height: 44px;
+    }
+
+    .thryv-download-checklist-btn {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .weekly-evaluation-summary-grid {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+    }
+
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .thryv-dashboard-page {
+        gap: 16px;
+    }
+
+    .thryv-dashboard-header {
+        padding: 20px;
+        border-radius: 18px;
+        gap: 18px;
+        min-height: auto;
+    }
+
+    .thryv-dashboard-hero-content {
+        padding-top: 0;
+    }
+
+    html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .thryv-dashboard-title {
+        font-size: 26px;
+        line-height: 1.15;
+        letter-spacing: -0.3px;
+    }
+
+    .thryv-dashboard-subtitle {
+        margin-top: 12px;
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    .thryv-dashboard-hero-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .thryv-hero-stat-card {
+        min-height: 92px;
+        padding: 16px 18px;
+        border-radius: 16px;
+    }
+
+        .thryv-hero-stat-card span {
+            font-size: 11px;
+            margin-bottom: 9px;
+        }
+
+        .thryv-hero-stat-card strong {
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+    .thryv-section-card {
+        border-radius: 18px;
+    }
+
+    .completed-section-card {
+        margin-top: 18px;
+    }
+
+    .thryv-section-header {
+        padding: 18px 16px;
+        gap: 14px;
+    }
+
+        .thryv-section-header h3 {
+            font-size: 19px;
+            line-height: 1.2;
+        }
+
+        .thryv-section-header p {
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+    .thryv-section-actions {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .thryv-filter-group {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .thryv-filter-select,
+    .thryv-clear-filter-btn,
+    .thryv-section-badge,
+    .thryv-search-box {
+        width: 100%;
+        min-width: 0;
+        height: 44px;
+        border-radius: 13px;
+    }
+
+    .thryv-section-badge {
+        white-space: normal;
+        text-align: center;
+        line-height: 1.25;
+        padding: 8px 12px;
+    }
+
+    .thryv-table-wrapper {
+        overflow: visible;
+        border: none;
+    }
+
+    .thryv-custom-table {
+        width: 100%;
+        min-width: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+    }
+
+        .thryv-custom-table thead {
+            display: none;
+        }
+
+        .thryv-custom-table,
+        .thryv-custom-table tbody,
+        .thryv-custom-table tr,
+        .thryv-custom-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .thryv-custom-table tbody tr {
+                background: #ffffff;
+                border: 1px solid rgba(226, 232, 240, 0.95);
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+                overflow: hidden;
+            }
+
+                .thryv-custom-table tbody tr:hover {
+                    background: #ffffff;
+                }
+
+            .thryv-custom-table tbody td {
+                position: relative;
+                min-height: 44px;
+                padding: 12px 10px 12px 44% !important;
+                border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                text-align: right;
+                white-space: normal;
+                font-size: 13px;
+            }
+
+                .thryv-custom-table tbody td:last-child {
+                    border-bottom: none;
+                }
+
+                .thryv-custom-table tbody td::before {
+                    content: "";
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 38%;
+                    color: #64748b;
+                    font-size: 11px;
+                    font-weight: 900;
+                    text-align: left;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    line-height: 1.25;
+                }
+
+                .thryv-custom-table tbody td:nth-child(1)::before {
+                    content: "Employee";
+                }
+
+                .thryv-custom-table tbody td:nth-child(2)::before {
+                    content: "Code";
+                }
+
+                .thryv-custom-table tbody td:nth-child(3)::before {
+                    content: "Book";
+                }
+
+                .thryv-custom-table tbody td:nth-child(4)::before {
+                    content: "Stage";
+                }
+
+                .thryv-custom-table tbody td:nth-child(5)::before {
+                    content: "Checklist";
+                }
+
+    .completed-section-card .thryv-custom-table tbody td:nth-child(1)::before {
+        content: "Employee";
+    }
+
+    .completed-section-card .thryv-custom-table tbody td:nth-child(2)::before {
+        content: "Book";
+    }
+
+    .completed-section-card .thryv-custom-table tbody td:nth-child(3)::before {
+        content: "Code";
+    }
+
+    .completed-section-card .thryv-custom-table tbody td:nth-child(4)::before {
+        content: "Stage";
+    }
+
+    .completed-section-card .thryv-custom-table tbody td:nth-child(5)::before {
+        content: "Completed";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(1)::before {
+        content: "Employee";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(2)::before {
+        content: "Total";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(3)::before {
+        content: "Proof";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(4)::before {
+        content: "Final";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(5)::before {
+        content: "Memo";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(6)::before {
+        content: "Final PO";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(7)::before {
+        content: "Shipping";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(8)::before {
+        content: "Dirxion";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(9)::before {
+        content: "Percent";
+    }
+
+    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(10)::before {
+        content: "Details";
+    }
+
+    .thryv-employee-cell {
+        width: 100%;
+        justify-content: flex-end;
+        text-align: right;
+    }
+
+    .thryv-employee-name {
+        text-align: right;
+        font-size: 13px;
+    }
+
+    .thryv-employee-avatar,
+    .completed-avatar,
+    .weekly-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 13px;
+        font-size: 13px;
+    }
+
+    .thryv-code-pill,
+    .thryv-stage-pill,
+    .thryv-percent-pill {
+        white-space: normal;
+        min-width: 0;
+        max-width: 100%;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .thryv-download-checklist-btn {
+        width: auto;
+        min-width: 120px;
+        max-width: 100%;
+        margin-left: auto !important;
+    }
+
+    .thryv-custom-table tbody td:last-child .thryv-download-checklist-btn {
+        margin-left: auto !important;
+        margin-right: 0 !important;
+    }
+
+    .thryv-empty-row {
+        padding: 22px 12px !important;
+        text-align: center !important;
+    }
+
+        .thryv-empty-row::before {
+            display: none;
+        }
+
+    .weekly-evaluation-modal-backdrop {
+        padding: 12px;
+        align-items: flex-start;
+        overflow-y: auto;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: none;
+        border-radius: 20px;
+    }
+
+    .weekly-evaluation-modal-header {
+        position: relative;
+        border-radius: 20px 20px 0 0;
+        padding: 20px;
+    }
+
+        .weekly-evaluation-modal-header h3 {
+            font-size: 1.12rem;
+            line-height: 1.25;
+        }
+
+        .weekly-evaluation-modal-header p {
+            font-size: 0.88rem;
+            line-height: 1.35;
+        }
+
+    .weekly-evaluation-summary-grid,
+    .weekly-evaluation-percent-grid,
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .weekly-evaluation-summary-grid {
+        padding-top: 16px;
+    }
+
+    .weekly-evaluation-detail-grid {
+        padding-bottom: 18px;
+    }
+
+    .weekly-summary-card,
+    .weekly-percent-mini-card,
+    .weekly-detail-card {
+        border-radius: 17px;
+        padding: 14px;
+    }
+
+    .weekly-detail-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .weekly-radio-row {
+        grid-template-columns: 22px 1fr;
+        gap: 8px;
+    }
+
+        .weekly-radio-row small {
+            grid-column: 2;
+            justify-self: flex-start;
+        }
+}
+
+@media (max-width: 520px) {
+    .thryv-dashboard-header {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .thryv-dashboard-title {
+        font-size: 23px;
+    }
+
+    .thryv-dashboard-subtitle {
+        font-size: 13px;
+    }
+
+    .thryv-hero-stat-card {
+        min-height: 86px;
+        padding: 15px 16px;
+    }
+
+        .thryv-hero-stat-card strong {
+            font-size: 25px;
+        }
+
+    .thryv-section-header {
+        padding: 16px 14px;
+    }
+
+        .thryv-section-header h3 {
+            font-size: 17px;
+        }
+
+        .thryv-section-header p {
+            font-size: 12.5px;
+        }
+
+    .thryv-filter-select,
+    .thryv-clear-filter-btn,
+    .thryv-section-badge,
+    .thryv-search-box {
+        height: 42px;
+        font-size: 13px;
+    }
+
+        .thryv-search-box input {
+            font-size: 13px;
+        }
+
+    .thryv-custom-table {
+        border-spacing: 0 12px;
+    }
+
+        .thryv-custom-table tbody tr {
+            border-radius: 16px;
+            padding: 10px;
+        }
+
+        .thryv-custom-table tbody td {
+            padding: 11px 8px 11px 42% !important;
+            min-height: 42px;
+            font-size: 12.5px;
+        }
+
+            .thryv-custom-table tbody td::before {
+                left: 8px;
+                width: 36%;
+                font-size: 10px;
+            }
+
+    .thryv-employee-cell {
+        gap: 8px;
+    }
+
+    .thryv-employee-avatar,
+    .completed-avatar,
+    .weekly-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 11px;
+        font-size: 12px;
+    }
+
+    .thryv-code-pill,
+    .thryv-stage-pill,
+    .thryv-percent-pill {
+        font-size: 10.5px;
+        padding: 7px 9px;
+    }
+
+    .thryv-paper-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+    }
+
+    .weekly-evaluation-modal-header {
+        padding: 16px;
+    }
+
+    .weekly-modal-close {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+    }
+
+    .weekly-evaluation-summary-grid,
+    .weekly-evaluation-percent-grid,
+    .weekly-evaluation-detail-grid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .thryv-custom-table tbody tr {
+        background: #111827;
+        border-color: rgba(255,255,255,.10);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+        html[data-theme="dark"] .thryv-custom-table tbody tr:hover {
+            background: #111827;
+        }
+
+    html[data-theme="dark"] .thryv-custom-table tbody td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark"] .thryv-custom-table tbody td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .thryv-custom-table tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+        html[data-theme="dark glass"] .thryv-custom-table tbody tr:hover {
+            background: rgba(15,23,42,.68);
+        }
+
+    html[data-theme="dark glass"] .thryv-custom-table tbody td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark glass"] .thryv-custom-table tbody td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .thryv-custom-table tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+        html[data-theme="liquid glass"] .thryv-custom-table tbody tr:hover {
+            background: rgba(255,255,255,.50);
+        }
+
+    html[data-theme="liquid glass"] .thryv-custom-table tbody td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.42);
+    }
+
+        html[data-theme="liquid glass"] .thryv-custom-table tbody td::before {
+            color: #475569;
+        }
+}

@@ -14,6 +14,7 @@ namespace Pagination_Project.Models
         public bool EditUser { get; set; }
         public bool DeleteUser { get; set; }
         public bool CreateBook { get; set; }
+        public bool UnlockUsers { get; set; }
         public bool EditBook { get; set; }
         public bool DeleteBook { get; set; }
         public bool AsignBook { get; set; }

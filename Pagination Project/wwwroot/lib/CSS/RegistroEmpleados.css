@@ -384,10 +384,6 @@
     }
 }
 
-/* =========================================================
-   DARK MODE - EMPLOYEES
-========================================================= */
-
 html[data-theme="dark"] .employees-page {
     background: #0f172a;
 }
@@ -450,10 +446,6 @@ html[data-theme="dark"] .btn-secondary {
     background: #1e293b;
     color: #f8fafc;
 }
-
-/* =========================================================
-   LIQUID GLASS PREMIUM - EMPLOYEES
-========================================================= */
 
 html[data-theme="liquid glass"] .employees-page {
     background: transparent;
@@ -533,10 +525,6 @@ html[data-theme="liquid glass"] .btn-secondary {
     backdrop-filter: blur(18px);
 }
 
-/* =========================================================
-   DARK GLASS - EMPLOYEES
-========================================================= */
-
 html[data-theme="dark glass"] .employees-page {
     background: transparent;
 }
@@ -603,10 +591,6 @@ html[data-theme="dark glass"] .btn-secondary {
     color: #f8fafc;
     border: 1px solid rgba(255,255,255,.12);
 }
-
-/* =========================================================
-   DARK MODE FIX - EMPLOYEE REGISTER / EMPLOYEE LIST
-========================================================= */
 
 html[data-theme="dark"] .employees-page,
 body.dark .employees-page,
@@ -753,10 +737,6 @@ html.dark .status-badge.active {
     color: #15803d !important;
 }
 
-/* =========================================================
-   LIQUID GLASS FIX - EMPLOYEE ID + NEW EMPLOYEE BUTTON
-========================================================= */
-
 html[data-theme="liquid glass"] .employees-page .form-input:disabled {
     background: rgba(255,255,255,.45) !important;
     color: #475569 !important;
@@ -783,10 +763,6 @@ html[data-theme="liquid glass"] .employees-page .btn-primary {
         background: rgba(100, 116, 139, 0.9) !important;
         transform: translateY(-1px);
     }
-
-/* =========================================================
-   DARK GLASS FIX - EMPLOYEES PAGE
-========================================================= */
 
 html[data-theme="dark glass"] .employees-page {
     background: transparent !important;
@@ -869,4 +845,533 @@ html[data-theme="dark glass"] .btn-secondary {
     background: rgba(244, 63, 94, 0.12) !important;
     color: #fb7185 !important;
     border: 1px solid rgba(244, 63, 94, 0.18) !important;
+}
+
+.employees-page,
+.employees-page * {
+    box-sizing: border-box;
+}
+
+.employees-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.employees-layout,
+.employee-form-card,
+.employee-list-card,
+.no-access-card,
+.table-wrapper,
+.employee-table {
+    max-width: 100%;
+}
+
+.employees-page .employee-table th,
+.employees-page .employee-table td,
+.employees-page .employees-header,
+.employees-page .card-title,
+.employees-page .table-header {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 1280px) {
+    .employees-layout {
+        grid-template-columns: 340px minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .employee-form-card,
+    .employee-list-card {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .employees-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .employee-form-card {
+        position: static;
+        top: auto;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .table-header {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .employees-page {
+        padding: 18px;
+    }
+
+    .employees-header {
+        margin-bottom: 20px;
+    }
+
+        .employees-header h1 {
+            font-size: 1.75rem;
+            line-height: 1.15;
+        }
+
+        .employees-header p {
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+
+    .employee-form-card,
+    .employee-list-card,
+    .no-access-card {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .search-box {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .form-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .employees-page {
+        padding: 14px;
+    }
+
+    .employees-layout {
+        gap: 16px;
+    }
+
+    .employees-header h1 {
+        font-size: 1.45rem;
+    }
+
+    .employees-header p {
+        font-size: 0.86rem;
+    }
+
+    .employee-form-card,
+    .employee-list-card,
+    .no-access-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .card-title {
+        margin-bottom: 18px;
+    }
+
+        .card-title h2,
+        .table-header h2 {
+            font-size: 1.12rem;
+            line-height: 1.2;
+        }
+
+        .card-title span,
+        .table-header p {
+            font-size: 0.84rem;
+            line-height: 1.4;
+        }
+
+    .form-group label {
+        font-size: 0.84rem;
+    }
+
+    .form-input,
+    .search-box {
+        height: 44px;
+        border-radius: 13px;
+        font-size: 0.88rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        min-height: 44px;
+        border-radius: 13px;
+    }
+
+    .alert-box {
+        padding: 13px 15px;
+        border-radius: 14px;
+        font-size: 0.86rem;
+    }
+
+    .no-access-card {
+        padding: 24px 18px;
+    }
+
+        .no-access-card h3 {
+            font-size: 1.1rem;
+        }
+
+        .no-access-card p {
+            font-size: 0.88rem;
+        }
+
+    .table-wrapper {
+        overflow: visible;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .employee-table {
+        width: 100%;
+        min-width: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        background: transparent;
+    }
+
+        .employee-table thead {
+            display: none;
+        }
+
+        .employee-table,
+        .employee-table tbody,
+        .employee-table tr,
+        .employee-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .employee-table tbody tr {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+                overflow: hidden;
+            }
+
+                .employee-table tbody tr:hover {
+                    background: #ffffff;
+                }
+
+            .employee-table tbody td {
+                position: relative;
+                min-height: 44px;
+                padding: 12px 10px 12px 44% !important;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                text-align: right;
+                white-space: normal;
+                font-size: 13px;
+                color: #1f2937;
+            }
+
+                .employee-table tbody td:last-child {
+                    border-bottom: none;
+                }
+
+                .employee-table tbody td::before {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 38%;
+                    color: #64748b;
+                    font-size: 11px;
+                    font-weight: 900;
+                    text-align: left;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    line-height: 1.25;
+                    white-space: normal;
+                }
+
+                .employee-table tbody td:nth-child(1)::before {
+                    content: "Employee ID";
+                }
+
+                .employee-table tbody td:nth-child(2)::before {
+                    content: "Name";
+                }
+
+                .employee-table tbody td:nth-child(3)::before {
+                    content: "Email";
+                }
+
+                .employee-table tbody td:nth-child(4)::before {
+                    content: "Status";
+                }
+
+                .employee-table tbody td:nth-child(5)::before {
+                    content: "Actions";
+                }
+
+    .actions-column {
+        width: 100%;
+    }
+
+    .status-badge {
+        min-width: 0;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .btn-action {
+        min-height: 36px;
+        padding: 8px 11px;
+        border-radius: 12px;
+        font-size: 0.78rem;
+    }
+
+    .empty-row {
+        display: block;
+        padding: 24px 12px !important;
+        text-align: center !important;
+    }
+
+        .empty-row::before {
+            display: none;
+        }
+}
+
+@media (max-width: 520px) {
+    .employees-page {
+        padding: 10px;
+    }
+
+    .employees-header {
+        margin-bottom: 16px;
+    }
+
+        .employees-header h1 {
+            font-size: 1.28rem;
+        }
+
+        .employees-header p {
+            font-size: 0.82rem;
+        }
+
+    .employee-form-card,
+    .employee-list-card,
+    .no-access-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .card-title h2,
+    .table-header h2 {
+        font-size: 1rem;
+    }
+
+    .card-title span,
+    .table-header p {
+        font-size: 0.8rem;
+    }
+
+    .form-grid {
+        gap: 13px;
+    }
+
+    .form-input,
+    .search-box,
+    .btn-primary,
+    .btn-secondary {
+        height: 42px;
+        min-height: 42px;
+        border-radius: 12px;
+        font-size: 0.84rem;
+    }
+
+    .employee-table {
+        border-spacing: 0 12px;
+    }
+
+        .employee-table tbody tr {
+            border-radius: 16px;
+            padding: 10px;
+        }
+
+        .employee-table tbody td {
+            padding: 11px 8px 11px 42% !important;
+            min-height: 42px;
+            font-size: 12.5px;
+        }
+
+            .employee-table tbody td::before {
+                left: 8px;
+                width: 36%;
+                font-size: 10px;
+            }
+
+    .action-buttons {
+        gap: 6px;
+    }
+
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .status-badge {
+        font-size: 0.76rem;
+        padding: 7px 10px;
+    }
+}
+
+@media (max-width: 390px) {
+    .employees-page {
+        padding: 8px;
+    }
+
+    .employee-form-card,
+    .employee-list-card,
+    .no-access-card {
+        padding: 14px;
+    }
+
+    .employees-header h1 {
+        font-size: 1.18rem;
+    }
+
+    .employee-table tbody td {
+        padding-left: 40% !important;
+    }
+
+        .employee-table tbody td::before {
+            width: 34%;
+            font-size: 9.5px;
+        }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    .employees-page {
+        padding: 14px;
+    }
+
+    .employee-form-card,
+    .employee-list-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-input {
+        height: 42px;
+    }
+
+    .form-actions {
+        flex-direction: row;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .employees-page .employee-table tbody tr,
+    body.dark .employees-page .employee-table tbody tr,
+    html.dark .employees-page .employee-table tbody tr {
+        background: #0f172a;
+        border-color: rgba(148, 163, 184, 0.18);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+        html[data-theme="dark"] .employees-page .employee-table tbody tr:hover,
+        body.dark .employees-page .employee-table tbody tr:hover,
+        html.dark .employees-page .employee-table tbody tr:hover {
+            background: #111c2f;
+        }
+
+    html[data-theme="dark"] .employees-page .employee-table tbody td,
+    body.dark .employees-page .employee-table tbody td,
+    html.dark .employees-page .employee-table tbody td {
+        background: transparent !important;
+        color: #ffffff !important;
+        border-bottom-color: rgba(148, 163, 184, 0.14) !important;
+    }
+
+        html[data-theme="dark"] .employees-page .employee-table tbody td::before,
+        body.dark .employees-page .employee-table tbody td::before,
+        html.dark .employees-page .employee-table tbody td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .employees-page .employee-table tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+        html[data-theme="dark glass"] .employees-page .employee-table tbody tr:hover {
+            background: rgba(15,23,42,.68);
+        }
+
+    html[data-theme="dark glass"] .employees-page .employee-table tbody td {
+        background: transparent !important;
+        color: #e2e8f0 !important;
+        border-bottom-color: rgba(255,255,255,.08) !important;
+    }
+
+        html[data-theme="dark glass"] .employees-page .employee-table tbody td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .employees-page .employee-table tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+        html[data-theme="liquid glass"] .employees-page .employee-table tbody tr:hover {
+            background: rgba(255,255,255,.50);
+        }
+
+    html[data-theme="liquid glass"] .employees-page .employee-table tbody td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.42);
+    }
+
+        html[data-theme="liquid glass"] .employees-page .employee-table tbody td::before {
+            color: #475569;
+        }
 }

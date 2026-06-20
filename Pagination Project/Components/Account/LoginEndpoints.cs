@@ -32,6 +32,7 @@ namespace Pagination_Project.Components.Account
                         LoginEstado.UsuarioNoExiste => "usuario",
                         LoginEstado.ContrasenaIncorrecta => "password",
                         LoginEstado.UsuarioInactivo => "inactivo",
+                        LoginEstado.CuentaBloqueada => "bloqueado",
                         _ => "general"
                     };
 
@@ -62,6 +63,7 @@ namespace Pagination_Project.Components.Account
                     claims.Add(new("CreateUser", usuario.Permisos.CreateUser.ToString()));
                     claims.Add(new("EditUser", usuario.Permisos.EditUser.ToString()));
                     claims.Add(new("DeleteUser", usuario.Permisos.DeleteUser.ToString()));
+                    claims.Add(new("UnlockUsers", usuario.Permisos.UnlockUsers.ToString()));
 
                     claims.Add(new("CreateBook", usuario.Permisos.CreateBook.ToString()));
                     claims.Add(new("EditBook", usuario.Permisos.EditBook.ToString()));

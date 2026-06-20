@@ -28,7 +28,14 @@ namespace Pagination_Project.Models
             EmployeeId.HasValue
                 ? $"{EmployeeName} - {EmployeeCode}"
                 : "Not linked";
+
         public bool RequirePasswordChange { get; set; }
+
+        public int LoginFailedAttempts { get; set; }
+
+        public bool LoginBloqueado { get; set; }
+
+        public DateTime? LoginBloqueadoAt { get; set; }
     }
 
     public class UsuarioCreateDto
@@ -79,6 +86,11 @@ namespace Pagination_Project.Models
 
         public Guid? EmployeeId { get; set; }
         public bool RequirePasswordChange { get; set; }
+        public int LoginFailedAttempts { get; set; }
+
+        public bool LoginBloqueado { get; set; }
+
+        public DateTime? LoginBloqueadoAt { get; set; }
     }
 
     public class PermisoComboDto

@@ -466,10 +466,6 @@
     }
 }
 
-/* =========================================================
-   DARK MODE - FINISH ASSIGNMENTS
-========================================================= */
-
 html[data-theme="dark"] .finish-assignments-page {
     background: #0f172a;
     color: #e5e7eb;
@@ -567,10 +563,6 @@ html[data-theme="dark"] .loader {
     border-color: rgba(96,165,250,.22);
     border-top-color: #60a5fa;
 }
-
-/* =========================================================
-   LIQUID GLASS PREMIUM - FINISH ASSIGNMENTS
-========================================================= */
 
 html[data-theme="liquid glass"] .finish-assignments-page {
     background: transparent;
@@ -691,10 +683,6 @@ html[data-theme="liquid glass"] .empty-icon {
     border: 1px solid rgba(16,185,129,.20);
 }
 
-/* =========================================================
-   DARK GLASS - FINISH ASSIGNMENTS
-========================================================= */
-
 html[data-theme="dark glass"] .finish-assignments-page {
     background: transparent;
     color: #e5e7eb;
@@ -811,4 +799,523 @@ html[data-theme="dark glass"] .empty-icon {
     background: rgba(16,185,129,.14);
     color: #34d399;
     border: 1px solid rgba(16,185,129,.18);
+}
+
+.finish-assignments-page,
+.finish-assignments-page * {
+    box-sizing: border-box;
+}
+
+.finish-assignments-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.finish-hero,
+.finish-panel,
+.finish-table-wrapper,
+.finish-table {
+    max-width: 100%;
+}
+
+    .finish-table th,
+    .finish-table td,
+    .employee-cell,
+    .book-cell {
+        overflow-wrap: anywhere;
+    }
+
+@media (max-width: 1280px) {
+    .finish-assignments-page .finish-hero {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .finish-assignments-page .hero-stats {
+        min-width: 0;
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(140px, 1fr));
+    }
+
+    .finish-assignments-page .finish-toolbar {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .finish-assignments-page .stage-filter {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 1024px) {
+    .finish-assignments-page {
+        padding: 18px;
+    }
+
+        .finish-assignments-page .finish-hero {
+            padding: 24px;
+            border-radius: 22px;
+        }
+
+            .finish-assignments-page .finish-hero h1 {
+                font-size: 30px;
+                line-height: 1.15;
+            }
+
+            .finish-assignments-page .finish-hero p {
+                font-size: 14px;
+            }
+
+        .finish-assignments-page .hero-stats {
+            grid-template-columns: repeat(2, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .finish-assignments-page .hero-stat {
+            padding: 16px;
+            border-radius: 17px;
+        }
+
+            .finish-assignments-page .hero-stat strong {
+                font-size: 27px;
+            }
+
+        .finish-assignments-page .finish-panel {
+            padding: 20px;
+            border-radius: 22px;
+        }
+
+        .finish-assignments-page .finish-toolbar {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .finish-assignments-page .stage-filter {
+            grid-column: auto;
+        }
+
+        .finish-assignments-page .finish-input {
+            height: 44px;
+        }
+
+        .finish-assignments-page .finish-actions {
+            justify-content: flex-start;
+        }
+}
+
+@media (max-width: 768px) {
+    .finish-assignments-page {
+        padding: 14px;
+    }
+
+        .finish-assignments-page .finish-hero {
+            padding: 18px;
+            border-radius: 18px;
+            gap: 18px;
+        }
+
+        .finish-assignments-page .hero-kicker {
+            font-size: 10.5px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+        }
+
+        .finish-assignments-page .finish-hero h1 {
+            font-size: 24px;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .finish-assignments-page .finish-hero p {
+            font-size: 13.5px;
+            line-height: 1.45;
+        }
+
+        .finish-assignments-page .hero-stats {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .finish-assignments-page .hero-stat {
+            width: 100%;
+            padding: 15px 16px;
+            border-radius: 16px;
+        }
+
+            .finish-assignments-page .hero-stat span {
+                font-size: 11px;
+                margin-bottom: 8px;
+            }
+
+            .finish-assignments-page .hero-stat strong {
+                font-size: 25px;
+            }
+
+        .finish-assignments-page .finish-alert {
+            padding: 13px 15px;
+            border-radius: 14px;
+            font-size: 13px;
+        }
+
+        .finish-assignments-page .finish-panel {
+            padding: 18px;
+            border-radius: 18px;
+        }
+
+        .finish-assignments-page .finish-toolbar {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .finish-assignments-page .filter-group label {
+            font-size: 11px;
+        }
+
+        .finish-assignments-page .finish-input {
+            height: 44px;
+            border-radius: 13px;
+            font-size: 13px;
+        }
+
+        .finish-assignments-page .finish-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .finish-assignments-page .btn-soft,
+        .finish-assignments-page .btn-primary {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 13px;
+            font-size: 13px;
+        }
+
+        .finish-assignments-page .finish-table-wrapper {
+            overflow: visible;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .finish-assignments-page .finish-table {
+            width: 100%;
+            min-width: 0 !important;
+            border-collapse: separate;
+            border-spacing: 0 14px;
+            background: transparent;
+        }
+
+            .finish-assignments-page .finish-table thead {
+                display: none;
+            }
+
+            .finish-assignments-page .finish-table,
+            .finish-assignments-page .finish-table tbody,
+            .finish-assignments-page .finish-table tr,
+            .finish-assignments-page .finish-table td {
+                display: block;
+                width: 100%;
+            }
+
+                .finish-assignments-page .finish-table tbody tr {
+                    background: #ffffff;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 18px;
+                    padding: 12px;
+                    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+                    overflow: hidden;
+                }
+
+                    .finish-assignments-page .finish-table tbody tr:hover {
+                        background: #ffffff;
+                    }
+
+                    .finish-assignments-page .finish-table tbody tr.row-completed {
+                        background: #f8fafc;
+                        opacity: 1;
+                    }
+
+                .finish-assignments-page .finish-table td {
+                    position: relative;
+                    min-height: 44px;
+                    padding: 12px 10px 12px 44% !important;
+                    border-bottom: 1px solid #e5e7eb;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    text-align: right;
+                    white-space: normal;
+                    font-size: 13px;
+                }
+
+                    .finish-assignments-page .finish-table td:last-child {
+                        border-bottom: none;
+                    }
+
+                    .finish-assignments-page .finish-table td::before {
+                        position: absolute;
+                        left: 10px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        width: 38%;
+                        color: #64748b;
+                        font-size: 11px;
+                        font-weight: 900;
+                        text-align: left;
+                        text-transform: uppercase;
+                        letter-spacing: 0.04em;
+                        line-height: 1.25;
+                        white-space: normal;
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(1)::before {
+                        content: "Select";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(2)::before {
+                        content: "Employee";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(3)::before {
+                        content: "Book";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(4)::before {
+                        content: "Code";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(5)::before {
+                        content: "Stage";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(6)::before {
+                        content: "Status";
+                    }
+
+                .finish-assignments-page .finish-table .check-col {
+                    width: 100% !important;
+                    text-align: right !important;
+                    justify-content: flex-end;
+                }
+
+                    .finish-assignments-page .finish-table .check-col input[type="checkbox"] {
+                        width: 20px;
+                        height: 20px;
+                    }
+
+        .finish-assignments-page .employee-cell,
+        .finish-assignments-page .book-cell {
+            width: 100%;
+            align-items: flex-end;
+            text-align: right;
+        }
+
+            .finish-assignments-page .employee-cell strong,
+            .finish-assignments-page .book-cell strong,
+            .finish-assignments-page .employee-cell span,
+            .finish-assignments-page .book-cell span {
+                white-space: normal;
+                word-break: break-word;
+            }
+
+        .finish-assignments-page .code-pill,
+        .finish-assignments-page .stage-pill,
+        .finish-assignments-page .status-badge {
+            white-space: normal;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 100%;
+        }
+
+        .finish-assignments-page .empty-state {
+            min-height: 220px;
+            padding: 28px 18px;
+            border-radius: 18px;
+        }
+
+            .finish-assignments-page .empty-state h3 {
+                font-size: 18px;
+            }
+
+            .finish-assignments-page .empty-state p {
+                font-size: 13px;
+            }
+
+        .finish-assignments-page .empty-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            font-size: 25px;
+        }
+}
+
+@media (max-width: 520px) {
+    .finish-assignments-page {
+        padding: 10px;
+    }
+
+        .finish-assignments-page .finish-hero,
+        .finish-assignments-page .finish-panel {
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+            .finish-assignments-page .finish-hero h1 {
+                font-size: 21px;
+            }
+
+            .finish-assignments-page .finish-hero p {
+                font-size: 13px;
+            }
+
+        .finish-assignments-page .hero-stat {
+            padding: 14px;
+        }
+
+            .finish-assignments-page .hero-stat strong {
+                font-size: 22px;
+            }
+
+        .finish-assignments-page .finish-input,
+        .finish-assignments-page .btn-soft,
+        .finish-assignments-page .btn-primary {
+            min-height: 42px;
+            height: 42px;
+            border-radius: 12px;
+            font-size: 12.5px;
+        }
+
+        .finish-assignments-page .finish-table {
+            border-spacing: 0 12px;
+        }
+
+            .finish-assignments-page .finish-table tbody tr {
+                border-radius: 16px;
+                padding: 10px;
+            }
+
+            .finish-assignments-page .finish-table td {
+                padding: 11px 8px 11px 42% !important;
+                min-height: 42px;
+                font-size: 12.5px;
+            }
+
+                .finish-assignments-page .finish-table td::before {
+                    left: 8px;
+                    width: 36%;
+                    font-size: 10px;
+                }
+
+        .finish-assignments-page .code-pill,
+        .finish-assignments-page .stage-pill,
+        .finish-assignments-page .status-badge {
+            font-size: 10.5px;
+            padding: 7px 9px;
+        }
+
+        .finish-assignments-page .check-col input[type="checkbox"] {
+            width: 19px;
+            height: 19px;
+        }
+}
+
+@media (max-width: 390px) {
+    .finish-assignments-page {
+        padding: 8px;
+    }
+
+        .finish-assignments-page .finish-hero,
+        .finish-assignments-page .finish-panel {
+            padding: 14px;
+        }
+
+            .finish-assignments-page .finish-hero h1 {
+                font-size: 20px;
+            }
+
+        .finish-assignments-page .finish-table td {
+            padding-left: 40% !important;
+        }
+
+            .finish-assignments-page .finish-table td::before {
+                width: 34%;
+                font-size: 9.5px;
+            }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr {
+        background: #111827;
+        border-color: rgba(255,255,255,.10);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: #111827;
+        }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr.row-completed {
+            background: rgba(255,255,255,.04);
+        }
+
+    html[data-theme="dark"] .finish-assignments-page .finish-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(15,23,42,.68);
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr.row-completed {
+            background: rgba(255,255,255,.04);
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .finish-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(255,255,255,.50);
+        }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr.row-completed {
+            background: rgba(255,255,255,.30);
+        }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.42);
+    }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table td::before {
+            color: #475569;
+        }
 }

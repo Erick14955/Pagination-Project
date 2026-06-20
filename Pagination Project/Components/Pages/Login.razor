@@ -104,9 +104,10 @@
         {
             _mensajeError = error.ToString() switch
             {
-                "usuario" => "The user does not exist.",
-                "password" => "The password is incorrect.",
+                "usuario" => "Incorrect user or password.",
+                "password" => "Incorrect user or password.",
                 "inactivo" => "This user is not active. Please contact the administrator.",
+                "bloqueado" => "This account has been locked due to multiple failed login attempts. Please contact the administrator.",
                 "general" => "Incorrect user or password.",
                 "1" => "Incorrect user or password.",
                 _ => "Incorrect user or password."

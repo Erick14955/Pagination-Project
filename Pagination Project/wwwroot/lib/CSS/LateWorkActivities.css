@@ -8,10 +8,6 @@
     overflow-x: hidden;
 }
 
-/* =========================
-   HERO
-========================= */
-
 .late-hero {
     width: 100%;
     max-width: 100%;
@@ -78,10 +74,6 @@
         color: #fde68a;
     }
 
-/* =========================
-   ALERTS
-========================= */
-
 .alert-box {
     padding: 14px 18px;
     border-radius: 14px;
@@ -100,10 +92,6 @@
         color: #991b1b;
         border: 1px solid #fca5a5;
     }
-
-/* =========================
-   LAYOUT
-========================= */
 
 .late-grid {
     width: 100%;
@@ -161,10 +149,6 @@
     .list-title > div {
         min-width: 0;
     }
-
-/* =========================
-   FORMS
-========================= */
 
 .form-group {
     display: flex;
@@ -246,10 +230,6 @@
         min-width: 0;
         margin-bottom: 0;
     }
-
-/* =========================
-   BUTTONS
-========================= */
 
 button {
     border: none;
@@ -339,10 +319,6 @@ button {
     font-size: 12px;
 }
 
-/* =========================
-   BULK ACTIONS
-========================= */
-
 .check-all {
     display: flex;
     align-items: center;
@@ -351,10 +327,6 @@ button {
     font-weight: 700;
     font-size: 14px;
 }
-
-/* =========================
-   TABLE
-========================= */
 
 .table-wrap {
     width: 100%;
@@ -443,10 +415,6 @@ tbody tr:hover {
     align-items: center;
 }
 
-/* =========================
-   ACCESS / READONLY
-========================= */
-
 .access-card,
 .access-denied-card,
 .readonly-card {
@@ -521,10 +489,6 @@ tbody tr:hover {
 .view-only-grid {
     grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
 }
-
-/* =========================
-   RESPONSIVE
-========================= */
 
 @media (max-width: 1350px) {
     .late-hero {
@@ -641,10 +605,6 @@ tbody tr:hover {
     }
 }
 
-/* =========================================================
-   DARK MODE - LATE WORK
-========================================================= */
-
 html[data-theme="dark"] .late-page {
     background: #0f172a;
     color: #e5e7eb;
@@ -737,10 +697,6 @@ html[data-theme="dark"] .btn-dark {
     background: #020617;
     color: #f8fafc;
 }
-
-/* =========================================================
-   LIQUID GLASS PREMIUM - LATE WORK
-========================================================= */
 
 html[data-theme="liquid glass"] .late-page {
     background: transparent;
@@ -851,10 +807,6 @@ html[data-theme="liquid glass"] .btn-refresh {
     backdrop-filter: blur(18px) saturate(170%);
     -webkit-backdrop-filter: blur(18px) saturate(170%);
 }
-
-/* =========================================================
-   DARK GLASS - LATE WORK
-========================================================= */
 
 html[data-theme="dark glass"] .late-page {
     background: transparent;
@@ -969,4 +921,590 @@ html[data-theme="dark glass"] .btn-refresh {
     border: 1px solid rgba(255,255,255,.12);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.late-page,
+.late-page * {
+    box-sizing: border-box;
+}
+
+.late-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+    .late-hero,
+    .late-grid,
+    .late-card,
+    .table-wrap,
+    .late-page table {
+        max-width: 100%;
+    }
+
+    .late-page th,
+    .late-page td,
+    .late-page .card-title,
+    .late-page .form-group,
+    .late-page .row-actions {
+        overflow-wrap: anywhere;
+    }
+
+@media (max-width: 1280px) {
+    .late-page .late-hero {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .late-page .late-stats {
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(140px, 1fr));
+    }
+
+    .late-page .late-grid,
+    .late-page .view-only-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .late-page .late-card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .late-page {
+        padding: 18px;
+    }
+
+        .late-page .late-hero {
+            padding: 24px;
+            border-radius: 22px;
+        }
+
+            .late-page .late-hero h1 {
+                font-size: 29px;
+                line-height: 1.15;
+            }
+
+            .late-page .late-hero p {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+        .late-page .late-stats {
+            grid-template-columns: repeat(2, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .late-page .late-stat-card {
+            padding: 16px;
+            border-radius: 17px;
+        }
+
+            .late-page .late-stat-card strong {
+                font-size: 27px;
+            }
+
+        .late-page .late-grid {
+            gap: 18px;
+        }
+
+        .late-page .late-card {
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .late-page .filters-row {
+            grid-template-columns: 1fr;
+        }
+
+        .late-page .single-actions,
+        .late-page .bulk-actions {
+            justify-content: flex-start;
+        }
+}
+
+@media (max-width: 768px) {
+    .late-page {
+        padding: 14px;
+    }
+
+        .late-page .late-hero {
+            padding: 18px;
+            border-radius: 18px;
+            gap: 18px;
+        }
+
+            .late-page .late-hero h1 {
+                font-size: 24px;
+                line-height: 1.15;
+            }
+
+            .late-page .late-hero p {
+                font-size: 13.5px;
+                line-height: 1.45;
+            }
+
+        .late-page .late-stats {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .late-page .late-stat-card {
+            width: 100%;
+            padding: 15px 16px;
+            border-radius: 16px;
+        }
+
+            .late-page .late-stat-card span {
+                font-size: 11.5px;
+            }
+
+            .late-page .late-stat-card strong {
+                font-size: 25px;
+            }
+
+        .late-page .alert-box {
+            padding: 13px 15px;
+            border-radius: 14px;
+            font-size: 13px;
+        }
+
+        .late-page .late-grid,
+        .late-page .view-only-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .late-page .late-card {
+            padding: 18px;
+            border-radius: 18px;
+        }
+
+        .late-page .card-title {
+            margin-bottom: 15px;
+        }
+
+            .late-page .card-title h2 {
+                font-size: 19px;
+                line-height: 1.2;
+            }
+
+            .late-page .card-title p {
+                font-size: 13px;
+            }
+
+        .late-page .list-title {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .late-page .form-group {
+            margin-bottom: 12px;
+        }
+
+            .late-page .form-group label,
+            .late-page .bulk-box label {
+                font-size: 12px;
+            }
+
+            .late-page .form-group input,
+            .late-page .form-group select,
+            .late-page .bulk-box textarea {
+                min-height: 44px;
+                border-radius: 13px;
+                font-size: 13px;
+            }
+
+        .late-page .bulk-box {
+            margin-top: 18px;
+            padding-top: 16px;
+        }
+
+            .late-page .bulk-box p {
+                font-size: 12.5px;
+            }
+
+            .late-page .bulk-box textarea {
+                min-height: 140px;
+            }
+
+        .late-page .single-actions,
+        .late-page .bulk-actions,
+        .late-page .filters-row {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .late-page .btn-primary,
+        .late-page .btn-light,
+        .late-page .btn-dark,
+        .late-page .btn-refresh,
+        .late-page .btn-complete-selected {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 13px;
+            font-size: 13px;
+        }
+
+        .late-page .check-all {
+            width: 100%;
+            justify-content: flex-start;
+            padding: 6px 0;
+        }
+
+        .late-page .permissions-info-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .late-page .permission-pill {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .late-page .access-card,
+        .late-page .access-denied-card,
+        .late-page .readonly-card {
+            padding: 26px 18px;
+            border-radius: 18px;
+        }
+
+            .late-page .access-card h2,
+            .late-page .access-denied-card h2,
+            .late-page .readonly-card h2 {
+                font-size: 20px;
+            }
+
+        .late-page .table-wrap {
+            overflow: visible;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .late-page table {
+            width: 100%;
+            min-width: 0 !important;
+            border-collapse: separate;
+            border-spacing: 0 14px;
+            background: transparent;
+        }
+
+        .late-page thead {
+            display: none;
+        }
+
+        .late-page table,
+        .late-page tbody,
+        .late-page tr,
+        .late-page td {
+            display: block;
+            width: 100%;
+        }
+
+            .late-page tbody tr {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+                overflow: hidden;
+            }
+
+                .late-page tbody tr:hover {
+                    background: #ffffff;
+                }
+
+                .late-page tbody tr.row-completed {
+                    background: #fbfefc;
+                }
+
+        .late-page td {
+            position: relative;
+            min-height: 44px;
+            padding: 12px 10px 12px 44% !important;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            text-align: right;
+            white-space: normal;
+            font-size: 13px;
+        }
+
+            .late-page td:last-child {
+                border-bottom: none;
+            }
+
+            .late-page td::before {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 38%;
+                color: #64748b;
+                font-size: 11px;
+                font-weight: 900;
+                text-align: left;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                line-height: 1.25;
+                white-space: normal;
+            }
+
+            .late-page td:nth-child(1)::before {
+                content: "Select";
+            }
+
+            .late-page td:nth-child(2)::before {
+                content: "Employee";
+            }
+
+            .late-page td:nth-child(3)::before {
+                content: "Book";
+            }
+
+            .late-page td:nth-child(4)::before {
+                content: "Stage";
+            }
+
+            .late-page td:nth-child(5)::before {
+                content: "Due Date";
+            }
+
+            .late-page td:nth-child(6)::before {
+                content: "Status";
+            }
+
+            .late-page td:nth-child(7)::before {
+                content: "Actions";
+            }
+
+            .late-page td input[type="checkbox"] {
+                width: 19px;
+                height: 19px;
+            }
+
+        .late-page .status {
+            white-space: normal;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 100%;
+        }
+
+        .late-page .done-text {
+            display: inline-flex;
+            justify-content: flex-end;
+            width: 100%;
+            text-align: right;
+        }
+
+        .late-page .row-actions {
+            width: 100%;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .late-page .btn-small-complete,
+        .late-page .btn-small-edit,
+        .late-page .btn-small-delete {
+            min-height: 36px;
+            padding: 8px 11px;
+            font-size: 11.5px;
+        }
+
+        .late-page .empty-cell {
+            padding: 24px 12px !important;
+            text-align: center !important;
+            display: block;
+        }
+
+            .late-page .empty-cell::before {
+                display: none;
+            }
+}
+
+@media (max-width: 520px) {
+    .late-page {
+        padding: 10px;
+    }
+
+        .late-page .late-hero,
+        .late-page .late-card {
+            padding: 16px;
+            border-radius: 16px;
+        }
+
+            .late-page .late-hero h1 {
+                font-size: 21px;
+            }
+
+            .late-page .late-hero p {
+                font-size: 13px;
+            }
+
+        .late-page .late-stat-card {
+            padding: 14px;
+        }
+
+            .late-page .late-stat-card strong {
+                font-size: 22px;
+            }
+
+        .late-page .card-title h2 {
+            font-size: 17px;
+        }
+
+        .late-page .card-title p {
+            font-size: 12.5px;
+        }
+
+        .late-page .form-group input,
+        .late-page .form-group select,
+        .late-page .bulk-box textarea,
+        .late-page .btn-primary,
+        .late-page .btn-light,
+        .late-page .btn-dark,
+        .late-page .btn-refresh,
+        .late-page .btn-complete-selected {
+            min-height: 42px;
+            border-radius: 12px;
+            font-size: 12.5px;
+        }
+
+        .late-page table {
+            border-spacing: 0 12px;
+        }
+
+        .late-page tbody tr {
+            border-radius: 16px;
+            padding: 10px;
+        }
+
+        .late-page td {
+            padding: 11px 8px 11px 42% !important;
+            min-height: 42px;
+            font-size: 12.5px;
+        }
+
+            .late-page td::before {
+                left: 8px;
+                width: 36%;
+                font-size: 10px;
+            }
+
+        .late-page .row-actions {
+            gap: 6px;
+        }
+
+        .late-page .btn-small-complete,
+        .late-page .btn-small-edit,
+        .late-page .btn-small-delete {
+            width: 100%;
+            justify-content: center;
+            border-radius: 12px;
+        }
+}
+
+@media (max-width: 390px) {
+    .late-page {
+        padding: 8px;
+    }
+
+        .late-page .late-hero,
+        .late-page .late-card {
+            padding: 14px;
+        }
+
+            .late-page .late-hero h1 {
+                font-size: 20px;
+            }
+
+        .late-page td {
+            padding-left: 40% !important;
+        }
+
+            .late-page td::before {
+                width: 34%;
+                font-size: 9.5px;
+            }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .late-page tbody tr {
+        background: #111827;
+        border-color: rgba(255,255,255,.10);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+        html[data-theme="dark"] .late-page tbody tr:hover {
+            background: #111827;
+        }
+
+        html[data-theme="dark"] .late-page tbody tr.row-completed {
+            background: rgba(255,255,255,.04);
+        }
+
+    html[data-theme="dark"] .late-page td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark"] .late-page td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .late-page tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+        html[data-theme="dark glass"] .late-page tbody tr:hover {
+            background: rgba(15,23,42,.68);
+        }
+
+        html[data-theme="dark glass"] .late-page tbody tr.row-completed {
+            background: rgba(255,255,255,.04);
+        }
+
+    html[data-theme="dark glass"] .late-page td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark glass"] .late-page td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .late-page tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+        html[data-theme="liquid glass"] .late-page tbody tr:hover {
+            background: rgba(255,255,255,.50);
+        }
+
+        html[data-theme="liquid glass"] .late-page tbody tr.row-completed {
+            background: rgba(255,255,255,.30);
+        }
+
+    html[data-theme="liquid glass"] .late-page td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.42);
+    }
+
+        html[data-theme="liquid glass"] .late-page td::before {
+            color: #475569;
+        }
 }

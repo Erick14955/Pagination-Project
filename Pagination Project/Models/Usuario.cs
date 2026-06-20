@@ -38,5 +38,10 @@ namespace Pagination_Project.Models
 
         public bool RequirePasswordChange { get; set; } = false;
         public string ThemePreference { get; set; } = "light";
+        public int LoginFailedAttempts { get; set; } = 0;
+
+        public bool LoginBloqueado { get; set; } = false;
+
+        public DateTime? LoginBloqueadoAt { get; set; }
     }
 }

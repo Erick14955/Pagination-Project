@@ -235,6 +235,7 @@ app.MapPost("/account/login", async (
             LoginEstado.UsuarioNoExiste => "usuario",
             LoginEstado.ContrasenaIncorrecta => "password",
             LoginEstado.UsuarioInactivo => "inactivo",
+            LoginEstado.CuentaBloqueada => "bloqueado",
             _ => "general"
         };
 
@@ -272,6 +273,7 @@ app.MapPost("/account/login", async (
         claims.Add(new("CreateUser", usuario.Permisos.CreateUser.ToString()));
         claims.Add(new("EditUser", usuario.Permisos.EditUser.ToString()));
         claims.Add(new("DeleteUser", usuario.Permisos.DeleteUser.ToString()));
+        claims.Add(new("UnlockUsers", usuario.Permisos.UnlockUsers.ToString()));
 
         claims.Add(new("CreateBook", usuario.Permisos.CreateBook.ToString()));
         claims.Add(new("EditBook", usuario.Permisos.EditBook.ToString()));

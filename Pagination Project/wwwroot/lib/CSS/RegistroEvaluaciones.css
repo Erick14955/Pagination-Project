@@ -1100,3 +1100,631 @@ html[data-theme="dark glass"] .evaluations-page {
         margin-top: 5px !important;
         font-weight: 800 !important;
     }
+
+.evaluations-page,
+.evaluations-page * {
+    box-sizing: border-box;
+}
+
+.evaluations-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+    .evaluations-page .page-hero,
+    .evaluations-page .form-card,
+    .evaluations-page .list-card,
+    .evaluations-page .summary-grid,
+    .evaluations-page .evaluation-grid,
+    .evaluations-page .evaluation-block,
+    .evaluations-page .assignment-cards-grid,
+    .evaluations-page .table-container,
+    .evaluations-page .evaluations-table {
+        max-width: 100%;
+    }
+
+        .evaluations-page .evaluations-table th,
+        .evaluations-page .evaluations-table td,
+        .evaluations-page .employee-title,
+        .evaluations-page .book-title,
+        .evaluations-page .section-header,
+        .evaluations-page .block-header,
+        .evaluations-page .assignment-card,
+        .evaluations-page .assignment-card-fixed {
+            overflow-wrap: anywhere;
+        }
+
+@media (max-width: 1280px) {
+    .evaluations-page .page-hero {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .evaluations-page .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .evaluations-page .stat-card {
+        min-width: 0;
+    }
+
+    .evaluations-page .summary-grid {
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+    }
+
+    .evaluations-page .evaluation-grid {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .evaluations-page {
+        padding: 18px;
+    }
+
+        .evaluations-page .page-hero {
+            padding: 24px;
+            border-radius: 22px;
+            min-height: auto;
+        }
+
+            .evaluations-page .page-hero h1 {
+                font-size: 30px;
+                line-height: 1.15;
+            }
+
+            .evaluations-page .page-hero p {
+                font-size: 15px;
+                line-height: 1.45;
+            }
+
+        .evaluations-page .hero-stats {
+            grid-template-columns: repeat(2, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .evaluations-page .form-card,
+        .evaluations-page .list-card,
+        .evaluations-page .evaluation-block {
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .evaluations-page .form-grid,
+        .evaluations-page .summary-grid,
+        .evaluations-page .evaluation-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .evaluations-page .section-header,
+        .evaluations-page .table-header,
+        .evaluations-page .block-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .evaluations-page .header-actions,
+        .evaluations-page .list-filters {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .evaluations-page .list-filters {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .evaluations-page .search-box {
+            grid-column: 1 / -1;
+            width: 100%;
+            min-width: 0 !important;
+        }
+
+    .employee-filter-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .evaluations-page .btn-filter-clear {
+        width: 100%;
+    }
+
+    .search-assignment-box {
+        grid-template-columns: 1fr auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .evaluations-page {
+        padding: 14px;
+    }
+
+        .evaluations-page .page-hero {
+            padding: 18px;
+            border-radius: 18px;
+            gap: 16px;
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .page-hero > div:first-child {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .evaluations-page .page-hero h1 {
+        font-size: 24px;
+        line-height: 1.15;
+    }
+
+    .evaluations-page .page-hero p {
+        font-size: 13.5px;
+        line-height: 1.45;
+    }
+
+    .evaluations-page .hero-stats,
+    .evaluations-page .summary-grid,
+    .evaluations-page .evaluation-grid,
+    .evaluations-page .assignment-cards-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .evaluations-page .stat-card,
+    .evaluations-page .summary-card,
+    .evaluations-page .assignment-card,
+    .evaluations-page .assignment-card-fixed {
+        width: 100%;
+        min-width: 0 !important;
+    }
+
+    .evaluations-page .stat-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+        .evaluations-page .stat-card strong {
+            font-size: 25px;
+        }
+
+    .evaluations-page .form-card,
+    .evaluations-page .list-card,
+    .evaluations-page .evaluation-block {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .evaluations-page .section-header {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+        .evaluations-page .section-header h2,
+        .evaluations-page .block-header h2 {
+            font-size: 18px;
+            line-height: 1.2;
+        }
+
+        .evaluations-page .section-header p,
+        .evaluations-page .block-header p {
+            font-size: 13px;
+        }
+
+    .evaluations-page .form-grid {
+        gap: 14px;
+    }
+
+    .evaluations-page .form-group.full {
+        grid-column: auto;
+    }
+
+    .evaluations-page .form-group label {
+        font-size: 13px;
+    }
+
+    .evaluations-page .form-control,
+    .evaluations-page .search-box,
+    .employee-filter-select {
+        width: 100%;
+        min-width: 0 !important;
+        min-height: 44px;
+        border-radius: 13px;
+        font-size: 13px;
+    }
+
+    html[data-theme="dark"] .evaluations-page .list-card .search-box {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .evaluations-page .search-box input {
+        font-size: 13px;
+    }
+
+    .evaluations-page .header-actions,
+    .evaluations-page .list-filters,
+    .search-assignment-box {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+        .evaluations-page .btn-primary,
+        .evaluations-page .btn-light,
+        .evaluations-page .btn-danger,
+        .evaluations-page .btn-filter-clear,
+        .search-assignment-box .btn-primary {
+            width: 100%;
+            min-height: 44px;
+            height: 44px;
+            border-radius: 13px;
+            font-size: 13px;
+        }
+
+    .evaluations-page .summary-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+        .evaluations-page .summary-card strong {
+            font-size: 23px;
+        }
+
+    .evaluations-page .assignment-card,
+    .evaluations-page .assignment-card-fixed {
+        min-height: auto !important;
+        padding: 16px !important;
+        border-radius: 16px !important;
+    }
+
+        .evaluations-page .assignment-card strong,
+        .evaluations-page .assignment-card-fixed strong {
+            font-size: 22px !important;
+        }
+
+    .evaluations-page .total-box {
+        width: 100%;
+    }
+
+    .evaluations-page .toggle-item {
+        align-items: flex-start;
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .evaluations-page .loading-state,
+    .evaluations-page .empty-state {
+        padding: 26px 18px;
+        border-radius: 16px;
+    }
+
+    .evaluations-page .table-container {
+        overflow: visible;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .evaluations-page .evaluations-table {
+        width: 100%;
+        min-width: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        background: transparent;
+    }
+
+        .evaluations-page .evaluations-table thead {
+            display: none;
+        }
+
+        .evaluations-page .evaluations-table,
+        .evaluations-page .evaluations-table tbody,
+        .evaluations-page .evaluations-table tr,
+        .evaluations-page .evaluations-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .evaluations-page .evaluations-table tbody tr {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+                overflow: hidden;
+            }
+
+                .evaluations-page .evaluations-table tbody tr:hover {
+                    background: #ffffff;
+                }
+
+            .evaluations-page .evaluations-table td {
+                position: relative;
+                min-height: 44px;
+                padding: 12px 10px 12px 44% !important;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                text-align: right;
+                white-space: normal !important;
+                font-size: 13px;
+            }
+
+                .evaluations-page .evaluations-table td:last-child {
+                    border-bottom: none;
+                }
+
+                .evaluations-page .evaluations-table td::before {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 38%;
+                    color: #64748b;
+                    font-size: 11px;
+                    font-weight: 900;
+                    text-align: left;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    line-height: 1.25;
+                    white-space: normal;
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(1)::before {
+                    content: "Employee";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(2)::before {
+                    content: "Book";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(3)::before {
+                    content: "Database";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(4)::before {
+                    content: "KGEN";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(5)::before {
+                    content: "Proof";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(6)::before {
+                    content: "Final";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(7)::before {
+                    content: "Memo";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(8)::before {
+                    content: "Final PO";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(9)::before {
+                    content: "Shipping";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(10)::before {
+                    content: "Dirxion";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(11)::before {
+                    content: "Total";
+                }
+
+    .evaluations-page .employee-title,
+    .evaluations-page .book-title {
+        width: 100%;
+        align-items: flex-end;
+        text-align: right;
+    }
+
+        .evaluations-page .employee-title strong,
+        .evaluations-page .book-title strong,
+        .evaluations-page .employee-title span,
+        .evaluations-page .book-title span {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+    .evaluations-page .pill,
+    .evaluations-page .kgen-pill,
+    .evaluations-page .total-percent {
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .evaluations-page {
+        padding: 10px;
+    }
+
+        .evaluations-page .page-hero,
+        .evaluations-page .form-card,
+        .evaluations-page .list-card,
+        .evaluations-page .evaluation-block {
+            padding: 16px;
+            border-radius: 16px;
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .page-hero > div:first-child {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .evaluations-page .page-hero h1 {
+        font-size: 21px;
+    }
+
+    .evaluations-page .page-hero p {
+        font-size: 13px;
+    }
+
+    .evaluations-page .section-header h2,
+    .evaluations-page .block-header h2 {
+        font-size: 17px;
+    }
+
+    .evaluations-page .section-header p,
+    .evaluations-page .block-header p {
+        font-size: 12.5px;
+    }
+
+    .evaluations-page .form-control,
+    .evaluations-page .search-box,
+    .employee-filter-select,
+    .evaluations-page .btn-primary,
+    .evaluations-page .btn-light,
+    .evaluations-page .btn-danger,
+    .evaluations-page .btn-filter-clear {
+        min-height: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 12.5px;
+    }
+
+    .evaluations-page .summary-card {
+        padding: 14px;
+        border-radius: 15px;
+    }
+
+        .evaluations-page .summary-card strong {
+            font-size: 21px;
+        }
+
+    .evaluations-page .assignment-card,
+    .evaluations-page .assignment-card-fixed {
+        padding: 14px !important;
+        border-radius: 15px !important;
+    }
+
+        .evaluations-page .assignment-card strong,
+        .evaluations-page .assignment-card-fixed strong {
+            font-size: 20px !important;
+        }
+
+    .evaluations-page .evaluations-table {
+        border-spacing: 0 12px;
+    }
+
+        .evaluations-page .evaluations-table tbody tr {
+            border-radius: 16px;
+            padding: 10px;
+        }
+
+        .evaluations-page .evaluations-table td {
+            padding: 11px 8px 11px 42% !important;
+            min-height: 42px;
+            font-size: 12.5px;
+        }
+
+            .evaluations-page .evaluations-table td::before {
+                left: 8px;
+                width: 36%;
+                font-size: 10px;
+            }
+
+    .evaluations-page .pill,
+    .evaluations-page .kgen-pill {
+        font-size: 10.5px;
+        padding: 6px 9px;
+    }
+}
+
+@media (max-width: 390px) {
+    .evaluations-page {
+        padding: 8px;
+    }
+
+        .evaluations-page .page-hero,
+        .evaluations-page .form-card,
+        .evaluations-page .list-card,
+        .evaluations-page .evaluation-block {
+            padding: 14px;
+        }
+
+            .evaluations-page .page-hero h1 {
+                font-size: 20px;
+            }
+
+        .evaluations-page .evaluations-table td {
+            padding-left: 40% !important;
+        }
+
+            .evaluations-page .evaluations-table td::before {
+                width: 34%;
+                font-size: 9.5px;
+            }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr {
+        background: #111827;
+        border-color: rgba(255,255,255,.10);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+        html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr:hover {
+            background: #111827;
+        }
+
+    html[data-theme="dark"] .evaluations-page .evaluations-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark"] .evaluations-page .evaluations-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+        html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr:hover {
+            background: rgba(15,23,42,.68);
+        }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark glass"] .evaluations-page .evaluations-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+        html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr:hover {
+            background: rgba(255,255,255,.50);
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .evaluations-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.42);
+    }
+
+        html[data-theme="liquid glass"] .evaluations-page .evaluations-table td::before {
+            color: #475569;
+        }
+}

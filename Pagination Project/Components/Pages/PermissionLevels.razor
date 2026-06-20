@@ -7,12 +7,15 @@
 @using Microsoft.JSInterop
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Permission Levels</PageTitle>
 
@@ -164,6 +167,17 @@
                     </label>
                     <span>Delete User</span>
                 </div>
+
+                @if (PuedeAdministrarUnlockUsers)
+                {
+                    <div class="toggle-item">
+                        <label class="switch">
+                            <input type="checkbox" @bind="PermisoActual.UnlockUsers" />
+                            <span class="slider"></span>
+                        </label>
+                        <span>Unlock Users</span>
+                    </div>
+                }
 
             </div>
         </div>
@@ -563,10 +577,26 @@
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
 
+    private ClaimsPrincipal? _user;
+
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
         await CargarPermisosAsync();
         NuevoPermiso();
+    }
+
+    private bool PuedeAdministrarUnlockUsers =>
+    _user != null && HasPermission(_user, "UnlockUsers");
+
+    private static bool HasPermission(ClaimsPrincipal user, string claimType)
+    {
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CargarPermisosAsync()
@@ -707,6 +737,11 @@
                 permisoDb.EditUser = PermisoActual.EditUser;
                 permisoDb.DeleteUser = PermisoActual.DeleteUser;
 
+                if (PuedeAdministrarUnlockUsers)
+                {
+                    permisoDb.UnlockUsers = PermisoActual.UnlockUsers;
+                }
+
                 permisoDb.CreateBook = PermisoActual.CreateBook;
                 permisoDb.EditBook = PermisoActual.EditBook;
                 permisoDb.DeleteBook = PermisoActual.DeleteBook;
@@ -812,6 +847,11 @@
         PermisoActual.EditUser = true;
         PermisoActual.DeleteUser = true;
 
+        if (PuedeAdministrarUnlockUsers)
+        {
+            PermisoActual.UnlockUsers = true;
+        }
+
         PermisoActual.CreateBook = true;
         PermisoActual.EditBook = true;
         PermisoActual.DeleteBook = true;
@@ -840,6 +880,11 @@
         PermisoActual.CreateUser = false;
         PermisoActual.EditUser = false;
         PermisoActual.DeleteUser = false;
+
+        if (PuedeAdministrarUnlockUsers)
+        {
+            PermisoActual.UnlockUsers = false;
+        }
 
         PermisoActual.CreateBook = false;
         PermisoActual.EditBook = false;
@@ -884,7 +929,8 @@
     private int TotalUsers =>
         Contar(PermisoActual.CreateUser) +
         Contar(PermisoActual.EditUser) +
-        Contar(PermisoActual.DeleteUser);
+        Contar(PermisoActual.DeleteUser) +
+        Contar(PuedeAdministrarUnlockUsers && PermisoActual.UnlockUsers);
 
     private int TotalBooks =>
         Contar(PermisoActual.CreateBook) +
@@ -921,11 +967,12 @@
         return valor ? 1 : 0;
     }
 
-    private static int ContarGrupoUsers(Permisos item)
+    private int ContarGrupoUsers(Permisos item)
     {
         return Contar(item.CreateUser) +
                Contar(item.EditUser) +
-               Contar(item.DeleteUser);
+               Contar(item.DeleteUser) +
+               Contar(PuedeAdministrarUnlockUsers && item.UnlockUsers);
     }
 
     private static int ContarGrupoBooks(Permisos item)
@@ -970,7 +1017,7 @@
         return Contar(item.EditPermissionLevels);
     }
 
-    private static int ContarTotalPermisos(Permisos item)
+    private int ContarTotalPermisos(Permisos item)
     {
         return ContarGrupoUsers(item) +
                ContarGrupoBooks(item) +
@@ -991,6 +1038,7 @@
             CreateUser = permiso.CreateUser,
             EditUser = permiso.EditUser,
             DeleteUser = permiso.DeleteUser,
+            UnlockUsers = permiso.UnlockUsers,
 
             CreateBook = permiso.CreateBook,
             EditBook = permiso.EditBook,

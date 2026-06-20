@@ -1018,3 +1018,597 @@ html[data-theme="liquid glass"] .permissions-page .page-hero .stat-card span {
 html[data-theme="liquid glass"] .permissions-page .page-hero .stat-card strong {
     color: #111827 !important;
 }
+
+.permissions-page,
+.permissions-page * {
+    box-sizing: border-box;
+}
+
+.permissions-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+    .permissions-page .page-hero,
+    .permissions-page .form-card,
+    .permissions-page .list-card,
+    .permissions-page .summary-grid,
+    .permissions-page .permissions-grid,
+    .permissions-page .permission-block,
+    .permissions-page .table-container,
+    .permissions-page .permissions-table {
+        max-width: 100%;
+    }
+
+        .permissions-page .permissions-table th,
+        .permissions-page .permissions-table td,
+        .permissions-page .permission-title,
+        .permissions-page .section-header,
+        .permissions-page .block-header,
+        .permissions-page .toggle-item {
+            overflow-wrap: anywhere;
+        }
+
+@media (max-width: 1280px) {
+    .permissions-page .page-hero {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .permissions-page .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(140px, 1fr));
+        width: 100%;
+    }
+
+    .permissions-page .stat-card {
+        min-width: 0;
+    }
+
+    .permissions-page .summary-grid {
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+    }
+
+    .permissions-page .permissions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1024px) {
+    .permissions-page {
+        padding: 18px;
+    }
+
+        .permissions-page .page-hero {
+            padding: 24px;
+            border-radius: 22px;
+        }
+
+            .permissions-page .page-hero h1 {
+                font-size: 30px;
+                line-height: 1.15;
+            }
+
+            .permissions-page .page-hero p {
+                font-size: 14px;
+            }
+
+        .permissions-page .hero-stats {
+            grid-template-columns: repeat(2, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .permissions-page .form-card,
+        .permissions-page .list-card,
+        .permissions-page .permission-block {
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .permissions-page .summary-grid {
+            grid-template-columns: repeat(2, minmax(150px, 1fr));
+            gap: 14px;
+        }
+
+        .permissions-page .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .permissions-page .section-header,
+        .permissions-page .block-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .permissions-page .header-actions,
+        .permissions-page .list-filters {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .permissions-page .list-filters {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+        }
+
+        .permissions-page .search-box {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .permissions-page .btn-filter-clear {
+            width: auto;
+        }
+}
+
+@media (max-width: 768px) {
+    .permissions-page {
+        padding: 14px;
+    }
+
+        .permissions-page .page-hero {
+            padding: 18px;
+            border-radius: 18px;
+            gap: 16px;
+        }
+
+    html[data-theme="liquid glass"] .permissions-page .page-hero > div:first-child {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .permissions-page .page-hero h1 {
+        font-size: 24px;
+        line-height: 1.15;
+    }
+
+    .permissions-page .page-hero p {
+        font-size: 13.5px;
+        line-height: 1.45;
+    }
+
+    .permissions-page .hero-stats,
+    .permissions-page .summary-grid,
+    .permissions-page .permissions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .permissions-page .stat-card,
+    .permissions-page .summary-card {
+        width: 100%;
+    }
+
+    .permissions-page .stat-card {
+        padding: 15px 16px;
+        border-radius: 16px;
+    }
+
+        .permissions-page .stat-card strong {
+            font-size: 22px;
+        }
+
+    .permissions-page .form-card,
+    .permissions-page .list-card,
+    .permissions-page .permission-block {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .permissions-page .section-header {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+        .permissions-page .section-header h2,
+        .permissions-page .block-header h2 {
+            font-size: 18px;
+            line-height: 1.2;
+        }
+
+        .permissions-page .section-header p,
+        .permissions-page .block-header p {
+            font-size: 13px;
+        }
+
+    .permissions-page .header-actions,
+    .permissions-page .list-filters {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .permissions-page .search-box,
+    .permissions-page .form-control,
+    .permissions-page .btn-primary,
+    .permissions-page .btn-light,
+    .permissions-page .btn-danger,
+    .permissions-page .btn-filter-clear {
+        width: 100%;
+        min-width: 0 !important;
+        min-height: 44px;
+        height: 44px;
+        border-radius: 13px;
+    }
+
+    html[data-theme="dark"] .permissions-page .list-card .search-box {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .permissions-page .summary-card {
+        padding: 16px;
+        border-radius: 17px;
+    }
+
+        .permissions-page .summary-card strong {
+            font-size: 24px;
+        }
+
+    .permissions-page .block-header {
+        gap: 12px;
+    }
+
+    .permissions-page .total-box {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .permissions-page .toggles-container {
+        gap: 10px;
+    }
+
+    .permissions-page .toggle-item {
+        min-height: 46px;
+        padding: 10px;
+        border-radius: 13px;
+    }
+
+        .permissions-page .toggle-item span:last-child {
+            font-size: 13px;
+            line-height: 1.25;
+        }
+
+    .permissions-page .switch {
+        width: 46px;
+        height: 25px;
+    }
+
+    .permissions-page .slider:before {
+        width: 19px;
+        height: 19px;
+    }
+
+    .permissions-page .switch input:checked + .slider:before {
+        transform: translateX(21px);
+    }
+
+    .permissions-page .loading-state,
+    .permissions-page .empty-state {
+        padding: 24px 16px;
+        border-radius: 16px;
+    }
+
+    .permissions-page .table-container {
+        overflow: visible;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .permissions-page .permissions-table {
+        width: 100%;
+        min-width: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        background: transparent;
+    }
+
+        .permissions-page .permissions-table thead {
+            display: none;
+        }
+
+        .permissions-page .permissions-table,
+        .permissions-page .permissions-table tbody,
+        .permissions-page .permissions-table tr,
+        .permissions-page .permissions-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .permissions-page .permissions-table tbody tr {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+                overflow: hidden;
+            }
+
+                .permissions-page .permissions-table tbody tr:hover {
+                    background: #ffffff;
+                }
+
+                .permissions-page .permissions-table tbody tr.selected-row {
+                    background: #dbeafe;
+                    border-color: #bfdbfe;
+                }
+
+            .permissions-page .permissions-table td {
+                position: relative;
+                min-height: 44px;
+                padding: 12px 10px 12px 44% !important;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                text-align: right;
+                white-space: normal !important;
+                font-size: 13px;
+            }
+
+                .permissions-page .permissions-table td:last-child {
+                    border-bottom: none;
+                }
+
+                .permissions-page .permissions-table td::before {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 38%;
+                    color: #64748b;
+                    font-size: 11px;
+                    font-weight: 900;
+                    text-align: left;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    line-height: 1.25;
+                    white-space: normal;
+                }
+
+                .permissions-page .permissions-table td:nth-child(1)::before {
+                    content: "ID";
+                }
+
+                .permissions-page .permissions-table td:nth-child(2)::before {
+                    content: "Permission Level";
+                }
+
+                .permissions-page .permissions-table td:nth-child(3)::before {
+                    content: "Description";
+                }
+
+                .permissions-page .permissions-table td:nth-child(4)::before {
+                    content: "Total";
+                }
+
+                .permissions-page .permissions-table td:nth-child(5)::before {
+                    content: "Status";
+                }
+
+                .permissions-page .permissions-table td:nth-child(6)::before {
+                    content: "Actions";
+                }
+
+    .permissions-page .permission-title {
+        width: 100%;
+        align-items: flex-end;
+        text-align: right;
+    }
+
+        .permissions-page .permission-title strong {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+    .permissions-page .id-pill,
+    .permissions-page .total-permissions {
+        white-space: normal;
+        text-align: center;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .permissions-page {
+        padding: 10px;
+    }
+
+        .permissions-page .page-hero,
+        .permissions-page .form-card,
+        .permissions-page .list-card,
+        .permissions-page .permission-block {
+            padding: 16px;
+            border-radius: 16px;
+        }
+
+    html[data-theme="liquid glass"] .permissions-page .page-hero > div:first-child {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .permissions-page .page-hero h1 {
+        font-size: 21px;
+    }
+
+    .permissions-page .page-hero p {
+        font-size: 13px;
+    }
+
+    .permissions-page .section-header h2,
+    .permissions-page .block-header h2 {
+        font-size: 17px;
+    }
+
+    .permissions-page .section-header p,
+    .permissions-page .block-header p {
+        font-size: 12.5px;
+    }
+
+    .permissions-page .form-group label,
+    .permissions-page .form-group small {
+        font-size: 12px;
+    }
+
+    .permissions-page .form-control,
+    .permissions-page .search-box,
+    .permissions-page .btn-primary,
+    .permissions-page .btn-light,
+    .permissions-page .btn-danger,
+    .permissions-page .btn-filter-clear {
+        min-height: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+
+    .permissions-page .summary-card {
+        padding: 14px;
+        border-radius: 15px;
+    }
+
+        .permissions-page .summary-card strong {
+            font-size: 22px;
+        }
+
+    .permissions-page .toggle-item {
+        align-items: flex-start;
+    }
+
+    .permissions-page .permissions-table {
+        border-spacing: 0 12px;
+    }
+
+        .permissions-page .permissions-table tbody tr {
+            border-radius: 16px;
+            padding: 10px;
+        }
+
+        .permissions-page .permissions-table td {
+            padding: 11px 8px 11px 42% !important;
+            min-height: 42px;
+            font-size: 12.5px;
+        }
+
+            .permissions-page .permissions-table td::before {
+                left: 8px;
+                width: 36%;
+                font-size: 10px;
+            }
+
+    .permissions-page .id-pill {
+        padding: 5px 9px;
+        font-size: 11px;
+    }
+
+    .permissions-page .total-permissions {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 390px) {
+    .permissions-page {
+        padding: 8px;
+    }
+
+        .permissions-page .page-hero,
+        .permissions-page .form-card,
+        .permissions-page .list-card,
+        .permissions-page .permission-block {
+            padding: 14px;
+        }
+
+            .permissions-page .page-hero h1 {
+                font-size: 20px;
+            }
+
+        .permissions-page .permissions-table td {
+            padding-left: 40% !important;
+        }
+
+            .permissions-page .permissions-table td::before {
+                width: 34%;
+                font-size: 9.5px;
+            }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .permissions-page .permissions-table tbody tr {
+        background: #111827;
+        border-color: rgba(255,255,255,.10);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+        html[data-theme="dark"] .permissions-page .permissions-table tbody tr:hover {
+            background: #111827;
+        }
+
+        html[data-theme="dark"] .permissions-page .permissions-table tbody tr.selected-row {
+            background: rgba(37,99,235,.22);
+            border-color: rgba(96,165,250,.35);
+        }
+
+    html[data-theme="dark"] .permissions-page .permissions-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark"] .permissions-page .permissions-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .permissions-page .permissions-table tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+        html[data-theme="dark glass"] .permissions-page .permissions-table tbody tr:hover {
+            background: rgba(15,23,42,.68);
+        }
+
+        html[data-theme="dark glass"] .permissions-page .permissions-table tbody tr.selected-row {
+            background: rgba(37,99,235,.24);
+            border-color: rgba(96,165,250,.36);
+        }
+
+    html[data-theme="dark glass"] .permissions-page .permissions-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255,255,255,.08);
+    }
+
+        html[data-theme="dark glass"] .permissions-page .permissions-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .permissions-page .permissions-table tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+        html[data-theme="liquid glass"] .permissions-page .permissions-table tbody tr:hover {
+            background: rgba(255,255,255,.50);
+        }
+
+        html[data-theme="liquid glass"] .permissions-page .permissions-table tbody tr.selected-row {
+            background: rgba(37,99,235,.18);
+            border-color: rgba(37,99,235,.25);
+        }
+
+    html[data-theme="liquid glass"] .permissions-page .permissions-table td {
+        color: #334155;
+        border-bottom-color: rgba(255,255,255,.42);
+    }
+
+        html[data-theme="liquid glass"] .permissions-page .permissions-table td::before {
+            color: #475569;
+        }
+}

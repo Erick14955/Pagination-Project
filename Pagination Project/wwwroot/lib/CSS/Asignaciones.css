@@ -1558,3 +1558,514 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card span {
 html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
     color: #111827 !important;
 }
+
+
+.assignments-page,
+.assignments-page * {
+    box-sizing: border-box;
+}
+
+.assignments-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.page-hero,
+.form-card,
+.list-card,
+.import-result-card,
+.table-container,
+.import-modal,
+.assignment-modal,
+.temporary-modal {
+    max-width: 100%;
+}
+
+@media (max-width: 1280px) {
+    .page-hero {
+        align-items: stretch;
+    }
+
+    .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        width: 100%;
+    }
+
+    .stat-card {
+        min-width: 0;
+    }
+
+    .assignments-table {
+        min-width: 1200px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .assignments-page {
+        padding: 18px;
+    }
+
+    .page-hero {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .month-filter {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+    }
+
+    .section-header,
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions,
+    .list-filters {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .list-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .search-box {
+        min-width: 0 !important;
+        width: 100%;
+        height: 46px;
+        grid-column: 1 / -1;
+    }
+
+    .employee-filter-select,
+    .filter-select,
+    .btn-export-xlsx,
+    .btn-xlsx,
+    .btn-light,
+    .btn-primary,
+    .btn-secondary,
+    .btn-filter-clear,
+    .btn-update-xlsx {
+        width: 100%;
+        min-width: 0;
+        height: 46px;
+    }
+
+    .form-grid,
+    .preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .import-stats,
+    .assignment-modal-stats {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+    }
+
+    .temporary-stages {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .assignments-page {
+        padding: 14px;
+    }
+
+    .page-hero,
+    .form-card,
+    .list-card,
+    .import-result-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+        .page-hero h1 {
+            font-size: 24px;
+            line-height: 1.15;
+        }
+
+        .page-hero p,
+        .section-header p {
+            font-size: 14px;
+        }
+
+    .section-header h2 {
+        font-size: 20px;
+    }
+
+    .hero-stats,
+    .import-stats,
+    .assignment-modal-stats,
+    .temporary-stages,
+    .list-filters {
+        grid-template-columns: 1fr;
+    }
+
+        .stat-card,
+        .import-stats div,
+        .assignment-modal-stats div,
+        .temporary-stage-card {
+            width: 100%;
+        }
+
+    .button-row,
+    .header-actions,
+    .temporary-modal-actions {
+        flex-direction: column;
+    }
+
+        .button-row button,
+        .button-row a,
+        .header-actions button,
+        .header-actions a,
+        .temporary-modal-actions button {
+            width: 100%;
+        }
+
+    .table-container {
+        overflow: visible;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .assignments-table {
+        min-width: 0 !important;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        background: transparent;
+    }
+
+        .assignments-table thead {
+            display: none;
+        }
+
+        .assignments-table,
+        .assignments-table tbody,
+        .assignments-table tr,
+        .assignments-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .assignments-table tbody tr {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 18px;
+                padding: 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+                overflow: hidden;
+            }
+
+            .assignments-table td {
+                position: relative;
+                padding: 12px 10px 12px 46% !important;
+                border-bottom: 1px solid #e5e7eb;
+                white-space: normal !important;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                text-align: right;
+                word-break: break-word;
+            }
+
+                .assignments-table td:last-child {
+                    border-bottom: none;
+                }
+
+                .assignments-table td::before {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 40%;
+                    font-size: 12px;
+                    font-weight: 800;
+                    color: #64748b;
+                    text-align: left;
+                    white-space: normal;
+                }
+
+                .assignments-table td:nth-child(1)::before {
+                    content: "Employee";
+                }
+
+                .assignments-table td:nth-child(2)::before {
+                    content: "Book";
+                }
+
+                .assignments-table td:nth-child(3)::before {
+                    content: "Database";
+                }
+
+                .assignments-table td:nth-child(4)::before {
+                    content: "Bind Plant";
+                }
+
+                .assignments-table td:nth-child(5)::before {
+                    content: "Proof";
+                }
+
+                .assignments-table td:nth-child(6)::before {
+                    content: "Final";
+                }
+
+                .assignments-table td:nth-child(7)::before {
+                    content: "Memo";
+                }
+
+                .assignments-table td:nth-child(8)::before {
+                    content: "Final PO";
+                }
+
+                .assignments-table td:nth-child(9)::before {
+                    content: "Shipping";
+                }
+
+                .assignments-table td:nth-child(10)::before {
+                    content: "Dirxion";
+                }
+
+                .assignments-table td:nth-child(11)::before {
+                    content: "Actions";
+                }
+
+    .employee-title,
+    .book-title {
+        width: 100%;
+        text-align: right;
+    }
+
+        .employee-title strong,
+        .book-title strong {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .employee-title span,
+        .book-title span {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+    .pill {
+        white-space: normal;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .assignments-table td.actions-cell {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        padding: 14px 10px !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        text-align: right !important;
+    }
+
+        .assignments-table td.actions-cell .icon-btn,
+        .assignments-table td.actions-cell button.icon-btn {
+            margin: 0 !important;
+        }
+
+    .modal-backdrop-custom,
+    .assignment-modal-backdrop,
+    .temporary-modal-backdrop {
+        padding: 12px !important;
+        align-items: flex-start !important;
+        overflow-y: auto !important;
+    }
+
+    .import-modal,
+    .assignment-modal,
+    .temporary-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        min-height: auto !important;
+        border-radius: 18px !important;
+        padding: 18px !important;
+        margin: 12px 0 !important;
+    }
+
+    .modal-header-custom,
+    .assignment-modal-header,
+    .temporary-modal-header {
+        gap: 12px;
+    }
+
+        .modal-header-custom h2,
+        .assignment-modal-header h2,
+        .temporary-modal-header h2 {
+            font-size: 1.15rem;
+            line-height: 1.25;
+        }
+
+    .modal-actions,
+    .assignment-modal-actions,
+    .temporary-modal-actions {
+        justify-content: stretch;
+    }
+
+        .modal-actions button,
+        .assignment-modal-actions button,
+        .temporary-modal-actions button {
+            width: 100%;
+        }
+}
+
+@media (max-width: 520px) {
+    .assignments-page {
+        padding: 10px;
+    }
+
+    .page-hero,
+    .form-card,
+    .list-card,
+    .import-result-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+        .page-hero h1 {
+            font-size: 21px;
+        }
+
+    .section-header h2 {
+        font-size: 18px;
+    }
+
+    .form-control,
+    .employee-filter-select,
+    .filter-select,
+    .search-box,
+    .btn-export-xlsx,
+    .btn-xlsx,
+    .btn-light,
+    .btn-primary,
+    .btn-secondary,
+    .btn-filter-clear,
+    .btn-update-xlsx {
+        min-height: 44px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+
+    .search-box {
+        height: 44px;
+        padding: 0 10px;
+    }
+
+        .search-box input {
+            font-size: 14px;
+        }
+
+    .stat-card strong,
+    .import-stats strong,
+    .assignment-modal-stats strong {
+        font-size: 21px;
+    }
+
+    .assignments-table tbody tr {
+        border-radius: 16px;
+        padding: 10px;
+    }
+
+    .assignments-table td {
+        padding: 11px 8px 11px 43% !important;
+        font-size: 13px;
+    }
+
+        .assignments-table td::before {
+            left: 8px;
+            width: 38%;
+            font-size: 11px;
+        }
+
+        .icon-btn,
+        .assignments-table td.actions-cell .icon-btn,
+        .assignments-table td.actions-cell button.icon-btn {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            min-height: 40px !important;
+        }
+
+    .modal-close-btn,
+    .assignment-modal-close,
+    .temporary-modal-close {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+    }
+
+    .modal-section,
+    .assignment-modal-section {
+        padding: 14px;
+        border-radius: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    html[data-theme="dark"] .assignments-table tbody tr {
+        background: #111827;
+        border-color: rgba(255,255,255,.10);
+        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+
+    html[data-theme="dark"] .assignments-table td {
+        border-bottom-color: rgba(255,255,255,.08);
+        color: #e2e8f0;
+    }
+
+        html[data-theme="dark"] .assignments-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .assignments-table tbody tr {
+        background: rgba(15,23,42,.62);
+        border-color: rgba(255,255,255,.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+
+    html[data-theme="dark glass"] .assignments-table td {
+        border-bottom-color: rgba(255,255,255,.08);
+        color: #e2e8f0;
+    }
+
+        html[data-theme="dark glass"] .assignments-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .assignments-table tbody tr {
+        background: rgba(255,255,255,.42);
+        border-color: rgba(255,255,255,.62);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    }
+
+    html[data-theme="liquid glass"] .assignments-table td {
+        border-bottom-color: rgba(255,255,255,.42);
+        color: #334155;
+    }
+
+        html[data-theme="liquid glass"] .assignments-table td::before {
+            color: #475569;
+        }
+}

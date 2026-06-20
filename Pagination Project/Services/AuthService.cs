@@ -46,7 +46,6 @@ namespace Pagination_Project.Services
             var usuario = await db.Users
                 .Include(u => u.Permisos)
                 .Include(u => u.Empleado)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == usernameLimpio);
 
             if (usuario is null)
@@ -66,11 +65,24 @@ namespace Pagination_Project.Services
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(usuario.password))
+            if (usuario.LoginBloqueado)
             {
                 return new LoginResult
                 {
-                    Estado = LoginEstado.ContrasenaIncorrecta,
+                    Estado = LoginEstado.CuentaBloqueada,
+                    Usuario = usuario
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(usuario.password))
+            {
+                await RegistrarIntentoFallidoAsync(db, usuario);
+
+                return new LoginResult
+                {
+                    Estado = usuario.LoginBloqueado
+                        ? LoginEstado.CuentaBloqueada
+                        : LoginEstado.ContrasenaIncorrecta,
                     Usuario = usuario
                 };
             }
@@ -81,11 +93,24 @@ namespace Pagination_Project.Services
 
                 if (!passwordCorrecta)
                 {
+                    await RegistrarIntentoFallidoAsync(db, usuario);
+
                     return new LoginResult
                     {
-                        Estado = LoginEstado.ContrasenaIncorrecta,
+                        Estado = usuario.LoginBloqueado
+                            ? LoginEstado.CuentaBloqueada
+                            : LoginEstado.ContrasenaIncorrecta,
                         Usuario = usuario
                     };
+                }
+
+                if (usuario.LoginFailedAttempts > 0)
+                {
+                    usuario.LoginFailedAttempts = 0;
+                    usuario.LoginBloqueado = false;
+                    usuario.LoginBloqueadoAt = null;
+
+                    await db.SaveChangesAsync();
                 }
 
                 return new LoginResult
@@ -96,12 +121,34 @@ namespace Pagination_Project.Services
             }
             catch
             {
+                await RegistrarIntentoFallidoAsync(db, usuario);
+
                 return new LoginResult
                 {
-                    Estado = LoginEstado.ContrasenaIncorrecta,
+                    Estado = usuario.LoginBloqueado
+                        ? LoginEstado.CuentaBloqueada
+                        : LoginEstado.ContrasenaIncorrecta,
                     Usuario = usuario
                 };
             }
+        }
+
+        private static DateTime FechaLocalSinZona()
+        {
+            return DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
+        }
+
+        private static async Task RegistrarIntentoFallidoAsync(AppDbContext db, Usuario usuario)
+        {
+            usuario.LoginFailedAttempts++;
+
+            if (usuario.LoginFailedAttempts >= 3)
+            {
+                usuario.LoginBloqueado = true;
+                usuario.LoginBloqueadoAt = FechaLocalSinZona();
+            }
+
+            await db.SaveChangesAsync();
         }
     }
 }

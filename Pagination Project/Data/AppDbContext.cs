@@ -46,6 +46,9 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.lvl_Id).HasColumnName("Lvl_Id");
                 entity.Property(e => e.Activo).HasColumnName("Active").IsRequired();
                 entity.Property(e => e.ThemePreference).HasColumnName("ThemePreference");
+                modelBuilder.Entity<Usuario>()
+                .Property(u => u.LoginBloqueadoAt)
+                .HasColumnType("timestamp without time zone");
                 entity.Property(e => e.EmployeeId)
                     .HasColumnName("Employee_Id")
                     .HasColumnType("uuid");
@@ -491,6 +494,7 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.EditLateWork).HasColumnName("Edit_Late_Work");
                 entity.Property(e => e.DeleteLateWork).HasColumnName("Delete_Late_Work");
                 entity.Property(e => e.CompleteLateWork).HasColumnName("Complete_Late_Work");
+                entity.Property(e => e.UnlockUsers).HasColumnName("UnlockUsers");
 
                 entity.Property(e => e.Name)
                     .HasColumnName("Permission_Name")

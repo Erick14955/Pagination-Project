@@ -7,7 +7,8 @@ namespace Pagination_Project.Services
         Correcto,
         UsuarioNoExiste,
         ContrasenaIncorrecta,
-        UsuarioInactivo
+        UsuarioInactivo,
+        CuentaBloqueada
     }
 
     public class LoginResult

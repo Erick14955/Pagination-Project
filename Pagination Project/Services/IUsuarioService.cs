@@ -17,5 +17,6 @@ namespace Pagination_Project.Services
 
         Task<bool> CambiarPasswordPerfilAsync(CambiarPasswordPerfilDto dto);
         Task<bool> ActualizarThemePreferenceAsync(Guid userId, string themePreference);
+        Task<bool> DesbloquearUsuarioAsync(Guid usuarioId);
     }
 }

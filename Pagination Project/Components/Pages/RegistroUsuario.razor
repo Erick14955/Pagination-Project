@@ -26,9 +26,20 @@
             <p>Create, edit and delete system users.</p>
         </div>
 
-        <button type="button" class="thryv-secondary-btn thryv-header-btn" @onclick="LimpiarFormulario">
-            @(Editando ? "Cancel edit" : "New user")
-        </button>
+        <div class="thryv-header-actions">
+            @if (PuedeDesbloquearUsuarios)
+            {
+                <button type="button"
+                        class="thryv-secondary-btn thryv-header-btn"
+                        @onclick="AbrirModalDesbloqueo">
+                    Unlock users (@usuariosBloqueados.Count)
+                </button>
+            }
+
+            <button type="button" class="thryv-secondary-btn thryv-header-btn" @onclick="LimpiarFormulario">
+                @(Editando ? "Cancel edit" : "New user")
+            </button>
+        </div>
     </section>
 
     <div class="thryv-users-card thryv-form-card-full">
@@ -247,6 +258,7 @@
                         <th>Employee</th>
                         <th>Permission</th>
                         <th>Status</th>
+                        <th>Login Lock</th>
                         <AuthorizeView>
                             <Authorized Context="auth">
                                 @if (HasPermission(auth.User, "EditUser"))
@@ -260,7 +272,7 @@
 
                 <tbody>
                     @{
-                        var totalColumnas = (_user != null && HasPermission(_user, "EditUser")) ? 7 : 6;
+                        var totalColumnas = (_user != null && HasPermission(_user, "EditUser")) ? 8 : 7;
                     }
 
                     @if (Cargando)
@@ -308,6 +320,20 @@
                                     }
                                 </td>
 
+                                <td>
+                                    @if (user.LoginBloqueado)
+                                    {
+                                        <div class="thryv-lock-cell">
+                                            <span class="thryv-status-badge inactive">Locked</span>
+                                            <small>@user.LoginFailedAttempts failed attempt(s)</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="thryv-status-badge active">Unlocked</span>
+                                    }
+                                </td>
+
                                 <AuthorizeView>
                                     <Authorized Context="auth">
                                         @if (HasPermission(auth.User, "EditUser"))
@@ -330,6 +356,79 @@
         </div>
     </div>
 </div>
+
+@if (MostrarModalDesbloqueo && PuedeDesbloquearUsuarios)
+{
+    <div class="thryv-modal-overlay" @onclick="CerrarModalDesbloqueo">
+        <div class="thryv-modal-card thryv-unlock-modal" @onclick:stopPropagation="true">
+            <div class="thryv-modal-header">
+                <h3>Unlock blocked users</h3>
+            </div>
+
+            <div class="thryv-modal-body">
+                @if (!usuariosBloqueados.Any())
+                {
+                    <p>No blocked users found.</p>
+                }
+                else
+                {
+                    <p>
+                        These accounts were locked due to multiple failed login attempts.
+                    </p>
+
+                    <div class="thryv-table-wrap thryv-unlock-table-wrap">
+                        <table class="thryv-users-table thryv-unlock-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Attempts</th>
+                                    <th>Locked At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var user in usuariosBloqueados)
+                                {
+                                    <tr>
+                                        <td>@user.Username</td>
+                                        <td>@user.Name</td>
+                                        <td>@user.Email</td>
+                                        <td>@user.LoginFailedAttempts</td>
+                                        <td>
+                                            @(user.LoginBloqueadoAt.HasValue
+                                                                            ? user.LoginBloqueadoAt.Value.ToString("dd/MM/yyyy hh:mm tt")
+                                                                            : "-")
+                            </td>
+                            <td>
+                                <button type="button"
+                                        class="thryv-primary-btn"
+                                        disabled="@Desbloqueando"
+                                        @onclick="async () => await DesbloquearUsuarioAsync(user.Id)">
+                                    @(Desbloqueando ? "Unlocking..." : "Unlock")
+                                </button>
+                            </td>
+                        </tr>
+                                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <div class="thryv-modal-actions">
+                <button type="button"
+                        class="thryv-secondary-btn"
+                        @onclick="CerrarModalDesbloqueo"
+                        disabled="@Desbloqueando">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+}
 
 @if (MostrarModalEliminar)
 {
@@ -416,6 +515,18 @@
     private bool Editando => modelo.Id != Guid.Empty;
     private List<EmpleadoUsuarioComboDto> empleadosDisponibles = new();
 
+    private bool MostrarModalDesbloqueo = false;
+    private bool Desbloqueando = false;
+
+    private bool PuedeDesbloquearUsuarios =>
+        _user != null && HasPermission(_user, "UnlockUsers");
+
+    private List<UsuarioListDto> usuariosBloqueados =>
+        usuarios
+            .Where(u => u.LoginBloqueado)
+            .OrderBy(u => u.Username)
+            .ToList();
+
     private List<UsuarioListDto> usuariosFiltrados =>
         usuarios
             .Where(u =>
@@ -434,6 +545,60 @@
         await CargarDatosAsync();
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
+    }
+    private void AbrirModalDesbloqueo()
+    {
+        if (!PuedeDesbloquearUsuarios)
+            return;
+
+        MostrarModalDesbloqueo = true;
+    }
+
+    private void CerrarModalDesbloqueo()
+    {
+        if (Desbloqueando)
+            return;
+
+        MostrarModalDesbloqueo = false;
+    }
+
+    private async Task DesbloquearUsuarioAsync(Guid usuarioId)
+    {
+        if (!PuedeDesbloquearUsuarios)
+        {
+            MostrarResultado("Unauthorized", "You do not have permission to unlock users.");
+            return;
+        }
+
+        Desbloqueando = true;
+
+        try
+        {
+            var desbloqueado = await UsuarioService.DesbloquearUsuarioAsync(usuarioId);
+
+            if (!desbloqueado)
+            {
+                MostrarResultado("Not found", "User not found.");
+                return;
+            }
+
+            await CargarDatosAsync();
+
+            if (!usuariosBloqueados.Any())
+            {
+                MostrarModalDesbloqueo = false;
+            }
+
+            MostrarResultado("User unlocked", "The user account was unlocked successfully.");
+        }
+        catch (Exception ex)
+        {
+            MostrarResultado("Error", $"Error unlocking user: {ex.Message}");
+        }
+        finally
+        {
+            Desbloqueando = false;
+        }
     }
 
     private void OnEmpleadoSeleccionado(Guid? empleadoId)
