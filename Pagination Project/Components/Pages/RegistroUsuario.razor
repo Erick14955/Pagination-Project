@@ -666,7 +666,7 @@
                 var dto = new UsuarioUpdateDto
                 {
                     Id = modelo.Id,
-                    Username = modelo.Username,
+                    Username = modelo.Username.Trim().ToLowerInvariant(),
                     Email = modelo.Email,
                     Password = string.IsNullOrWhiteSpace(modelo.Password) ? null : modelo.Password,
                     Name = modelo.Name,
@@ -692,7 +692,7 @@
             {
                 var dto = new UsuarioCreateDto
                 {
-                    Username = modelo.Username,
+                    Username = modelo.Username.Trim().ToLowerInvariant(),
                     Email = modelo.Email,
                     Password = modelo.Password,
                     Name = modelo.Name,
@@ -734,7 +734,7 @@
         modelo = new UsuarioFormModel
         {
             Id = user.Id,
-            Username = user.Username,
+            Username = user.Username.Trim().ToLowerInvariant(),
             Email = user.Email,
             Name = user.Name,
             Password = string.Empty,

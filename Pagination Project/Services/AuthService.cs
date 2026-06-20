@@ -14,6 +14,18 @@ namespace Pagination_Project.Services
             _dbFactory = dbFactory;
         }
 
+        public async Task<bool> UsuarioSigueActivoAsync(Guid usuarioId)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            return await db.Users
+                .AsNoTracking()
+                .AnyAsync(u =>
+                    u.Id == usuarioId &&
+                    u.Activo == true &&
+                    u.LoginBloqueado == false);
+        }
+
         public async Task<Usuario?> ValidarLoginAsync(string username, string password)
         {
             var resultado = await ValidarLoginDetalladoAsync(username, password);
@@ -39,14 +51,16 @@ namespace Pagination_Project.Services
                 };
             }
 
-            var usernameLimpio = username.Trim();
+            var usernameLimpio = username.Trim().ToLowerInvariant();
 
             await using var db = await _dbFactory.CreateDbContextAsync();
 
             var usuario = await db.Users
                 .Include(u => u.Permisos)
                 .Include(u => u.Empleado)
-                .FirstOrDefaultAsync(u => u.Username == usernameLimpio);
+                .FirstOrDefaultAsync(u =>
+                    u.Username != null &&
+                    u.Username.ToLower() == usernameLimpio);
 
             if (usuario is null)
             {

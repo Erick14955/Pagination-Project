@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Pagination_Project.Models;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Pagination_Project.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IDataProtectionKeyContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -28,10 +29,27 @@ namespace Pagination_Project.Data
         public DbSet<EmployeeLeaveCoverage> EmployeeLeaveCoverages { get; set; }
         public DbSet<EmployeeLeaveCoverageDetail> EmployeeLeaveCoverageDetails { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<DataProtectionKey>(entity =>
+            {
+                entity.ToTable("DataProtectionKeys");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id");
+
+                entity.Property(e => e.FriendlyName)
+                    .HasColumnName("FriendlyName");
+
+                entity.Property(e => e.Xml)
+                    .HasColumnName("Xml");
+            });
 
             modelBuilder.Entity<Usuario>(entity =>
             {

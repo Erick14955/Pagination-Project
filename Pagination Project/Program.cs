@@ -1,17 +1,19 @@
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Pagination_Project.Components;
 using Pagination_Project.Data;
 using Pagination_Project.Services;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Oculta el header "Server" generado por Kestrel.
-// Nota: Render u otro proxy todavía puede agregar sus propios headers.
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.AddServerHeader = false;
@@ -35,6 +37,9 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
             npgsqlOptions.CommandTimeout(60);
         }));
 
+builder.Services.AddDataProtection()
+    .SetApplicationName("Pagination_Project")
+    .PersistKeysToDbContext<AppDbContext>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -88,6 +93,31 @@ builder.Services
 
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
+
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnValidatePrincipal = async context =>
+            {
+                var userIdClaim = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (!Guid.TryParse(userIdClaim, out var usuarioId))
+                {
+                    context.RejectPrincipal();
+                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    return;
+                }
+
+                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+
+                var usuarioValido = await authService.UsuarioSigueActivoAsync(usuarioId);
+
+                if (!usuarioValido)
+                {
+                    context.RejectPrincipal();
+                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                }
+            }
+        };
     });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -96,12 +126,47 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
         ForwardedHeaders.XForwardedFor |
         ForwardedHeaders.XForwardedProto;
 
+    options.ForwardLimit = 1;
+
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("login-policy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    options.AddPolicy("password-reset-policy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 3,
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
 
 var app = builder.Build();
 
@@ -125,6 +190,8 @@ app.Use(async (context, next) =>
         headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         headers["X-Frame-Options"] = "DENY";
         headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+        headers["Cross-Origin-Opener-Policy"] = "same-origin";
+        headers["Cross-Origin-Resource-Policy"] = "same-origin";
 
         headers["Content-Security-Policy"] =
             "default-src 'self'; " +
@@ -158,6 +225,7 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.UseAntiforgery();
 
 app.Use(async (context, next) =>
@@ -203,8 +271,6 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseAuthorization();
-
 app.MapPost("/account/login", async (
     HttpContext httpContext,
     IAuthService authService) =>
@@ -214,6 +280,9 @@ app.MapPost("/account/login", async (
     var username = form["Username"].ToString();
     var password = form["Password"].ToString();
     var returnUrl = form["ReturnUrl"].ToString();
+    var rememberMe =
+    form.TryGetValue("RememberMe", out var rememberValue) &&
+    string.Equals(rememberValue.ToString(), "true", StringComparison.OrdinalIgnoreCase);
 
     if (string.IsNullOrWhiteSpace(returnUrl))
     {
@@ -311,9 +380,11 @@ app.MapPost("/account/login", async (
         principal,
         new AuthenticationProperties
         {
-            IsPersistent = true,
+            IsPersistent = rememberMe,
             AllowRefresh = true,
-            ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+            ExpiresUtc = rememberMe
+                ? DateTimeOffset.UtcNow.AddHours(8)
+                : null
         });
 
     if (requiereCambioPassword)
@@ -323,7 +394,9 @@ app.MapPost("/account/login", async (
 
     return Results.Redirect(returnUrl);
 })
-.DisableAntiforgery();
+.AllowAnonymous()
+.RequireRateLimiting("login-policy")
+.AddEndpointFilter(ValidarAntiforgeryEndpoint);
 
 app.MapPost("/account/change-password", async (
     HttpContext httpContext,
@@ -369,14 +442,15 @@ app.MapPost("/account/change-password", async (
     return Results.Redirect("/login?changed=1");
 })
 .RequireAuthorization()
-.DisableAntiforgery();
+.AddEndpointFilter(ValidarAntiforgeryEndpoint);
 
 app.MapPost("/account/logout", async (HttpContext httpContext) =>
 {
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/login");
 })
-.DisableAntiforgery();
+.RequireAuthorization()
+.AddEndpointFilter(ValidarAntiforgeryEndpoint);
 
 app.MapPost("/account/forgot-password", async (
     HttpContext httpContext,
@@ -397,7 +471,9 @@ app.MapPost("/account/forgot-password", async (
 
     return Results.Redirect("/forgot-password?sent=1");
 })
-.DisableAntiforgery();
+.AllowAnonymous()
+.RequireRateLimiting("password-reset-policy")
+.AddEndpointFilter(ValidarAntiforgeryEndpoint);
 
 app.MapPost("/account/reset-password", async (
     HttpContext httpContext,
@@ -430,7 +506,9 @@ app.MapPost("/account/reset-password", async (
 
     return Results.Redirect("/login?changed=1");
 })
-.DisableAntiforgery();
+.AllowAnonymous()
+.RequireRateLimiting("password-reset-policy")
+.AddEndpointFilter(ValidarAntiforgeryEndpoint);
 
 var securityTxtHandler = (IConfiguration configuration, HttpContext httpContext) =>
 {
@@ -469,5 +547,23 @@ app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+static async ValueTask<object?> ValidarAntiforgeryEndpoint(
+    EndpointFilterInvocationContext context,
+    EndpointFilterDelegate next)
+{
+    var antiforgery = context.HttpContext.RequestServices.GetRequiredService<IAntiforgery>();
+
+    try
+    {
+        await antiforgery.ValidateRequestAsync(context.HttpContext);
+    }
+    catch (AntiforgeryValidationException)
+    {
+        return Results.BadRequest("Solicitud inválida.");
+    }
+
+    return await next(context);
+}
 
 app.Run();

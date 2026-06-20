@@ -7,5 +7,7 @@ namespace Pagination_Project.Services
         Task<Usuario?> ValidarLoginAsync(string username, string password);
 
         Task<LoginResult> ValidarLoginDetalladoAsync(string username, string password);
+
+        Task<bool> UsuarioSigueActivoAsync(Guid usuarioId);
     }
 }

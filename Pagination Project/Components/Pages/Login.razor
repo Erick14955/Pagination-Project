@@ -1,5 +1,10 @@
 ﻿@page "/"
 @page "/login"
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [AllowAnonymous]
+
 @inject NavigationManager Navigation
 @layout Pagination_Project.Components.Layout.LoginLayout
 @inject IJSRuntime JS
@@ -24,6 +29,7 @@
             </p>
 
             <form method="post" action="/account/login">
+                <AntiforgeryToken />
                 <input type="hidden" name="ReturnUrl" value="/dashboard" />
 
                 <div class="thryv-form-group">
@@ -43,6 +49,16 @@
                            placeholder="••••••••"
                            maxlength="100"
                            autocomplete="current-password" />
+                </div>
+
+                <div class="thryv-remember-row">
+                    <label class="thryv-remember-option">
+                        <input type="checkbox"
+                               name="RememberMe"
+                               value="true" />
+
+                        <span>Remember me</span>
+                    </label>
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(_mensajeError))

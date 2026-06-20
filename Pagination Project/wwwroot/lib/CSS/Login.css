@@ -198,6 +198,31 @@
     color: #0f172a;
 }
 
+.thryv-remember-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 4px 0 18px;
+}
+
+.thryv-remember-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #334155;
+    user-select: none;
+}
+
+    .thryv-remember-option input {
+        width: 16px;
+        height: 16px;
+        accent-color: #00796b;
+        cursor: pointer;
+    }
+
 .thryv-modal-card p {
     margin: 0 0 22px;
     color: #475569;

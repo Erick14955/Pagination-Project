@@ -222,7 +222,7 @@ namespace Pagination_Project.Services
             var usuario = new Usuario
             {
                 Id = Guid.NewGuid(),
-                Username = dto.Username,
+                Username = dto.Username.Trim().ToLowerInvariant(),
                 email = dto.Email,
                 password = Argon2.Hash(dto.Password),
                 Name = dto.Name,
@@ -244,7 +244,7 @@ namespace Pagination_Project.Services
             return new UsuarioListDto
             {
                 Id = usuario.Id,
-                Username = usuario.Username,
+                Username = usuario.Username.Trim().ToLowerInvariant(),
                 Email = usuario.email,
                 Name = usuario.Name,
                 Lvl_Id = usuario.lvl_Id,
@@ -257,7 +257,7 @@ namespace Pagination_Project.Services
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
 
-            dto.Username = dto.Username.Trim();
+            dto.Username = dto.Username.Trim().ToLowerInvariant();
             dto.Email = dto.Email.Trim().ToLower();
             dto.Name = dto.Name?.Trim() ?? string.Empty;
 
@@ -311,7 +311,7 @@ namespace Pagination_Project.Services
                     throw new Exception("This employee already has an assigned user.");
             }
 
-            usuario.Username = dto.Username;
+            usuario.Username = dto.Username.Trim().ToLowerInvariant();
             usuario.email = dto.Email;
             usuario.Name = dto.Name;
             usuario.lvl_Id = dto.Lvl_Id;
@@ -335,7 +335,7 @@ namespace Pagination_Project.Services
             return new UsuarioListDto
             {
                 Id = usuario.Id,
-                Username = usuario.Username,
+                Username = usuario.Username.Trim().ToLowerInvariant(),
                 Email = usuario.email,
                 Name = usuario.Name,
                 Lvl_Id = usuario.lvl_Id,
