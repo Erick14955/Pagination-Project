@@ -511,137 +511,140 @@
                 </button>
             </div>
 
-            <div class="weekly-evaluation-summary-grid">
-                <div class="weekly-summary-card">
-                    <span>Employee</span>
-                    <strong>@selectedWeeklyEvaluation.EmployeeName</strong>
-                </div>
+            <div class="weekly-evaluation-modal-scroll">
 
-                <div class="weekly-summary-card">
-                    <span>KGEN Code</span>
-                    <strong>@selectedWeeklyEvaluation.KgenCode</strong>
-                </div>
-
-                <div class="weekly-summary-card">
-                    <span>Shipping Date</span>
-                    <strong>@selectedWeeklyEvaluation.ShippingDate.ToString("dd/MM/yyyy")</strong>
-                </div>
-
-                <div class="weekly-summary-card total">
-                    <span>Total Accuracy</span>
-                    <strong>@selectedWeeklyEvaluation.PercentageAverage.ToString("0.00")%</strong>
-                </div>
-            </div>
-
-            <div class="weekly-evaluation-percent-grid">
-                <div class="weekly-percent-mini-card">
-                    <span>Motif YP</span>
-                    <strong>@selectedWeeklyEvaluation.MotifYp.ToString("0.00")%</strong>
-                </div>
-
-                <div class="weekly-percent-mini-card">
-                    <span>Motif WP</span>
-                    <strong>@selectedWeeklyEvaluation.MotifWp.ToString("0.00")%</strong>
-                </div>
-
-                <div class="weekly-percent-mini-card">
-                    <span>Inventory</span>
-                    <strong>@selectedWeeklyEvaluation.InventoryReport.ToString("0.00")%</strong>
-                </div>
-
-                <div class="weekly-percent-mini-card">
-                    <span>Shipping Folder</span>
-                    <strong>@selectedWeeklyEvaluation.ProductShippingFolder.ToString("0.00")%</strong>
-                </div>
-
-                <div class="weekly-percent-mini-card">
-                    <span>Task Memo</span>
-                    <strong>@selectedWeeklyEvaluation.TaskMemo.ToString("0.00")%</strong>
-                </div>
-            </div>
-
-            <div class="weekly-evaluation-detail-grid">
-
-                <div class="weekly-detail-card">
-                    <div class="weekly-detail-card-header">
-                        <h4>📌 Motif YP</h4>
-                        <span>@CountErrors(GetMotifYpOptions(selectedWeeklyEvaluation)) errors</span>
+                <div class="weekly-evaluation-summary-grid">
+                    <div class="weekly-summary-card">
+                        <span>Employee</span>
+                        <strong>@selectedWeeklyEvaluation.EmployeeName</strong>
                     </div>
 
-                    @foreach (var option in GetMotifYpOptions(selectedWeeklyEvaluation))
-                    {
-                        <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                            <input type="radio" checked="@option.HasError" disabled />
-                            <span>@option.Label</span>
-                            <small>@(option.HasError ? "Failed" : "OK")</small>
-                        </label>
-                    }
-                </div>
-
-                <div class="weekly-detail-card">
-                    <div class="weekly-detail-card-header">
-                        <h4>⚙️ Motif WP</h4>
-                        <span>@CountErrors(GetMotifWpOptions(selectedWeeklyEvaluation)) errors</span>
+                    <div class="weekly-summary-card">
+                        <span>KGEN Code</span>
+                        <strong>@selectedWeeklyEvaluation.KgenCode</strong>
                     </div>
 
-                    @foreach (var option in GetMotifWpOptions(selectedWeeklyEvaluation))
-                    {
-                        <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                            <input type="radio" checked="@option.HasError" disabled />
-                            <span>@option.Label</span>
-                            <small>@(option.HasError ? "Failed" : "OK")</small>
-                        </label>
-                    }
-                </div>
-
-                <div class="weekly-detail-card">
-                    <div class="weekly-detail-card-header">
-                        <h4>📦 Inventory Report</h4>
-                        <span>@CountErrors(GetInventoryOptions(selectedWeeklyEvaluation)) errors</span>
+                    <div class="weekly-summary-card">
+                        <span>Shipping Date</span>
+                        <strong>@selectedWeeklyEvaluation.ShippingDate.ToString("dd/MM/yyyy")</strong>
                     </div>
 
-                    @foreach (var option in GetInventoryOptions(selectedWeeklyEvaluation))
-                    {
-                        <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                            <input type="radio" checked="@option.HasError" disabled />
-                            <span>@option.Label</span>
-                            <small>@(option.HasError ? "Failed" : "OK")</small>
-                        </label>
-                    }
+                    <div class="weekly-summary-card total">
+                        <span>Total Accuracy</span>
+                        <strong>@selectedWeeklyEvaluation.PercentageAverage.ToString("0.00")%</strong>
+                    </div>
                 </div>
 
-                <div class="weekly-detail-card">
-                    <div class="weekly-detail-card-header">
-                        <h4>📎 Product Shipping Folder</h4>
-                        <span>@CountErrors(GetShippingOptions(selectedWeeklyEvaluation)) errors</span>
+                <div class="weekly-evaluation-percent-grid">
+                    <div class="weekly-percent-mini-card">
+                        <span>Motif YP</span>
+                        <strong>@selectedWeeklyEvaluation.MotifYp.ToString("0.00")%</strong>
                     </div>
 
-                    @foreach (var option in GetShippingOptions(selectedWeeklyEvaluation))
-                    {
-                        <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                            <input type="radio" checked="@option.HasError" disabled />
-                            <span>@option.Label</span>
-                            <small>@(option.HasError ? "Failed" : "OK")</small>
-                        </label>
-                    }
-                </div>
-
-                <div class="weekly-detail-card">
-                    <div class="weekly-detail-card-header">
-                        <h4>📋 Task Memo</h4>
-                        <span>@CountErrors(GetTaskMemoOptions(selectedWeeklyEvaluation)) errors</span>
+                    <div class="weekly-percent-mini-card">
+                        <span>Motif WP</span>
+                        <strong>@selectedWeeklyEvaluation.MotifWp.ToString("0.00")%</strong>
                     </div>
 
-                    @foreach (var option in GetTaskMemoOptions(selectedWeeklyEvaluation))
-                    {
-                        <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                            <input type="radio" checked="@option.HasError" disabled />
-                            <span>@option.Label</span>
-                            <small>@(option.HasError ? "Failed" : "OK")</small>
-                        </label>
-                    }
+                    <div class="weekly-percent-mini-card">
+                        <span>Inventory</span>
+                        <strong>@selectedWeeklyEvaluation.InventoryReport.ToString("0.00")%</strong>
+                    </div>
+
+                    <div class="weekly-percent-mini-card">
+                        <span>Shipping Folder</span>
+                        <strong>@selectedWeeklyEvaluation.ProductShippingFolder.ToString("0.00")%</strong>
+                    </div>
+
+                    <div class="weekly-percent-mini-card">
+                        <span>Task Memo</span>
+                        <strong>@selectedWeeklyEvaluation.TaskMemo.ToString("0.00")%</strong>
+                    </div>
                 </div>
 
+                <div class="weekly-evaluation-detail-grid">
+
+                    <div class="weekly-detail-card">
+                        <div class="weekly-detail-card-header">
+                            <h4>📌 Motif YP</h4>
+                            <span>@CountErrors(GetMotifYpOptions(selectedWeeklyEvaluation)) errors</span>
+                        </div>
+
+                        @foreach (var option in GetMotifYpOptions(selectedWeeklyEvaluation))
+                        {
+                            <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
+                                <input type="radio" checked="@option.HasError" disabled />
+                                <span>@option.Label</span>
+                                <small>@(option.HasError ? "Failed" : "OK")</small>
+                            </label>
+                        }
+                    </div>
+
+                    <div class="weekly-detail-card">
+                        <div class="weekly-detail-card-header">
+                            <h4>⚙️ Motif WP</h4>
+                            <span>@CountErrors(GetMotifWpOptions(selectedWeeklyEvaluation)) errors</span>
+                        </div>
+
+                        @foreach (var option in GetMotifWpOptions(selectedWeeklyEvaluation))
+                        {
+                            <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
+                                <input type="radio" checked="@option.HasError" disabled />
+                                <span>@option.Label</span>
+                                <small>@(option.HasError ? "Failed" : "OK")</small>
+                            </label>
+                        }
+                    </div>
+
+                    <div class="weekly-detail-card">
+                        <div class="weekly-detail-card-header">
+                            <h4>📦 Inventory Report</h4>
+                            <span>@CountErrors(GetInventoryOptions(selectedWeeklyEvaluation)) errors</span>
+                        </div>
+
+                        @foreach (var option in GetInventoryOptions(selectedWeeklyEvaluation))
+                        {
+                            <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
+                                <input type="radio" checked="@option.HasError" disabled />
+                                <span>@option.Label</span>
+                                <small>@(option.HasError ? "Failed" : "OK")</small>
+                            </label>
+                        }
+                    </div>
+
+                    <div class="weekly-detail-card">
+                        <div class="weekly-detail-card-header">
+                            <h4>📎 Product Shipping Folder</h4>
+                            <span>@CountErrors(GetShippingOptions(selectedWeeklyEvaluation)) errors</span>
+                        </div>
+
+                        @foreach (var option in GetShippingOptions(selectedWeeklyEvaluation))
+                        {
+                            <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
+                                <input type="radio" checked="@option.HasError" disabled />
+                                <span>@option.Label</span>
+                                <small>@(option.HasError ? "Failed" : "OK")</small>
+                            </label>
+                        }
+                    </div>
+
+                    <div class="weekly-detail-card">
+                        <div class="weekly-detail-card-header">
+                            <h4>📋 Task Memo</h4>
+                            <span>@CountErrors(GetTaskMemoOptions(selectedWeeklyEvaluation)) errors</span>
+                        </div>
+
+                        @foreach (var option in GetTaskMemoOptions(selectedWeeklyEvaluation))
+                        {
+                            <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
+                                <input type="radio" checked="@option.HasError" disabled />
+                                <span>@option.Label</span>
+                                <small>@(option.HasError ? "Failed" : "OK")</small>
+                            </label>
+                        }
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
@@ -1057,16 +1060,21 @@
         WeeklySearch = string.Empty;
     }
 
-    private void OpenWeeklyEvaluationModal(WeeklyEvaluationDashboardDto item)
+    private async Task OpenWeeklyEvaluationModal(WeeklyEvaluationDashboardDto item)
     {
         selectedWeeklyEvaluation = item;
         showWeeklyEvaluationModal = true;
+
+        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("thryvModalScroll.open");
     }
 
-    private void CloseWeeklyEvaluationModal()
+    private async Task CloseWeeklyEvaluationModal()
     {
         showWeeklyEvaluationModal = false;
         selectedWeeklyEvaluation = null;
+
+        await JS.InvokeVoidAsync("thryvModalScroll.close");
     }
 
     private static string GetAccuracyClass(decimal value)

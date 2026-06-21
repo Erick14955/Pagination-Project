@@ -1831,3 +1831,153 @@ html[data-theme="dark glass"] .thryv-code-pill {
         padding: 12px;
     }
 }
+
+html.thryv-modal-open,
+body.thryv-modal-open {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+.weekly-evaluation-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: calc(22px + env(safe-area-inset-top)) !important;
+    padding-right: max(12px, env(safe-area-inset-right)) !important;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    padding-left: max(12px, env(safe-area-inset-left)) !important;
+    background: rgba(15, 23, 42, 0.72) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+.weekly-evaluation-modal {
+    position: relative !important;
+    z-index: 2147483647 !important;
+    width: min(1180px, 100%) !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain !important;
+    touch-action: auto !important;
+    border-radius: 24px !important;
+    background: #f8fafc !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
+}
+
+.weekly-evaluation-modal-header {
+    position: relative !important;
+    top: auto !important;
+    z-index: 20 !important;
+    flex: 0 0 auto !important;
+    padding: 22px 24px !important;
+    border-radius: 24px 24px 0 0 !important;
+}
+
+.weekly-evaluation-modal-scroll {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+}
+
+.weekly-evaluation-summary-grid,
+.weekly-evaluation-percent-grid,
+.weekly-evaluation-detail-grid {
+    flex-shrink: 0 !important;
+}
+
+html[data-theme="dark"] .weekly-evaluation-modal,
+html[data-theme="dark glass"] .weekly-evaluation-modal {
+    background: #111827 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="liquid glass"] .weekly-evaluation-modal {
+    background: rgba(255, 255, 255, 0.42) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+}
+
+@media (max-width: 768px) {
+    .weekly-evaluation-modal-backdrop {
+        padding-top: calc(18px + env(safe-area-inset-top)) !important;
+        padding-right: max(8px, env(safe-area-inset-right)) !important;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        padding-left: max(8px, env(safe-area-inset-left)) !important;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100% !important;
+        max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        border-radius: 18px !important;
+    }
+
+    .weekly-evaluation-modal-header {
+        padding: 16px !important;
+        border-radius: 18px 18px 0 0 !important;
+    }
+
+    .weekly-evaluation-modal-scroll {
+        padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .weekly-evaluation-summary-grid {
+        grid-template-columns: 1fr !important;
+        padding: 14px 14px 0 !important;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        padding: 12px 14px 0 !important;
+    }
+
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr !important;
+        padding: 14px !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .weekly-evaluation-modal-backdrop {
+        padding-top: calc(16px + env(safe-area-inset-top)) !important;
+        padding-right: max(6px, env(safe-area-inset-right)) !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+        padding-left: max(6px, env(safe-area-inset-left)) !important;
+    }
+
+    .weekly-evaluation-modal {
+        max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        border-radius: 16px !important;
+    }
+
+    .weekly-evaluation-modal-header {
+        padding: 14px !important;
+        border-radius: 16px 16px 0 0 !important;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
