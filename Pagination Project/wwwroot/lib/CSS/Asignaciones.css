@@ -1841,3 +1841,268 @@ html[data-theme="dark glass"] .assignments-page input[type="date"]::-webkit-cale
         padding-bottom: 9px !important;
     }
 }
+
+.modal-backdrop-custom,
+.assignment-modal-backdrop,
+.temporary-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    min-height: 100svh !important;
+    min-height: 100dvh !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: calc(24px + env(safe-area-inset-top)) !important;
+    padding-right: max(24px, env(safe-area-inset-right)) !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    padding-left: max(24px, env(safe-area-inset-left)) !important;
+    background: rgba(15, 23, 42, 0.72) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.import-modal,
+.assignment-modal,
+.temporary-modal {
+    position: relative !important;
+    z-index: 2147483647 !important;
+    width: min(980px, 100%) !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 24px !important;
+}
+
+.import-modal,
+.assignment-modal,
+.temporary-modal {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.modal-header-custom,
+.assignment-modal-header,
+.temporary-modal-header {
+    flex-shrink: 0 !important;
+}
+
+.modal-actions,
+.assignment-modal-actions,
+.temporary-modal-actions {
+    flex-shrink: 0 !important;
+}
+
+.temporary-stages,
+.assignment-modal-stats,
+.import-stats,
+.modal-section,
+.assignment-modal-section {
+    flex-shrink: 0;
+}
+
+html:has(.modal-backdrop-custom),
+body:has(.modal-backdrop-custom),
+html:has(.assignment-modal-backdrop),
+body:has(.assignment-modal-backdrop),
+html:has(.temporary-modal-backdrop),
+body:has(.temporary-modal-backdrop) {
+    overflow: hidden !important;
+}
+
+@media (max-width: 900px) {
+    .modal-backdrop-custom,
+    .assignment-modal-backdrop,
+    .temporary-modal-backdrop {
+        align-items: flex-start !important;
+        padding-top: calc(22px + env(safe-area-inset-top)) !important;
+        padding-right: max(14px, env(safe-area-inset-right)) !important;
+        padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+        padding-left: max(14px, env(safe-area-inset-left)) !important;
+    }
+
+    .import-modal,
+    .assignment-modal,
+    .temporary-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        margin: 0 !important;
+        border-radius: 22px !important;
+        padding: 22px !important;
+        overflow-y: auto !important;
+    }
+
+    .modal-header-custom,
+    .assignment-modal-header,
+    .temporary-modal-header {
+        padding-bottom: 16px !important;
+        margin-bottom: 16px !important;
+    }
+
+        .modal-header-custom h2,
+        .assignment-modal-header h2,
+        .temporary-modal-header h2 {
+            font-size: 1.25rem !important;
+            line-height: 1.25 !important;
+        }
+
+        .modal-header-custom p,
+        .assignment-modal-header p,
+        .temporary-modal-header p {
+            font-size: 0.9rem !important;
+            line-height: 1.4 !important;
+        }
+}
+
+@media (max-width: 768px) {
+    .modal-backdrop-custom,
+    .assignment-modal-backdrop,
+    .temporary-modal-backdrop {
+        padding-top: calc(20px + env(safe-area-inset-top)) !important;
+        padding-right: max(12px, env(safe-area-inset-right)) !important;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+        padding-left: max(12px, env(safe-area-inset-left)) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .import-modal,
+    .assignment-modal,
+    .temporary-modal {
+        max-height: calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        min-height: auto !important;
+        border-radius: 18px !important;
+        padding: 18px !important;
+        margin: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .temporary-modal {
+        border-top-width: 7px !important;
+    }
+
+    .temporary-stages {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin-top: 16px !important;
+    }
+
+    .temporary-stage-card {
+        min-height: 54px !important;
+        padding: 14px !important;
+        border-radius: 15px !important;
+    }
+
+    .temporary-modal-actions,
+    .assignment-modal-actions,
+    .modal-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: stretch !important;
+        gap: 10px !important;
+        margin-top: 18px !important;
+        padding-top: 16px !important;
+    }
+
+        .temporary-modal-actions button,
+        .assignment-modal-actions button,
+        .modal-actions button {
+            width: 100% !important;
+            min-height: 44px !important;
+        }
+
+    .modal-close-btn,
+    .assignment-modal-close,
+    .temporary-modal-close {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .modal-backdrop-custom,
+    .assignment-modal-backdrop,
+    .temporary-modal-backdrop {
+        padding-top: calc(18px + env(safe-area-inset-top)) !important;
+        padding-right: max(8px, env(safe-area-inset-right)) !important;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        padding-left: max(8px, env(safe-area-inset-left)) !important;
+    }
+
+    .import-modal,
+    .assignment-modal,
+    .temporary-modal {
+        max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        border-radius: 16px !important;
+        padding: 16px !important;
+    }
+
+    .modal-header-custom,
+    .assignment-modal-header,
+    .temporary-modal-header {
+        gap: 10px !important;
+        padding-bottom: 14px !important;
+        margin-bottom: 14px !important;
+    }
+
+        .modal-header-custom h2,
+        .assignment-modal-header h2,
+        .temporary-modal-header h2 {
+            font-size: 1.08rem !important;
+        }
+
+        .modal-header-custom p,
+        .assignment-modal-header p,
+        .temporary-modal-header p {
+            font-size: 0.82rem !important;
+        }
+
+    .temporary-stage-card strong {
+        font-size: 13px !important;
+    }
+
+    .temporary-stage-card input {
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .modal-backdrop-custom,
+    .assignment-modal-backdrop,
+    .temporary-modal-backdrop {
+        padding-top: calc(16px + env(safe-area-inset-top)) !important;
+        padding-right: max(6px, env(safe-area-inset-right)) !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+        padding-left: max(6px, env(safe-area-inset-left)) !important;
+    }
+
+    .import-modal,
+    .assignment-modal,
+    .temporary-modal {
+        max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        padding: 14px !important;
+        border-radius: 15px !important;
+    }
+
+    .modal-close-btn,
+    .assignment-modal-close,
+    .temporary-modal-close {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+    }
+}
