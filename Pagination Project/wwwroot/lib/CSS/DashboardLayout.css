@@ -1501,3 +1501,44 @@ html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
         }
     }
 }
+
+html.thryv-modal-open .thryv-top-header,
+body.thryv-modal-open .thryv-top-header,
+html.thryv-modal-open .thryv-sidebar,
+body.thryv-modal-open .thryv-sidebar,
+html.thryv-modal-open .thryv-sidebar-overlay,
+body.thryv-modal-open .thryv-sidebar-overlay {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+html.thryv-modal-open .thryv-dashboard-layout,
+body.thryv-modal-open .thryv-dashboard-layout,
+html.thryv-modal-open .thryv-main-content,
+body.thryv-modal-open .thryv-main-content,
+html.thryv-modal-open .thryv-page-content,
+body.thryv-modal-open .thryv-page-content {
+    overflow: hidden !important;
+}
+
+.weekly-evaluation-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+}
+
+.weekly-evaluation-modal-header {
+    padding-top: calc(22px + env(safe-area-inset-top)) !important;
+}
+
+@media (max-width: 768px) {
+    .weekly-evaluation-modal-header {
+        padding-top: calc(24px + env(safe-area-inset-top)) !important;
+    }
+}
