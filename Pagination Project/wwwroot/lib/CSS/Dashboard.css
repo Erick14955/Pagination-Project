@@ -465,58 +465,80 @@
         box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
     }
 
+html.thryv-modal-open,
+body.thryv-modal-open {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+    html.thryv-modal-open .thryv-top-header,
+    html.thryv-modal-open .thryv-sidebar,
+    html.thryv-modal-open .thryv-sidebar-overlay {
+        z-index: 1 !important;
+    }
+
 .weekly-evaluation-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    width: 100%;
-    min-height: 100vh;
-    min-height: 100svh;
-    min-height: 100dvh;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: calc(22px + env(safe-area-inset-top));
-    padding-right: max(22px, env(safe-area-inset-right));
-    padding-bottom: calc(22px + env(safe-area-inset-bottom));
-    padding-left: max(22px, env(safe-area-inset-left));
-    background: rgba(15, 23, 42, 0.62);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    background: rgba(15, 23, 42, 0.76) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
 }
 
 .weekly-evaluation-modal {
-    position: relative;
-    z-index: 100000;
-    width: min(1180px, 96vw);
-    max-width: 100%;
-    max-height: calc(100dvh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 28px;
-    background: #f8fafc;
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35);
+    position: relative !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain !important;
+    touch-action: auto !important;
+    border-radius: 0 !important;
+    background: #f8fafc !important;
+    border: none !important;
+    box-shadow: none !important;
     scrollbar-width: thin;
 }
 
 .weekly-evaluation-modal-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    padding: 24px 28px;
-    border-radius: 28px 28px 0 0;
+    position: relative !important;
+    top: auto !important;
+    z-index: 20 !important;
+    flex: 0 0 auto !important;
+    padding-top: calc(18px + env(safe-area-inset-top)) !important;
+    padding-right: calc(18px + env(safe-area-inset-right)) !important;
+    padding-bottom: 18px !important;
+    padding-left: calc(18px + env(safe-area-inset-left)) !important;
+    border-radius: 0 !important;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    background: linear-gradient(135deg, #0f172a, #1e3a8a);
-    color: #ffffff;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a) !important;
+    color: #ffffff !important;
 }
 
 .weekly-modal-eyebrow {
@@ -556,11 +578,23 @@
         background: rgba(255, 255, 255, 0.22);
     }
 
+.weekly-evaluation-modal-scroll {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+}
+
 .weekly-evaluation-summary-grid,
 .weekly-evaluation-percent-grid,
 .weekly-evaluation-detail-grid {
     display: grid;
     gap: 14px;
+    flex-shrink: 0 !important;
 }
 
 .weekly-evaluation-summary-grid {
@@ -725,7 +759,7 @@ html[data-theme="dark"] .weekly-evaluation-modal,
 html[data-theme="dark"] .weekly-summary-card,
 html[data-theme="dark"] .weekly-detail-card,
 html[data-theme="dark"] .weekly-percent-mini-card {
-    background: #111827;
+    background: #111827 !important;
     border-color: rgba(255, 255, 255, 0.08);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
 }
@@ -793,6 +827,18 @@ html[data-theme="dark"] .thryv-code-pill {
         border-color: rgba(255, 255, 255, 0.12);
     }
 
+html[data-theme="dark"] .weekly-evaluation-modal,
+html[data-theme="dark glass"] .weekly-evaluation-modal {
+    background: #111827 !important;
+    color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .weekly-evaluation-modal-header,
+html[data-theme="dark glass"] .weekly-evaluation-modal-header {
+    background: linear-gradient(135deg, #020617, #0f172a) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
 html[data-theme="liquid glass"] .thryv-dashboard-header {
     background: rgba(255, 255, 255, 0.28);
     backdrop-filter: blur(34px) saturate(180%);
@@ -826,20 +872,26 @@ html[data-theme="liquid glass"] .weekly-evaluation-modal,
 html[data-theme="liquid glass"] .weekly-summary-card,
 html[data-theme="liquid glass"] .weekly-detail-card,
 html[data-theme="liquid glass"] .weekly-percent-mini-card {
-    background: rgba(255, 255, 255, 0.32);
+    background: rgba(255, 255, 255, 0.32) !important;
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.62);
     box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.86);
 }
 
-    html[data-theme="liquid glass"] .thryv-hero-stat-card span {
-        color: #475569;
-    }
+html[data-theme="liquid glass"] .weekly-evaluation-modal {
+    background: rgba(255, 255, 255, 0.90) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+}
 
-    html[data-theme="liquid glass"] .thryv-hero-stat-card strong {
-        color: #111827;
-    }
+html[data-theme="liquid glass"] .thryv-hero-stat-card span {
+    color: #475569;
+}
+
+html[data-theme="liquid glass"] .thryv-hero-stat-card strong {
+    color: #111827;
+}
 
 html[data-theme="liquid glass"] .thryv-section-header {
     background: rgba(255, 255, 255, 0.12);
@@ -867,7 +919,7 @@ html[data-theme="liquid glass"] .thryv-custom-table tbody tr:hover {
 }
 
 html[data-theme="liquid glass"] .weekly-evaluation-modal-header {
-    background: rgba(15, 23, 42, 0.70);
+    background: rgba(15, 23, 42, 0.70) !important;
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
 }
@@ -881,11 +933,10 @@ html[data-theme="dark glass"] .thryv-dashboard-header {
 
 html[data-theme="dark glass"] .thryv-hero-stat-card,
 html[data-theme="dark glass"] .thryv-section-card,
-html[data-theme="dark glass"] .weekly-evaluation-modal,
 html[data-theme="dark glass"] .weekly-summary-card,
 html[data-theme="dark glass"] .weekly-detail-card,
 html[data-theme="dark glass"] .weekly-percent-mini-card {
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(15, 23, 42, 0.55) !important;
     backdrop-filter: blur(24px) saturate(170%);
     -webkit-backdrop-filter: blur(24px) saturate(170%);
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -940,7 +991,7 @@ html[data-theme="dark glass"] .thryv-custom-table tbody tr:hover {
 }
 
 html[data-theme="dark glass"] .weekly-evaluation-modal-header {
-    background: rgba(2, 6, 23, 0.78);
+    background: rgba(2, 6, 23, 0.78) !important;
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
 }
@@ -962,6 +1013,27 @@ html[data-theme="dark glass"] .thryv-code-pill {
         color: #f8fafc;
         border-color: rgba(255, 255, 255, 0.12);
     }
+
+@media (min-width: 769px) {
+    .weekly-evaluation-modal-backdrop {
+        align-items: center !important;
+        padding: 24px !important;
+    }
+
+    .weekly-evaluation-modal {
+        width: min(1180px, calc(100vw - 48px)) !important;
+        height: min(920px, calc(100dvh - 48px)) !important;
+        max-height: calc(100dvh - 48px) !important;
+        border-radius: 28px !important;
+        border: 1px solid rgba(226, 232, 240, 0.9) !important;
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
+    }
+
+    .weekly-evaluation-modal-header {
+        border-radius: 28px 28px 0 0 !important;
+        padding: 24px 28px !important;
+    }
+}
 
 @media (max-width: 1280px) {
     .thryv-dashboard-header {
@@ -1060,45 +1132,6 @@ html[data-theme="dark glass"] .thryv-code-pill {
 
     .weekly-evaluation-detail-grid {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 900px) {
-    .weekly-evaluation-modal-backdrop {
-        padding-top: calc(18px + env(safe-area-inset-top));
-        padding-right: max(14px, env(safe-area-inset-right));
-        padding-bottom: calc(18px + env(safe-area-inset-bottom));
-        padding-left: max(14px, env(safe-area-inset-left));
-    }
-
-    .weekly-evaluation-modal {
-        width: 100%;
-        max-width: 100%;
-        max-height: calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        border-radius: 22px;
-    }
-
-    .weekly-evaluation-modal-header {
-        border-radius: 22px 22px 0 0;
-        padding: 20px;
-    }
-
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        padding: 18px 18px 0;
-        gap: 12px;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        padding: 14px 18px 0;
-        gap: 12px;
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr;
-        padding: 18px;
-        gap: 14px;
     }
 }
 
@@ -1412,20 +1445,42 @@ html[data-theme="dark glass"] .thryv-code-pill {
         margin-left: auto;
     }
 
-    .weekly-evaluation-summary-grid,
-    .weekly-evaluation-percent-grid,
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr;
-        padding-left: 16px;
-        padding-right: 16px;
+    .weekly-evaluation-modal-backdrop {
+        align-items: stretch !important;
+        padding: 0 !important;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        border-radius: 0 !important;
+    }
+
+    .weekly-evaluation-modal-header {
+        padding-top: calc(16px + env(safe-area-inset-top)) !important;
+        padding-right: calc(14px + env(safe-area-inset-right)) !important;
+        padding-bottom: 16px !important;
+        padding-left: calc(14px + env(safe-area-inset-left)) !important;
     }
 
     .weekly-evaluation-summary-grid {
-        padding-top: 16px;
+        grid-template-columns: 1fr !important;
+        padding: 14px 14px 0 !important;
+        gap: 10px;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        padding: 12px 14px 0 !important;
+        gap: 10px;
     }
 
     .weekly-evaluation-detail-grid {
-        padding-bottom: 18px;
+        grid-template-columns: 1fr !important;
+        padding: 14px !important;
+        gap: 12px;
     }
 
     .weekly-summary-card,
@@ -1513,32 +1568,6 @@ html[data-theme="dark glass"] .thryv-code-pill {
 }
 
 @media (max-width: 640px) {
-    .weekly-evaluation-modal-backdrop {
-        padding-top: calc(18px + env(safe-area-inset-top));
-        padding-right: max(8px, env(safe-area-inset-right));
-        padding-bottom: calc(14px + env(safe-area-inset-bottom));
-        padding-left: max(8px, env(safe-area-inset-left));
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    .weekly-evaluation-modal {
-        width: 100%;
-        max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        border-radius: 18px;
-        overflow-y: auto;
-    }
-
-    .weekly-evaluation-modal-header {
-        position: sticky;
-        top: 0;
-        z-index: 25;
-        padding: 16px;
-        border-radius: 18px 18px 0 0;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
     .weekly-modal-eyebrow {
         font-size: 0.66rem;
         letter-spacing: 0.10em;
@@ -1565,24 +1594,6 @@ html[data-theme="dark glass"] .thryv-code-pill {
         font-size: 15px;
     }
 
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: 1fr;
-        padding: 14px 14px 0;
-        gap: 10px;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        padding: 12px 14px 0;
-        gap: 10px;
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr;
-        padding: 14px;
-        gap: 12px;
-    }
-
     .weekly-summary-card,
     .weekly-percent-mini-card,
     .weekly-detail-card {
@@ -1607,8 +1618,6 @@ html[data-theme="dark glass"] .thryv-code-pill {
         }
 
     .weekly-detail-card-header {
-        flex-direction: column;
-        align-items: flex-start;
         gap: 8px;
     }
 
@@ -1763,21 +1772,11 @@ html[data-theme="dark glass"] .thryv-code-pill {
         border-radius: 11px;
     }
 
-    .weekly-evaluation-modal-header {
-        padding: 16px;
-    }
-
-    .weekly-modal-close {
-        width: 34px;
-        height: 34px;
-        min-width: 34px;
-    }
-
     .weekly-evaluation-summary-grid,
     .weekly-evaluation-percent-grid,
     .weekly-evaluation-detail-grid {
-        padding-left: 12px;
-        padding-right: 12px;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
     }
 }
 
@@ -1799,354 +1798,11 @@ html[data-theme="dark glass"] .thryv-code-pill {
             font-size: 9.5px;
         }
 
-    .weekly-evaluation-modal-backdrop {
-        padding-top: calc(16px + env(safe-area-inset-top));
-        padding-right: max(6px, env(safe-area-inset-right));
-        padding-bottom: calc(12px + env(safe-area-inset-bottom));
-        padding-left: max(6px, env(safe-area-inset-left));
-    }
-
-    .weekly-evaluation-modal {
-        max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        border-radius: 16px;
-    }
-
-    .weekly-evaluation-modal-header {
-        padding: 14px;
-        border-radius: 16px 16px 0 0;
-    }
-
     .weekly-evaluation-percent-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .weekly-evaluation-summary-grid,
-    .weekly-evaluation-percent-grid,
-    .weekly-evaluation-detail-grid {
-        padding-left: 12px;
-        padding-right: 12px;
+        grid-template-columns: 1fr !important;
     }
 
     .weekly-detail-card {
         padding: 12px;
     }
-}
-
-html.thryv-modal-open,
-body.thryv-modal-open {
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-}
-
-.weekly-evaluation-modal-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    padding-top: calc(22px + env(safe-area-inset-top)) !important;
-    padding-right: max(12px, env(safe-area-inset-right)) !important;
-    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
-    padding-left: max(12px, env(safe-area-inset-left)) !important;
-    background: rgba(15, 23, 42, 0.72) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-}
-
-.weekly-evaluation-modal {
-    position: relative !important;
-    z-index: 2147483647 !important;
-    width: min(1180px, 100%) !important;
-    max-width: 100% !important;
-    height: auto !important;
-    max-height: calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-    overscroll-behavior: contain !important;
-    touch-action: auto !important;
-    border-radius: 24px !important;
-    background: #f8fafc !important;
-    border: 1px solid rgba(226, 232, 240, 0.9) !important;
-    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
-}
-
-.weekly-evaluation-modal-header {
-    position: relative !important;
-    top: auto !important;
-    z-index: 20 !important;
-    flex: 0 0 auto !important;
-    padding: 22px 24px !important;
-    border-radius: 24px 24px 0 0 !important;
-}
-
-.weekly-evaluation-modal-scroll {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
-    touch-action: pan-y !important;
-    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
-}
-
-.weekly-evaluation-summary-grid,
-.weekly-evaluation-percent-grid,
-.weekly-evaluation-detail-grid {
-    flex-shrink: 0 !important;
-}
-
-html[data-theme="dark"] .weekly-evaluation-modal,
-html[data-theme="dark glass"] .weekly-evaluation-modal {
-    background: #111827 !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-html[data-theme="liquid glass"] .weekly-evaluation-modal {
-    background: rgba(255, 255, 255, 0.42) !important;
-    backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
-}
-
-@media (max-width: 768px) {
-    .weekly-evaluation-modal-backdrop {
-        padding-top: calc(18px + env(safe-area-inset-top)) !important;
-        padding-right: max(8px, env(safe-area-inset-right)) !important;
-        padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
-        padding-left: max(8px, env(safe-area-inset-left)) !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: 100% !important;
-        max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-        border-radius: 18px !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        padding: 16px !important;
-        border-radius: 18px 18px 0 0 !important;
-    }
-
-    .weekly-evaluation-modal-scroll {
-        padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
-    }
-
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px 14px 0 !important;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        padding: 12px 14px 0 !important;
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px !important;
-    }
-}
-
-@media (max-width: 390px) {
-    .weekly-evaluation-modal-backdrop {
-        padding-top: calc(16px + env(safe-area-inset-top)) !important;
-        padding-right: max(6px, env(safe-area-inset-right)) !important;
-        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
-        padding-left: max(6px, env(safe-area-inset-left)) !important;
-    }
-
-    .weekly-evaluation-modal {
-        max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-        border-radius: 16px !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        padding: 14px !important;
-        border-radius: 16px 16px 0 0 !important;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: 1fr !important;
-    }
-}
-
-html.thryv-modal-open,
-body.thryv-modal-open {
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-}
-
-    html.thryv-modal-open .thryv-top-header,
-    html.thryv-modal-open .thryv-sidebar,
-    html.thryv-modal-open .thryv-sidebar-overlay {
-        z-index: 1 !important;
-    }
-
-.weekly-evaluation-modal-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    display: flex !important;
-    align-items: stretch !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    background: rgba(15, 23, 42, 0.76) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-}
-
-.weekly-evaluation-modal {
-    position: relative !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    max-width: none !important;
-    max-height: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    overscroll-behavior: contain !important;
-    touch-action: auto !important;
-    border-radius: 0 !important;
-    background: #f8fafc !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-.weekly-evaluation-modal-header {
-    position: relative !important;
-    top: auto !important;
-    z-index: 20 !important;
-    flex: 0 0 auto !important;
-    padding-top: calc(18px + env(safe-area-inset-top)) !important;
-    padding-right: calc(18px + env(safe-area-inset-right)) !important;
-    padding-bottom: 18px !important;
-    padding-left: calc(18px + env(safe-area-inset-left)) !important;
-    border-radius: 0 !important;
-    background: linear-gradient(135deg, #0f172a, #1e3a8a) !important;
-    color: #ffffff !important;
-}
-
-.weekly-evaluation-modal-scroll {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
-    touch-action: pan-y !important;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
-}
-
-.weekly-evaluation-summary-grid,
-.weekly-evaluation-percent-grid,
-.weekly-evaluation-detail-grid {
-    flex-shrink: 0 !important;
-}
-
-@media (min-width: 769px) {
-    .weekly-evaluation-modal-backdrop {
-        align-items: center !important;
-        padding: 24px !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: min(1180px, calc(100vw - 48px)) !important;
-        height: min(920px, calc(100dvh - 48px)) !important;
-        max-height: calc(100dvh - 48px) !important;
-        border-radius: 28px !important;
-        border: 1px solid rgba(226, 232, 240, 0.9) !important;
-        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        border-radius: 28px 28px 0 0 !important;
-        padding: 24px 28px !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .weekly-evaluation-modal-backdrop {
-        align-items: stretch !important;
-        padding: 0 !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100svh !important;
-        height: 100dvh !important;
-        border-radius: 0 !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        padding-top: calc(16px + env(safe-area-inset-top)) !important;
-        padding-right: calc(14px + env(safe-area-inset-right)) !important;
-        padding-bottom: 16px !important;
-        padding-left: calc(14px + env(safe-area-inset-left)) !important;
-    }
-
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px 14px 0 !important;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        padding: 12px 14px 0 !important;
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px !important;
-    }
-}
-
-@media (max-width: 390px) {
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: 1fr !important;
-    }
-}
-
-html[data-theme="dark"] .weekly-evaluation-modal,
-html[data-theme="dark glass"] .weekly-evaluation-modal {
-    background: #111827 !important;
-    color: #e5e7eb !important;
-}
-
-html[data-theme="dark"] .weekly-evaluation-modal-header,
-html[data-theme="dark glass"] .weekly-evaluation-modal-header {
-    background: linear-gradient(135deg, #020617, #0f172a) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
-}
-
-html[data-theme="liquid glass"] .weekly-evaluation-modal {
-    background: rgba(255, 255, 255, 0.90) !important;
-    backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
 }
