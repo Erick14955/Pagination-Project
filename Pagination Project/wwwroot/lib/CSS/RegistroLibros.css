@@ -1,615 +1,637 @@
-﻿.books-page {
-    padding: 24px;
-    background: #f6f8fb;
+﻿.books-page,
+.books-page * {
+    box-sizing: border-box;
+}
+
+.books-page {
+    width: 100%;
+    max-width: 100%;
     min-height: 100%;
+    padding: 24px;
+    overflow-x: hidden;
+    background: #f6f8fb;
     color: #172033;
 }
 
-.page-hero {
-    display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    align-items: stretch;
-    background: linear-gradient(135deg, #083b78 0%, #0a66c2 55%, #0f9f7a 100%);
-    border-radius: 24px;
-    padding: 28px;
-    color: white;
-    box-shadow: 0 22px 45px rgba(8, 59, 120, 0.22);
-    margin-bottom: 22px;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.file-input-hidden {
-    display: none;
-}
-
-.btn-export-xlsx {
-    border: none;
-    border-radius: 12px;
-    padding: 0.7rem 1rem;
-    background: linear-gradient(135deg, #16a34a, #15803d);
-    color: #ffffff;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 10px 22px rgba(21, 128, 61, 0.22);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-    white-space: nowrap;
-}
-
-    .btn-export-xlsx:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 14px 28px rgba(21, 128, 61, 0.28);
+    .books-page .page-hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 24px;
+        max-width: 100%;
+        margin-bottom: 22px;
+        padding: 28px;
+        border-radius: 24px;
+        color: #ffffff;
+        background: linear-gradient(135deg, #083b78 0%, #0a66c2 55%, #0f9f7a 100%);
+        box-shadow: 0 22px 45px rgba(8, 59, 120, 0.22);
     }
 
-    .btn-export-xlsx:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-
-.btn-xlsx {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 42px;
-    padding: 0 18px;
-    border-radius: 14px;
-    background: #111111;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all .18s ease;
-    box-shadow: 0 12px 24px rgba(17, 17, 17, 0.16);
-    user-select: none;
-}
-
-    .btn-xlsx:hover {
-        background: #242424;
-        transform: translateY(-1px);
-    }
-
-    .btn-xlsx.disabled {
-        opacity: .55;
-        pointer-events: none;
-        transform: none;
-    }
-
-.eyebrow {
-    display: inline-flex;
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-}
-
-.page-hero h1 {
-    margin: 0;
-    font-size: clamp(28px, 3vw, 42px);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-}
-
-.page-hero p {
-    margin: 8px 0 0;
-    max-width: 680px;
-    color: rgba(255, 255, 255, 0.86);
-    font-size: 15px;
-}
-
-.hero-stats {
-    display: flex;
-    gap: 12px;
-    align-items: stretch;
-}
-
-.stat-card {
-    min-width: 130px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 20px;
-    padding: 18px;
-    backdrop-filter: blur(12px);
-}
-
-    .stat-card span {
-        display: block;
-        font-size: 13px;
-        opacity: .86;
-        margin-bottom: 6px;
-    }
-
-    .stat-card strong {
-        font-size: 34px;
-        line-height: 1;
-    }
-
-.form-card,
-.list-card {
-    background: #ffffff;
-    border: 1px solid #e6ebf2;
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
-    margin-bottom: 22px;
-}
-
-.section-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 20px;
-}
-
-    .section-header h2 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 800;
-        color: #10223f;
-    }
-
-    .section-header p {
-        margin: 5px 0 0;
-        color: #64748b;
-        font-size: 14px;
-    }
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-    gap: 16px;
-}
-
-    .form-grid .large {
-        grid-column: span 2;
-    }
-
-.dates-grid {
-    grid-template-columns: repeat(4, minmax(160px, 1fr));
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-    .form-group label {
-        font-size: 13px;
-        font-weight: 800;
-        color: #334155;
-    }
-
-.form-control {
-    width: 100%;
-    min-height: 44px;
-    border: 1px solid #dbe3ef;
-    border-radius: 14px;
-    background: #f8fafc;
-    color: #0f172a;
-    padding: 10px 13px;
-    font-size: 14px;
-    outline: none;
-    transition: all .18s ease;
-}
-
-    .form-control:focus {
-        border-color: #0a66c2;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.12);
-    }
-
-.subsection-title {
-    display: flex;
-    align-items: center;
-    margin: 24px 0 14px;
-    color: #0f766e;
-    font-weight: 900;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-}
-
-    .subsection-title::after {
-        content: "";
-        height: 1px;
-        background: #e2e8f0;
-        flex: 1;
-        margin-left: 14px;
-    }
-
-.switch-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-    gap: 14px;
-    margin-top: 18px;
-}
-
-.switch-card {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    padding: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: all .18s ease;
-}
-
-    .switch-card:hover {
-        border-color: #0a66c2;
-        background: #ffffff;
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
-    }
-
-    .switch-card input {
-        width: 20px;
-        height: 20px;
-        accent-color: #0a66c2;
-    }
-
-    .switch-card strong {
-        display: block;
-        color: #10223f;
-        font-size: 14px;
-    }
-
-    .switch-card small {
-        color: #64748b;
-        font-size: 12px;
-    }
-
-.button-row {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 24px;
-}
-
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.btn-light,
-.icon-btn {
-    border: none;
-    border-radius: 14px;
-    min-height: 42px;
-    padding: 0 18px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all .18s ease;
-}
-
-.btn-primary {
-    background: #0a66c2;
-    color: white;
-    box-shadow: 0 12px 22px rgba(10, 102, 194, 0.22);
-}
-
-    .btn-primary:hover {
-        background: #084f98;
-        transform: translateY(-1px);
-    }
-
-.btn-secondary {
-    background: #eef4fb;
-    color: #0a66c2;
-}
-
-    .btn-secondary:hover {
-        background: #dbeafe;
-    }
-
-.btn-danger {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-    .btn-danger:hover {
-        background: #fecaca;
-    }
-
-.btn-light {
-    background: #f1f5f9;
-    color: #0f172a;
-}
-
-    .btn-light:hover {
-        background: #e2e8f0;
-    }
-
-button:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-    transform: none !important;
-}
-
-.alert-box {
-    padding: 14px 16px;
-    border-radius: 16px;
-    margin-bottom: 18px;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-    .alert-box.success {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
-    }
-
-    .alert-box.error {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-
-    .alert-box.info {
-        background: #dbeafe;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
-    }
-
-.table-header {
-    align-items: center;
-}
-
-.search-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: min(440px, 100%);
-    background: #f8fafc;
-    border: 1px solid #dbe3ef;
-    border-radius: 16px;
-    padding: 0 12px;
-}
-
-    .search-box input {
-        border: none;
-        background: transparent;
-        outline: none;
-        min-height: 44px;
-        width: 100%;
-        color: #0f172a;
-    }
-
-.table-container {
-    width: 100%;
-    max-height: 650px;
-    overflow: auto;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    background: #ffffff;
-}
-
-.books-table {
-    width: 100%;
-    min-width: 1180px;
-    border-collapse: collapse;
-    background: white;
-}
-
-    .books-table th {
-        background: #f8fafc;
-        color: #475569;
-        text-align: left;
-        padding: 14px 16px;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        border-bottom: 1px solid #e2e8f0;
-        vertical-align: middle;
-    }
-
-    .books-table thead th {
-        position: sticky;
-        top: 0;
-        z-index: 5;
-    }
-
-    .books-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #edf2f7;
-        color: #334155;
-        font-size: 13px;
-        vertical-align: middle;
-    }
-
-    .books-table tbody tr {
-        transition: all .16s ease;
-    }
-
-        .books-table tbody tr:hover {
-            background: #f8fbff;
+        .books-page .page-hero h1 {
+            margin: 0;
+            font-size: clamp(28px, 3vw, 42px);
+            font-weight: 800;
+            letter-spacing: -0.04em;
         }
 
-.selected-row {
-    background: #eff6ff !important;
-    box-shadow: inset 4px 0 0 #0a66c2;
-}
+        .books-page .page-hero p {
+            max-width: 680px;
+            margin: 8px 0 0;
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 15px;
+            line-height: 1.45;
+        }
 
-.list-filters {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
+    .books-page .hero-stats {
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+    }
 
-.month-filter {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: -18px;
-}
+    .books-page .stat-card {
+        min-width: 130px;
+        padding: 18px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
 
-    .month-filter label {
-        font-size: 12px;
+        .books-page .stat-card span {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            opacity: 0.86;
+        }
+
+        .books-page .stat-card strong {
+            font-size: 34px;
+            line-height: 1;
+        }
+
+    .books-page .form-card,
+    .books-page .list-card {
+        max-width: 100%;
+        margin-bottom: 22px;
+        padding: 24px;
+        border-radius: 24px;
+        background: #ffffff;
+        border: 1px solid #e6ebf2;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .books-page .section-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 20px;
+        overflow-wrap: anywhere;
+    }
+
+        .books-page .section-header h2 {
+            margin: 0;
+            color: #10223f;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .books-page .section-header p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+    .books-page .table-header {
+        align-items: center;
+    }
+
+    .books-page .header-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .books-page .file-input-hidden {
+        display: none;
+    }
+
+    .books-page .btn-primary,
+    .books-page .btn-secondary,
+    .books-page .btn-danger,
+    .books-page .btn-light,
+    .books-page .icon-btn,
+    .books-page .btn-filter-clear,
+    .books-page .btn-export-xlsx,
+    .books-page .btn-xlsx,
+    .books-page .btn-update-xlsx {
+        border: none;
+        border-radius: 14px;
+        min-height: 42px;
+        padding: 0 18px;
         font-weight: 800;
-        color: #334155;
-        margin: 0;
-        line-height: 1;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+        user-select: none;
     }
 
-.search-box,
-.filter-select,
-.btn-filter-clear {
-    height: 46px;
-}
-
-.filter-select {
-    min-width: 210px;
-    padding: 0 14px;
-}
-
-.btn-filter-clear {
-    min-height: 44px;
-    padding: 0 18px;
-    border: none;
-    border-radius: 14px;
-    background: #f1f5f9;
-    color: #334155;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all .18s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-    .btn-filter-clear:hover {
-        background: #e2e8f0;
+    .books-page .btn-primary {
+        background: #0a66c2;
+        color: #ffffff;
+        box-shadow: 0 12px 22px rgba(10, 102, 194, 0.22);
     }
 
-.sortable-header {
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    cursor: pointer;
-    padding: 0;
-    white-space: nowrap;
-}
+        .books-page .btn-primary:hover:not(:disabled) {
+            background: #084f98;
+            transform: translateY(-1px);
+        }
 
-    .sortable-header span {
-        font-size: 13px;
-        opacity: .8;
-    }
-
-    .sortable-header:hover {
+    .books-page .btn-secondary {
+        background: #eef4fb;
         color: #0a66c2;
     }
 
-.table-container::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-}
+        .books-page .btn-secondary:hover:not(:disabled) {
+            background: #dbeafe;
+        }
 
-.table-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 999px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 999px;
-    border: 2px solid #f1f5f9;
-}
-
-    .table-container::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+    .books-page .btn-danger {
+        background: #fee2e2;
+        color: #b91c1c;
     }
 
-.book-title {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
+        .books-page .btn-danger:hover:not(:disabled) {
+            background: #fecaca;
+        }
 
-    .book-title strong {
-        color: #10223f;
+    .books-page .btn-light,
+    .books-page .btn-filter-clear {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+        .books-page .btn-light:hover:not(:disabled),
+        .books-page .btn-filter-clear:hover:not(:disabled) {
+            background: #e2e8f0;
+        }
+
+    .books-page .btn-xlsx {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #111111;
+        color: #ffffff;
         font-size: 14px;
+        box-shadow: 0 12px 24px rgba(17, 17, 17, 0.16);
     }
 
-    .book-title span {
-        color: #64748b;
-        font-size: 12px;
-        max-width: 360px;
+        .books-page .btn-xlsx:hover:not(.disabled) {
+            background: #242424;
+            transform: translateY(-1px);
+        }
+
+    .books-page .btn-update-xlsx {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        font-size: 14px;
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+    }
+
+        .books-page .btn-update-xlsx:hover:not(.disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+        }
+
+    .books-page .btn-export-xlsx {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: #ffffff;
+        box-shadow: 0 10px 22px rgba(21, 128, 61, 0.22);
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
-.pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: #e0f2fe;
-    color: #075985;
-    font-size: 12px;
-    font-weight: 800;
-}
+        .books-page .btn-export-xlsx:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(21, 128, 61, 0.28);
+        }
 
-.loading-state,
-.empty-state {
-    padding: 34px;
-    text-align: center;
-    color: #64748b;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-radius: 18px;
-}
-
-    .empty-state strong {
-        display: block;
-        color: #10223f;
-        margin-bottom: 5px;
+    .books-page .btn-xlsx.disabled,
+    .books-page .btn-update-xlsx.disabled,
+    .books-page button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        pointer-events: none;
+        transform: none !important;
+        box-shadow: none;
     }
+
+    .books-page .alert-box {
+        margin-bottom: 18px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+        .books-page .alert-box.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .books-page .alert-box.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .books-page .alert-box.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+    .books-page .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 16px;
+    }
+
+        .books-page .form-grid .large {
+            grid-column: span 2;
+        }
+
+    .books-page .dates-grid {
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+    }
+
+    .books-page .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+        .books-page .form-group label {
+            color: #334155;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+    .books-page .form-control {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 13px;
+        border: 1px solid #dbe3ef;
+        border-radius: 14px;
+        outline: none;
+        background: #f8fafc;
+        color: #0f172a;
+        font-size: 14px;
+        transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+        .books-page .form-control:focus {
+            border-color: #0a66c2;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.12);
+        }
+
+        .books-page .form-control::placeholder {
+            color: #94a3b8;
+            opacity: 1;
+        }
+
+    .books-page .subsection-title {
+        display: flex;
+        align-items: center;
+        margin: 24px 0 14px;
+        color: #0f766e;
+        font-size: 14px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+        .books-page .subsection-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            margin-left: 14px;
+            background: #e2e8f0;
+        }
+
+    .books-page .switch-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+    }
+
+    .books-page .switch-card {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 15px;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+        .books-page .switch-card:hover {
+            border-color: #0a66c2;
+            background: #ffffff;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+
+        .books-page .switch-card input {
+            width: 20px;
+            height: 20px;
+            accent-color: #0a66c2;
+        }
+
+        .books-page .switch-card strong {
+            display: block;
+            color: #10223f;
+            font-size: 14px;
+        }
+
+        .books-page .switch-card small {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+    .books-page .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .books-page .list-filters {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .books-page .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: min(440px, 100%);
+        height: 46px;
+        padding: 0 12px;
+        border-radius: 16px;
+        border: 1px solid #dbe3ef;
+        background: #f8fafc;
+    }
+
+        .books-page .search-box input {
+            width: 100%;
+            min-height: 44px;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #0f172a;
+        }
+
+            .books-page .search-box input::placeholder {
+                color: #94a3b8;
+                opacity: 1;
+            }
+
+    .books-page .month-filter {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .books-page .month-filter label {
+            margin: 0;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+    .books-page .filter-select {
+        min-width: 210px;
+        height: 46px;
+        padding: 0 14px;
+    }
+
+    .books-page .table-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 650px;
+        overflow: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+    }
+
+    .books-page .books-table {
+        width: 100%;
+        min-width: 1180px;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+        .books-page .books-table th,
+        .books-page .books-table td {
+            vertical-align: middle !important;
+        }
+
+        .books-page .books-table th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .books-page .books-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #edf2f7;
+            color: #334155;
+            font-size: 13px;
+        }
+
+        .books-page .books-table tbody tr {
+            transition: background 0.16s ease;
+        }
+
+            .books-page .books-table tbody tr:hover {
+                background: #f8fbff;
+            }
+
+    .books-page .selected-row {
+        background: #eff6ff !important;
+        box-shadow: inset 4px 0 0 #0a66c2;
+    }
+
+    .books-page .sortable-header {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .books-page .sortable-header span {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .books-page .sortable-header:hover {
+            color: #0a66c2;
+        }
+
+    .books-page .book-title {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+        .books-page .book-title strong {
+            color: #10223f;
+            font-size: 14px;
+        }
+
+        .books-page .book-title span {
+            max-width: 360px;
+            overflow: hidden;
+            color: #64748b;
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .books-page .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        max-width: 100%;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #e0f2fe;
+        color: #075985;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .books-page .actions-cell {
+        width: 76px !important;
+        min-width: 76px !important;
+        max-width: 76px !important;
+        padding: 14px 16px !important;
+        text-align: center !important;
+    }
+
+        .books-page .actions-cell .icon-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
+            min-height: 42px !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            border-radius: 14px !important;
+            background: #e0f2fe !important;
+            color: #0a66c2 !important;
+            font-size: 16px !important;
+            line-height: 1 !important;
+        }
+
+            .books-page .actions-cell .icon-btn:hover {
+                background: #dbeafe !important;
+            }
+
+    .books-page .table-container::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .books-page .table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 999px;
+    }
+
+    .books-page .table-container::-webkit-scrollbar-thumb {
+        border: 2px solid #f1f5f9;
+        border-radius: 999px;
+        background: #cbd5e1;
+    }
+
+        .books-page .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+    .books-page .loading-state,
+    .books-page .empty-state {
+        padding: 34px;
+        border-radius: 18px;
+        border: 1px dashed #cbd5e1;
+        background: #f8fafc;
+        color: #64748b;
+        text-align: center;
+    }
+
+        .books-page .empty-state strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #10223f;
+        }
 
 .xlsx-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.58);
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
     padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.58);
 }
 
 .xlsx-modal-card {
     width: min(760px, 96vw);
+    max-width: 100%;
     max-height: 88vh;
     overflow-y: auto;
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.35);
     padding: 1.5rem;
+    border-radius: 24px;
     border-top: 7px solid #16a34a;
+    background: #ffffff;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.35);
 }
 
     .xlsx-modal-card.xlsx-modal-error {
@@ -626,9 +648,9 @@ button:disabled {
 
     .xlsx-modal-header h2 {
         margin: 0;
+        color: #0f172a;
         font-size: 1.35rem;
         font-weight: 900;
-        color: #0f172a;
     }
 
     .xlsx-modal-header p {
@@ -638,12 +660,12 @@ button:disabled {
     }
 
 .xlsx-modal-close {
-    border: none;
-    background: #f1f5f9;
-    color: #0f172a;
     width: 36px;
     height: 36px;
+    border: none;
     border-radius: 999px;
+    background: #f1f5f9;
+    color: #0f172a;
     cursor: pointer;
     font-weight: 900;
 }
@@ -660,10 +682,10 @@ button:disabled {
 }
 
     .xlsx-modal-stats div {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
         padding: 1rem;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
         text-align: center;
     }
 
@@ -686,9 +708,10 @@ button:disabled {
 
 .xlsx-modal-section {
     margin-top: 1rem;
-    border-radius: 16px;
     padding: 1rem;
+    border-radius: 16px;
     border: 1px solid #e2e8f0;
+    overflow-wrap: anywhere;
 }
 
     .xlsx-modal-section h3 {
@@ -731,13 +754,13 @@ button:disabled {
         border-color: #bbf7d0;
     }
 
-        .xlsx-modal-section.clean h3 {
+        .xlsx-modal-section.clean h3,
+        .xlsx-modal-section.clean p {
             color: #166534;
         }
 
         .xlsx-modal-section.clean p {
             margin: 0;
-            color: #166534;
         }
 
 .xlsx-modal-more {
@@ -754,11 +777,11 @@ button:disabled {
 }
 
 .xlsx-modal-ok {
+    padding: 0.75rem 1.35rem;
     border: none;
     border-radius: 14px;
-    padding: 0.75rem 1.35rem;
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: white;
+    color: #ffffff;
     font-weight: 900;
     cursor: pointer;
     box-shadow: 0 12px 26px rgba(37, 99, 235, 0.26);
@@ -768,628 +791,392 @@ button:disabled {
         transform: translateY(-1px);
     }
 
-/* ========================================================= */
-/* FIX FINAL: BOTÓN DE EDITAR ALINEADO EN REGISTRO DE LIBROS */
-/* ========================================================= */
-
-.books-table th,
-.books-table td {
-    vertical-align: middle !important;
-}
-
-    .books-table th:last-child,
-    .books-table td.actions-cell {
-        width: 76px !important;
-        min-width: 76px !important;
-        max-width: 76px !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    .books-table td.actions-cell {
-        display: table-cell !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-        padding: 14px 16px !important;
-        line-height: normal !important;
-        position: static !important;
-    }
-
-        .books-table td.actions-cell .icon-btn,
-        .books-table td.actions-cell button.icon-btn {
-            position: static !important;
-            transform: none !important;
-            margin: 0 auto !important;
-            width: 42px !important;
-            height: 42px !important;
-            min-width: 42px !important;
-            min-height: 42px !important;
-            padding: 0 !important;
-            border: none !important;
-            border-radius: 14px !important;
-            background: #e0f2fe !important;
-            color: #0a66c2 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            line-height: 1 !important;
-            font-size: 16px !important;
-        }
-
-            .books-table td.actions-cell .icon-btn:hover,
-            .books-table td.actions-cell button.icon-btn:hover {
-                background: #dbeafe !important;
-                transform: none !important;
-            }
-
-@media (max-width: 1100px) {
-    .page-hero {
-        flex-direction: column;
-    }
-
-    .hero-stats {
-        width: 100%;
-    }
-
-    .stat-card {
-        flex: 1;
-    }
-
-    .form-grid,
-    .dates-grid {
-        grid-template-columns: repeat(2, minmax(160px, 1fr));
-    }
-
-        .form-grid .large {
-            grid-column: span 2;
-        }
-
-    .section-header {
-        flex-direction: column;
-    }
-
-    .search-box {
-        width: 100%;
-    }
-}
-
-@media (max-width: 900px) {
-    .list-filters {
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .search-box,
-    .month-filter,
-    .btn-filter-clear {
-        width: 100%;
-    }
-}
-
-@media (max-width: 700px) {
-    .books-page {
-        padding: 14px;
-    }
-
-    .page-hero,
-    .form-card,
-    .list-card {
-        border-radius: 18px;
-        padding: 18px;
-    }
-
-    .form-grid,
-    .dates-grid,
-    .switch-row {
-        grid-template-columns: 1fr;
-    }
-
-        .form-grid .large {
-            grid-column: span 1;
-        }
-
-    .hero-stats {
-        flex-direction: column;
-    }
-
-    .button-row {
-        flex-direction: column;
-    }
-
-        .button-row button {
-            width: 100%;
-        }
-}
-
-@media (max-width: 640px) {
-    .xlsx-modal-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .xlsx-modal-card {
-        padding: 1rem;
-    }
-}
-
-/* =========================================================
-   DARK MODE - BOOKS
-========================================================= */
-
 html[data-theme="dark"] .books-page {
     background: #0f172a;
     color: #e5e7eb;
 }
 
-html[data-theme="dark"] .page-hero {
-    background: linear-gradient(135deg, #020617, #0f172a);
-    border: 1px solid rgba(255,255,255,.08);
-    box-shadow: 0 18px 45px rgba(0,0,0,.35);
-}
+    html[data-theme="dark"] .books-page .page-hero {
+        background: linear-gradient(135deg, #020617, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    }
 
-html[data-theme="dark"] .form-card,
-html[data-theme="dark"] .list-card,
-html[data-theme="dark"] .switch-card,
-html[data-theme="dark"] .loading-state,
-html[data-theme="dark"] .empty-state,
-html[data-theme="dark"] .xlsx-modal-card,
-html[data-theme="dark"] .xlsx-modal-stats div {
-    background: #111827;
-    border-color: rgba(255,255,255,.10);
-    box-shadow: 0 18px 40px rgba(0,0,0,.28);
-}
+    html[data-theme="dark"] .books-page .form-card,
+    html[data-theme="dark"] .books-page .list-card,
+    html[data-theme="dark"] .books-page .switch-card,
+    html[data-theme="dark"] .books-page .loading-state,
+    html[data-theme="dark"] .books-page .empty-state,
+    html[data-theme="dark"] .xlsx-modal-card,
+    html[data-theme="dark"] .xlsx-modal-stats div {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
 
-    html[data-theme="dark"] .section-header h2,
-    html[data-theme="dark"] .switch-card strong,
-    html[data-theme="dark"] .book-title strong,
-    html[data-theme="dark"] .empty-state strong,
-    html[data-theme="dark"] .xlsx-modal-header h2,
-    html[data-theme="dark"] .xlsx-modal-stats strong {
+        html[data-theme="dark"] .books-page .section-header h2,
+        html[data-theme="dark"] .books-page .switch-card strong,
+        html[data-theme="dark"] .books-page .book-title strong,
+        html[data-theme="dark"] .books-page .empty-state strong,
+        html[data-theme="dark"] .xlsx-modal-header h2,
+        html[data-theme="dark"] .xlsx-modal-stats strong {
+            color: #f8fafc;
+        }
+
+        html[data-theme="dark"] .books-page .section-header p,
+        html[data-theme="dark"] .books-page .form-group label,
+        html[data-theme="dark"] .books-page .switch-card small,
+        html[data-theme="dark"] .books-page .book-title span,
+        html[data-theme="dark"] .books-page .loading-state,
+        html[data-theme="dark"] .books-page .empty-state,
+        html[data-theme="dark"] .books-page .month-filter label,
+        html[data-theme="dark"] .xlsx-modal-header p,
+        html[data-theme="dark"] .xlsx-modal-stats span,
+        html[data-theme="dark"] .xlsx-modal-more {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark"] .books-page .form-control,
+    html[data-theme="dark"] .books-page .search-box,
+    html[data-theme="dark"] .books-page .filter-select {
+        background: #0f172a;
+        color: #f8fafc;
+        border-color: rgba(255, 255, 255, 0.14);
+    }
+
+        html[data-theme="dark"] .books-page .form-control::placeholder,
+        html[data-theme="dark"] .books-page .search-box input::placeholder,
+        html[data-theme="dark"] .books-page .filter-select::placeholder {
+            color: #cbd5e1 !important;
+            opacity: 1 !important;
+        }
+
+        html[data-theme="dark"] .books-page .search-box input {
+            color: #f8fafc;
+        }
+
+        html[data-theme="dark"] .books-page .search-box span {
+            color: #cbd5e1;
+        }
+
+        html[data-theme="dark"] .books-page .search-box:focus-within {
+            border-color: rgba(148, 163, 184, 0.38);
+            box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08);
+        }
+
+    html[data-theme="dark"] .books-page select.form-control option,
+    html[data-theme="dark"] .books-page select.filter-select option {
+        background: #0f172a;
         color: #f8fafc;
     }
 
-    html[data-theme="dark"] .section-header p,
-    html[data-theme="dark"] .form-group label,
-    html[data-theme="dark"] .switch-card small,
-    html[data-theme="dark"] .book-title span,
-    html[data-theme="dark"] .loading-state,
-    html[data-theme="dark"] .empty-state,
-    html[data-theme="dark"] .xlsx-modal-header p,
-    html[data-theme="dark"] .xlsx-modal-stats span,
-    html[data-theme="dark"] .xlsx-modal-more,
-    html[data-theme="dark"] .month-filter label {
-        color: #94a3b8;
+    html[data-theme="dark"] .books-page .subsection-title {
+        color: #38bdf8;
     }
 
-html[data-theme="dark"] .form-control,
-html[data-theme="dark"] .search-box,
-html[data-theme="dark"] .filter-select {
-    background: #0f172a;
-    color: #f8fafc;
-    border-color: rgba(255,255,255,.14);
-}
+        html[data-theme="dark"] .books-page .subsection-title::after {
+            background: rgba(255, 255, 255, 0.12);
+        }
 
-    html[data-theme="dark"] .search-box input {
-        color: #f8fafc;
+    html[data-theme="dark"] .books-page .table-container,
+    html[data-theme="dark"] .books-page .books-table {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
     }
 
-html[data-theme="dark"] .subsection-title {
-    color: #38bdf8;
-}
+        html[data-theme="dark"] .books-page .books-table th {
+            background: #020617;
+            color: #cbd5e1;
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
 
-    html[data-theme="dark"] .subsection-title::after {
-        background: rgba(255,255,255,.12);
+        html[data-theme="dark"] .books-page .books-table td {
+            color: #e2e8f0;
+            border-bottom-color: rgba(255, 255, 255, 0.07);
+        }
+
+        html[data-theme="dark"] .books-page .books-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+    html[data-theme="dark"] .books-page .selected-row {
+        background: rgba(37, 99, 235, 0.22) !important;
     }
 
-html[data-theme="dark"] .table-container,
-html[data-theme="dark"] .books-table {
-    background: #111827;
-    border-color: rgba(255,255,255,.10);
-}
-
-    html[data-theme="dark"] .books-table th {
-        background: #020617;
-        color: #cbd5e1;
-        border-bottom-color: rgba(255,255,255,.08);
+    html[data-theme="dark"] .books-page .btn-light,
+    html[data-theme="dark"] .books-page .btn-secondary,
+    html[data-theme="dark"] .books-page .btn-filter-clear,
+    html[data-theme="dark"] .xlsx-modal-close {
+        background: #1e293b;
+        color: #e5e7eb;
+        border-color: rgba(255, 255, 255, 0.12);
     }
-
-    html[data-theme="dark"] .books-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.07);
-    }
-
-    html[data-theme="dark"] .books-table tbody tr:hover {
-        background: rgba(255,255,255,.04);
-    }
-
-html[data-theme="dark"] .selected-row {
-    background: rgba(37,99,235,.22) !important;
-}
-
-html[data-theme="dark"] .btn-light,
-html[data-theme="dark"] .btn-secondary,
-html[data-theme="dark"] .btn-filter-clear,
-html[data-theme="dark"] .xlsx-modal-close {
-    background: #1e293b;
-    color: #e5e7eb;
-    border-color: rgba(255,255,255,.12);
-}
-
-/* =========================================================
-   LIQUID GLASS PREMIUM - BOOKS
-========================================================= */
 
 html[data-theme="liquid glass"] .books-page {
     background: transparent;
     color: #111827;
 }
 
-html[data-theme="liquid glass"] .page-hero,
-html[data-theme="liquid glass"] .form-card,
-html[data-theme="liquid glass"] .list-card,
-html[data-theme="liquid glass"] .switch-card,
-html[data-theme="liquid glass"] .loading-state,
-html[data-theme="liquid glass"] .empty-state,
-html[data-theme="liquid glass"] .xlsx-modal-card,
-html[data-theme="liquid glass"] .xlsx-modal-stats div {
-    background: rgba(255,255,255,.34);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255,255,255,.62);
-    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
-}
-
-html[data-theme="liquid glass"] .page-hero,
-html[data-theme="liquid glass"] .form-card,
-html[data-theme="liquid glass"] .list-card {
-    position: relative;
-    overflow: hidden;
-}
-
-    html[data-theme="liquid glass"] .page-hero::before,
-    html[data-theme="liquid glass"] .form-card::before,
-    html[data-theme="liquid glass"] .list-card::before {
-        content: "";
-        position: absolute;
-        inset: 1px;
-        pointer-events: none;
-        border-radius: inherit;
-        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
-        opacity: .82;
+    html[data-theme="liquid glass"] .books-page .page-hero,
+    html[data-theme="liquid glass"] .books-page .form-card,
+    html[data-theme="liquid glass"] .books-page .list-card,
+    html[data-theme="liquid glass"] .books-page .switch-card,
+    html[data-theme="liquid glass"] .books-page .loading-state,
+    html[data-theme="liquid glass"] .books-page .empty-state,
+    html[data-theme="liquid glass"] .xlsx-modal-card,
+    html[data-theme="liquid glass"] .xlsx-modal-stats div {
+        background: rgba(255, 255, 255, 0.34);
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.86);
     }
 
-    html[data-theme="liquid glass"] .page-hero > *,
-    html[data-theme="liquid glass"] .form-card > *,
-    html[data-theme="liquid glass"] .list-card > * {
+    html[data-theme="liquid glass"] .books-page .page-hero,
+    html[data-theme="liquid glass"] .books-page .form-card,
+    html[data-theme="liquid glass"] .books-page .list-card {
         position: relative;
-        z-index: 1;
+        overflow: hidden;
     }
 
-    html[data-theme="liquid glass"] .page-hero h1,
-    html[data-theme="liquid glass"] .stat-card strong,
-    html[data-theme="liquid glass"] .section-header h2,
-    html[data-theme="liquid glass"] .switch-card strong,
-    html[data-theme="liquid glass"] .book-title strong,
-    html[data-theme="liquid glass"] .empty-state strong,
-    html[data-theme="liquid glass"] .xlsx-modal-header h2,
-    html[data-theme="liquid glass"] .xlsx-modal-stats strong {
-        color: #111827;
-        text-shadow: 0 1px 1px rgba(255,255,255,.85);
-    }
+        html[data-theme="liquid glass"] .books-page .page-hero::before,
+        html[data-theme="liquid glass"] .books-page .form-card::before,
+        html[data-theme="liquid glass"] .books-page .list-card::before {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.75), transparent 30%);
+            opacity: 0.82;
+        }
 
-    html[data-theme="liquid glass"] .page-hero p,
-    html[data-theme="liquid glass"] .stat-card span,
-    html[data-theme="liquid glass"] .section-header p,
-    html[data-theme="liquid glass"] .form-group label,
-    html[data-theme="liquid glass"] .switch-card small,
-    html[data-theme="liquid glass"] .book-title span,
-    html[data-theme="liquid glass"] .loading-state,
-    html[data-theme="liquid glass"] .empty-state,
+        html[data-theme="liquid glass"] .books-page .page-hero > *,
+        html[data-theme="liquid glass"] .books-page .form-card > *,
+        html[data-theme="liquid glass"] .books-page .list-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        html[data-theme="liquid glass"] .books-page .page-hero > div:first-child {
+            padding: 22px 24px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.34);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(18px) saturate(170%);
+            -webkit-backdrop-filter: blur(18px) saturate(170%);
+        }
+
+        html[data-theme="liquid glass"] .books-page .page-hero h1,
+        html[data-theme="liquid glass"] .books-page .stat-card strong,
+        html[data-theme="liquid glass"] .books-page .section-header h2,
+        html[data-theme="liquid glass"] .books-page .switch-card strong,
+        html[data-theme="liquid glass"] .books-page .book-title strong,
+        html[data-theme="liquid glass"] .books-page .empty-state strong,
+        html[data-theme="liquid glass"] .xlsx-modal-header h2,
+        html[data-theme="liquid glass"] .xlsx-modal-stats strong {
+            color: #111827;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
+        }
+
+        html[data-theme="liquid glass"] .books-page .page-hero h1 {
+            color: #0f172a !important;
+            text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
+        }
+
+        html[data-theme="liquid glass"] .books-page .page-hero p {
+            color: #334155 !important;
+            text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
+        }
+
+        html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
+            background: rgba(255, 255, 255, 0.48) !important;
+            border-color: rgba(255, 255, 255, 0.72) !important;
+        }
+
+            html[data-theme="liquid glass"] .books-page .page-hero .stat-card span {
+                color: #475569 !important;
+                opacity: 1 !important;
+                text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85) !important;
+            }
+
+            html[data-theme="liquid glass"] .books-page .page-hero .stat-card strong {
+                color: #0f172a !important;
+                opacity: 1 !important;
+                text-shadow: 0 2px 5px rgba(255, 255, 255, 0.9) !important;
+            }
+
+    html[data-theme="liquid glass"] .books-page .section-header p,
+    html[data-theme="liquid glass"] .books-page .form-group label,
+    html[data-theme="liquid glass"] .books-page .switch-card small,
+    html[data-theme="liquid glass"] .books-page .book-title span,
+    html[data-theme="liquid glass"] .books-page .loading-state,
+    html[data-theme="liquid glass"] .books-page .empty-state,
+    html[data-theme="liquid glass"] .books-page .month-filter label,
     html[data-theme="liquid glass"] .xlsx-modal-header p,
     html[data-theme="liquid glass"] .xlsx-modal-stats span,
-    html[data-theme="liquid glass"] .xlsx-modal-more,
-    html[data-theme="liquid glass"] .month-filter label {
+    html[data-theme="liquid glass"] .xlsx-modal-more {
         color: #475569;
     }
 
-html[data-theme="liquid glass"] .eyebrow,
-html[data-theme="liquid glass"] .stat-card {
-    background: rgba(255,255,255,.38);
-    border: 1px solid rgba(255,255,255,.58);
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-html[data-theme="liquid glass"] .form-control,
-html[data-theme="liquid glass"] .search-box,
-html[data-theme="liquid glass"] .filter-select {
-    background: rgba(255,255,255,.45);
-    backdrop-filter: blur(20px) saturate(170%);
-    -webkit-backdrop-filter: blur(20px) saturate(170%);
-    border-color: rgba(255,255,255,.65);
-    color: #111827;
-    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
-}
-
-    html[data-theme="liquid glass"] .search-box input {
+    html[data-theme="liquid glass"] .books-page .form-control,
+    html[data-theme="liquid glass"] .books-page .search-box,
+    html[data-theme="liquid glass"] .books-page .filter-select {
+        background: rgba(255, 255, 255, 0.45);
+        border-color: rgba(255, 255, 255, 0.65);
         color: #111827;
+        backdrop-filter: blur(20px) saturate(170%);
+        -webkit-backdrop-filter: blur(20px) saturate(170%);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.80);
     }
 
-html[data-theme="liquid glass"] .table-container,
-html[data-theme="liquid glass"] .books-table {
-    background: rgba(255,255,255,.28);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border-color: rgba(255,255,255,.55);
-}
+        html[data-theme="liquid glass"] .books-page .search-box input {
+            color: #111827;
+        }
 
-    html[data-theme="liquid glass"] .books-table th {
-        background: rgba(17,24,39,.88);
-        color: #ffffff;
+    html[data-theme="liquid glass"] .books-page .table-container,
+    html[data-theme="liquid glass"] .books-page .books-table {
+        background: rgba(255, 255, 255, 0.28);
+        border-color: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
     }
 
-    html[data-theme="liquid glass"] .books-table td {
-        color: #334155;
-        border-bottom-color: rgba(255,255,255,.38);
-    }
+        html[data-theme="liquid glass"] .books-page .books-table th {
+            background: rgba(17, 24, 39, 0.88);
+            color: #ffffff;
+        }
 
-    html[data-theme="liquid glass"] .books-table tbody tr:hover {
-        background: rgba(255,255,255,.22);
-    }
+        html[data-theme="liquid glass"] .books-page .books-table td {
+            color: #334155;
+            border-bottom-color: rgba(255, 255, 255, 0.38);
+        }
 
-html[data-theme="liquid glass"] .selected-row {
-    background: rgba(37,99,235,.18) !important;
-}
+        html[data-theme="liquid glass"] .books-page .books-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+    html[data-theme="liquid glass"] .books-page .selected-row {
+        background: rgba(37, 99, 235, 0.18) !important;
+    }
 
 html[data-theme="liquid glass"] .xlsx-modal-backdrop {
-    background: rgba(15,23,42,.34);
+    background: rgba(15, 23, 42, 0.34);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
-
-/* =========================================================
-   DARK GLASS - BOOKS
-========================================================= */
 
 html[data-theme="dark glass"] .books-page {
     background: transparent;
     color: #e5e7eb;
 }
 
-html[data-theme="dark glass"] .page-hero,
-html[data-theme="dark glass"] .form-card,
-html[data-theme="dark glass"] .list-card,
-html[data-theme="dark glass"] .switch-card,
-html[data-theme="dark glass"] .loading-state,
-html[data-theme="dark glass"] .empty-state,
-html[data-theme="dark glass"] .xlsx-modal-card,
-html[data-theme="dark glass"] .xlsx-modal-stats div {
-    background: rgba(15,23,42,.55);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
-}
+    html[data-theme="dark glass"] .books-page .page-hero,
+    html[data-theme="dark glass"] .books-page .form-card,
+    html[data-theme="dark glass"] .books-page .list-card,
+    html[data-theme="dark glass"] .books-page .switch-card,
+    html[data-theme="dark glass"] .books-page .loading-state,
+    html[data-theme="dark glass"] .books-page .empty-state,
+    html[data-theme="dark glass"] .xlsx-modal-card,
+    html[data-theme="dark glass"] .xlsx-modal-stats div {
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+    }
 
-    html[data-theme="dark glass"] .page-hero h1,
-    html[data-theme="dark glass"] .stat-card strong,
-    html[data-theme="dark glass"] .section-header h2,
-    html[data-theme="dark glass"] .switch-card strong,
-    html[data-theme="dark glass"] .book-title strong,
-    html[data-theme="dark glass"] .empty-state strong,
-    html[data-theme="dark glass"] .xlsx-modal-header h2,
-    html[data-theme="dark glass"] .xlsx-modal-stats strong {
+        html[data-theme="dark glass"] .books-page .page-hero h1,
+        html[data-theme="dark glass"] .books-page .stat-card strong,
+        html[data-theme="dark glass"] .books-page .section-header h2,
+        html[data-theme="dark glass"] .books-page .switch-card strong,
+        html[data-theme="dark glass"] .books-page .book-title strong,
+        html[data-theme="dark glass"] .books-page .empty-state strong,
+        html[data-theme="dark glass"] .xlsx-modal-header h2,
+        html[data-theme="dark glass"] .xlsx-modal-stats strong {
+            color: #f8fafc;
+        }
+
+        html[data-theme="dark glass"] .books-page .page-hero p,
+        html[data-theme="dark glass"] .books-page .stat-card span,
+        html[data-theme="dark glass"] .books-page .section-header p,
+        html[data-theme="dark glass"] .books-page .form-group label,
+        html[data-theme="dark glass"] .books-page .switch-card small,
+        html[data-theme="dark glass"] .books-page .book-title span,
+        html[data-theme="dark glass"] .books-page .loading-state,
+        html[data-theme="dark glass"] .books-page .empty-state,
+        html[data-theme="dark glass"] .books-page .month-filter label,
+        html[data-theme="dark glass"] .xlsx-modal-header p,
+        html[data-theme="dark glass"] .xlsx-modal-stats span,
+        html[data-theme="dark glass"] .xlsx-modal-more {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="dark glass"] .books-page .form-control,
+    html[data-theme="dark glass"] .books-page .search-box,
+    html[data-theme="dark glass"] .books-page .filter-select {
+        background: rgba(15, 23, 42, 0.58);
         color: #f8fafc;
+        border-color: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
     }
 
-    html[data-theme="dark glass"] .page-hero p,
-    html[data-theme="dark glass"] .stat-card span,
-    html[data-theme="dark glass"] .section-header p,
-    html[data-theme="dark glass"] .form-group label,
-    html[data-theme="dark glass"] .switch-card small,
-    html[data-theme="dark glass"] .book-title span,
-    html[data-theme="dark glass"] .loading-state,
-    html[data-theme="dark glass"] .empty-state,
-    html[data-theme="dark glass"] .xlsx-modal-header p,
-    html[data-theme="dark glass"] .xlsx-modal-stats span,
-    html[data-theme="dark glass"] .xlsx-modal-more,
-    html[data-theme="dark glass"] .month-filter label {
-        color: #cbd5e1;
-    }
-
-html[data-theme="dark glass"] .form-control,
-html[data-theme="dark glass"] .search-box,
-html[data-theme="dark glass"] .filter-select {
-    background: rgba(15,23,42,.58);
-    color: #f8fafc;
-    border-color: rgba(255,255,255,.12);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
-
-    html[data-theme="dark glass"] .search-box input {
-        color: #f8fafc;
-    }
-
-html[data-theme="dark glass"] .table-container,
-html[data-theme="dark glass"] .books-table {
-    background: rgba(15,23,42,.50);
-    border-color: rgba(255,255,255,.10);
-}
-
-    html[data-theme="dark glass"] .books-table th {
-        background: rgba(2,6,23,.78);
-        color: #cbd5e1;
-    }
-
-    html[data-theme="dark glass"] .books-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.07);
-    }
-
-    html[data-theme="dark glass"] .books-table tbody tr:hover {
-        background: rgba(255,255,255,.05);
-    }
-
-html[data-theme="dark glass"] .selected-row {
-    background: rgba(37,99,235,.24) !important;
-}
-
-html[data-theme="dark glass"] .btn-light,
-html[data-theme="dark glass"] .btn-secondary,
-html[data-theme="dark glass"] .btn-filter-clear,
-html[data-theme="dark glass"] .xlsx-modal-close {
-    background: rgba(15,23,42,.58);
-    color: #f8fafc;
-    border: 1px solid rgba(255,255,255,.12);
-}
-
-html[data-theme="dark glass"] .xlsx-modal-backdrop {
-    background: rgba(2,6,23,.52);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* =========================================================
-   DARK MODE FIX - BOOKS PLACEHOLDERS
-========================================================= */
-
-html[data-theme="dark"] .form-control::placeholder,
-html[data-theme="dark"] .search-box input::placeholder,
-html[data-theme="dark"] .filter-select::placeholder {
-    color: #94a3b8 !important;
-    opacity: 1 !important;
-}
-
-html[data-theme="dark glass"] .form-control::placeholder,
-html[data-theme="dark glass"] .search-box input::placeholder,
-html[data-theme="dark glass"] .filter-select::placeholder {
-    color: #cbd5e1 !important;
-    opacity: 1 !important;
-}
-
-html[data-theme="dark"] select.form-control,
-html[data-theme="dark"] select.filter-select,
-html[data-theme="dark glass"] select.form-control,
-html[data-theme="dark glass"] select.filter-select {
-    color: #f8fafc !important;
-}
-
-    html[data-theme="dark"] select.form-control option,
-    html[data-theme="dark"] select.filter-select option,
-    html[data-theme="dark glass"] select.form-control option,
-    html[data-theme="dark glass"] select.filter-select option {
-        background: #0f172a;
-        color: #f8fafc;
-    }
-
-/* =========================================================
-   DARK MODE FIX - BOOK LIST HEADER + SEARCH LIKE EMPLOYEES
-========================================================= */
-
-html[data-theme="dark"] .books-page .list-card .section-header h2,
-html[data-theme="dark"] .books-page .list-card .section-header p {
-    color: #f8fafc !important;
-}
-
-html[data-theme="dark"] .books-page .list-card .search-box {
-    background: #0f172a !important;
-    border: 1px solid rgba(148, 163, 184, 0.22) !important;
-    border-radius: 14px !important;
-    min-width: 340px !important;
-    height: 46px !important;
-    box-shadow: none !important;
-}
-
-    html[data-theme="dark"] .books-page .list-card .search-box input {
-        color: #f8fafc !important;
-        background: transparent !important;
-    }
-
-        html[data-theme="dark"] .books-page .list-card .search-box input::placeholder {
+        html[data-theme="dark glass"] .books-page .form-control::placeholder,
+        html[data-theme="dark glass"] .books-page .search-box input::placeholder,
+        html[data-theme="dark glass"] .books-page .filter-select::placeholder {
             color: #cbd5e1 !important;
             opacity: 1 !important;
         }
 
-    html[data-theme="dark"] .books-page .list-card .search-box:focus-within {
-        border-color: rgba(148, 163, 184, 0.38) !important;
-        box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08) !important;
-    }
-
-    html[data-theme="dark"] .books-page .list-card .search-box span {
-        color: #cbd5e1 !important;
-    }
-
-/* =========================================================
-   LIQUID GLASS FIX - BOOKS HERO READABILITY
-========================================================= */
-
-html[data-theme="liquid glass"] .books-page .page-hero h1 {
-    color: #0f172a !important;
-    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
-}
-
-html[data-theme="liquid glass"] .books-page .page-hero p {
-    color: #334155 !important;
-    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
-}
-
-html[data-theme="liquid glass"] .books-page .page-hero > div:first-child {
-    background: rgba(255, 255, 255, 0.34);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    border-radius: 22px;
-    padding: 22px 24px;
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-/* =========================================================
-   LIQUID GLASS FIX - HERO STAT CARDS READABILITY
-========================================================= */
-
-html[data-theme="liquid glass"] .books-page .page-hero .stat-card span {
-    color: #475569 !important;
-    opacity: 1 !important;
-    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85) !important;
-}
-
-html[data-theme="liquid glass"] .books-page .page-hero .stat-card strong {
-    color: #0f172a !important;
-    opacity: 1 !important;
-    text-shadow: 0 2px 5px rgba(255, 255, 255, 0.9) !important;
-}
-
-html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
-    background: rgba(255, 255, 255, 0.48) !important;
-    border-color: rgba(255, 255, 255, 0.72) !important;
-}
-
-.books-page,
-.books-page * {
-    box-sizing: border-box;
-}
-
-.books-page {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-    .books-page .page-hero,
-    .books-page .form-card,
-    .books-page .list-card,
-    .books-page .table-container,
-    .books-page .books-table,
-    .books-page .xlsx-modal-card {
-        max-width: 100%;
-    }
-
-        .books-page .books-table th,
-        .books-page .books-table td,
-        .books-page .book-title,
-        .books-page .section-header,
-        .books-page .xlsx-modal-section {
-            overflow-wrap: anywhere;
+        html[data-theme="dark glass"] .books-page .search-box input {
+            color: #f8fafc;
         }
+
+    html[data-theme="dark glass"] .books-page select.form-control option,
+    html[data-theme="dark glass"] .books-page select.filter-select option {
+        background: #0f172a;
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark glass"] .books-page .table-container,
+    html[data-theme="dark glass"] .books-page .books-table {
+        background: rgba(15, 23, 42, 0.50);
+        border-color: rgba(255, 255, 255, 0.10);
+    }
+
+        html[data-theme="dark glass"] .books-page .books-table th {
+            background: rgba(2, 6, 23, 0.78);
+            color: #cbd5e1;
+        }
+
+        html[data-theme="dark glass"] .books-page .books-table td {
+            color: #e2e8f0;
+            border-bottom-color: rgba(255, 255, 255, 0.07);
+        }
+
+        html[data-theme="dark glass"] .books-page .books-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+    html[data-theme="dark glass"] .books-page .selected-row {
+        background: rgba(37, 99, 235, 0.24) !important;
+    }
+
+    html[data-theme="dark glass"] .books-page .btn-light,
+    html[data-theme="dark glass"] .books-page .btn-secondary,
+    html[data-theme="dark glass"] .books-page .btn-filter-clear,
+    html[data-theme="dark glass"] .xlsx-modal-close {
+        background: rgba(15, 23, 42, 0.58);
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+html[data-theme="dark glass"] .xlsx-modal-backdrop {
+    background: rgba(2, 6, 23, 0.52);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
 
 @media (max-width: 1280px) {
     .books-page .page-hero {
@@ -1407,17 +1194,14 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
         min-width: 0;
     }
 
-    .books-page .form-grid {
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
-    }
-
+    .books-page .form-grid,
     .books-page .dates-grid {
         grid-template-columns: repeat(2, minmax(180px, 1fr));
     }
 
-    .books-page .form-grid .large {
-        grid-column: span 2;
-    }
+        .books-page .form-grid .large {
+            grid-column: span 2;
+        }
 }
 
 @media (max-width: 1024px) {
@@ -1437,12 +1221,10 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
 
             .books-page .page-hero p {
                 font-size: 14px;
-                line-height: 1.45;
             }
 
         .books-page .hero-stats {
             grid-template-columns: repeat(2, minmax(140px, 1fr));
-            gap: 12px;
         }
 
         .books-page .form-card,
@@ -1477,13 +1259,13 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
 
         .books-page .month-filter {
             width: 100%;
-            margin-top: 0;
         }
 
         .books-page .filter-select,
         .books-page .btn-filter-clear,
         .books-page .btn-export-xlsx,
-        .books-page .btn-xlsx {
+        .books-page .btn-xlsx,
+        .books-page .btn-update-xlsx {
             width: 100%;
             min-width: 0;
             height: 44px;
@@ -1499,10 +1281,11 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
         padding: 14px;
     }
 
-        .books-page .page-hero {
+        .books-page .page-hero,
+        .books-page .form-card,
+        .books-page .list-card {
             padding: 18px;
             border-radius: 18px;
-            gap: 16px;
         }
 
     html[data-theme="liquid glass"] .books-page .page-hero > div:first-child {
@@ -1510,20 +1293,18 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
         border-radius: 18px;
     }
 
-    .books-page .eyebrow {
-        font-size: 10.5px;
-        padding: 6px 10px;
+    .books-page .page-hero {
+        gap: 16px;
     }
 
-    .books-page .page-hero h1 {
-        font-size: 24px;
-        line-height: 1.15;
-    }
+        .books-page .page-hero h1 {
+            font-size: 24px;
+            line-height: 1.15;
+        }
 
-    .books-page .page-hero p {
-        font-size: 13.5px;
-        line-height: 1.45;
-    }
+        .books-page .page-hero p {
+            font-size: 13.5px;
+        }
 
     .books-page .hero-stats {
         grid-template-columns: 1fr;
@@ -1540,12 +1321,6 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
             font-size: 25px;
         }
 
-    .books-page .form-card,
-    .books-page .list-card {
-        padding: 18px;
-        border-radius: 18px;
-    }
-
     .books-page .section-header {
         gap: 12px;
         margin-bottom: 16px;
@@ -1558,7 +1333,6 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
 
         .books-page .section-header p {
             font-size: 13px;
-            line-height: 1.45;
         }
 
     .books-page .form-grid,
@@ -1583,6 +1357,7 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
     .books-page .btn-filter-clear,
     .books-page .btn-export-xlsx,
     .books-page .btn-xlsx,
+    .books-page .btn-update-xlsx,
     .books-page .btn-primary,
     .books-page .btn-secondary,
     .books-page .btn-danger,
@@ -1595,15 +1370,10 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
         font-size: 13px;
     }
 
-    html[data-theme="dark"] .books-page .list-card .search-box {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    .books-page .search-box input {
-        min-height: 42px;
-        font-size: 13px;
-    }
+        .books-page .search-box input {
+            min-height: 42px;
+            font-size: 13px;
+        }
 
     .books-page .header-actions,
     .books-page .list-filters,
@@ -1615,9 +1385,9 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
     }
 
     .books-page .switch-card {
+        align-items: flex-start;
         padding: 13px;
         border-radius: 15px;
-        align-items: flex-start;
     }
 
         .books-page .switch-card strong {
@@ -1651,7 +1421,7 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
         width: 100%;
         min-width: 0 !important;
         border-collapse: separate;
-        border-spacing: 0 14px;
+        border-spacing: 0 !important;
         background: transparent;
     }
 
@@ -1667,41 +1437,49 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
             width: 100% !important;
         }
 
-            .books-page .books-table tbody tr {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 18px;
-                padding: 12px;
-                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-                overflow: hidden;
+            .books-page .books-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 18px !important;
             }
 
-                .books-page .books-table tbody tr:hover {
+                .books-page .books-table tbody tr {
+                    display: block !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 12px;
+                    overflow: hidden;
+                    border-radius: 18px !important;
                     background: #ffffff;
+                    border: 1px solid #e5e7eb;
+                    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
                 }
 
-                .books-page .books-table tbody tr.selected-row {
-                    background: #eff6ff !important;
-                    border-color: #bfdbfe;
-                    box-shadow: inset 4px 0 0 #0a66c2, 0 10px 26px rgba(15, 23, 42, 0.08);
-                }
+                    .books-page .books-table tbody tr:hover {
+                        background: #ffffff;
+                    }
+
+                    .books-page .books-table tbody tr.selected-row {
+                        background: #eff6ff !important;
+                        border-color: #bfdbfe;
+                        box-shadow: inset 4px 0 0 #0a66c2, 0 10px 26px rgba(15, 23, 42, 0.08);
+                    }
 
             .books-page .books-table td {
                 position: relative !important;
-                min-height: 44px;
-                padding: 12px 10px 12px 44% !important;
-                border-bottom: 1px solid #e5e7eb;
                 display: flex !important;
                 align-items: center;
                 justify-content: flex-end;
+                min-height: 44px;
+                padding: 12px 10px 12px 44% !important;
+                border-bottom: 1px solid #e5e7eb;
+                color: #334155;
+                font-size: 13px;
                 text-align: right !important;
                 white-space: normal !important;
-                font-size: 13px;
-                vertical-align: middle !important;
             }
 
-                .books-page .books-table td:last-child,
-                .books-page .books-table td.actions-cell {
+                .books-page .books-table td:last-child {
                     border-bottom: none;
                 }
 
@@ -1709,8 +1487,8 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
                     position: absolute;
                     left: 10px;
                     top: 50%;
-                    transform: translateY(-50%);
                     width: 38%;
+                    transform: translateY(-50%);
                     color: #64748b;
                     font-size: 11px;
                     font-weight: 900;
@@ -1726,19 +1504,19 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
                 }
 
                 .books-page .books-table td:nth-child(2)::before {
-                    content: "Database";
+                    content: "KGEN";
                 }
 
                 .books-page .books-table td:nth-child(3)::before {
-                    content: "Bind Plant";
+                    content: "LSA";
                 }
 
                 .books-page .books-table td:nth-child(4)::before {
-                    content: "Pager";
+                    content: "State";
                 }
 
                 .books-page .books-table td:nth-child(5)::before {
-                    content: "Footprint";
+                    content: "Database";
                 }
 
                 .books-page .books-table td:nth-child(6)::before {
@@ -1746,22 +1524,58 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
                 }
 
                 .books-page .books-table td:nth-child(7)::before {
-                    content: "LSA";
+                    content: "Print Foot";
                 }
 
                 .books-page .books-table td:nth-child(8)::before {
-                    content: "Proof";
+                    content: "Trim Size";
                 }
 
                 .books-page .books-table td:nth-child(9)::before {
-                    content: "Final";
+                    content: "Bind Plant";
                 }
 
                 .books-page .books-table td:nth-child(10)::before {
-                    content: "Memo";
+                    content: "Product Issue";
                 }
 
                 .books-page .books-table td:nth-child(11)::before {
+                    content: "Proof";
+                }
+
+                .books-page .books-table td:nth-child(12)::before {
+                    content: "Final";
+                }
+
+                .books-page .books-table td:nth-child(13)::before {
+                    content: "Memo";
+                }
+
+                .books-page .books-table td:nth-child(14)::before {
+                    content: "Final PO";
+                }
+
+                .books-page .books-table td:nth-child(15)::before {
+                    content: "Shipping";
+                }
+
+                .books-page .books-table td:nth-child(16)::before {
+                    content: "Dirxion";
+                }
+
+                .books-page .books-table td:nth-child(17)::before {
+                    content: "Pub Date";
+                }
+
+                .books-page .books-table td:nth-child(18)::before {
+                    content: "SRL";
+                }
+
+                .books-page .books-table td:nth-child(19)::before {
+                    content: "NWP";
+                }
+
+                .books-page .books-table td:nth-child(20)::before {
                     content: "Actions";
                 }
 
@@ -1773,99 +1587,161 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
 
         .books-page .book-title strong,
         .books-page .book-title span {
-            white-space: normal;
-            word-break: break-word;
             max-width: 100%;
             overflow: visible;
             text-overflow: unset;
+            white-space: normal;
+            word-break: break-word;
         }
 
     .books-page .pill {
         white-space: normal;
         text-align: center;
-        line-height: 1.2;
-        max-width: 100%;
     }
 
     .books-page .books-table td.actions-cell {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
         width: 100% !important;
         min-width: 0 !important;
         max-width: none !important;
-        display: flex !important;
-        justify-content: flex-end !important;
-        align-items: center !important;
         padding: 12px 10px 12px 44% !important;
-        position: relative !important;
         text-align: right !important;
     }
 
-        .books-page .books-table td.actions-cell .icon-btn,
-        .books-page .books-table td.actions-cell button.icon-btn {
-            margin: 0 !important;
+        .books-page .books-table td.actions-cell .icon-btn {
             width: 40px !important;
             height: 40px !important;
             min-width: 40px !important;
             min-height: 40px !important;
+            margin: 0 !important;
             border-radius: 13px !important;
         }
 
-    .books-page .xlsx-modal-backdrop,
     .xlsx-modal-backdrop {
-        padding: 12px;
         align-items: flex-start;
         overflow-y: auto;
+        padding: 12px;
     }
 
-    .books-page .xlsx-modal-card,
     .xlsx-modal-card {
         width: 100%;
         max-width: 100%;
         max-height: none;
-        margin-top: 12px;
-        margin-bottom: 12px;
+        margin: 12px 0;
         padding: 18px;
         border-radius: 18px;
     }
 
-    .books-page .xlsx-modal-header,
     .xlsx-modal-header {
         gap: 12px;
     }
 
-        .books-page .xlsx-modal-header h2,
         .xlsx-modal-header h2 {
             font-size: 1.1rem;
             line-height: 1.25;
         }
 
-        .books-page .xlsx-modal-header p,
         .xlsx-modal-header p {
             font-size: 0.85rem;
             line-height: 1.4;
         }
 
-    .books-page .xlsx-modal-stats,
     .xlsx-modal-stats {
         grid-template-columns: 1fr;
     }
 
-    .books-page .xlsx-modal-section,
     .xlsx-modal-section {
         padding: 14px;
         border-radius: 14px;
     }
 
-    .books-page .xlsx-modal-actions,
     .xlsx-modal-actions {
         justify-content: stretch;
     }
 
-    .books-page .xlsx-modal-ok,
     .xlsx-modal-ok {
         width: 100%;
         min-height: 44px;
         border-radius: 13px;
     }
+
+    html[data-theme="dark"] .books-page .books-table tbody tr {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
+    }
+
+        html[data-theme="dark"] .books-page .books-table tbody tr:hover {
+            background: #111827;
+        }
+
+        html[data-theme="dark"] .books-page .books-table tbody tr.selected-row {
+            background: rgba(37, 99, 235, 0.22) !important;
+            border-color: rgba(96, 165, 250, 0.35);
+        }
+
+    html[data-theme="dark"] .books-page .books-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+        html[data-theme="dark"] .books-page .books-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .books-page .books-table tbody tr {
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+
+        html[data-theme="dark glass"] .books-page .books-table tbody tr:hover {
+            background: rgba(15, 23, 42, 0.92) !important;
+        }
+
+        html[data-theme="dark glass"] .books-page .books-table tbody tr.selected-row {
+            background: rgba(37, 99, 235, 0.24) !important;
+            border-color: rgba(96, 165, 250, 0.36) !important;
+        }
+
+    html[data-theme="dark glass"] .books-page .books-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+        html[data-theme="dark glass"] .books-page .books-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .books-page .books-table tbody tr {
+        background: rgba(255, 255, 255, 0.42);
+        border-color: rgba(255, 255, 255, 0.62);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+    }
+
+        html[data-theme="liquid glass"] .books-page .books-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.50);
+        }
+
+        html[data-theme="liquid glass"] .books-page .books-table tbody tr.selected-row {
+            background: rgba(37, 99, 235, 0.18) !important;
+            border-color: rgba(37, 99, 235, 0.25);
+        }
+
+    html[data-theme="liquid glass"] .books-page .books-table td {
+        color: #334155;
+        border-bottom-color: rgba(255, 255, 255, 0.42);
+    }
+
+        html[data-theme="liquid glass"] .books-page .books-table td::before {
+            color: #475569;
+        }
 }
 
 @media (max-width: 520px) {
@@ -1915,6 +1791,7 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
     .books-page .btn-filter-clear,
     .books-page .btn-export-xlsx,
     .books-page .btn-xlsx,
+    .books-page .btn-update-xlsx,
     .books-page .btn-primary,
     .books-page .btn-secondary,
     .books-page .btn-danger,
@@ -1925,47 +1802,44 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
         font-size: 12.5px;
     }
 
-    .books-page .books-table {
-        border-spacing: 0 12px;
+    .books-page .books-table tbody {
+        gap: 16px !important;
     }
 
         .books-page .books-table tbody tr {
-            border-radius: 16px;
             padding: 10px;
+            border-radius: 16px !important;
         }
 
-        .books-page .books-table td {
+    .books-page .books-table td {
+        min-height: 42px;
+        padding: 11px 8px 11px 42% !important;
+        font-size: 12.5px;
+    }
+
+        .books-page .books-table td::before {
+            left: 8px;
+            width: 36%;
+            font-size: 10px;
+        }
+
+        .books-page .books-table td.actions-cell {
             padding: 11px 8px 11px 42% !important;
-            min-height: 42px;
-            font-size: 12.5px;
         }
 
-            .books-page .books-table td::before {
-                left: 8px;
-                width: 36%;
-                font-size: 10px;
+            .books-page .books-table td.actions-cell .icon-btn {
+                width: 38px !important;
+                height: 38px !important;
+                min-width: 38px !important;
+                min-height: 38px !important;
+                border-radius: 12px !important;
             }
 
-            .books-page .books-table td.actions-cell {
-                padding: 11px 8px 11px 42% !important;
-            }
-
-                .books-page .books-table td.actions-cell .icon-btn,
-                .books-page .books-table td.actions-cell button.icon-btn {
-                    width: 38px !important;
-                    height: 38px !important;
-                    min-width: 38px !important;
-                    min-height: 38px !important;
-                    border-radius: 12px !important;
-                }
-
-    .books-page .xlsx-modal-card,
     .xlsx-modal-card {
         padding: 16px;
         border-radius: 16px;
     }
 
-    .books-page .xlsx-modal-close,
     .xlsx-modal-close {
         width: 34px;
         height: 34px;
@@ -1997,130 +1871,4 @@ html[data-theme="liquid glass"] .books-page .page-hero .stat-card {
                 width: 34%;
                 font-size: 9.5px;
             }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark"] .books-page .books-table tbody tr {
-        background: #111827;
-        border-color: rgba(255,255,255,.10);
-        box-shadow: 0 12px 30px rgba(0,0,0,.30);
-    }
-
-        html[data-theme="dark"] .books-page .books-table tbody tr:hover {
-            background: #111827;
-        }
-
-        html[data-theme="dark"] .books-page .books-table tbody tr.selected-row {
-            background: rgba(37,99,235,.22) !important;
-            border-color: rgba(96,165,250,.35);
-        }
-
-    html[data-theme="dark"] .books-page .books-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
-    }
-
-        html[data-theme="dark"] .books-page .books-table td::before {
-            color: #94a3b8;
-        }
-
-    html[data-theme="dark glass"] .books-page .books-table tbody tr {
-        background: rgba(15,23,42,.62);
-        border-color: rgba(255,255,255,.10);
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
-        box-shadow: 0 14px 34px rgba(0,0,0,.28);
-    }
-
-        html[data-theme="dark glass"] .books-page .books-table tbody tr:hover {
-            background: rgba(15,23,42,.68);
-        }
-
-        html[data-theme="dark glass"] .books-page .books-table tbody tr.selected-row {
-            background: rgba(37,99,235,.24) !important;
-            border-color: rgba(96,165,250,.36);
-        }
-
-    html[data-theme="dark glass"] .books-page .books-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
-    }
-
-        html[data-theme="dark glass"] .books-page .books-table td::before {
-            color: #cbd5e1;
-        }
-
-    html[data-theme="liquid glass"] .books-page .books-table tbody tr {
-        background: rgba(255,255,255,.42);
-        border-color: rgba(255,255,255,.62);
-        backdrop-filter: blur(22px) saturate(170%);
-        -webkit-backdrop-filter: blur(22px) saturate(170%);
-        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
-    }
-
-        html[data-theme="liquid glass"] .books-page .books-table tbody tr:hover {
-            background: rgba(255,255,255,.50);
-        }
-
-        html[data-theme="liquid glass"] .books-page .books-table tbody tr.selected-row {
-            background: rgba(37,99,235,.18) !important;
-            border-color: rgba(37,99,235,.25);
-        }
-
-    html[data-theme="liquid glass"] .books-page .books-table td {
-        color: #334155;
-        border-bottom-color: rgba(255,255,255,.42);
-    }
-
-        html[data-theme="liquid glass"] .books-page .books-table td::before {
-            color: #475569;
-        }
-}
-
-@media (max-width: 768px) {
-    .books-page .books-table tbody {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-
-        .books-page .books-table tbody tr {
-            display: block !important;
-            width: 100% !important;
-            margin: 0 !important;
-            border-radius: 18px !important;
-        }
-
-            .books-page .books-table tbody tr:not(:last-child) {
-                margin-bottom: 0 !important;
-            }
-
-    .books-page .books-table {
-        border-spacing: 0 !important;
-    }
-}
-
-@media (max-width: 520px) {
-    .books-page .books-table tbody {
-        gap: 16px !important;
-    }
-
-        .books-page .books-table tbody tr {
-            border-radius: 16px !important;
-        }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark glass"] .books-page .books-table tbody tr {
-        background: rgba(15, 23, 42, 0.88) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-
-    html[data-theme="liquid glass"] .books-page .books-table tbody tr {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
 }

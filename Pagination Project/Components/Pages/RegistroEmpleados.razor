@@ -1,19 +1,22 @@
 ﻿@page "/registro-empleados"
 @attribute [Authorize]
+
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Pagination_Project.Models
 @using Pagination_Project.Services
+@using System.Security.Claims
+
 @inject IEmpleadoService EmpleadoService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
-@inject NavigationManager Navigation
 
 <PageTitle>Employees - Evaluations</PageTitle>
 
-<div class="thryv-users-page">
+<div class="thryv-users-page employees-management-page">
     <div class="thryv-users-header">
         <div>
             <h2>Employees Management</h2>
@@ -22,7 +25,9 @@
 
         @if (CreateEmployees || EditEmployees)
         {
-            <button type="button" class="thryv-secondary-btn" @onclick="LimpiarFormulario">
+            <button type="button"
+                    class="thryv-secondary-btn thryv-header-btn"
+                    @onclick="LimpiarFormulario">
                 @(Editando ? "Cancel edit" : "New employee")
             </button>
         }
@@ -49,9 +54,11 @@
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
                             </span>
+
                             <InputText class="thryv-input modern"
-                            @bind-Value="modelo.Nombre"
-                            placeholder=" " />
+                                       @bind-Value="modelo.Nombre"
+                                       placeholder=" " />
+
                             <span class="thryv-floating-label">Full Name</span>
                         </label>
                     </div>
@@ -65,9 +72,12 @@
                                     <path d="M4 17h10"></path>
                                 </svg>
                             </span>
+
                             <InputNumber TValue="int"
-                            class="thryv-input modern"
-                            @bind-Value="modelo.IdEmpleado" />
+                                         class="thryv-input modern"
+                                         @bind-Value="modelo.IdEmpleado"
+                                         placeholder=" " />
+
                             <span class="thryv-floating-label">Employee ID</span>
                         </label>
                     </div>
@@ -80,9 +90,11 @@
                                     <path d="m4 7 8 6 8-6"></path>
                                 </svg>
                             </span>
+
                             <InputText class="thryv-input modern"
-                            @bind-Value="modelo.Email"
-                            placeholder=" " />
+                                       @bind-Value="modelo.Email"
+                                       placeholder=" " />
+
                             <span class="thryv-floating-label">Email</span>
                         </label>
                     </div>
@@ -107,7 +119,9 @@
                 <div class="thryv-form-actions">
                     @if (PuedeCrearOEditar)
                     {
-                        <button type="submit" class="thryv-primary-btn" disabled="@Guardando">
+                        <button type="submit"
+                                class="thryv-primary-btn"
+                                disabled="@Guardando">
                             @(Guardando ? "Saving..." : (Editando ? "Update Employee" : "Register Employee"))
                         </button>
                     }
@@ -140,13 +154,14 @@
         </div>
 
         <div class="thryv-table-wrap large">
-            <table class="thryv-users-table large">
+            <table class="thryv-users-table large employees-table">
                 <thead>
                     <tr>
                         <th>Employee ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Status</th>
+
                         @if (EditEmployees)
                         {
                             <th>Action</th>
@@ -162,13 +177,17 @@
                     @if (Cargando)
                     {
                         <tr>
-                            <td colspan="@totalColumnas" class="thryv-empty-row">Loading employees...</td>
+                            <td colspan="@totalColumnas" class="thryv-empty-row">
+                                Loading employees...
+                            </td>
                         </tr>
                     }
                     else if (!empleadosFiltrados.Any())
                     {
                         <tr>
-                            <td colspan="@totalColumnas" class="thryv-empty-row">No employees found.</td>
+                            <td colspan="@totalColumnas" class="thryv-empty-row">
+                                No employees found.
+                            </td>
                         </tr>
                     }
                     else
@@ -177,10 +196,14 @@
                         {
                             <tr class="@(modelo.Id == emp.Id ? "selected" : "")"
                                 @ondblclick="() => OnDobleClickEmpleado(emp)">
-                                <td>@emp.IdEmpleado</td>
-                                <td>@emp.Nombre</td>
-                                <td>@emp.Email</td>
-                                <td>
+
+                                <td data-label="Employee ID">@emp.IdEmpleado</td>
+
+                                <td data-label="Name">@emp.Nombre</td>
+
+                                <td data-label="Email">@emp.Email</td>
+
+                                <td data-label="Status">
                                     @if (emp.Activo)
                                     {
                                         <span class="thryv-status-badge active">● Active</span>
@@ -193,7 +216,7 @@
 
                                 @if (EditEmployees)
                                 {
-                                    <td>
+                                    <td data-label="Action" class="thryv-users-action-cell">
                                         <button type="button"
                                                 class="thryv-table-btn"
                                                 @onclick="() => SeleccionarEmpleado(emp)">
@@ -275,7 +298,6 @@
 
 @code {
     private List<Empleados> empleados = new();
-
     private EmpleadoFormModel modelo = new();
     private ClaimsPrincipal? _user;
 

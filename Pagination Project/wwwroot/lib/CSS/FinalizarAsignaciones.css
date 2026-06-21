@@ -1,468 +1,442 @@
-﻿.finish-assignments-page {
+﻿.finish-assignments-page,
+.finish-assignments-page * {
+    box-sizing: border-box;
+}
+
+.finish-assignments-page {
     width: 100%;
+    max-width: 100%;
     min-height: 100%;
     padding: 24px;
+    overflow-x: hidden;
     background: #f5f7fb;
     color: #172033;
 }
 
-.finish-hero {
-    display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    align-items: stretch;
-    padding: 28px;
-    border-radius: 26px;
-    background: linear-gradient(135deg, #111827 0%, #1f2937 52%, #334155 100%);
-    color: #ffffff;
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
-    margin-bottom: 20px;
-    overflow: hidden;
-}
+    .finish-assignments-page .finish-hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 24px;
+        max-width: 100%;
+        margin-bottom: 20px;
+        padding: 28px;
+        overflow: hidden;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #111827 0%, #1f2937 52%, #334155 100%);
+        color: #ffffff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+    }
 
-.hero-kicker {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    color: #dbeafe;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-}
-
-.finish-hero h1 {
-    margin: 0;
-    font-size: clamp(28px, 3vw, 42px);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-}
-
-.finish-hero p {
-    margin: 10px 0 0;
-    max-width: 720px;
-    color: #d1d5db;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.hero-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(130px, 1fr));
-    gap: 14px;
-    min-width: 430px;
-}
-
-.hero-stat {
-    padding: 18px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(8px);
-}
-
-    .hero-stat span {
-        display: block;
-        color: #d1d5db;
+    .finish-assignments-page .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #dbeafe;
         font-size: 12px;
         font-weight: 700;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-bottom: 10px;
     }
 
-    .hero-stat strong {
-        display: block;
-        font-size: 30px;
-        font-weight: 900;
-        color: #ffffff;
-    }
-
-.finish-alert {
-    padding: 14px 18px;
-    border-radius: 16px;
-    margin-bottom: 18px;
-    font-weight: 700;
-    border: 1px solid transparent;
-}
-
-.finish-alert-success {
-    background: #ecfdf5;
-    color: #047857;
-    border-color: #a7f3d0;
-}
-
-.finish-alert-error {
-    background: #fef2f2;
-    color: #b91c1c;
-    border-color: #fecaca;
-}
-
-.finish-panel {
-    background: #ffffff;
-    border-radius: 26px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
-    padding: 22px;
-}
-
-.finish-toolbar {
-    display: grid;
-    grid-template-columns: 280px minmax(260px, 1fr) 220px;
-    gap: 16px;
-    margin-bottom: 18px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-    .filter-group label {
-        font-size: 12px;
-        font-weight: 800;
-        color: #475569;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-.finish-input {
-    width: 100%;
-    height: 44px;
-    border: 1px solid #d7dce5;
-    border-radius: 14px;
-    background: #ffffff;
-    padding: 0 14px;
-    color: #111827;
-    outline: none;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-    .finish-input:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-    }
-
-    .finish-input:disabled {
-        background: #f1f5f9;
-        color: #64748b;
-        cursor: not-allowed;
-    }
-
-.finish-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
-}
-
-.btn-soft,
-.btn-primary {
-    min-height: 42px;
-    border: none;
-    border-radius: 14px;
-    padding: 0 18px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-soft {
-    background: #f1f5f9;
-    color: #334155;
-    border: 1px solid #e2e8f0;
-}
-
-    .btn-soft:hover {
-        background: #e2e8f0;
-    }
-
-.btn-primary {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #ffffff;
-    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
-}
-
-    .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 14px 28px rgba(37, 99, 235, 0.32);
-    }
-
-    .btn-primary:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-.finish-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 18px;
-    border: 1px solid #e5e7eb;
-}
-
-.finish-table {
-    width: 100%;
-    min-width: 980px;
-    border-collapse: collapse;
-    background: #ffffff;
-}
-
-    .finish-table thead {
-        background: #0f172a;
-    }
-
-    .finish-table th {
-        padding: 14px 16px;
-        text-align: left;
-        color: #ffffff;
-        font-size: 12px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        white-space: nowrap;
-    }
-
-    .finish-table td {
-        padding: 15px 16px;
-        border-bottom: 1px solid #edf0f5;
-        vertical-align: middle;
-        font-size: 14px;
-        color: #1f2937;
-    }
-
-    .finish-table tbody tr:hover {
-        background: #f8fafc;
-    }
-
-    .finish-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-.check-col {
-    width: 52px;
-    text-align: center !important;
-}
-
-    .check-col input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: #2563eb;
-        cursor: pointer;
-    }
-
-.employee-cell,
-.book-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-    .employee-cell strong,
-    .book-cell strong {
-        color: #111827;
-        font-weight: 800;
-    }
-
-    .employee-cell span,
-    .book-cell span {
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-.code-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
-    font-weight: 900;
-    font-size: 12px;
-    border: 1px solid #bfdbfe;
-}
-
-.code-muted {
-    color: #475569;
-    font-weight: 700;
-}
-
-.stage-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 7px 11px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 900;
-    white-space: nowrap;
-}
-
-.stage-proofextract {
-    background: #eef2ff;
-    color: #4338ca;
-}
-
-.stage-finalextract {
-    background: #ecfeff;
-    color: #0e7490;
-}
-
-.stage-memoextract {
-    background: #fdf4ff;
-    color: #a21caf;
-}
-
-.stage-finalpo {
-    background: #fff7ed;
-    color: #c2410c;
-}
-
-.stage-shipping {
-    background: #f0fdf4;
-    color: #15803d;
-}
-
-.stage-dirxion {
-    background: #fef2f2;
-    color: #b91c1c;
-}
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 7px 11px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.status-done {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status-pending {
-    background: #fef9c3;
-    color: #a16207;
-}
-
-.row-completed {
-    background: #f8fafc;
-    opacity: 0.78;
-}
-
-.empty-state {
-    min-height: 280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #64748b;
-    text-align: center;
-    padding: 36px 20px;
-}
-
-    .empty-state h3 {
-        margin: 14px 0 6px;
-        color: #1e293b;
-        font-size: 22px;
-        font-weight: 900;
-    }
-
-    .empty-state p {
+    .finish-assignments-page .finish-hero h1 {
         margin: 0;
-        max-width: 520px;
+        font-size: clamp(28px, 3vw, 42px);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+    }
+
+    .finish-assignments-page .finish-hero p {
+        max-width: 720px;
+        margin: 10px 0 0;
+        color: #d1d5db;
+        font-size: 15px;
         line-height: 1.6;
     }
 
-.empty-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ecfdf5;
-    color: #059669;
-    font-size: 30px;
-    font-weight: 900;
-}
+    .finish-assignments-page .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(130px, 1fr));
+        gap: 14px;
+        min-width: 430px;
+    }
 
-.loader {
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    border: 4px solid #dbeafe;
-    border-top-color: #2563eb;
-    animation: spin 0.85s linear infinite;
-}
+    .finish-assignments-page .hero-stat {
+        padding: 18px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
 
-@keyframes spin {
+        .finish-assignments-page .hero-stat span {
+            display: block;
+            margin-bottom: 10px;
+            color: #d1d5db;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .finish-assignments-page .hero-stat strong {
+            display: block;
+            color: #ffffff;
+            font-size: 30px;
+            font-weight: 900;
+        }
+
+    .finish-assignments-page .finish-alert {
+        margin-bottom: 18px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        border: 1px solid transparent;
+        font-weight: 700;
+    }
+
+    .finish-assignments-page .finish-alert-success {
+        background: #ecfdf5;
+        color: #047857;
+        border-color: #a7f3d0;
+    }
+
+    .finish-assignments-page .finish-alert-error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .finish-assignments-page .finish-panel {
+        max-width: 100%;
+        padding: 22px;
+        border-radius: 26px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+    }
+
+    .finish-assignments-page .finish-toolbar {
+        display: grid;
+        grid-template-columns: 280px minmax(260px, 1fr) 220px;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .finish-assignments-page .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+        .finish-assignments-page .filter-group label {
+            color: #475569;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+    .finish-assignments-page .finish-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 14px;
+        border: 1px solid #d7dce5;
+        border-radius: 14px;
+        outline: none;
+        background: #ffffff;
+        color: #111827;
+        font-size: 14px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+        .finish-assignments-page .finish-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        .finish-assignments-page .finish-input:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .finish-assignments-page .finish-input::placeholder {
+            color: #94a3b8;
+            opacity: 1;
+        }
+
+    .finish-assignments-page .finish-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .finish-assignments-page .btn-soft,
+    .finish-assignments-page .btn-primary {
+        min-height: 42px;
+        padding: 0 18px;
+        border: none;
+        border-radius: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+    }
+
+    .finish-assignments-page .btn-soft {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+    }
+
+        .finish-assignments-page .btn-soft:hover {
+            background: #e2e8f0;
+        }
+
+    .finish-assignments-page .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
+    }
+
+        .finish-assignments-page .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.32);
+        }
+
+        .finish-assignments-page .btn-primary:disabled,
+        .finish-assignments-page button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none;
+        }
+
+    .finish-assignments-page .finish-table-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        border-radius: 18px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+    }
+
+    .finish-assignments-page .finish-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+        .finish-assignments-page .finish-table thead {
+            background: #0f172a;
+        }
+
+        .finish-assignments-page .finish-table th {
+            padding: 14px 16px;
+            color: #ffffff;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .finish-assignments-page .finish-table td {
+            padding: 15px 16px;
+            border-bottom: 1px solid #edf0f5;
+            color: #1f2937;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        .finish-assignments-page .finish-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .finish-assignments-page .finish-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .finish-assignments-page .finish-table th,
+        .finish-assignments-page .finish-table td,
+        .finish-assignments-page .employee-cell,
+        .finish-assignments-page .book-cell {
+            overflow-wrap: anywhere;
+        }
+
+    .finish-assignments-page .check-col {
+        width: 52px;
+        text-align: center !important;
+    }
+
+        .finish-assignments-page .check-col input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+
+    .finish-assignments-page .employee-cell,
+    .finish-assignments-page .book-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+        .finish-assignments-page .employee-cell strong,
+        .finish-assignments-page .book-cell strong {
+            color: #111827;
+            font-weight: 800;
+        }
+
+        .finish-assignments-page .employee-cell span,
+        .finish-assignments-page .book-cell span {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+    .finish-assignments-page .code-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .finish-assignments-page .code-muted {
+        color: #475569;
+        font-weight: 700;
+    }
+
+    .finish-assignments-page .stage-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .finish-assignments-page .stage-proofextract {
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    .finish-assignments-page .stage-finalextract {
+        background: #ecfeff;
+        color: #0e7490;
+    }
+
+    .finish-assignments-page .stage-memoextract {
+        background: #fdf4ff;
+        color: #a21caf;
+    }
+
+    .finish-assignments-page .stage-finalpo {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .finish-assignments-page .stage-shipping {
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    .finish-assignments-page .stage-dirxion {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .finish-assignments-page .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .finish-assignments-page .status-done {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .finish-assignments-page .status-pending {
+        background: #fef9c3;
+        color: #a16207;
+    }
+
+    .finish-assignments-page .row-completed {
+        background: #f8fafc;
+        opacity: 0.78;
+    }
+
+    .finish-assignments-page .empty-state {
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 36px 20px;
+        color: #64748b;
+        text-align: center;
+    }
+
+        .finish-assignments-page .empty-state h3 {
+            margin: 14px 0 6px;
+            color: #1e293b;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .finish-assignments-page .empty-state p {
+            max-width: 520px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+    .finish-assignments-page .empty-icon {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 22px;
+        background: #ecfdf5;
+        color: #059669;
+        font-size: 30px;
+        font-weight: 900;
+    }
+
+    .finish-assignments-page .loader {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        border: 4px solid #dbeafe;
+        border-top-color: #2563eb;
+        animation: finish-spin 0.85s linear infinite;
+    }
+
+@keyframes finish-spin {
     to {
         transform: rotate(360deg);
-    }
-}
-
-@media (max-width: 1180px) {
-    .finish-hero {
-        flex-direction: column;
-    }
-
-    .hero-stats {
-        min-width: 0;
-        width: 100%;
-    }
-
-    .finish-toolbar {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .stage-filter {
-        grid-column: 1 / -1;
-    }
-}
-
-@media (max-width: 760px) {
-    .finish-assignments-page {
-        padding: 14px;
-    }
-
-    .finish-hero {
-        padding: 22px;
-        border-radius: 22px;
-    }
-
-    .hero-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .finish-toolbar {
-        grid-template-columns: 1fr;
-    }
-
-    .stage-filter {
-        grid-column: auto;
-    }
-
-    .finish-actions {
-        justify-content: stretch;
-    }
-
-    .btn-soft,
-    .btn-primary {
-        width: 100%;
     }
 }
 
@@ -471,359 +445,355 @@ html[data-theme="dark"] .finish-assignments-page {
     color: #e5e7eb;
 }
 
-html[data-theme="dark"] .finish-hero {
-    background: linear-gradient(135deg, #020617, #0f172a);
-    border: 1px solid rgba(255,255,255,.08);
-    box-shadow: 0 18px 45px rgba(0,0,0,.35);
-}
-
-html[data-theme="dark"] .hero-kicker,
-html[data-theme="dark"] .hero-stat {
-    background: rgba(15,23,42,.88);
-    border-color: rgba(148,163,184,.18);
-}
-
-html[data-theme="dark"] .finish-panel,
-html[data-theme="dark"] .empty-state {
-    background: #111827;
-    border-color: rgba(255,255,255,.10);
-    box-shadow: 0 18px 40px rgba(0,0,0,.28);
-}
-
-    html[data-theme="dark"] .filter-group label,
-    html[data-theme="dark"] .finish-hero p,
-    html[data-theme="dark"] .hero-stat span,
-    html[data-theme="dark"] .employee-cell span,
-    html[data-theme="dark"] .book-cell span,
-    html[data-theme="dark"] .empty-state,
-    html[data-theme="dark"] .empty-state p {
-        color: #94a3b8;
+    html[data-theme="dark"] .finish-assignments-page .finish-hero {
+        background: linear-gradient(135deg, #020617, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
     }
 
-        html[data-theme="dark"] .employee-cell strong,
-        html[data-theme="dark"] .book-cell strong,
-        html[data-theme="dark"] .empty-state h3 {
+    html[data-theme="dark"] .finish-assignments-page .hero-kicker,
+    html[data-theme="dark"] .finish-assignments-page .hero-stat {
+        background: rgba(15, 23, 42, 0.88);
+        border-color: rgba(148, 163, 184, 0.18);
+    }
+
+    html[data-theme="dark"] .finish-assignments-page .finish-panel,
+    html[data-theme="dark"] .finish-assignments-page .empty-state {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+        html[data-theme="dark"] .finish-assignments-page .filter-group label,
+        html[data-theme="dark"] .finish-assignments-page .finish-hero p,
+        html[data-theme="dark"] .finish-assignments-page .hero-stat span,
+        html[data-theme="dark"] .finish-assignments-page .employee-cell span,
+        html[data-theme="dark"] .finish-assignments-page .book-cell span,
+        html[data-theme="dark"] .finish-assignments-page .empty-state,
+        html[data-theme="dark"] .finish-assignments-page .empty-state p {
+            color: #94a3b8;
+        }
+
+            html[data-theme="dark"] .finish-assignments-page .employee-cell strong,
+            html[data-theme="dark"] .finish-assignments-page .book-cell strong,
+            html[data-theme="dark"] .finish-assignments-page .empty-state h3 {
+                color: #f8fafc;
+            }
+
+    html[data-theme="dark"] .finish-assignments-page .finish-input {
+        background: #0f172a;
+        color: #f8fafc;
+        border-color: rgba(255, 255, 255, 0.14);
+    }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-input::placeholder {
+            color: #cbd5e1;
+            opacity: 1;
+        }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-input:disabled {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-input option {
+            background: #0f172a;
             color: #f8fafc;
         }
 
-html[data-theme="dark"] .finish-input {
-    background: #0f172a;
-    color: #f8fafc;
-    border-color: rgba(255,255,255,.14);
-}
-
-    html[data-theme="dark"] .finish-input:disabled {
+    html[data-theme="dark"] .finish-assignments-page .btn-soft {
         background: #1e293b;
-        color: #94a3b8;
+        color: #e5e7eb;
+        border-color: rgba(255, 255, 255, 0.12);
     }
 
-html[data-theme="dark"] .btn-soft {
-    background: #1e293b;
-    color: #e5e7eb;
-    border-color: rgba(255,255,255,.12);
-}
+        html[data-theme="dark"] .finish-assignments-page .btn-soft:hover {
+            background: #334155;
+        }
 
-    html[data-theme="dark"] .btn-soft:hover {
-        background: #334155;
+    html[data-theme="dark"] .finish-assignments-page .finish-table-wrapper,
+    html[data-theme="dark"] .finish-assignments-page .finish-table {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
     }
 
-html[data-theme="dark"] .finish-table-wrapper,
-html[data-theme="dark"] .finish-table {
-    background: #111827;
-    border-color: rgba(255,255,255,.10);
-}
+        html[data-theme="dark"] .finish-assignments-page .finish-table thead {
+            background: #020617;
+        }
 
-    html[data-theme="dark"] .finish-table thead {
-        background: #020617;
+        html[data-theme="dark"] .finish-assignments-page .finish-table td {
+            color: #e2e8f0;
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+    html[data-theme="dark"] .finish-assignments-page .row-completed {
+        background: rgba(255, 255, 255, 0.04);
     }
 
-    html[data-theme="dark"] .finish-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
+    html[data-theme="dark"] .finish-assignments-page .code-muted {
+        color: #cbd5e1;
     }
 
-    html[data-theme="dark"] .finish-table tbody tr:hover {
-        background: rgba(255,255,255,.04);
+    html[data-theme="dark"] .finish-assignments-page .empty-icon {
+        background: rgba(16, 185, 129, 0.14);
+        color: #34d399;
     }
 
-html[data-theme="dark"] .row-completed {
-    background: rgba(255,255,255,.04);
-}
-
-html[data-theme="dark"] .code-muted {
-    color: #cbd5e1;
-}
-
-html[data-theme="dark"] .empty-icon {
-    background: rgba(16,185,129,.14);
-    color: #34d399;
-}
-
-html[data-theme="dark"] .loader {
-    border-color: rgba(96,165,250,.22);
-    border-top-color: #60a5fa;
-}
+    html[data-theme="dark"] .finish-assignments-page .loader {
+        border-color: rgba(96, 165, 250, 0.22);
+        border-top-color: #60a5fa;
+    }
 
 html[data-theme="liquid glass"] .finish-assignments-page {
     background: transparent;
     color: #111827;
 }
 
-html[data-theme="liquid glass"] .finish-hero,
-html[data-theme="liquid glass"] .finish-panel,
-html[data-theme="liquid glass"] .hero-stat,
-html[data-theme="liquid glass"] .empty-state {
-    background: rgba(255,255,255,.34);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255,255,255,.62);
-    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
-}
-
-html[data-theme="liquid glass"] .finish-hero,
-html[data-theme="liquid glass"] .finish-panel {
-    position: relative;
-    overflow: hidden;
-}
-
-    html[data-theme="liquid glass"] .finish-hero::before,
-    html[data-theme="liquid glass"] .finish-panel::before {
-        content: "";
-        position: absolute;
-        inset: 1px;
-        border-radius: inherit;
-        pointer-events: none;
-        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
-        opacity: .82;
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-hero,
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-panel,
+    html[data-theme="liquid glass"] .finish-assignments-page .hero-stat,
+    html[data-theme="liquid glass"] .finish-assignments-page .empty-state {
+        background: rgba(255, 255, 255, 0.34);
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.86);
     }
 
-    html[data-theme="liquid glass"] .finish-hero > *,
-    html[data-theme="liquid glass"] .finish-panel > * {
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-hero,
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-panel {
         position: relative;
-        z-index: 1;
+        overflow: hidden;
     }
 
-    html[data-theme="liquid glass"] .finish-hero h1,
-    html[data-theme="liquid glass"] .hero-stat strong,
-    html[data-theme="liquid glass"] .employee-cell strong,
-    html[data-theme="liquid glass"] .book-cell strong,
-    html[data-theme="liquid glass"] .empty-state h3 {
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-hero::before,
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-panel::before {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.75), transparent 30%);
+            opacity: 0.82;
+        }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-hero > *,
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-hero h1,
+        html[data-theme="liquid glass"] .finish-assignments-page .hero-stat strong,
+        html[data-theme="liquid glass"] .finish-assignments-page .employee-cell strong,
+        html[data-theme="liquid glass"] .finish-assignments-page .book-cell strong,
+        html[data-theme="liquid glass"] .finish-assignments-page .empty-state h3 {
+            color: #111827;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
+        }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-hero p,
+        html[data-theme="liquid glass"] .finish-assignments-page .hero-stat span,
+        html[data-theme="liquid glass"] .finish-assignments-page .employee-cell span,
+        html[data-theme="liquid glass"] .finish-assignments-page .book-cell span,
+        html[data-theme="liquid glass"] .finish-assignments-page .empty-state,
+        html[data-theme="liquid glass"] .finish-assignments-page .empty-state p,
+        html[data-theme="liquid glass"] .finish-assignments-page .filter-group label {
+            color: #475569;
+        }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .hero-kicker {
+        background: rgba(255, 255, 255, 0.38);
+        color: #1d4ed8;
+        border: 1px solid rgba(255, 255, 255, 0.58);
+        backdrop-filter: blur(18px) saturate(170%);
+        -webkit-backdrop-filter: blur(18px) saturate(170%);
+    }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-input {
+        background: rgba(255, 255, 255, 0.45);
         color: #111827;
-        text-shadow: 0 1px 1px rgba(255,255,255,.85);
+        border-color: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(20px) saturate(170%);
+        -webkit-backdrop-filter: blur(20px) saturate(170%);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.80);
     }
 
-    html[data-theme="liquid glass"] .finish-hero p,
-    html[data-theme="liquid glass"] .hero-stat span,
-    html[data-theme="liquid glass"] .employee-cell span,
-    html[data-theme="liquid glass"] .book-cell span,
-    html[data-theme="liquid glass"] .empty-state,
-    html[data-theme="liquid glass"] .empty-state p,
-    html[data-theme="liquid glass"] .filter-group label {
-        color: #475569;
-    }
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-input:disabled {
+            background: rgba(255, 255, 255, 0.32);
+            color: #64748b;
+        }
 
-html[data-theme="liquid glass"] .hero-kicker {
-    background: rgba(255,255,255,.38);
-    color: #1d4ed8;
-    border: 1px solid rgba(255,255,255,.58);
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-html[data-theme="liquid glass"] .finish-input {
-    background: rgba(255,255,255,.45);
-    backdrop-filter: blur(20px) saturate(170%);
-    -webkit-backdrop-filter: blur(20px) saturate(170%);
-    border-color: rgba(255,255,255,.65);
-    color: #111827;
-    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
-}
-
-    html[data-theme="liquid glass"] .finish-input:disabled {
-        background: rgba(255,255,255,.32);
-        color: #64748b;
-    }
-
-html[data-theme="liquid glass"] .btn-soft {
-    background: rgba(255,255,255,.42);
-    color: #334155;
-    border-color: rgba(255,255,255,.62);
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-html[data-theme="liquid glass"] .finish-table-wrapper,
-html[data-theme="liquid glass"] .finish-table {
-    background: rgba(255,255,255,.28);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border-color: rgba(255,255,255,.55);
-}
-
-    html[data-theme="liquid glass"] .finish-table thead {
-        background: rgba(17,24,39,.88);
-    }
-
-    html[data-theme="liquid glass"] .finish-table td {
+    html[data-theme="liquid glass"] .finish-assignments-page .btn-soft {
+        background: rgba(255, 255, 255, 0.42);
         color: #334155;
-        border-bottom-color: rgba(255,255,255,.38);
+        border-color: rgba(255, 255, 255, 0.62);
+        backdrop-filter: blur(18px) saturate(170%);
+        -webkit-backdrop-filter: blur(18px) saturate(170%);
     }
 
-    html[data-theme="liquid glass"] .finish-table tbody tr:hover {
-        background: rgba(255,255,255,.22);
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-table-wrapper,
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-table {
+        background: rgba(255, 255, 255, 0.28);
+        border-color: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
     }
 
-html[data-theme="liquid glass"] .row-completed {
-    background: rgba(255,255,255,.20);
-}
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table thead {
+            background: rgba(17, 24, 39, 0.88);
+        }
 
-html[data-theme="liquid glass"] .empty-icon {
-    background: rgba(16,185,129,.16);
-    color: #059669;
-    border: 1px solid rgba(16,185,129,.20);
-}
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table td {
+            color: #334155;
+            border-bottom-color: rgba(255, 255, 255, 0.38);
+        }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .row-completed {
+        background: rgba(255, 255, 255, 0.20);
+    }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .empty-icon {
+        background: rgba(16, 185, 129, 0.16);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.20);
+    }
 
 html[data-theme="dark glass"] .finish-assignments-page {
     background: transparent;
     color: #e5e7eb;
 }
 
-html[data-theme="dark glass"] .finish-hero,
-html[data-theme="dark glass"] .finish-panel,
-html[data-theme="dark glass"] .hero-stat,
-html[data-theme="dark glass"] .empty-state {
-    background: rgba(15,23,42,.55);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
-}
-
-html[data-theme="dark glass"] .finish-hero {
-    position: relative;
-    overflow: hidden;
-}
-
-    html[data-theme="dark glass"] .finish-hero::before,
-    html[data-theme="dark glass"] .finish-panel::before {
-        content: "";
-        position: absolute;
-        inset: 1px;
-        border-radius: inherit;
-        pointer-events: none;
-        background: linear-gradient(135deg, rgba(255,255,255,.10), transparent 42%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.12), transparent 30%);
-        opacity: .85;
+    html[data-theme="dark glass"] .finish-assignments-page .finish-hero,
+    html[data-theme="dark glass"] .finish-assignments-page .finish-panel,
+    html[data-theme="dark glass"] .finish-assignments-page .hero-stat,
+    html[data-theme="dark glass"] .finish-assignments-page .empty-state {
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
     }
 
-    html[data-theme="dark glass"] .finish-hero > *,
-    html[data-theme="dark glass"] .finish-panel > * {
+    html[data-theme="dark glass"] .finish-assignments-page .finish-hero,
+    html[data-theme="dark glass"] .finish-assignments-page .finish-panel {
         position: relative;
-        z-index: 1;
+        overflow: hidden;
     }
 
-    html[data-theme="dark glass"] .finish-hero h1,
-    html[data-theme="dark glass"] .hero-stat strong,
-    html[data-theme="dark glass"] .employee-cell strong,
-    html[data-theme="dark glass"] .book-cell strong,
-    html[data-theme="dark glass"] .empty-state h3 {
+        html[data-theme="dark glass"] .finish-assignments-page .finish-hero::before,
+        html[data-theme="dark glass"] .finish-assignments-page .finish-panel::before {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), transparent 42%), radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.12), transparent 30%);
+            opacity: 0.85;
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-hero > *,
+        html[data-theme="dark glass"] .finish-assignments-page .finish-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-hero h1,
+        html[data-theme="dark glass"] .finish-assignments-page .hero-stat strong,
+        html[data-theme="dark glass"] .finish-assignments-page .employee-cell strong,
+        html[data-theme="dark glass"] .finish-assignments-page .book-cell strong,
+        html[data-theme="dark glass"] .finish-assignments-page .empty-state h3 {
+            color: #f8fafc;
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-hero p,
+        html[data-theme="dark glass"] .finish-assignments-page .hero-stat span,
+        html[data-theme="dark glass"] .finish-assignments-page .employee-cell span,
+        html[data-theme="dark glass"] .finish-assignments-page .book-cell span,
+        html[data-theme="dark glass"] .finish-assignments-page .empty-state,
+        html[data-theme="dark glass"] .finish-assignments-page .empty-state p,
+        html[data-theme="dark glass"] .finish-assignments-page .filter-group label {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .hero-kicker {
+        background: rgba(255, 255, 255, 0.08);
+        color: #bfdbfe;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    html[data-theme="dark glass"] .finish-assignments-page .finish-input {
+        background: rgba(15, 23, 42, 0.58);
         color: #f8fafc;
+        border-color: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
     }
 
-    html[data-theme="dark glass"] .finish-hero p,
-    html[data-theme="dark glass"] .hero-stat span,
-    html[data-theme="dark glass"] .employee-cell span,
-    html[data-theme="dark glass"] .book-cell span,
-    html[data-theme="dark glass"] .empty-state,
-    html[data-theme="dark glass"] .empty-state p,
-    html[data-theme="dark glass"] .filter-group label {
+        html[data-theme="dark glass"] .finish-assignments-page .finish-input::placeholder {
+            color: #cbd5e1;
+            opacity: 1;
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-input:disabled {
+            background: rgba(30, 41, 59, 0.62);
+            color: #94a3b8;
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-input option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .btn-soft {
+        background: rgba(15, 23, 42, 0.58);
+        color: #e5e7eb;
+        border-color: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    html[data-theme="dark glass"] .finish-assignments-page .finish-table-wrapper,
+    html[data-theme="dark glass"] .finish-assignments-page .finish-table {
+        background: rgba(15, 23, 42, 0.50);
+        border-color: rgba(255, 255, 255, 0.10);
+    }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table thead {
+            background: rgba(2, 6, 23, 0.78);
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table td {
+            color: #e2e8f0;
+            border-bottom-color: rgba(255, 255, 255, 0.07);
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .row-completed {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    html[data-theme="dark glass"] .finish-assignments-page .code-muted {
         color: #cbd5e1;
     }
 
-html[data-theme="dark glass"] .hero-kicker {
-    background: rgba(255,255,255,.08);
-    color: #bfdbfe;
-    border: 1px solid rgba(255,255,255,.10);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
-
-html[data-theme="dark glass"] .finish-input {
-    background: rgba(15,23,42,.58);
-    color: #f8fafc;
-    border-color: rgba(255,255,255,.12);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
-
-    html[data-theme="dark glass"] .finish-input:disabled {
-        background: rgba(30,41,59,.62);
-        color: #94a3b8;
-    }
-
-html[data-theme="dark glass"] .btn-soft {
-    background: rgba(15,23,42,.58);
-    color: #e5e7eb;
-    border-color: rgba(255,255,255,.12);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
-
-html[data-theme="dark glass"] .finish-table-wrapper,
-html[data-theme="dark glass"] .finish-table {
-    background: rgba(15,23,42,.50);
-    border-color: rgba(255,255,255,.10);
-}
-
-    html[data-theme="dark glass"] .finish-table thead {
-        background: rgba(2,6,23,.78);
-    }
-
-    html[data-theme="dark glass"] .finish-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.07);
-    }
-
-    html[data-theme="dark glass"] .finish-table tbody tr:hover {
-        background: rgba(255,255,255,.05);
-    }
-
-html[data-theme="dark glass"] .row-completed {
-    background: rgba(255,255,255,.04);
-}
-
-html[data-theme="dark glass"] .code-muted {
-    color: #cbd5e1;
-}
-
-html[data-theme="dark glass"] .empty-icon {
-    background: rgba(16,185,129,.14);
-    color: #34d399;
-    border: 1px solid rgba(16,185,129,.18);
-}
-
-.finish-assignments-page,
-.finish-assignments-page * {
-    box-sizing: border-box;
-}
-
-.finish-assignments-page {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.finish-hero,
-.finish-panel,
-.finish-table-wrapper,
-.finish-table {
-    max-width: 100%;
-}
-
-    .finish-table th,
-    .finish-table td,
-    .employee-cell,
-    .book-cell {
-        overflow-wrap: anywhere;
+    html[data-theme="dark glass"] .finish-assignments-page .empty-icon {
+        background: rgba(16, 185, 129, 0.14);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.18);
     }
 
 @media (max-width: 1280px) {
@@ -833,8 +803,8 @@ html[data-theme="dark glass"] .empty-icon {
     }
 
     .finish-assignments-page .hero-stats {
-        min-width: 0;
         width: 100%;
+        min-width: 0;
         grid-template-columns: repeat(3, minmax(140px, 1fr));
     }
 
@@ -894,10 +864,6 @@ html[data-theme="dark glass"] .empty-icon {
             grid-column: auto;
         }
 
-        .finish-assignments-page .finish-input {
-            height: 44px;
-        }
-
         .finish-assignments-page .finish-actions {
             justify-content: flex-start;
         }
@@ -909,15 +875,15 @@ html[data-theme="dark glass"] .empty-icon {
     }
 
         .finish-assignments-page .finish-hero {
+            gap: 18px;
             padding: 18px;
             border-radius: 18px;
-            gap: 18px;
         }
 
         .finish-assignments-page .hero-kicker {
-            font-size: 10.5px;
-            padding: 6px 10px;
             margin-bottom: 10px;
+            padding: 6px 10px;
+            font-size: 10.5px;
         }
 
         .finish-assignments-page .finish-hero h1 {
@@ -943,8 +909,8 @@ html[data-theme="dark glass"] .empty-icon {
         }
 
             .finish-assignments-page .hero-stat span {
-                font-size: 11px;
                 margin-bottom: 8px;
+                font-size: 11px;
             }
 
             .finish-assignments-page .hero-stat strong {
@@ -1003,7 +969,7 @@ html[data-theme="dark glass"] .empty-icon {
             width: 100%;
             min-width: 0 !important;
             border-collapse: separate;
-            border-spacing: 0 14px;
+            border-spacing: 0 !important;
             background: transparent;
         }
 
@@ -1015,39 +981,50 @@ html[data-theme="dark glass"] .empty-icon {
             .finish-assignments-page .finish-table tbody,
             .finish-assignments-page .finish-table tr,
             .finish-assignments-page .finish-table td {
-                display: block;
-                width: 100%;
+                display: block !important;
+                width: 100% !important;
             }
 
-                .finish-assignments-page .finish-table tbody tr {
-                    background: #ffffff;
-                    border: 1px solid #e5e7eb;
-                    border-radius: 18px;
-                    padding: 12px;
-                    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-                    overflow: hidden;
+                .finish-assignments-page .finish-table tbody {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 18px !important;
+                    width: 100% !important;
                 }
 
-                    .finish-assignments-page .finish-table tbody tr:hover {
+                    .finish-assignments-page .finish-table tbody tr {
+                        display: block !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 12px;
+                        overflow: hidden;
+                        border-radius: 18px !important;
                         background: #ffffff;
+                        border: 1px solid #e5e7eb;
+                        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
                     }
 
-                    .finish-assignments-page .finish-table tbody tr.row-completed {
-                        background: #f8fafc;
-                        opacity: 1;
-                    }
+                        .finish-assignments-page .finish-table tbody tr:hover {
+                            background: #ffffff;
+                        }
+
+                        .finish-assignments-page .finish-table tbody tr.row-completed {
+                            background: #f8fafc;
+                            opacity: 1;
+                        }
 
                 .finish-assignments-page .finish-table td {
                     position: relative;
+                    display: flex !important;
+                    align-items: center;
+                    justify-content: flex-end;
                     min-height: 44px;
                     padding: 12px 10px 12px 44% !important;
                     border-bottom: 1px solid #e5e7eb;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-end;
+                    color: #1f2937;
+                    font-size: 13px;
                     text-align: right;
                     white-space: normal;
-                    font-size: 13px;
                 }
 
                     .finish-assignments-page .finish-table td:last-child {
@@ -1058,8 +1035,8 @@ html[data-theme="dark glass"] .empty-icon {
                         position: absolute;
                         left: 10px;
                         top: 50%;
-                        transform: translateY(-50%);
                         width: 38%;
+                        transform: translateY(-50%);
                         color: #64748b;
                         font-size: 11px;
                         font-weight: 900;
@@ -1083,21 +1060,29 @@ html[data-theme="dark glass"] .empty-icon {
                     }
 
                     .finish-assignments-page .finish-table td:nth-child(4)::before {
-                        content: "Code";
+                        content: "KGEN";
                     }
 
                     .finish-assignments-page .finish-table td:nth-child(5)::before {
-                        content: "Stage";
+                        content: "LSA";
                     }
 
                     .finish-assignments-page .finish-table td:nth-child(6)::before {
+                        content: "Stage";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(7)::before {
+                        content: "Date";
+                    }
+
+                    .finish-assignments-page .finish-table td:nth-child(8)::before {
                         content: "Status";
                     }
 
                 .finish-assignments-page .finish-table .check-col {
                     width: 100% !important;
-                    text-align: right !important;
                     justify-content: flex-end;
+                    text-align: right !important;
                 }
 
                     .finish-assignments-page .finish-table .check-col input[type="checkbox"] {
@@ -1122,11 +1107,12 @@ html[data-theme="dark glass"] .empty-icon {
 
         .finish-assignments-page .code-pill,
         .finish-assignments-page .stage-pill,
-        .finish-assignments-page .status-badge {
-            white-space: normal;
+        .finish-assignments-page .status-badge,
+        .finish-assignments-page .code-muted {
+            max-width: 100%;
             text-align: center;
             line-height: 1.2;
-            max-width: 100%;
+            white-space: normal;
         }
 
         .finish-assignments-page .empty-state {
@@ -1149,6 +1135,79 @@ html[data-theme="dark glass"] .empty-icon {
             border-radius: 18px;
             font-size: 25px;
         }
+
+    html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
+    }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: #111827;
+        }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr.row-completed {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+    html[data-theme="dark"] .finish-assignments-page .finish-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+        html[data-theme="dark"] .finish-assignments-page .finish-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr {
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(15, 23, 42, 0.92) !important;
+        }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr.row-completed {
+            background: rgba(255, 255, 255, 0.04) !important;
+        }
+
+    html[data-theme="dark glass"] .finish-assignments-page .finish-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+        html[data-theme="dark glass"] .finish-assignments-page .finish-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr {
+        background: rgba(255, 255, 255, 0.42);
+        border-color: rgba(255, 255, 255, 0.62);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+    }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.50);
+        }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr.row-completed {
+            background: rgba(255, 255, 255, 0.30);
+        }
+
+    html[data-theme="liquid glass"] .finish-assignments-page .finish-table td {
+        color: #334155;
+        border-bottom-color: rgba(255, 255, 255, 0.42);
+    }
+
+        html[data-theme="liquid glass"] .finish-assignments-page .finish-table td::before {
+            color: #475569;
+        }
 }
 
 @media (max-width: 520px) {
@@ -1158,8 +1217,8 @@ html[data-theme="dark glass"] .empty-icon {
 
         .finish-assignments-page .finish-hero,
         .finish-assignments-page .finish-panel {
-            border-radius: 16px;
             padding: 16px;
+            border-radius: 16px;
         }
 
             .finish-assignments-page .finish-hero h1 {
@@ -1187,32 +1246,32 @@ html[data-theme="dark glass"] .empty-icon {
             font-size: 12.5px;
         }
 
-        .finish-assignments-page .finish-table {
-            border-spacing: 0 12px;
+        .finish-assignments-page .finish-table tbody {
+            gap: 16px !important;
         }
 
             .finish-assignments-page .finish-table tbody tr {
-                border-radius: 16px;
                 padding: 10px;
+                border-radius: 16px !important;
             }
 
-            .finish-assignments-page .finish-table td {
-                padding: 11px 8px 11px 42% !important;
-                min-height: 42px;
-                font-size: 12.5px;
-            }
+        .finish-assignments-page .finish-table td {
+            min-height: 42px;
+            padding: 11px 8px 11px 42% !important;
+            font-size: 12.5px;
+        }
 
-                .finish-assignments-page .finish-table td::before {
-                    left: 8px;
-                    width: 36%;
-                    font-size: 10px;
-                }
+            .finish-assignments-page .finish-table td::before {
+                left: 8px;
+                width: 36%;
+                font-size: 10px;
+            }
 
         .finish-assignments-page .code-pill,
         .finish-assignments-page .stage-pill,
         .finish-assignments-page .status-badge {
-            font-size: 10.5px;
             padding: 7px 9px;
+            font-size: 10.5px;
         }
 
         .finish-assignments-page .check-col input[type="checkbox"] {
@@ -1243,127 +1302,4 @@ html[data-theme="dark glass"] .empty-icon {
                 width: 34%;
                 font-size: 9.5px;
             }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr {
-        background: #111827;
-        border-color: rgba(255,255,255,.10);
-        box-shadow: 0 12px 30px rgba(0,0,0,.30);
-    }
-
-        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr:hover {
-            background: #111827;
-        }
-
-        html[data-theme="dark"] .finish-assignments-page .finish-table tbody tr.row-completed {
-            background: rgba(255,255,255,.04);
-        }
-
-    html[data-theme="dark"] .finish-assignments-page .finish-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
-    }
-
-        html[data-theme="dark"] .finish-assignments-page .finish-table td::before {
-            color: #94a3b8;
-        }
-
-    html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr {
-        background: rgba(15,23,42,.62);
-        border-color: rgba(255,255,255,.10);
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
-        box-shadow: 0 14px 34px rgba(0,0,0,.28);
-    }
-
-        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr:hover {
-            background: rgba(15,23,42,.68);
-        }
-
-        html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr.row-completed {
-            background: rgba(255,255,255,.04);
-        }
-
-    html[data-theme="dark glass"] .finish-assignments-page .finish-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
-    }
-
-        html[data-theme="dark glass"] .finish-assignments-page .finish-table td::before {
-            color: #cbd5e1;
-        }
-
-    html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr {
-        background: rgba(255,255,255,.42);
-        border-color: rgba(255,255,255,.62);
-        backdrop-filter: blur(22px) saturate(170%);
-        -webkit-backdrop-filter: blur(22px) saturate(170%);
-        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
-    }
-
-        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr:hover {
-            background: rgba(255,255,255,.50);
-        }
-
-        html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr.row-completed {
-            background: rgba(255,255,255,.30);
-        }
-
-    html[data-theme="liquid glass"] .finish-assignments-page .finish-table td {
-        color: #334155;
-        border-bottom-color: rgba(255,255,255,.42);
-    }
-
-        html[data-theme="liquid glass"] .finish-assignments-page .finish-table td::before {
-            color: #475569;
-        }
-}
-
-@media (max-width: 768px) {
-    .finish-assignments-page .finish-table tbody {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-
-        .finish-assignments-page .finish-table tbody tr {
-            display: block !important;
-            width: 100% !important;
-            margin: 0 !important;
-            border-radius: 18px !important;
-        }
-
-            .finish-assignments-page .finish-table tbody tr:not(:last-child) {
-                margin-bottom: 0 !important;
-            }
-
-    .finish-assignments-page .finish-table {
-        border-spacing: 0 !important;
-    }
-}
-
-@media (max-width: 520px) {
-    .finish-assignments-page .finish-table tbody {
-        gap: 16px !important;
-    }
-
-        .finish-assignments-page .finish-table tbody tr {
-            border-radius: 16px !important;
-        }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark glass"] .finish-assignments-page .finish-table tbody tr {
-        background: rgba(15, 23, 42, 0.88) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-
-    html[data-theme="liquid glass"] .finish-assignments-page .finish-table tbody tr {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
 }

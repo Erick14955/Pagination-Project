@@ -1,479 +1,521 @@
-﻿.evaluations-page {
-    padding: 24px;
-    background: #f5f7fb;
+﻿.evaluations-page,
+.evaluations-page * {
+    box-sizing: border-box;
+}
+
+.evaluations-page {
+    width: 100%;
+    max-width: 100%;
     min-height: 100vh;
+    padding: 24px;
+    overflow-x: hidden;
+    background: #f5f7fb;
+    color: #111827;
 }
 
     .evaluations-page .page-hero {
-        background: #111827;
-        border-radius: 24px;
-        padding: 28px 30px;
-        margin-bottom: 24px;
-        min-height: 150px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 24px;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        max-width: 100%;
+        min-height: 150px;
+        margin-bottom: 24px;
+        padding: 28px 30px;
+        border-radius: 24px;
+        background: #111827;
         border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
     }
 
-.search-assignment-box {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: center;
-}
+        .evaluations-page .page-hero h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
 
-    .search-assignment-box .form-control {
-        width: 100%;
+        .evaluations-page .page-hero p {
+            max-width: 780px;
+            margin: 10px 0 0;
+            color: #e5e7eb;
+            font-size: 17px;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+    .evaluations-page .hero-stats {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 14px;
     }
 
-    .search-assignment-box .btn-primary {
-        height: 44px;
-        min-width: 115px;
-        margin: 0;
-        align-self: center;
+    .evaluations-page .stat-card {
+        min-width: 160px;
+        padding: 20px 22px;
+        border-radius: 20px;
+        background: rgba(55, 65, 81, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
-.evaluations-page .assignment-card {
-    background: rgba(15,23,42,.55);
-    border-radius: 18px;
-    padding: 18px;
-    min-height: 128px;
-    border: 1px solid rgba(59, 130, 246, 0.22);
-    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-}
+        .evaluations-page .stat-card span {
+            display: block;
+            margin-bottom: 10px;
+            color: #d1d5db;
+            font-size: 14px;
+            font-weight: 800;
+        }
 
-    .evaluations-page .assignment-card span {
-        color: #cbd5e1;
+        .evaluations-page .stat-card strong {
+            display: block;
+            color: #ffffff;
+            font-size: 30px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+    .evaluations-page .form-card,
+    .evaluations-page .list-card,
+    .evaluations-page .evaluation-block,
+    .evaluations-page .summary-card {
+        max-width: 100%;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     }
 
-    .evaluations-page .assignment-card strong {
-        color: #f8fafc;
-        font-size: 25px;
-        font-weight: 900;
+    .evaluations-page .form-card,
+    .evaluations-page .list-card {
+        margin-bottom: 20px;
+        padding: 24px;
+        border-radius: 22px;
     }
 
-    .evaluations-page .assignment-card small {
-        color: #cbd5e1;
+    .evaluations-page .section-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 20px;
+        overflow-wrap: anywhere;
+    }
+
+        .evaluations-page .section-header h2 {
+            margin: 0;
+            color: #111827;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .evaluations-page .section-header p {
+            margin: 6px 0 0;
+            color: #6b7280;
+            line-height: 1.45;
+        }
+
+    .evaluations-page .table-header,
+    .evaluations-page .actions-section {
+        align-items: center;
+    }
+
+    .evaluations-page .header-actions {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .evaluations-page .btn-primary,
+    .evaluations-page .btn-light,
+    .evaluations-page .btn-danger,
+    .evaluations-page .btn-filter-clear {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 11px 18px;
+        border: none;
+        border-radius: 14px;
         font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
     }
 
-.evaluations-page .assignment-cards-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
-    gap: 14px !important;
-    margin-top: 22px !important;
-}
-
-.total-summary-card {
-    border: 1px solid rgba(37, 99, 235, 0.25);
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #eef2ff 100%);
-}
-
-    .total-summary-card span {
-        color: #1d4ed8;
-        font-weight: 800;
-    }
-
-    .total-summary-card strong {
-        color: #1e3a8a;
-    }
-
-.evaluations-page .page-hero h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 34px;
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: -0.5px;
-}
-
-.evaluations-page .page-hero p {
-    margin: 10px 0 0;
-    color: #e5e7eb;
-    font-size: 17px;
-    font-weight: 400;
-    line-height: 1.4;
-    max-width: 780px;
-}
-
-.evaluations-page .hero-stats {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 14px;
-    flex-wrap: wrap;
-}
-
-.evaluations-page .stat-card {
-    min-width: 160px;
-    background: rgba(55, 65, 81, 0.88);
-    border: 1px solid rgba(148, 163, 184, 0.32);
-    border-radius: 20px;
-    padding: 20px 22px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-    .evaluations-page .stat-card span {
-        display: block;
-        color: #d1d5db;
-        font-size: 14px;
-        font-weight: 800;
-        margin-bottom: 10px;
-    }
-
-    .evaluations-page .stat-card strong {
-        display: block;
+    .evaluations-page .btn-primary {
+        background: #2563eb;
         color: #ffffff;
-        font-size: 30px;
-        font-weight: 900;
-        line-height: 1;
     }
 
-.evaluations-page .form-card,
-.evaluations-page .list-card {
-    background: #ffffff;
-    border-radius: 22px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e5e7eb;
-}
-
-.evaluations-page .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-    .evaluations-page .section-header h2 {
-        margin: 0;
-        color: #111827;
-        font-size: 22px;
-        font-weight: 800;
+    .evaluations-page .btn-light {
+        background: #eef2ff;
+        color: #1e40af;
     }
 
-    .evaluations-page .section-header p {
-        margin: 6px 0 0;
-        color: #6b7280;
-    }
-
-.evaluations-page .header-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.evaluations-page .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(280px, 1fr));
-    gap: 18px;
-}
-
-.evaluations-page .form-group.full {
-    grid-column: 1 / -1;
-}
-
-.evaluations-page .form-group label {
-    display: block;
-    font-weight: 800;
-    color: #374151;
-    margin-bottom: 8px;
-    font-size: 14px;
-}
-
-.evaluations-page .form-control {
-    width: 100%;
-    border: 1px solid #d1d5db;
-    border-radius: 14px;
-    padding: 13px 15px;
-    background: #ffffff;
-    color: #111827;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-    .evaluations-page .form-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-    }
-
-.evaluations-page .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(160px, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.evaluations-page .summary-card {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e5e7eb;
-}
-
-    .evaluations-page .summary-card span {
-        display: block;
-        color: #6b7280;
-        font-size: 13px;
-        font-weight: 800;
-    }
-
-    .evaluations-page .summary-card strong {
-        display: block;
-        color: #111827;
-        font-size: 25px;
-        margin-top: 6px;
-    }
-
-    .evaluations-page .summary-card small {
-        display: block;
-        color: #6b7280;
-        margin-top: 5px;
-    }
-
-.evaluations-page .evaluation-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(300px, 1fr));
-    gap: 18px;
-    margin-bottom: 20px;
-}
-
-.evaluations-page .evaluation-block {
-    background: #ffffff;
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e5e7eb;
-}
-
-.evaluations-page .block-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 14px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 16px;
-}
-
-    .evaluations-page .block-header h2 {
-        margin: 0;
-        color: #111827;
-        font-size: 21px;
-        font-weight: 800;
-    }
-
-    .evaluations-page .block-header p {
-        margin: 5px 0 0;
-        color: #6b7280;
-        font-size: 13px;
-    }
-
-.evaluations-page .total-box {
-    min-width: 72px;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 10px 14px;
-    text-align: center;
-}
-
-    .evaluations-page .total-box span {
-        display: block;
-        color: #6b7280;
-        font-size: 12px;
-        font-weight: 800;
-    }
-
-    .evaluations-page .total-box strong {
-        display: block;
-        color: #111827;
-        font-size: 18px;
-        margin-top: 3px;
-    }
-
-.evaluations-page .toggles-container {
-    display: flex;
-    flex-direction: column;
-    gap: 13px;
-}
-
-.evaluations-page .toggle-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #374151;
-    font-size: 14px;
-}
-
-.evaluations-page .switch {
-    position: relative;
-    display: inline-block;
-    width: 46px;
-    height: 24px;
-    flex: 0 0 auto;
-}
-
-    .evaluations-page .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-.evaluations-page .slider {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background-color: #d1d5db;
-    transition: 0.25s;
-    border-radius: 999px;
-}
-
-    .evaluations-page .slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: #ffffff;
-        transition: 0.25s;
-        border-radius: 50%;
-        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
-    }
-
-.evaluations-page .switch input:checked + .slider {
-    background-color: #ef4444;
-}
-
-    .evaluations-page .switch input:checked + .slider:before {
-        transform: translateX(22px);
-    }
-
-.evaluations-page .btn-primary,
-.evaluations-page .btn-light,
-.evaluations-page .btn-danger,
-.evaluations-page .btn-filter-clear {
-    border: none;
-    border-radius: 14px;
-    padding: 11px 18px;
-    cursor: pointer;
-    font-weight: 800;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.evaluations-page .btn-primary {
-    background: #2563eb;
-    color: #ffffff;
-}
-
-.evaluations-page .btn-light {
-    background: #eef2ff;
-    color: #1e40af;
-}
-
-.evaluations-page .btn-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.evaluations-page .btn-filter-clear {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-    .evaluations-page .btn-primary:hover,
-    .evaluations-page .btn-light:hover,
-    .evaluations-page .btn-danger:hover,
-    .evaluations-page .btn-filter-clear:hover {
-        transform: translateY(-1px);
-    }
-
-.evaluations-page .btn-primary:disabled,
-.evaluations-page .btn-danger:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.evaluations-page .alert-box {
-    padding: 14px 18px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-    font-weight: 800;
-}
-
-    .evaluations-page .alert-box.success {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #86efac;
-    }
-
-    .evaluations-page .alert-box.error {
+    .evaluations-page .btn-danger,
+    .evaluations-page .btn-filter-clear {
         background: #fee2e2;
         color: #991b1b;
-        border: 1px solid #fca5a5;
     }
 
-.evaluations-page .actions-section {
-    align-items: center;
-}
+        .evaluations-page .btn-primary:hover:not(:disabled),
+        .evaluations-page .btn-light:hover:not(:disabled),
+        .evaluations-page .btn-danger:hover:not(:disabled),
+        .evaluations-page .btn-filter-clear:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
 
-.evaluations-page .table-header {
-    align-items: center;
-}
+        .evaluations-page .btn-primary:disabled,
+        .evaluations-page .btn-danger:disabled,
+        .evaluations-page button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none !important;
+        }
 
-.evaluations-page .list-filters {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-}
+    .evaluations-page .alert-box {
+        margin-bottom: 20px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        font-weight: 800;
+    }
 
-.evaluations-page .search-box {
-    min-width: 380px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 14px;
-    padding: 0 12px;
-    background: #ffffff;
-}
+        .evaluations-page .alert-box.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
 
-    .evaluations-page .search-box input {
-        border: none;
-        outline: none;
-        padding: 12px 0;
+        .evaluations-page .alert-box.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .evaluations-page .alert-box.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+    .evaluations-page .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    .evaluations-page .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .evaluations-page .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .evaluations-page .form-control {
         width: 100%;
+        min-height: 44px;
+        padding: 13px 15px;
+        border: 1px solid #d1d5db;
+        border-radius: 14px;
+        outline: none;
+        background: #ffffff;
         color: #111827;
-        background: transparent;
+        font-size: 14px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
+        .evaluations-page .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        .evaluations-page .form-control::placeholder {
+            color: #9ca3af;
+            opacity: 1;
+        }
+
+    .evaluations-page .search-assignment-box {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+    }
+
+        .evaluations-page .search-assignment-box .form-control {
+            width: 100%;
+        }
+
+        .evaluations-page .search-assignment-box .btn-primary {
+            min-width: 115px;
+            height: 44px;
+            margin: 0;
+            align-self: center;
+        }
+
+    .evaluations-page .assignment-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+        gap: 14px;
+        max-width: 100%;
+        margin-top: 22px;
+        margin-bottom: 20px;
+    }
+
+    .evaluations-page .assignment-card,
+    .evaluations-page .assignment-card-fixed {
+        min-height: 128px;
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(59, 130, 246, 0.22);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+        overflow-wrap: anywhere;
+    }
+
+        .evaluations-page .assignment-card span,
+        .evaluations-page .assignment-card-fixed span {
+            display: block;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .evaluations-page .assignment-card strong,
+        .evaluations-page .assignment-card-fixed strong {
+            display: block;
+            margin-top: 6px;
+            color: #f8fafc;
+            font-size: 25px;
+            font-weight: 900;
+        }
+
+        .evaluations-page .assignment-card small,
+        .evaluations-page .assignment-card-fixed small {
+            display: block;
+            margin-top: 5px;
+            color: #cbd5e1;
+            font-weight: 800;
+        }
+
+    .evaluations-page .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(150px, 1fr));
+        gap: 14px;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .evaluations-page .summary-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+        .evaluations-page .summary-card span {
+            display: block;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .evaluations-page .summary-card strong {
+            display: block;
+            margin-top: 6px;
+            color: #111827;
+            font-size: 25px;
+        }
+
+        .evaluations-page .summary-card small {
+            display: block;
+            margin-top: 5px;
+            color: #6b7280;
+        }
+
+    .evaluations-page .total-summary-card {
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #eef2ff 100%);
+    }
+
+        .evaluations-page .total-summary-card span {
+            color: #1d4ed8;
+            font-weight: 800;
+        }
+
+        .evaluations-page .total-summary-card strong {
+            color: #1e3a8a;
+        }
+
+    .evaluations-page .evaluation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(300px, 1fr));
+        gap: 18px;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .evaluations-page .evaluation-block {
+        padding: 22px;
+        border-radius: 22px;
+    }
+
+    .evaluations-page .block-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e5e7eb;
+        overflow-wrap: anywhere;
+    }
+
+        .evaluations-page .block-header h2 {
+            margin: 0;
+            color: #111827;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .evaluations-page .block-header p {
+            margin: 5px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+    .evaluations-page .total-box {
+        min-width: 72px;
+        padding: 10px 14px;
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+    }
+
+        .evaluations-page .total-box span {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .evaluations-page .total-box strong {
+            display: block;
+            margin-top: 3px;
+            color: #111827;
+            font-size: 18px;
+        }
+
+    .evaluations-page .toggles-container {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .evaluations-page .toggle-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .evaluations-page .switch {
+        position: relative;
+        display: inline-block;
+        flex: 0 0 auto;
+        width: 46px;
+        height: 24px;
+    }
+
+        .evaluations-page .switch input {
+            width: 0;
+            height: 0;
+            opacity: 0;
+        }
+
+    .evaluations-page .slider {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background-color: #d1d5db;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+
+        .evaluations-page .slider::before {
+            content: "";
+            position: absolute;
+            left: 3px;
+            bottom: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
+            transition: 0.25s;
+        }
+
+    .evaluations-page .switch input:checked + .slider {
+        background-color: #ef4444;
+    }
+
+        .evaluations-page .switch input:checked + .slider::before {
+            transform: translateX(22px);
+        }
+
+    .evaluations-page .list-filters {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .evaluations-page .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 380px;
+        min-height: 44px;
+        padding: 0 12px;
+        border-radius: 14px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+    }
+
+        .evaluations-page .search-box input {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #111827;
+        }
+
+            .evaluations-page .search-box input::placeholder {
+                color: #9ca3af;
+                opacity: 1;
+            }
 
 .employee-filter-select {
     min-width: 230px;
     height: 42px;
+    padding: 0 14px;
     border: 1px solid #d1d5db;
     border-radius: 12px;
-    padding: 0 14px;
+    outline: none;
     background: #ffffff;
     color: #111827;
     font-size: 14px;
-    outline: none;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
     .employee-filter-select:focus {
@@ -483,23 +525,25 @@
 
 .evaluations-page .table-container {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
+    background: #ffffff;
 }
 
 .evaluations-page .evaluations-table {
     width: 100%;
-    border-collapse: collapse;
     min-width: 900px;
+    border-collapse: collapse;
     background: #ffffff;
 }
 
     .evaluations-page .evaluations-table th {
+        padding: 13px 14px;
         background: #111827;
         color: #ffffff;
         text-align: left;
-        padding: 13px 14px;
         font-size: 13px;
         white-space: nowrap;
     }
@@ -521,19 +565,26 @@
             background: #f9fafb;
         }
 
-.evaluations-page .employee-title strong,
-.evaluations-page .book-title strong {
-    display: block;
-    color: #111827;
-}
+    .evaluations-page .employee-title,
+    .evaluations-page .book-title,
+    .evaluations-page .evaluations-table th,
+    .evaluations-page .evaluations-table td {
+        overflow-wrap: anywhere;
+    }
 
-.evaluations-page .employee-title span,
-.evaluations-page .book-title span {
-    display: block;
-    color: #6b7280;
-    font-size: 12px;
-    margin-top: 3px;
-}
+        .evaluations-page .employee-title strong,
+        .evaluations-page .book-title strong {
+            display: block;
+            color: #111827;
+        }
+
+        .evaluations-page .employee-title span,
+        .evaluations-page .book-title span {
+            display: block;
+            margin-top: 3px;
+            color: #6b7280;
+            font-size: 12px;
+        }
 
 .evaluations-page .pill {
     display: inline-flex;
@@ -556,11 +607,11 @@
 .evaluations-page .kgen-pill {
     display: inline-flex;
     padding: 6px 11px;
+    border-radius: 999px;
     background: #eef2ff;
     color: #1e40af;
-    border-radius: 999px;
-    font-weight: 800;
     font-size: 12px;
+    font-weight: 800;
 }
 
 .evaluations-page .total-percent {
@@ -571,17 +622,17 @@
 .evaluations-page .loading-state,
 .evaluations-page .empty-state {
     padding: 34px;
-    text-align: center;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
     border-radius: 18px;
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
     color: #6b7280;
+    text-align: center;
 }
 
     .evaluations-page .empty-state strong {
         display: block;
-        color: #111827;
         margin-bottom: 6px;
+        color: #111827;
     }
 
 html[data-theme="dark"] .evaluations-page {
@@ -591,25 +642,27 @@ html[data-theme="dark"] .evaluations-page {
 
     html[data-theme="dark"] .evaluations-page .page-hero {
         background: linear-gradient(135deg, #020617, #0f172a);
-        border-color: rgba(255,255,255,.08);
+        border-color: rgba(255, 255, 255, 0.08);
     }
 
     html[data-theme="dark"] .evaluations-page .form-card,
     html[data-theme="dark"] .evaluations-page .list-card,
     html[data-theme="dark"] .evaluations-page .summary-card,
     html[data-theme="dark"] .evaluations-page .assignment-card,
+    html[data-theme="dark"] .evaluations-page .assignment-card-fixed,
     html[data-theme="dark"] .evaluations-page .evaluation-block,
     html[data-theme="dark"] .evaluations-page .total-box,
     html[data-theme="dark"] .evaluations-page .loading-state,
     html[data-theme="dark"] .evaluations-page .empty-state {
         background: #111827;
-        border-color: rgba(255,255,255,.10);
-        box-shadow: 0 18px 40px rgba(0,0,0,.28);
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
     }
 
         html[data-theme="dark"] .evaluations-page .section-header h2,
         html[data-theme="dark"] .evaluations-page .summary-card strong,
         html[data-theme="dark"] .evaluations-page .assignment-card strong,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed strong,
         html[data-theme="dark"] .evaluations-page .block-header h2,
         html[data-theme="dark"] .evaluations-page .total-box strong,
         html[data-theme="dark"] .evaluations-page .employee-title strong,
@@ -626,6 +679,8 @@ html[data-theme="dark"] .evaluations-page {
         html[data-theme="dark"] .evaluations-page .summary-card small,
         html[data-theme="dark"] .evaluations-page .assignment-card span,
         html[data-theme="dark"] .evaluations-page .assignment-card small,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed span,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed small,
         html[data-theme="dark"] .evaluations-page .block-header p,
         html[data-theme="dark"] .evaluations-page .total-box span,
         html[data-theme="dark"] .evaluations-page .employee-title span,
@@ -640,50 +695,32 @@ html[data-theme="dark"] .evaluations-page {
     html[data-theme="dark"] .employee-filter-select {
         background: #0f172a;
         color: #f8fafc;
-        border-color: rgba(255,255,255,.14);
+        border-color: rgba(255, 255, 255, 0.14);
     }
 
         html[data-theme="dark"] .evaluations-page .search-box input {
             color: #f8fafc;
         }
 
-    html[data-theme="dark"] .evaluations-page .list-card .section-header h2,
-    html[data-theme="dark"] .evaluations-page .list-card .section-header p {
-        color: #f8fafc !important;
-    }
-
-    html[data-theme="dark"] .evaluations-page .list-card .search-box {
-        background: #0f172a !important;
-        border: 1px solid rgba(148, 163, 184, 0.22) !important;
-        border-radius: 14px !important;
-        min-width: 340px !important;
-        height: 46px !important;
-        box-shadow: none !important;
-    }
-
-        html[data-theme="dark"] .evaluations-page .list-card .search-box input {
-            color: #f8fafc !important;
-            background: transparent !important;
-        }
-
-            html[data-theme="dark"] .evaluations-page .list-card .search-box input::placeholder {
-                color: #cbd5e1 !important;
-                opacity: 1 !important;
+            html[data-theme="dark"] .evaluations-page .form-control::placeholder,
+            html[data-theme="dark"] .evaluations-page .search-box input::placeholder {
+                color: #cbd5e1;
+                opacity: 1;
             }
 
-        html[data-theme="dark"] .evaluations-page .list-card .search-box:focus-within {
-            border-color: rgba(148, 163, 184, 0.38) !important;
-            box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08) !important;
+        html[data-theme="dark"] .employee-filter-select option {
+            background: #0f172a;
+            color: #f8fafc;
         }
 
-        html[data-theme="dark"] .evaluations-page .list-card .search-box span {
-            color: #cbd5e1 !important;
+        html[data-theme="dark"] .evaluations-page .search-box span {
+            color: #cbd5e1;
         }
 
     html[data-theme="dark"] .evaluations-page .table-container,
     html[data-theme="dark"] .evaluations-page .evaluations-table {
         background: #111827;
-        border-color: rgba(255,255,255,.10);
+        border-color: rgba(255, 255, 255, 0.10);
     }
 
         html[data-theme="dark"] .evaluations-page .evaluations-table th {
@@ -693,11 +730,11 @@ html[data-theme="dark"] .evaluations-page {
 
         html[data-theme="dark"] .evaluations-page .evaluations-table td {
             color: #e2e8f0;
-            border-bottom-color: rgba(255,255,255,.08);
+            border-bottom-color: rgba(255, 255, 255, 0.08);
         }
 
         html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr:hover {
-            background: rgba(255,255,255,.04);
+            background: rgba(255, 255, 255, 0.04);
         }
 
     html[data-theme="dark"] .evaluations-page .btn-light {
@@ -715,15 +752,16 @@ html[data-theme="liquid glass"] .evaluations-page {
     html[data-theme="liquid glass"] .evaluations-page .list-card,
     html[data-theme="liquid glass"] .evaluations-page .summary-card,
     html[data-theme="liquid glass"] .evaluations-page .assignment-card,
+    html[data-theme="liquid glass"] .evaluations-page .assignment-card-fixed,
     html[data-theme="liquid glass"] .evaluations-page .evaluation-block,
     html[data-theme="liquid glass"] .evaluations-page .total-box,
     html[data-theme="liquid glass"] .evaluations-page .loading-state,
     html[data-theme="liquid glass"] .evaluations-page .empty-state {
-        background: rgba(255,255,255,.34);
+        background: rgba(255, 255, 255, 0.34);
+        border: 1px solid rgba(255, 255, 255, 0.62);
         backdrop-filter: blur(30px) saturate(180%);
         -webkit-backdrop-filter: blur(30px) saturate(180%);
-        border: 1px solid rgba(255,255,255,.62);
-        box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.86);
     }
 
     html[data-theme="liquid glass"] .evaluations-page .page-hero,
@@ -743,8 +781,8 @@ html[data-theme="liquid glass"] .evaluations-page {
             inset: 1px;
             pointer-events: none;
             border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
-            opacity: .82;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.75), transparent 30%);
+            opacity: 0.82;
         }
 
         html[data-theme="liquid glass"] .evaluations-page .page-hero > *,
@@ -755,11 +793,21 @@ html[data-theme="liquid glass"] .evaluations-page {
             z-index: 1;
         }
 
+        html[data-theme="liquid glass"] .evaluations-page .page-hero > div:first-child {
+            padding: 22px 24px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.34);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(18px) saturate(170%);
+            -webkit-backdrop-filter: blur(18px) saturate(170%);
+        }
+
         html[data-theme="liquid glass"] .evaluations-page .page-hero h1,
         html[data-theme="liquid glass"] .evaluations-page .stat-card strong,
         html[data-theme="liquid glass"] .evaluations-page .section-header h2,
         html[data-theme="liquid glass"] .evaluations-page .summary-card strong,
         html[data-theme="liquid glass"] .evaluations-page .assignment-card strong,
+        html[data-theme="liquid glass"] .evaluations-page .assignment-card-fixed strong,
         html[data-theme="liquid glass"] .evaluations-page .block-header h2,
         html[data-theme="liquid glass"] .evaluations-page .total-box strong,
         html[data-theme="liquid glass"] .evaluations-page .employee-title strong,
@@ -768,7 +816,17 @@ html[data-theme="liquid glass"] .evaluations-page {
         html[data-theme="liquid glass"] .evaluations-page .total-percent,
         html[data-theme="liquid glass"] .evaluations-page .toggle-item {
             color: #111827;
-            text-shadow: 0 1px 1px rgba(255,255,255,.85);
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
+        }
+
+        html[data-theme="liquid glass"] .evaluations-page .page-hero h1 {
+            color: #0f172a !important;
+            text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
+        }
+
+        html[data-theme="liquid glass"] .evaluations-page .page-hero p {
+            color: #334155 !important;
+            text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
         }
 
         html[data-theme="liquid glass"] .evaluations-page .page-hero p,
@@ -779,6 +837,8 @@ html[data-theme="liquid glass"] .evaluations-page {
         html[data-theme="liquid glass"] .evaluations-page .summary-card small,
         html[data-theme="liquid glass"] .evaluations-page .assignment-card span,
         html[data-theme="liquid glass"] .evaluations-page .assignment-card small,
+        html[data-theme="liquid glass"] .evaluations-page .assignment-card-fixed span,
+        html[data-theme="liquid glass"] .evaluations-page .assignment-card-fixed small,
         html[data-theme="liquid glass"] .evaluations-page .block-header p,
         html[data-theme="liquid glass"] .evaluations-page .total-box span,
         html[data-theme="liquid glass"] .evaluations-page .employee-title span,
@@ -792,12 +852,12 @@ html[data-theme="liquid glass"] .evaluations-page {
     html[data-theme="liquid glass"] .evaluations-page .form-control,
     html[data-theme="liquid glass"] .evaluations-page .search-box,
     html[data-theme="liquid glass"] .employee-filter-select {
-        background: rgba(255,255,255,.45);
+        background: rgba(255, 255, 255, 0.45);
+        border-color: rgba(255, 255, 255, 0.65);
+        color: #111827;
         backdrop-filter: blur(20px) saturate(170%);
         -webkit-backdrop-filter: blur(20px) saturate(170%);
-        border-color: rgba(255,255,255,.65);
-        color: #111827;
-        box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.80);
     }
 
         html[data-theme="liquid glass"] .evaluations-page .search-box input {
@@ -806,51 +866,25 @@ html[data-theme="liquid glass"] .evaluations-page {
 
     html[data-theme="liquid glass"] .evaluations-page .table-container,
     html[data-theme="liquid glass"] .evaluations-page .evaluations-table {
-        background: rgba(255,255,255,.28);
+        background: rgba(255, 255, 255, 0.28);
+        border-color: rgba(255, 255, 255, 0.55);
         backdrop-filter: blur(24px) saturate(170%);
         -webkit-backdrop-filter: blur(24px) saturate(170%);
-        border-color: rgba(255,255,255,.55);
     }
 
         html[data-theme="liquid glass"] .evaluations-page .evaluations-table th {
-            background: rgba(17,24,39,.88);
+            background: rgba(17, 24, 39, 0.88);
+            color: #ffffff;
         }
 
         html[data-theme="liquid glass"] .evaluations-page .evaluations-table td {
             color: #334155;
-            border-bottom-color: rgba(255,255,255,.38);
+            border-bottom-color: rgba(255, 255, 255, 0.38);
         }
 
         html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr:hover {
-            background: rgba(255,255,255,.22);
+            background: rgba(255, 255, 255, 0.22);
         }
-
-    html[data-theme="liquid glass"] .evaluations-page .page-hero h1 {
-        color: #0f172a !important;
-        text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
-    }
-
-    html[data-theme="liquid glass"] .evaluations-page .page-hero p {
-        color: #334155 !important;
-        text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
-    }
-
-    html[data-theme="liquid glass"] .evaluations-page .page-hero > div:first-child {
-        background: rgba(255, 255, 255, 0.34);
-        border: 1px solid rgba(255, 255, 255, 0.55);
-        border-radius: 22px;
-        padding: 22px 24px;
-        backdrop-filter: blur(18px) saturate(170%);
-        -webkit-backdrop-filter: blur(18px) saturate(170%);
-    }
-
-    html[data-theme="liquid glass"] .evaluations-page .page-hero .stat-card span {
-        color: #475569 !important;
-    }
-
-    html[data-theme="liquid glass"] .evaluations-page .page-hero .stat-card strong {
-        color: #111827 !important;
-    }
 
 html[data-theme="dark glass"] .evaluations-page {
     background: transparent;
@@ -862,15 +896,16 @@ html[data-theme="dark glass"] .evaluations-page {
     html[data-theme="dark glass"] .evaluations-page .list-card,
     html[data-theme="dark glass"] .evaluations-page .summary-card,
     html[data-theme="dark glass"] .evaluations-page .assignment-card,
+    html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed,
     html[data-theme="dark glass"] .evaluations-page .evaluation-block,
     html[data-theme="dark glass"] .evaluations-page .total-box,
     html[data-theme="dark glass"] .evaluations-page .loading-state,
     html[data-theme="dark glass"] .evaluations-page .empty-state {
-        background: rgba(15,23,42,.55);
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.10);
         backdrop-filter: blur(24px) saturate(170%);
         -webkit-backdrop-filter: blur(24px) saturate(170%);
-        border: 1px solid rgba(255,255,255,.10);
-        box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
     }
 
         html[data-theme="dark glass"] .evaluations-page .page-hero h1,
@@ -878,6 +913,7 @@ html[data-theme="dark glass"] .evaluations-page {
         html[data-theme="dark glass"] .evaluations-page .section-header h2,
         html[data-theme="dark glass"] .evaluations-page .summary-card strong,
         html[data-theme="dark glass"] .evaluations-page .assignment-card strong,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed strong,
         html[data-theme="dark glass"] .evaluations-page .block-header h2,
         html[data-theme="dark glass"] .evaluations-page .total-box strong,
         html[data-theme="dark glass"] .evaluations-page .employee-title strong,
@@ -896,6 +932,8 @@ html[data-theme="dark glass"] .evaluations-page {
         html[data-theme="dark glass"] .evaluations-page .summary-card small,
         html[data-theme="dark glass"] .evaluations-page .assignment-card span,
         html[data-theme="dark glass"] .evaluations-page .assignment-card small,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed span,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed small,
         html[data-theme="dark glass"] .evaluations-page .block-header p,
         html[data-theme="dark glass"] .evaluations-page .total-box span,
         html[data-theme="dark glass"] .evaluations-page .employee-title span,
@@ -909,9 +947,9 @@ html[data-theme="dark glass"] .evaluations-page {
     html[data-theme="dark glass"] .evaluations-page .form-control,
     html[data-theme="dark glass"] .evaluations-page .search-box,
     html[data-theme="dark glass"] .employee-filter-select {
-        background: rgba(15,23,42,.58);
+        background: rgba(15, 23, 42, 0.58);
         color: #f8fafc;
-        border-color: rgba(255,255,255,.12);
+        border-color: rgba(255, 255, 255, 0.12);
         backdrop-filter: blur(18px) saturate(160%);
         -webkit-backdrop-filter: blur(18px) saturate(160%);
     }
@@ -920,29 +958,41 @@ html[data-theme="dark glass"] .evaluations-page {
             color: #f8fafc;
         }
 
+            html[data-theme="dark glass"] .evaluations-page .form-control::placeholder,
+            html[data-theme="dark glass"] .evaluations-page .search-box input::placeholder {
+                color: #cbd5e1;
+                opacity: 1;
+            }
+
+        html[data-theme="dark glass"] .employee-filter-select option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
     html[data-theme="dark glass"] .evaluations-page .table-container,
     html[data-theme="dark glass"] .evaluations-page .evaluations-table {
-        background: rgba(15,23,42,.50);
-        border-color: rgba(255,255,255,.10);
+        background: rgba(15, 23, 42, 0.50);
+        border-color: rgba(255, 255, 255, 0.10);
     }
 
         html[data-theme="dark glass"] .evaluations-page .evaluations-table th {
-            background: rgba(2,6,23,.78);
+            background: rgba(2, 6, 23, 0.78);
+            color: #f8fafc;
         }
 
         html[data-theme="dark glass"] .evaluations-page .evaluations-table td {
             color: #e2e8f0;
-            border-bottom-color: rgba(255,255,255,.07);
+            border-bottom-color: rgba(255, 255, 255, 0.07);
         }
 
         html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr:hover {
-            background: rgba(255,255,255,.05);
+            background: rgba(255, 255, 255, 0.05);
         }
 
     html[data-theme="dark glass"] .evaluations-page .btn-light {
-        background: rgba(15,23,42,.58);
+        background: rgba(15, 23, 42, 0.58);
         color: #f8fafc;
-        border: 1px solid rgba(255,255,255,.12);
+        border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
 @media (max-width: 1300px) {
@@ -955,221 +1005,17 @@ html[data-theme="dark glass"] .evaluations-page {
     }
 }
 
-@media (max-width: 1000px) {
-    .evaluations-page {
-        padding: 18px;
-    }
-
-        .evaluations-page .page-hero,
-        .evaluations-page .section-header,
-        .evaluations-page .table-header {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .evaluations-page .page-hero {
-            padding: 30px 26px;
-            min-height: auto;
-        }
-
-        .evaluations-page .hero-stats {
-            width: 100%;
-            justify-content: flex-start;
-        }
-
-        .evaluations-page .stat-card {
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .evaluations-page .form-grid,
-        .evaluations-page .summary-grid,
-        .evaluations-page .evaluation-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .evaluations-page .header-actions {
-            justify-content: flex-start;
-        }
-
-        .evaluations-page .search-box {
-            min-width: 100%;
-        }
-}
-
-@media (max-width: 900px) {
-    .employee-filter-select {
-        width: 100%;
-    }
-}
-
-@media (max-width: 700px) {
-    .search-assignment-box {
-        grid-template-columns: 1fr;
-    }
-
-        .search-assignment-box .btn-primary {
-            width: 100%;
-        }
-
-    .evaluations-page .assignment-cards-grid {
-        grid-template-columns: 1fr !important;
-    }
-}
-
-@media (max-width: 560px) {
-    .evaluations-page {
-        padding: 14px;
-    }
-
-        .evaluations-page .page-hero,
-        .evaluations-page .form-card,
-        .evaluations-page .list-card,
-        .evaluations-page .evaluation-block {
-            border-radius: 18px;
-            padding: 18px;
-        }
-
-            .evaluations-page .page-hero h1 {
-                font-size: 30px;
-            }
-
-            .evaluations-page .page-hero p {
-                font-size: 16px;
-            }
-
-        .evaluations-page .stat-card {
-            width: 100%;
-            min-width: 100%;
-        }
-
-        .evaluations-page .block-header {
-            flex-direction: column;
-        }
-
-        .evaluations-page .total-box {
-            width: 100%;
-        }
-
-        .evaluations-page .header-actions {
-            flex-direction: column;
-        }
-
-        .evaluations-page .btn-primary,
-        .evaluations-page .btn-light,
-        .evaluations-page .btn-danger {
-            width: 100%;
-        }
-}
-
-.evaluations-page .assignment-cards-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(240px, 1fr)) !important;
-    gap: 14px !important;
-    margin-top: 22px !important;
-    margin-bottom: 20px !important;
-}
-
-.evaluations-page .assignment-card-fixed {
-    background: rgba(15,23,42,.55) !important;
-    border-radius: 18px !important;
-    padding: 18px !important;
-    min-height: 128px !important;
-    border: 1px solid rgba(59, 130, 246, 0.22) !important;
-    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06) !important;
-}
-
-    .evaluations-page .assignment-card-fixed span {
-        display: block !important;
-        color: #cbd5e1 !important;
-        font-size: 13px !important;
-        font-weight: 800 !important;
-    }
-
-    .evaluations-page .assignment-card-fixed strong {
-        display: block !important;
-        color: #f8fafc !important;
-        font-size: 25px !important;
-        margin-top: 6px !important;
-        font-weight: 900 !important;
-    }
-
-    .evaluations-page .assignment-card-fixed small {
-        display: block !important;
-        color: #cbd5e1 !important;
-        margin-top: 5px !important;
-        font-weight: 800 !important;
-    }
-
-.evaluations-page,
-.evaluations-page * {
-    box-sizing: border-box;
-}
-
-.evaluations-page {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-    .evaluations-page .page-hero,
-    .evaluations-page .form-card,
-    .evaluations-page .list-card,
-    .evaluations-page .summary-grid,
-    .evaluations-page .evaluation-grid,
-    .evaluations-page .evaluation-block,
-    .evaluations-page .assignment-cards-grid,
-    .evaluations-page .table-container,
-    .evaluations-page .evaluations-table {
-        max-width: 100%;
-    }
-
-        .evaluations-page .evaluations-table th,
-        .evaluations-page .evaluations-table td,
-        .evaluations-page .employee-title,
-        .evaluations-page .book-title,
-        .evaluations-page .section-header,
-        .evaluations-page .block-header,
-        .evaluations-page .assignment-card,
-        .evaluations-page .assignment-card-fixed {
-            overflow-wrap: anywhere;
-        }
-
-@media (max-width: 1280px) {
-    .evaluations-page .page-hero {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .evaluations-page .hero-stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(150px, 1fr));
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .evaluations-page .stat-card {
-        min-width: 0;
-    }
-
-    .evaluations-page .summary-grid {
-        grid-template-columns: repeat(3, minmax(160px, 1fr));
-    }
-
-    .evaluations-page .evaluation-grid {
-        grid-template-columns: repeat(2, minmax(260px, 1fr));
-    }
-}
-
 @media (max-width: 1024px) {
     .evaluations-page {
         padding: 18px;
     }
 
         .evaluations-page .page-hero {
+            flex-direction: column;
+            align-items: stretch;
+            min-height: auto;
             padding: 24px;
             border-radius: 22px;
-            min-height: auto;
         }
 
             .evaluations-page .page-hero h1 {
@@ -1183,8 +1029,15 @@ html[data-theme="dark glass"] .evaluations-page {
             }
 
         .evaluations-page .hero-stats {
+            display: grid;
             grid-template-columns: repeat(2, minmax(150px, 1fr));
+            justify-content: stretch;
+            width: 100%;
             gap: 12px;
+        }
+
+        .evaluations-page .stat-card {
+            min-width: 0;
         }
 
         .evaluations-page .form-card,
@@ -1209,8 +1062,8 @@ html[data-theme="dark glass"] .evaluations-page {
 
         .evaluations-page .header-actions,
         .evaluations-page .list-filters {
-            width: 100%;
             justify-content: flex-start;
+            width: 100%;
         }
 
         .evaluations-page .list-filters {
@@ -1225,18 +1078,11 @@ html[data-theme="dark glass"] .evaluations-page {
             min-width: 0 !important;
         }
 
-    .employee-filter-select {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .evaluations-page .btn-filter-clear {
-        width: 100%;
-    }
-
-    .search-assignment-box {
-        grid-template-columns: 1fr auto;
-    }
+        .employee-filter-select,
+        .evaluations-page .btn-filter-clear {
+            width: 100%;
+            min-width: 0;
+        }
 }
 
 @media (max-width: 768px) {
@@ -1245,9 +1091,9 @@ html[data-theme="dark glass"] .evaluations-page {
     }
 
         .evaluations-page .page-hero {
+            gap: 16px;
             padding: 18px;
             border-radius: 18px;
-            gap: 16px;
         }
 
     html[data-theme="liquid glass"] .evaluations-page .page-hero > div:first-child {
@@ -1334,18 +1180,13 @@ html[data-theme="dark glass"] .evaluations-page {
         font-size: 13px;
     }
 
-    html[data-theme="dark"] .evaluations-page .list-card .search-box {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    .evaluations-page .search-box input {
-        font-size: 13px;
-    }
+        .evaluations-page .search-box input {
+            font-size: 13px;
+        }
 
     .evaluations-page .header-actions,
     .evaluations-page .list-filters,
-    .search-assignment-box {
+    .evaluations-page .search-assignment-box {
         display: flex;
         flex-direction: column;
         align-items: stretch;
@@ -1356,7 +1197,7 @@ html[data-theme="dark glass"] .evaluations-page {
         .evaluations-page .btn-light,
         .evaluations-page .btn-danger,
         .evaluations-page .btn-filter-clear,
-        .search-assignment-box .btn-primary {
+        .evaluations-page .search-assignment-box .btn-primary {
             width: 100%;
             min-height: 44px;
             height: 44px;
@@ -1375,14 +1216,14 @@ html[data-theme="dark glass"] .evaluations-page {
 
     .evaluations-page .assignment-card,
     .evaluations-page .assignment-card-fixed {
-        min-height: auto !important;
-        padding: 16px !important;
-        border-radius: 16px !important;
+        min-height: auto;
+        padding: 16px;
+        border-radius: 16px;
     }
 
         .evaluations-page .assignment-card strong,
         .evaluations-page .assignment-card-fixed strong {
-            font-size: 22px !important;
+            font-size: 22px;
         }
 
     .evaluations-page .total-box {
@@ -1412,7 +1253,7 @@ html[data-theme="dark glass"] .evaluations-page {
         width: 100%;
         min-width: 0 !important;
         border-collapse: separate;
-        border-spacing: 0 14px;
+        border-spacing: 0 !important;
         background: transparent;
     }
 
@@ -1424,34 +1265,44 @@ html[data-theme="dark glass"] .evaluations-page {
         .evaluations-page .evaluations-table tbody,
         .evaluations-page .evaluations-table tr,
         .evaluations-page .evaluations-table td {
-            display: block;
-            width: 100%;
+            display: block !important;
+            width: 100% !important;
         }
 
-            .evaluations-page .evaluations-table tbody tr {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 18px;
-                padding: 12px;
-                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-                overflow: hidden;
+            .evaluations-page .evaluations-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 18px !important;
             }
 
-                .evaluations-page .evaluations-table tbody tr:hover {
+                .evaluations-page .evaluations-table tbody tr {
+                    display: block !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 12px;
+                    overflow: hidden;
+                    border-radius: 18px;
                     background: #ffffff;
+                    border: 1px solid #e5e7eb;
+                    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
                 }
+
+                    .evaluations-page .evaluations-table tbody tr:hover {
+                        background: #ffffff;
+                    }
 
             .evaluations-page .evaluations-table td {
                 position: relative;
+                display: flex !important;
+                align-items: center;
+                justify-content: flex-end;
                 min-height: 44px;
                 padding: 12px 10px 12px 44% !important;
                 border-bottom: 1px solid #e5e7eb;
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
+                color: #374151;
+                font-size: 13px;
                 text-align: right;
                 white-space: normal !important;
-                font-size: 13px;
             }
 
                 .evaluations-page .evaluations-table td:last-child {
@@ -1462,8 +1313,8 @@ html[data-theme="dark glass"] .evaluations-page {
                     position: absolute;
                     left: 10px;
                     top: 50%;
-                    transform: translateY(-50%);
                     width: 38%;
+                    transform: translateY(-50%);
                     color: #64748b;
                     font-size: 11px;
                     font-weight: 900;
@@ -1479,49 +1330,36 @@ html[data-theme="dark glass"] .evaluations-page {
                 }
 
                 .evaluations-page .evaluations-table td:nth-child(2)::before {
-                    content: "Book";
-                }
-
-                .evaluations-page .evaluations-table td:nth-child(3)::before {
-                    content: "Database";
-                }
-
-                .evaluations-page .evaluations-table td:nth-child(4)::before {
                     content: "KGEN";
                 }
 
+                .evaluations-page .evaluations-table td:nth-child(3)::before {
+                    content: "Motif YP";
+                }
+
+                .evaluations-page .evaluations-table td:nth-child(4)::before {
+                    content: "Motif WP";
+                }
+
                 .evaluations-page .evaluations-table td:nth-child(5)::before {
-                    content: "Proof";
+                    content: "Inventory";
                 }
 
                 .evaluations-page .evaluations-table td:nth-child(6)::before {
-                    content: "Final";
-                }
-
-                .evaluations-page .evaluations-table td:nth-child(7)::before {
-                    content: "Memo";
-                }
-
-                .evaluations-page .evaluations-table td:nth-child(8)::before {
-                    content: "Final PO";
-                }
-
-                .evaluations-page .evaluations-table td:nth-child(9)::before {
                     content: "Shipping";
                 }
 
-                .evaluations-page .evaluations-table td:nth-child(10)::before {
-                    content: "Dirxion";
+                .evaluations-page .evaluations-table td:nth-child(7)::before {
+                    content: "Task Memo";
                 }
 
-                .evaluations-page .evaluations-table td:nth-child(11)::before {
-                    content: "Total";
+                .evaluations-page .evaluations-table td:nth-child(8)::before {
+                    content: "Total %";
                 }
 
     .evaluations-page .employee-title,
     .evaluations-page .book-title {
         width: 100%;
-        align-items: flex-end;
         text-align: right;
     }
 
@@ -1536,11 +1374,72 @@ html[data-theme="dark glass"] .evaluations-page {
     .evaluations-page .pill,
     .evaluations-page .kgen-pill,
     .evaluations-page .total-percent {
-        white-space: normal;
-        text-align: center;
-        line-height: 1.2;
         max-width: 100%;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.2;
     }
+
+    html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
+    }
+
+        html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr:hover {
+            background: #111827;
+        }
+
+    html[data-theme="dark"] .evaluations-page .evaluations-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+        html[data-theme="dark"] .evaluations-page .evaluations-table td::before {
+            color: #94a3b8;
+        }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr {
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+
+        html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr:hover {
+            background: rgba(15, 23, 42, 0.92) !important;
+        }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table td {
+        color: #e2e8f0;
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+        html[data-theme="dark glass"] .evaluations-page .evaluations-table td::before {
+            color: #cbd5e1;
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr {
+        background: rgba(255, 255, 255, 0.42);
+        border-color: rgba(255, 255, 255, 0.62);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+    }
+
+        html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.50);
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .evaluations-table td {
+        color: #334155;
+        border-bottom-color: rgba(255, 255, 255, 0.42);
+    }
+
+        html[data-theme="liquid glass"] .evaluations-page .evaluations-table td::before {
+            color: #475569;
+        }
 }
 
 @media (max-width: 520px) {
@@ -1603,40 +1502,40 @@ html[data-theme="dark glass"] .evaluations-page {
 
     .evaluations-page .assignment-card,
     .evaluations-page .assignment-card-fixed {
-        padding: 14px !important;
-        border-radius: 15px !important;
+        padding: 14px;
+        border-radius: 15px;
     }
 
         .evaluations-page .assignment-card strong,
         .evaluations-page .assignment-card-fixed strong {
-            font-size: 20px !important;
+            font-size: 20px;
         }
 
-    .evaluations-page .evaluations-table {
-        border-spacing: 0 12px;
+    .evaluations-page .evaluations-table tbody {
+        gap: 16px !important;
     }
 
         .evaluations-page .evaluations-table tbody tr {
-            border-radius: 16px;
             padding: 10px;
+            border-radius: 16px;
         }
 
-        .evaluations-page .evaluations-table td {
-            padding: 11px 8px 11px 42% !important;
-            min-height: 42px;
-            font-size: 12.5px;
-        }
+    .evaluations-page .evaluations-table td {
+        min-height: 42px;
+        padding: 11px 8px 11px 42% !important;
+        font-size: 12.5px;
+    }
 
-            .evaluations-page .evaluations-table td::before {
-                left: 8px;
-                width: 36%;
-                font-size: 10px;
-            }
+        .evaluations-page .evaluations-table td::before {
+            left: 8px;
+            width: 36%;
+            font-size: 10px;
+        }
 
     .evaluations-page .pill,
     .evaluations-page .kgen-pill {
-        font-size: 10.5px;
         padding: 6px 9px;
+        font-size: 10.5px;
     }
 }
 
@@ -1664,115 +1563,4 @@ html[data-theme="dark glass"] .evaluations-page {
                 width: 34%;
                 font-size: 9.5px;
             }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr {
-        background: #111827;
-        border-color: rgba(255,255,255,.10);
-        box-shadow: 0 12px 30px rgba(0,0,0,.30);
-    }
-
-        html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr:hover {
-            background: #111827;
-        }
-
-    html[data-theme="dark"] .evaluations-page .evaluations-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
-    }
-
-        html[data-theme="dark"] .evaluations-page .evaluations-table td::before {
-            color: #94a3b8;
-        }
-
-    html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr {
-        background: rgba(15,23,42,.62);
-        border-color: rgba(255,255,255,.10);
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
-        box-shadow: 0 14px 34px rgba(0,0,0,.28);
-    }
-
-        html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr:hover {
-            background: rgba(15,23,42,.68);
-        }
-
-    html[data-theme="dark glass"] .evaluations-page .evaluations-table td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
-    }
-
-        html[data-theme="dark glass"] .evaluations-page .evaluations-table td::before {
-            color: #cbd5e1;
-        }
-
-    html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr {
-        background: rgba(255,255,255,.42);
-        border-color: rgba(255,255,255,.62);
-        backdrop-filter: blur(22px) saturate(170%);
-        -webkit-backdrop-filter: blur(22px) saturate(170%);
-        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
-    }
-
-        html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr:hover {
-            background: rgba(255,255,255,.50);
-        }
-
-    html[data-theme="liquid glass"] .evaluations-page .evaluations-table td {
-        color: #334155;
-        border-bottom-color: rgba(255,255,255,.42);
-    }
-
-        html[data-theme="liquid glass"] .evaluations-page .evaluations-table td::before {
-            color: #475569;
-        }
-}
-
-@media (max-width: 768px) {
-    .evaluations-page .evaluations-table tbody {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-
-        .evaluations-page .evaluations-table tbody tr {
-            display: block !important;
-            width: 100% !important;
-            margin: 0 !important;
-            border-radius: 18px !important;
-        }
-
-            .evaluations-page .evaluations-table tbody tr:not(:last-child) {
-                margin-bottom: 0 !important;
-            }
-
-    .evaluations-page .evaluations-table {
-        border-spacing: 0 !important;
-    }
-}
-
-@media (max-width: 520px) {
-    .evaluations-page .evaluations-table tbody {
-        gap: 16px !important;
-    }
-
-        .evaluations-page .evaluations-table tbody tr {
-            border-radius: 16px !important;
-        }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr {
-        background: rgba(15, 23, 42, 0.88) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-
-    html[data-theme="liquid glass"] .evaluations-page .evaluations-table tbody tr {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
 }

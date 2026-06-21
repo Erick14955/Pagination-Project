@@ -281,14 +281,14 @@
                         @foreach (var item in AsignacionesFiltradas)
                         {
                             <tr>
-                                <td>
+                                <td data-label="Employee">
                                     <div class="employee-title">
                                         <strong>@item.EmpleadoNombre</strong>
                                         <span>@item.EmpleadoEmail</span>
                                     </div>
                                 </td>
 
-                                <td>
+                                <td data-label="Temporary">
                                     @if (item.TieneAsignacionTemporal)
                                     {
                                         <div class="employee-title">
@@ -303,26 +303,30 @@
                                     }
                                 </td>
 
-                                <td>
+                                <td data-label="Book">
                                     <div class="book-title">
                                         <strong>@item.BookName</strong>
                                         <span>@item.ProductIssue</span>
                                     </div>
                                 </td>
 
-                                <td>@item.KGENCode</td>
-                                <td>@item.LSACode</td>
-                                <td><span class="pill">@item.StateName</span></td>
-                                <td>@item.DatabaseName</td>
-                                <td>@item.LegacyCodeName</td>
-                                <td>@item.PrintFootName</td>
-                                <td>@item.TrimSizeName</td>
-                                <td>@item.BindPlantName</td>
-                                <td>@FormatoFecha(item.PubDate)</td>
+                                <td data-label="KGEN">@item.KGENCode</td>
+                                <td data-label="LSA">@item.LSACode</td>
+
+                                <td data-label="State">
+                                    <span class="pill">@item.StateName</span>
+                                </td>
+
+                                <td data-label="Database">@item.DatabaseName</td>
+                                <td data-label="Legacy">@item.LegacyCodeName</td>
+                                <td data-label="Print Foot">@item.PrintFootName</td>
+                                <td data-label="Trim Size">@item.TrimSizeName</td>
+                                <td data-label="Bind Plant">@item.BindPlantName</td>
+                                <td data-label="Pub Date">@FormatoFecha(item.PubDate)</td>
 
                                 @if (CreateAssignations)
                                 {
-                                    <td class="actions-cell">
+                                    <td data-label="Actions" class="actions-cell">
                                         <button type="button"
                                                 class="icon-btn danger"
                                                 title="Delete"

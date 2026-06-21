@@ -1,8 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -26,7 +26,7 @@
 
         <AuthorizeView>
             <Authorized Context="auth">
-                <nav class="thryv-sidebar-menu">
+                <nav class="thryv-sidebar-menu" @onclick="CloseSidebarOnCompactAsync">
                     <NavLink href="/dashboard" Match="NavLinkMatch.All" class="thryv-menu-link">
                         <span class="thryv-menu-icon">📊</span>
                         <span class="thryv-menu-text">Dashboard</span>
@@ -158,13 +158,63 @@
 </div>
 
 @code {
-    private bool sidebarOpen = true;
+    private bool sidebarOpen = false;
     private ClaimsPrincipal? _user;
+    private bool _themeApplied = false;
+    private bool _sidebarInitialized = false;
+
+    private static readonly string[] TemasPermitidos =
+    [
+        "light",
+        "dark",
+        "liquid glass",
+        "dark glass"
+    ];
 
     protected override async Task OnInitializedAsync()
     {
+        Navigation.LocationChanged += HandleLocationChanged;
+
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (!_sidebarInitialized)
+            {
+                _sidebarInitialized = true;
+                await InicializarSidebarAsync();
+            }
+
+            if (!_themeApplied)
+            {
+                _themeApplied = true;
+                await AplicarTemaLayoutAsync();
+            }
+        }
+    }
+
+    private async Task InicializarSidebarAsync()
+    {
+        try
+        {
+            var isCompact = await JS.InvokeAsync<bool>("thryvLayout.isCompact");
+
+            // Desktop: abierto.
+            // Celular/tablet: cerrado.
+            sidebarOpen = !isCompact;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            // Si JS no está disponible en el primer momento, lo dejamos cerrado.
+            sidebarOpen = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private void ToggleSidebar()
@@ -175,6 +225,34 @@
     private void CloseSidebar()
     {
         sidebarOpen = false;
+    }
+
+    private async Task CloseSidebarOnCompactAsync()
+    {
+        try
+        {
+            var isCompact = await JS.InvokeAsync<bool>("thryvLayout.isCompact");
+
+            if (isCompact && sidebarOpen)
+            {
+                sidebarOpen = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch
+        {
+            // No hacemos nada si JS falla temporalmente.
+        }
+    }
+
+    private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await CloseSidebarOnCompactAsync();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
     }
 
     private static bool HasPermission(ClaimsPrincipal user, string claimType)
@@ -197,25 +275,6 @@
         return rol == "Administrator" ||
                rol == "Supervisor" ||
                rol == "Assistant";
-    }
-
-    private bool _themeApplied = false;
-
-    private static readonly string[] TemasPermitidos =
-    [
-        "light",
-        "dark",
-        "liquid glass",
-        "dark glass"
-    ];
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_themeApplied)
-        {
-            _themeApplied = true;
-            await AplicarTemaLayoutAsync();
-        }
     }
 
     private async Task AplicarTemaLayoutAsync()
@@ -246,6 +305,7 @@
             await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
         }
     }
+
     private async Task AplicarTemaDesdeSesionAsync()
     {
         try

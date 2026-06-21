@@ -255,8 +255,8 @@
                         <th>Username</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Employee</th>
                         <th>Permission</th>
+                        <th>Employee</th>
                         <th>Status</th>
                         <th>Login Lock</th>
                         <AuthorizeView>
@@ -293,13 +293,18 @@
                         {
                             <tr class="@(modelo.Id == user.Id ? "selected" : "")"
                                 @ondblclick="async () => await OnDobleClickUsuario(user)">
-                                <td>@user.Username</td>
-                                <td>@user.Name</td>
-                                <td>@user.Email</td>
-                                <td>
+
+                                <td data-label="Username">@user.Username</td>
+
+                                <td data-label="Name">@user.Name</td>
+
+                                <td data-label="Email">@user.Email</td>
+
+                                <td data-label="Permission">
                                     <span class="thryv-role-badge">@user.NivelNombre</span>
                                 </td>
-                                <td>
+
+                                <td data-label="Employee">
                                     @if (user.EmployeeId.HasValue)
                                     {
                                         <span class="thryv-role-badge">@user.EmployeeDisplay</span>
@@ -309,7 +314,8 @@
                                         <span class="thryv-status-badge inactive">Not linked</span>
                                     }
                                 </td>
-                                <td>
+
+                                <td data-label="Status">
                                     @if (user.Activo)
                                     {
                                         <span class="thryv-status-badge active">● Active</span>
@@ -320,7 +326,7 @@
                                     }
                                 </td>
 
-                                <td>
+                                <td data-label="Login Lock">
                                     @if (user.LoginBloqueado)
                                     {
                                         <div class="thryv-lock-cell">
@@ -338,7 +344,7 @@
                                     <Authorized Context="auth">
                                         @if (HasPermission(auth.User, "EditUser"))
                                         {
-                                            <td>
+                                            <td data-label="Action" class="thryv-users-action-cell">
                                                 <button type="button"
                                                         class="thryv-table-btn"
                                                         @onclick="async () => await SeleccionarUsuario(user)">

@@ -1,10 +1,21 @@
-﻿.assignments-page {
+﻿.assignments-page,
+.assignments-page * {
+    box-sizing: border-box;
+}
+
+.assignments-page {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100vh;
     padding: 24px;
     background: #f5f7fb;
-    min-height: 100vh;
+    color: #0f172a;
+    overflow-x: hidden;
 }
 
 .page-hero {
+    width: 100%;
+    max-width: 100%;
     background: #ffffff;
     border-radius: 22px;
     padding: 24px;
@@ -24,27 +35,10 @@
         font-weight: 800;
     }
 
-.month-filter {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 190px;
-}
-
-    .month-filter label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #64748b;
+    .page-hero p {
+        margin: 8px 0 0;
+        color: #6b7280;
     }
-
-.filter-select {
-    min-height: 42px;
-}
-
-.page-hero p {
-    margin: 8px 0 0;
-    color: #6b7280;
-}
 
 .hero-stats {
     display: flex;
@@ -77,6 +71,8 @@
 .form-card,
 .list-card,
 .import-result-card {
+    width: 100%;
+    max-width: 100%;
     background: #ffffff;
     border-radius: 22px;
     padding: 24px;
@@ -85,7 +81,8 @@
     border: 1px solid #e5e7eb;
 }
 
-.section-header {
+.section-header,
+.table-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -105,12 +102,103 @@
         color: #6b7280;
     }
 
-.header-actions {
+.header-actions,
+.list-filters {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
+    align-items: flex-end;
     justify-content: flex-end;
 }
+
+.month-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 190px;
+}
+
+    .month-filter label,
+    .form-group label {
+        display: block;
+        margin: 0 0 1px 2px;
+        padding: 0;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.25;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+    }
+
+.employee-filter-select,
+.filter-select,
+.form-control,
+.assignments-page input[type="date"],
+.assignments-page select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    min-height: 46px;
+    border: 1px solid #d1d5db;
+    border-radius: 14px;
+    padding: 0 14px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-control {
+    padding: 13px 15px;
+}
+
+.employee-filter-select {
+    min-width: 230px;
+}
+
+    .form-control:focus,
+    .employee-filter-select:focus,
+    .filter-select:focus,
+    .assignments-page input[type="date"]:focus,
+    .assignments-page select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+.search-box {
+    min-width: 380px;
+    height: 46px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 14px;
+    padding: 0 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+    .search-box input {
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        border: none;
+        outline: none;
+        padding: 0;
+        background: transparent;
+        color: #111827;
+        font-size: 14px;
+    }
+
+        .search-box input::placeholder {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
 .file-input-hidden {
     display: none;
@@ -120,7 +208,9 @@
 .btn-light,
 .btn-primary,
 .btn-secondary,
-.btn-filter-clear {
+.btn-filter-clear,
+.btn-export-xlsx,
+.btn-update-xlsx {
     border: none;
     border-radius: 14px;
     padding: 11px 18px;
@@ -131,19 +221,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    min-height: 42px;
+    white-space: nowrap;
 }
-
-
 
 .btn-xlsx {
     background: #16a34a;
     color: #ffffff;
 }
-
-    .btn-xlsx.disabled {
-        opacity: 0.65;
-        pointer-events: none;
-    }
 
 .btn-light {
     background: #eef2ff;
@@ -165,17 +250,40 @@
     color: #991b1b;
 }
 
+.btn-export-xlsx {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.btn-update-xlsx {
+    background: #7c3aed;
+    color: #ffffff;
+}
+
     .btn-primary:hover,
     .btn-secondary:hover,
     .btn-light:hover,
     .btn-xlsx:hover,
-    .btn-filter-clear:hover {
+    .btn-filter-clear:hover,
+    .btn-export-xlsx:hover,
+    .btn-update-xlsx:hover {
         transform: translateY(-1px);
     }
 
-.btn-primary:disabled {
+.btn-export-xlsx:hover {
+    background: #15803d;
+}
+
+.btn-update-xlsx:hover {
+    background: #6d28d9;
+}
+
+.btn-primary:disabled,
+.btn-xlsx.disabled,
+.btn-update-xlsx.disabled {
     opacity: 0.65;
     cursor: not-allowed;
+    pointer-events: none;
     transform: none;
 }
 
@@ -188,30 +296,6 @@
 .form-group.large {
     grid-column: span 1;
 }
-
-.form-group label {
-    display: block;
-    font-weight: 800;
-    color: #374151;
-    margin-bottom: 8px;
-    font-size: 14px;
-}
-
-.form-control {
-    width: 100%;
-    border: 1px solid #d1d5db;
-    border-radius: 14px;
-    padding: 13px 15px;
-    background: #ffffff;
-    color: #111827;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-    .form-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-    }
 
 .preview-grid {
     display: grid;
@@ -328,38 +412,9 @@
         color: #4b5563;
     }
 
-.table-header {
-    align-items: center;
-}
-
-.list-filters {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.search-box {
-    min-width: 380px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 14px;
-    padding: 0 12px;
-    background: #ffffff;
-}
-
-    .search-box input {
-        border: none;
-        outline: none;
-        padding: 12px 0;
-        width: 100%;
-        color: #111827;
-    }
-
 .table-container {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     border-radius: 16px;
     border: 1px solid #e5e7eb;
@@ -367,8 +422,8 @@
 
 .assignments-table {
     width: 100%;
-    border-collapse: collapse;
     min-width: 1400px;
+    border-collapse: collapse;
     background: #ffffff;
 }
 
@@ -411,6 +466,8 @@
 
 .pill {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 5px 10px;
     background: #eef2ff;
     color: #1e40af;
@@ -420,17 +477,21 @@
 }
 
 .actions-cell {
-    text-align: center;
+    width: 78px !important;
+    min-width: 78px !important;
+    max-width: 78px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
 .icon-btn {
     border: none;
     background: #eef2ff;
     color: #1e40af;
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    min-height: 38px;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
     border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -439,16 +500,23 @@
     justify-content: center;
     line-height: 1;
     font-size: 16px;
+    padding: 0;
 }
 
     .icon-btn:hover {
         transform: translateY(-1px);
     }
 
-    .icon-btn.danger {
+    .icon-btn.danger,
+    .actions-cell .icon-btn {
         background: #fee2e2;
         color: #991b1b;
     }
+
+        .icon-btn.danger:hover,
+        .actions-cell .icon-btn:hover {
+            background: #fecaca;
+        }
 
 .loading-state,
 .empty-state {
@@ -466,269 +534,9 @@
         margin-bottom: 6px;
     }
 
-.employee-filter-select {
-    min-width: 230px;
-    height: 42px;
-    border: 1px solid #d1d5db;
-    border-radius: 12px;
-    padding: 0 14px;
-    background: #ffffff;
-    color: #111827;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-    .employee-filter-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-.btn-export-xlsx {
-    height: 42px;
-    border: none;
-    border-radius: 12px;
-    padding: 0 16px;
-    background: #16a34a;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-    .btn-export-xlsx:hover {
-        background: #15803d;
-        transform: translateY(-1px);
-    }
-
-    .btn-export-xlsx:active {
-        transform: translateY(0);
-    }
-
-/* ============================= */
-/* XLSX RESULT MODAL */
-/* ============================= */
-
-.modal-backdrop-custom {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(15, 23, 42, 0.72) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 2147483647 !important;
-    padding: 24px !important;
-}
-
-.import-modal {
-    width: min(920px, 96vw) !important;
-    max-height: 88vh !important;
-    overflow-y: auto !important;
-    background: #ffffff !important;
-    border-radius: 24px !important;
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35) !important;
-    padding: 26px !important;
-    border-top: 8px solid #16a34a !important;
-    position: relative !important;
-    z-index: 2147483647 !important;
-}
-
-    .import-modal.modal-error {
-        border-top-color: #dc2626;
-    }
-
-    .import-modal.modal-success {
-        border-top-color: #16a34a;
-    }
-
-.modal-header-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 18px;
-    margin-bottom: 18px;
-}
-
-    .modal-header-custom h2 {
-        margin: 0;
-        font-size: 1.45rem;
-        font-weight: 800;
-        color: #111827;
-    }
-
-    .modal-header-custom p {
-        margin: 8px 0 0;
-        color: #4b5563;
-        font-size: 0.95rem;
-    }
-
-.modal-close-btn {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border: none;
-    border-radius: 999px;
-    background: #f3f4f6;
-    color: #111827;
-    cursor: pointer;
-    font-weight: 800;
-    transition: 0.2s ease;
-}
-
-    .modal-close-btn:hover {
-        background: #e5e7eb;
-        transform: rotate(4deg);
-    }
-
-.modal-stats {
-    margin-bottom: 20px;
-}
-
-.modal-section {
-    border-radius: 18px;
-    padding: 16px;
-    margin-top: 16px;
-}
-
-    .modal-section h3 {
-        margin: 0 0 12px;
-        font-size: 1rem;
-        font-weight: 800;
-    }
-
-    .modal-section ul {
-        margin: 0;
-        padding-left: 20px;
-    }
-
-    .modal-section li {
-        margin-bottom: 8px;
-        line-height: 1.45;
-    }
-
-    .modal-section small {
-        display: block;
-        margin-top: 12px;
-        font-weight: 700;
-    }
-
-.error-list {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #7f1d1d;
-}
-
-.warning-list {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    color: #78350f;
-}
-
-.success-message {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #14532d;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 22px;
-    border-top: 1px solid #e5e7eb;
-    padding-top: 18px;
-}
-
-/* ============================= */
-/* RESPONSIVE */
-/* ============================= */
-
-@media (max-width: 1000px) {
-    .page-hero,
-    .section-header,
-    .table-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-grid,
-    .preview-grid,
-    .import-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .search-box {
-        min-width: 100%;
-    }
-
-    .header-actions {
-        justify-content: flex-start;
-    }
-}
-
-@media (max-width: 900px) {
-    .employee-filter-select,
-    .btn-export-xlsx {
-        width: 100%;
-    }
-}
-
-@media (max-width: 640px) {
-    .assignments-page {
-        padding: 14px;
-    }
-
-    .page-hero,
-    .form-card,
-    .list-card {
-        border-radius: 18px;
-        padding: 18px;
-    }
-
-        .page-hero h1 {
-            font-size: 24px;
-        }
-
-    .modal-backdrop-custom {
-        padding: 12px;
-        align-items: flex-start;
-    }
-
-    .import-modal {
-        max-height: 94vh;
-        border-radius: 18px;
-        padding: 18px;
-    }
-
-    .modal-header-custom {
-        align-items: flex-start;
-    }
-
-        .modal-header-custom h2 {
-            font-size: 1.2rem;
-        }
-
-    .modal-actions {
-        justify-content: stretch;
-    }
-
-        .modal-actions .btn-primary {
-            width: 100%;
-        }
-}
-
-.assignment-modal-backdrop {
+.modal-backdrop-custom,
+.assignment-modal-backdrop,
+.temporary-modal-backdrop {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
@@ -741,49 +549,73 @@
     padding: 24px !important;
 }
 
-.assignment-modal {
-    width: min(920px, 96vw) !important;
-    max-height: 88vh !important;
+.import-modal,
+.assignment-modal,
+.temporary-modal {
+    width: min(980px, 96vw) !important;
+    max-width: 100%;
+    max-height: 90vh !important;
     overflow-y: auto !important;
     background: #ffffff !important;
     border-radius: 24px !important;
     padding: 26px !important;
     box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35) !important;
-    border-top: 8px solid #16a34a !important;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+    position: relative !important;
+    z-index: 2147483647 !important;
 }
 
+.import-modal,
+.assignment-modal {
+    border-top: 8px solid #16a34a !important;
+}
+
+.temporary-modal {
+    border-top: 8px solid #7c3aed !important;
+}
+
+.import-modal.modal-error,
 .assignment-modal-error {
     border-top-color: #dc2626 !important;
 }
 
+.import-modal.modal-success,
 .assignment-modal-success {
     border-top-color: #16a34a !important;
 }
 
-.assignment-modal-header {
+.modal-header-custom,
+.assignment-modal-header,
+.temporary-modal-header {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     gap: 16px;
     border-bottom: 1px solid #e5e7eb;
     padding-bottom: 18px;
     margin-bottom: 18px;
 }
 
-    .assignment-modal-header h2 {
+    .modal-header-custom h2,
+    .assignment-modal-header h2,
+    .temporary-modal-header h2 {
         margin: 0;
-        color: #111827;
         font-size: 1.45rem;
         font-weight: 800;
+        color: #111827;
     }
 
-    .assignment-modal-header p {
+    .modal-header-custom p,
+    .assignment-modal-header p,
+    .temporary-modal-header p {
         margin: 8px 0 0;
         color: #4b5563;
         font-size: 0.95rem;
     }
 
-.assignment-modal-close {
+.modal-close-btn,
+.assignment-modal-close,
+.temporary-modal-close {
     width: 38px;
     height: 38px;
     min-width: 38px;
@@ -793,7 +625,15 @@
     color: #111827;
     cursor: pointer;
     font-weight: 800;
+    transition: 0.2s ease;
 }
+
+    .modal-close-btn:hover,
+    .assignment-modal-close:hover,
+    .temporary-modal-close:hover {
+        background: #e5e7eb;
+        transform: rotate(4deg);
+    }
 
 .assignment-modal-stats {
     display: grid;
@@ -823,40 +663,53 @@
         margin-top: 4px;
     }
 
+.modal-section,
 .assignment-modal-section {
     border-radius: 18px;
     padding: 16px;
     margin-top: 16px;
 }
 
+    .modal-section h3,
     .assignment-modal-section h3 {
         margin: 0 0 12px;
         font-size: 1rem;
         font-weight: 800;
     }
 
+    .modal-section ul,
     .assignment-modal-section ul {
         margin: 0;
         padding-left: 20px;
     }
 
+    .modal-section li,
     .assignment-modal-section li {
         margin-bottom: 8px;
         line-height: 1.45;
     }
 
+    .modal-section small {
+        display: block;
+        margin-top: 12px;
+        font-weight: 700;
+    }
+
+.error-list,
 .assignment-modal-errors {
     background: #fef2f2;
     border: 1px solid #fecaca;
     color: #7f1d1d;
 }
 
+.warning-list,
 .assignment-modal-warnings {
     background: #fffbeb;
     border: 1px solid #fde68a;
     color: #78350f;
 }
 
+.success-message,
 .assignment-modal-ok {
     background: #f0fdf4;
     border: 1px solid #bbf7d0;
@@ -866,9 +719,12 @@
     gap: 4px;
 }
 
-.assignment-modal-actions {
+.modal-actions,
+.assignment-modal-actions,
+.temporary-modal-actions {
     display: flex;
     justify-content: flex-end;
+    gap: 12px;
     margin-top: 22px;
     border-top: 1px solid #e5e7eb;
     padding-top: 18px;
@@ -883,97 +739,6 @@
         font-weight: 800;
         cursor: pointer;
     }
-
-@media (max-width: 700px) {
-    .assignment-modal-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .assignment-modal {
-        max-height: 94vh !important;
-        padding: 18px !important;
-        border-radius: 18px !important;
-    }
-
-    .assignment-modal-actions button {
-        width: 100%;
-    }
-}
-
-.btn-update-xlsx {
-    border: none;
-    border-radius: 14px;
-    padding: 11px 18px;
-    cursor: pointer;
-    font-weight: 800;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #7c3aed;
-    color: #ffffff;
-}
-
-.temporary-modal-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 2147483647 !important;
-    background: rgba(15, 23, 42, 0.72) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 24px !important;
-}
-
-.temporary-modal {
-    width: min(980px, 96vw) !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-    background: #ffffff !important;
-    border-radius: 24px !important;
-    padding: 26px !important;
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35) !important;
-    border-top: 8px solid #7c3aed !important;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
-}
-
-.temporary-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 18px;
-    margin-bottom: 18px;
-}
-
-    .temporary-modal-header h2 {
-        margin: 0;
-        color: #111827;
-        font-size: 1.45rem;
-        font-weight: 800;
-    }
-
-    .temporary-modal-header p {
-        margin: 8px 0 0;
-        color: #4b5563;
-        font-size: 0.95rem;
-    }
-
-.temporary-modal-close {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border: none;
-    border-radius: 999px;
-    background: #f3f4f6;
-    color: #111827;
-    cursor: pointer;
-    font-weight: 800;
-}
 
 .temporary-stages {
     display: grid;
@@ -1003,105 +768,6 @@
         font-size: 14px;
     }
 
-.temporary-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 22px;
-    border-top: 1px solid #e5e7eb;
-    padding-top: 18px;
-}
-
-@media (max-width: 700px) {
-    .temporary-modal {
-        max-height: 94vh !important;
-        padding: 18px !important;
-        border-radius: 18px !important;
-    }
-
-    .temporary-stages {
-        grid-template-columns: 1fr;
-    }
-
-    .temporary-modal-actions {
-        flex-direction: column;
-    }
-
-        .temporary-modal-actions .btn-primary,
-        .temporary-modal-actions .btn-secondary {
-            width: 100%;
-        }
-}
-
-.btn-update-xlsx:hover {
-    transform: translateY(-1px);
-    background: #6d28d9;
-}
-
-.btn-update-xlsx.disabled {
-    opacity: 0.65;
-    pointer-events: none;
-}
-
-/* ========================================================= */
-/* FIX FINAL: BOTÓN ELIMINAR ALINEADO EN REGISTRO ASIGNACIONES */
-/* ========================================================= */
-
-.assignments-table th,
-.assignments-table td {
-    vertical-align: middle !important;
-}
-
-    .assignments-table th:last-child,
-    .assignments-table td.actions-cell {
-        width: 78px !important;
-        min-width: 78px !important;
-        max-width: 78px !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    .assignments-table td.actions-cell {
-        display: table-cell !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-        padding: 13px 14px !important;
-        line-height: normal !important;
-        position: static !important;
-    }
-
-        .assignments-table td.actions-cell .icon-btn,
-        .assignments-table td.actions-cell button.icon-btn {
-            position: static !important;
-            transform: none !important;
-            margin: 0 auto !important;
-            width: 42px !important;
-            height: 42px !important;
-            min-width: 42px !important;
-            min-height: 42px !important;
-            padding: 0 !important;
-            border: none !important;
-            border-radius: 14px !important;
-            background: #fee2e2 !important;
-            color: #991b1b !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            line-height: 1 !important;
-            font-size: 16px !important;
-            cursor: pointer !important;
-        }
-
-            .assignments-table td.actions-cell .icon-btn:hover,
-            .assignments-table td.actions-cell button.icon-btn:hover {
-                background: #fecaca !important;
-                transform: none !important;
-            }
-
-/* =========================================================
-   DARK MODE - ASIGNACIONES
-========================================================= */
-
 html[data-theme="dark"] .assignments-page {
     background: #0f172a;
     color: #e5e7eb;
@@ -1118,8 +784,8 @@ html[data-theme="dark"] .import-details,
 html[data-theme="dark"] .loading-state,
 html[data-theme="dark"] .empty-state {
     background: #111827;
-    border-color: rgba(255,255,255,.10);
-    box-shadow: 0 18px 40px rgba(0,0,0,.28);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
 }
 
     html[data-theme="dark"] .page-hero h1,
@@ -1141,25 +807,40 @@ html[data-theme="dark"] .empty-state {
     html[data-theme="dark"] .import-stats span,
     html[data-theme="dark"] .employee-title span,
     html[data-theme="dark"] .book-title span,
-    html[data-theme="dark"] .form-group label,
-    html[data-theme="dark"] .month-filter label {
-        color: #94a3b8;
+    html[data-theme="dark"] .month-filter label,
+    html[data-theme="dark"] .form-group label {
+        color: #cbd5e1;
     }
 
 html[data-theme="dark"] .form-control,
 html[data-theme="dark"] .search-box,
-html[data-theme="dark"] .search-box input,
 html[data-theme="dark"] .employee-filter-select,
-html[data-theme="dark"] .filter-select {
+html[data-theme="dark"] .filter-select,
+html[data-theme="dark"] .assignments-page input[type="date"],
+html[data-theme="dark"] .assignments-page select {
     background: #0f172a;
-    border-color: rgba(255,255,255,.14);
+    border-color: rgba(148, 163, 184, 0.24);
     color: #f8fafc;
 }
+
+    html[data-theme="dark"] .search-box input {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .search-box span {
+        color: #93c5fd;
+    }
+
+    html[data-theme="dark"] .form-control::placeholder,
+    html[data-theme="dark"] .search-box input::placeholder {
+        color: #cbd5e1;
+        opacity: 0.95;
+    }
 
 html[data-theme="dark"] .table-container,
 html[data-theme="dark"] .assignments-table {
     background: #111827;
-    border-color: rgba(255,255,255,.10);
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
     html[data-theme="dark"] .assignments-table th {
@@ -1169,11 +850,11 @@ html[data-theme="dark"] .assignments-table {
 
     html[data-theme="dark"] .assignments-table td {
         color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.08);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
     }
 
     html[data-theme="dark"] .assignments-table tbody tr:hover {
-        background: rgba(255,255,255,.04);
+        background: rgba(255, 255, 255, 0.04);
     }
 
 html[data-theme="dark"] .temporary-modal,
@@ -1181,7 +862,7 @@ html[data-theme="dark"] .assignment-modal,
 html[data-theme="dark"] .import-modal {
     background: #111827 !important;
     color: #e5e7eb !important;
-    border-color: rgba(255,255,255,.10) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 html[data-theme="dark"] .temporary-modal-header,
@@ -1190,7 +871,7 @@ html[data-theme="dark"] .modal-header-custom,
 html[data-theme="dark"] .temporary-modal-actions,
 html[data-theme="dark"] .assignment-modal-actions,
 html[data-theme="dark"] .modal-actions {
-    border-color: rgba(255,255,255,.10);
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
     html[data-theme="dark"] .temporary-modal-header h2,
@@ -1211,13 +892,14 @@ html[data-theme="dark"] .modal-actions {
 html[data-theme="dark"] .assignment-modal-stats div,
 html[data-theme="dark"] .temporary-stage-card {
     background: #0f172a;
-    border-color: rgba(255,255,255,.10);
+    border-color: rgba(255, 255, 255, 0.10);
     color: #e5e7eb;
 }
 
-/* =========================================================
-   LIQUID GLASS PREMIUM - ASIGNACIONES
-========================================================= */
+html[data-theme="dark"] .assignments-page input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.4);
+    opacity: 0.85;
+}
 
 html[data-theme="liquid glass"] .assignments-page {
     background: transparent;
@@ -1234,14 +916,16 @@ html[data-theme="liquid glass"] .import-stats div,
 html[data-theme="liquid glass"] .import-details,
 html[data-theme="liquid glass"] .loading-state,
 html[data-theme="liquid glass"] .empty-state {
-    background: rgba(255,255,255,.34);
+    background: rgba(255, 255, 255, 0.34);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255,255,255,.62);
-    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.86);
 }
 
-html[data-theme="liquid glass"] .page-hero {
+html[data-theme="liquid glass"] .page-hero,
+html[data-theme="liquid glass"] .form-card,
+html[data-theme="liquid glass"] .list-card {
     position: relative;
     overflow: hidden;
 }
@@ -1254,15 +938,9 @@ html[data-theme="liquid glass"] .page-hero {
         inset: 1px;
         pointer-events: none;
         border-radius: inherit;
-        background: linear-gradient(135deg, rgba(255,255,255,.55), transparent 38%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.70), transparent 28%);
-        opacity: .75;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), transparent 38%), radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.70), transparent 28%);
+        opacity: 0.75;
     }
-
-html[data-theme="liquid glass"] .form-card,
-html[data-theme="liquid glass"] .list-card {
-    position: relative;
-    overflow: hidden;
-}
 
     html[data-theme="liquid glass"] .form-card > *,
     html[data-theme="liquid glass"] .list-card > *,
@@ -1271,16 +949,37 @@ html[data-theme="liquid glass"] .list-card {
         z-index: 1;
     }
 
+    html[data-theme="liquid glass"] .page-hero h1 {
+        color: #0f172a !important;
+        text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95);
+    }
+
+    html[data-theme="liquid glass"] .page-hero p {
+        color: #334155 !important;
+        text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85);
+    }
+
+    html[data-theme="liquid glass"] .page-hero > div:first-child {
+        background: rgba(255, 255, 255, 0.34);
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        border-radius: 22px;
+        padding: 22px 24px;
+        backdrop-filter: blur(18px) saturate(170%);
+        -webkit-backdrop-filter: blur(18px) saturate(170%);
+    }
+
 html[data-theme="liquid glass"] .form-control,
 html[data-theme="liquid glass"] .search-box,
 html[data-theme="liquid glass"] .employee-filter-select,
-html[data-theme="liquid glass"] .filter-select {
-    background: rgba(255,255,255,.45);
+html[data-theme="liquid glass"] .filter-select,
+html[data-theme="liquid glass"] .assignments-page input[type="date"],
+html[data-theme="liquid glass"] .assignments-page select {
+    background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(20px) saturate(170%);
     -webkit-backdrop-filter: blur(20px) saturate(170%);
-    border-color: rgba(255,255,255,.65);
+    border-color: rgba(255, 255, 255, 0.65);
     color: #111827;
-    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.80);
 }
 
     html[data-theme="liquid glass"] .search-box input {
@@ -1290,40 +989,40 @@ html[data-theme="liquid glass"] .filter-select {
 
 html[data-theme="liquid glass"] .table-container,
 html[data-theme="liquid glass"] .assignments-table {
-    background: rgba(255,255,255,.28);
+    background: rgba(255, 255, 255, 0.28);
     backdrop-filter: blur(24px) saturate(170%);
     -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border-color: rgba(255,255,255,.55);
+    border-color: rgba(255, 255, 255, 0.55);
 }
 
     html[data-theme="liquid glass"] .assignments-table th {
-        background: rgba(17,24,39,.88);
+        background: rgba(17, 24, 39, 0.88);
         color: #ffffff;
     }
 
     html[data-theme="liquid glass"] .assignments-table td {
         color: #334155;
-        border-bottom-color: rgba(255,255,255,.38);
+        border-bottom-color: rgba(255, 255, 255, 0.38);
     }
 
     html[data-theme="liquid glass"] .assignments-table tbody tr:hover {
-        background: rgba(255,255,255,.22);
+        background: rgba(255, 255, 255, 0.22);
     }
 
 html[data-theme="liquid glass"] .temporary-modal,
 html[data-theme="liquid glass"] .assignment-modal,
 html[data-theme="liquid glass"] .import-modal {
-    background: rgba(255,255,255,.42) !important;
+    background: rgba(255, 255, 255, 0.42) !important;
     backdrop-filter: blur(34px) saturate(190%) !important;
     -webkit-backdrop-filter: blur(34px) saturate(190%) !important;
-    border: 1px solid rgba(255,255,255,.65) !important;
-    box-shadow: 0 30px 80px rgba(15,23,42,.20), inset 0 1px 1px rgba(255,255,255,.86) !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.20), inset 0 1px 1px rgba(255, 255, 255, 0.86) !important;
 }
 
 html[data-theme="liquid glass"] .temporary-stage-card,
 html[data-theme="liquid glass"] .assignment-modal-stats div {
-    background: rgba(255,255,255,.42);
-    border-color: rgba(255,255,255,.62);
+    background: rgba(255, 255, 255, 0.42);
+    border-color: rgba(255, 255, 255, 0.62);
     backdrop-filter: blur(20px) saturate(170%);
     -webkit-backdrop-filter: blur(20px) saturate(170%);
 }
@@ -1331,14 +1030,10 @@ html[data-theme="liquid glass"] .assignment-modal-stats div {
 html[data-theme="liquid glass"] .modal-backdrop-custom,
 html[data-theme="liquid glass"] .assignment-modal-backdrop,
 html[data-theme="liquid glass"] .temporary-modal-backdrop {
-    background: rgba(15,23,42,.34) !important;
+    background: rgba(15, 23, 42, 0.34) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
-
-/* =========================================================
-   DARK GLASS - ASIGNACIONES
-========================================================= */
 
 html[data-theme="dark glass"] .assignments-page {
     background: transparent;
@@ -1355,11 +1050,11 @@ html[data-theme="dark glass"] .import-stats div,
 html[data-theme="dark glass"] .import-details,
 html[data-theme="dark glass"] .loading-state,
 html[data-theme="dark glass"] .empty-state {
-    background: rgba(15,23,42,.55);
+    background: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(24px) saturate(170%);
     -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
 }
 
     html[data-theme="dark glass"] .page-hero h1,
@@ -1381,18 +1076,20 @@ html[data-theme="dark glass"] .empty-state {
     html[data-theme="dark glass"] .import-stats span,
     html[data-theme="dark glass"] .employee-title span,
     html[data-theme="dark glass"] .book-title span,
-    html[data-theme="dark glass"] .form-group label,
-    html[data-theme="dark glass"] .month-filter label {
+    html[data-theme="dark glass"] .month-filter label,
+    html[data-theme="dark glass"] .form-group label {
         color: #cbd5e1;
     }
 
 html[data-theme="dark glass"] .form-control,
 html[data-theme="dark glass"] .search-box,
 html[data-theme="dark glass"] .employee-filter-select,
-html[data-theme="dark glass"] .filter-select {
-    background: rgba(15,23,42,.58);
+html[data-theme="dark glass"] .filter-select,
+html[data-theme="dark glass"] .assignments-page input[type="date"],
+html[data-theme="dark glass"] .assignments-page select {
+    background: rgba(15, 23, 42, 0.58);
     color: #f8fafc;
-    border-color: rgba(255,255,255,.12);
+    border-color: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
@@ -1402,40 +1099,50 @@ html[data-theme="dark glass"] .filter-select {
         background: transparent;
     }
 
+    html[data-theme="dark glass"] .search-box span {
+        color: #93c5fd;
+    }
+
+    html[data-theme="dark glass"] .form-control::placeholder,
+    html[data-theme="dark glass"] .search-box input::placeholder {
+        color: #cbd5e1;
+        opacity: 0.95;
+    }
+
 html[data-theme="dark glass"] .table-container,
 html[data-theme="dark glass"] .assignments-table {
-    background: rgba(15,23,42,.50);
-    border-color: rgba(255,255,255,.10);
+    background: rgba(15, 23, 42, 0.50);
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
     html[data-theme="dark glass"] .assignments-table th {
-        background: rgba(2,6,23,.78);
+        background: rgba(2, 6, 23, 0.78);
         color: #f8fafc;
     }
 
     html[data-theme="dark glass"] .assignments-table td {
         color: #e2e8f0;
-        border-bottom-color: rgba(255,255,255,.07);
+        border-bottom-color: rgba(255, 255, 255, 0.07);
     }
 
     html[data-theme="dark glass"] .assignments-table tbody tr:hover {
-        background: rgba(255,255,255,.05);
+        background: rgba(255, 255, 255, 0.05);
     }
 
 html[data-theme="dark glass"] .temporary-modal,
 html[data-theme="dark glass"] .assignment-modal,
 html[data-theme="dark glass"] .import-modal {
-    background: rgba(15,23,42,.72) !important;
+    background: rgba(15, 23, 42, 0.72) !important;
     color: #e5e7eb !important;
     backdrop-filter: blur(28px) saturate(170%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
-    border: 1px solid rgba(255,255,255,.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 html[data-theme="dark glass"] .temporary-stage-card,
 html[data-theme="dark glass"] .assignment-modal-stats div {
-    background: rgba(15,23,42,.55);
-    border-color: rgba(255,255,255,.10);
+    background: rgba(15, 23, 42, 0.55);
+    border-color: rgba(255, 255, 255, 0.10);
     color: #e5e7eb;
 }
 
@@ -1445,7 +1152,7 @@ html[data-theme="dark glass"] .modal-header-custom,
 html[data-theme="dark glass"] .temporary-modal-actions,
 html[data-theme="dark glass"] .assignment-modal-actions,
 html[data-theme="dark glass"] .modal-actions {
-    border-color: rgba(255,255,255,.10);
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
     html[data-theme="dark glass"] .temporary-modal-header h2,
@@ -1466,120 +1173,14 @@ html[data-theme="dark glass"] .modal-actions {
 html[data-theme="dark glass"] .modal-backdrop-custom,
 html[data-theme="dark glass"] .assignment-modal-backdrop,
 html[data-theme="dark glass"] .temporary-modal-backdrop {
-    background: rgba(2,6,23,.52) !important;
+    background: rgba(2, 6, 23, 0.52) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
-/* =========================================================
-   DARK MODE FIX - ASSIGNMENTS PLACEHOLDERS
-========================================================= */
-
-html[data-theme="dark"] .assignments-page .form-control::placeholder,
-html[data-theme="dark"] .assignments-page .search-box input::placeholder,
-html[data-theme="dark"] .assignments-page .employee-filter-select::placeholder,
-html[data-theme="dark"] .assignments-page .filter-select::placeholder {
-    color: #94a3b8 !important;
-    opacity: 1 !important;
-}
-
-html[data-theme="dark glass"] .assignments-page .form-control::placeholder,
-html[data-theme="dark glass"] .assignments-page .search-box input::placeholder,
-html[data-theme="dark glass"] .assignments-page .employee-filter-select::placeholder,
-html[data-theme="dark glass"] .assignments-page .filter-select::placeholder {
-    color: #cbd5e1 !important;
-    opacity: 1 !important;
-}
-
-/* =========================================================
-   DARK MODE FIX - ASSIGNMENTS LIST HEADER + SEARCH LIKE EMPLOYEES
-========================================================= */
-
-html[data-theme="dark"] .assignments-page .list-card .section-header h2,
-html[data-theme="dark"] .assignments-page .list-card .section-header p {
-    color: #f8fafc !important;
-}
-
-html[data-theme="dark"] .assignments-page .list-card .search-box {
-    background: #0f172a !important;
-    border: 1px solid rgba(148, 163, 184, 0.22) !important;
-    border-radius: 14px !important;
-    min-width: 340px !important;
-    height: 46px !important;
-    box-shadow: none !important;
-}
-
-    html[data-theme="dark"] .assignments-page .list-card .search-box input {
-        color: #f8fafc !important;
-        background: transparent !important;
-    }
-
-        html[data-theme="dark"] .assignments-page .list-card .search-box input::placeholder {
-            color: #cbd5e1 !important;
-            opacity: 1 !important;
-        }
-
-    html[data-theme="dark"] .assignments-page .list-card .search-box:focus-within {
-        border-color: rgba(148, 163, 184, 0.38) !important;
-        box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.08) !important;
-    }
-
-    html[data-theme="dark"] .assignments-page .list-card .search-box span {
-        color: #cbd5e1 !important;
-    }
-
-/* =========================================================
-   LIQUID GLASS FIX - ASSIGNMENTS HERO READABILITY
-========================================================= */
-
-html[data-theme="liquid glass"] .assignments-page .page-hero h1 {
-    color: #0f172a !important;
-    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95) !important;
-}
-
-html[data-theme="liquid glass"] .assignments-page .page-hero p {
-    color: #334155 !important;
-    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85) !important;
-}
-
-html[data-theme="liquid glass"] .assignments-page .page-hero > div:first-child {
-    background: rgba(255, 255, 255, 0.34);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    border-radius: 22px;
-    padding: 22px 24px;
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card span {
-    color: #475569 !important;
-}
-
-html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
-    color: #111827 !important;
-}
-
-
-.assignments-page,
-.assignments-page * {
-    box-sizing: border-box;
-}
-
-.assignments-page {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.page-hero,
-.form-card,
-.list-card,
-.import-result-card,
-.table-container,
-.import-modal,
-.assignment-modal,
-.temporary-modal {
-    max-width: 100%;
+html[data-theme="dark glass"] .assignments-page input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.4);
+    opacity: 0.85;
 }
 
 @media (max-width: 1280px) {
@@ -1607,24 +1208,15 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
         padding: 18px;
     }
 
-    .page-hero {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .month-filter {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .hero-stats {
-        grid-template-columns: repeat(3, minmax(120px, 1fr));
-    }
-
+    .page-hero,
     .section-header,
     .table-header {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
     }
 
     .header-actions,
@@ -1635,14 +1227,19 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
 
     .list-filters {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        align-items: end;
     }
 
+        .list-filters .month-filter {
+            width: 100%;
+            min-width: 0;
+        }
+
     .search-box {
-        min-width: 0 !important;
+        min-width: 0;
         width: 100%;
-        height: 46px;
         grid-column: 1 / -1;
     }
 
@@ -1658,6 +1255,7 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
         width: 100%;
         min-width: 0;
         height: 46px;
+        min-height: 46px;
     }
 
     .form-grid,
@@ -1705,8 +1303,7 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
     .hero-stats,
     .import-stats,
     .assignment-modal-stats,
-    .temporary-stages,
-    .list-filters {
+    .temporary-stages {
         grid-template-columns: 1fr;
     }
 
@@ -1731,154 +1328,215 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
             width: 100%;
         }
 
+    .list-filters {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 18px !important;
+        width: 100% !important;
+    }
+
+        .list-filters > * {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+
+    .month-filter {
+        width: 100% !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 9px !important;
+        margin: 0 !important;
+    }
+
+        .month-filter label,
+        .form-group label {
+            position: static !important;
+            display: block !important;
+            margin: 0 0 2px 2px !important;
+            padding: 0 !important;
+            min-height: 16px !important;
+            line-height: 1.25 !important;
+            font-size: 12px !important;
+            font-weight: 900 !important;
+            white-space: nowrap !important;
+        }
+
+    .employee-filter-select,
+    .filter-select,
+    .form-control,
+    .assignments-page input[type="date"],
+    .assignments-page select,
+    .search-box,
+    .btn-export-xlsx,
+    .btn-filter-clear,
+    .btn-primary,
+    .btn-secondary,
+    .btn-light,
+    .btn-xlsx,
+    .btn-update-xlsx {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        border-radius: 14px !important;
+        font-size: 14px !important;
+    }
+
+    .search-box {
+        padding: 0 12px !important;
+        overflow: hidden !important;
+    }
+
+        .search-box input {
+            width: 100% !important;
+            min-width: 0 !important;
+            height: 100% !important;
+            padding: 0 !important;
+            font-size: 13px !important;
+        }
+
+            .search-box input::placeholder {
+                font-size: 12.5px !important;
+                text-overflow: ellipsis !important;
+            }
+
     .table-container {
-        overflow: visible;
-        border: none;
-        border-radius: 0;
-        background: transparent;
+        overflow: visible !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
     }
 
     .assignments-table {
+        display: block !important;
+        width: 100% !important;
         min-width: 0 !important;
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 14px;
-        background: transparent;
+        background: transparent !important;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
     }
 
         .assignments-table thead {
-            display: none;
+            display: none !important;
         }
+
+        .assignments-table tbody {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 18px !important;
+            width: 100% !important;
+            background: transparent !important;
+        }
+
+            .assignments-table tbody tr {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 14px !important;
+                border-radius: 20px !important;
+                overflow: hidden !important;
+                position: relative !important;
+                background: #ffffff !important;
+                border: 1px solid #e5e7eb !important;
+                box-shadow: 0 14px 34px rgba(15, 23, 42, 0.10) !important;
+            }
 
         .assignments-table,
         .assignments-table tbody,
         .assignments-table tr,
         .assignments-table td {
-            display: block;
             width: 100%;
         }
 
-            .assignments-table tbody tr {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 18px;
-                padding: 12px;
-                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-                overflow: hidden;
-            }
-
             .assignments-table td {
-                position: relative;
-                padding: 12px 10px 12px 46% !important;
-                border-bottom: 1px solid #e5e7eb;
+                display: flex !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-top: none !important;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.22) !important;
+                padding: 12px 8px 12px 43% !important;
+                min-height: 46px !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                text-align: right !important;
                 white-space: normal !important;
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                text-align: right;
-                word-break: break-word;
+                word-break: break-word !important;
+                position: relative !important;
+                color: #334155 !important;
             }
 
                 .assignments-table td:last-child {
-                    border-bottom: none;
+                    border-bottom: none !important;
                 }
 
                 .assignments-table td::before {
-                    position: absolute;
-                    left: 10px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    width: 40%;
-                    font-size: 12px;
-                    font-weight: 800;
-                    color: #64748b;
-                    text-align: left;
-                    white-space: normal;
-                }
-
-                .assignments-table td:nth-child(1)::before {
-                    content: "Employee";
-                }
-
-                .assignments-table td:nth-child(2)::before {
-                    content: "Book";
-                }
-
-                .assignments-table td:nth-child(3)::before {
-                    content: "Database";
-                }
-
-                .assignments-table td:nth-child(4)::before {
-                    content: "Bind Plant";
-                }
-
-                .assignments-table td:nth-child(5)::before {
-                    content: "Proof";
-                }
-
-                .assignments-table td:nth-child(6)::before {
-                    content: "Final";
-                }
-
-                .assignments-table td:nth-child(7)::before {
-                    content: "Memo";
-                }
-
-                .assignments-table td:nth-child(8)::before {
-                    content: "Final PO";
-                }
-
-                .assignments-table td:nth-child(9)::before {
-                    content: "Shipping";
-                }
-
-                .assignments-table td:nth-child(10)::before {
-                    content: "Dirxion";
-                }
-
-                .assignments-table td:nth-child(11)::before {
-                    content: "Actions";
+                    content: attr(data-label) !important;
+                    position: absolute !important;
+                    left: 8px !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
+                    width: 38% !important;
+                    text-align: left !important;
+                    font-size: 11.5px !important;
+                    font-weight: 900 !important;
+                    line-height: 1.2 !important;
+                    white-space: normal !important;
+                    color: #64748b !important;
                 }
 
     .employee-title,
     .book-title {
-        width: 100%;
-        text-align: right;
+        width: 100% !important;
+        text-align: right !important;
     }
 
         .employee-title strong,
-        .book-title strong {
-            white-space: normal;
-            word-break: break-word;
-        }
-
+        .book-title strong,
         .employee-title span,
         .book-title span {
-            white-space: normal;
-            word-break: break-word;
+            white-space: normal !important;
+            word-break: break-word !important;
         }
 
     .pill {
-        white-space: normal;
-        text-align: center;
-        justify-content: center;
+        max-width: 100% !important;
+        white-space: normal !important;
+        text-align: center !important;
+        justify-content: center !important;
     }
 
     .assignments-table td.actions-cell {
+        display: flex !important;
         width: 100% !important;
         min-width: 0 !important;
-        max-width: none !important;
-        padding: 14px 10px !important;
-        display: flex !important;
+        max-width: 100% !important;
+        padding: 14px 8px 6px 43% !important;
+        min-height: 58px !important;
+        background: transparent !important;
         justify-content: flex-end !important;
         align-items: center !important;
         text-align: right !important;
     }
 
+        .assignments-table td.actions-cell::before {
+            content: "Actions" !important;
+        }
+
         .assignments-table td.actions-cell .icon-btn,
         .assignments-table td.actions-cell button.icon-btn {
             margin: 0 !important;
+            position: static !important;
+            transform: none !important;
         }
 
     .modal-backdrop-custom,
@@ -1925,6 +1583,58 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
         .temporary-modal-actions button {
             width: 100%;
         }
+
+    html[data-theme="dark"] .assignments-table tbody tr {
+        background: #0f172a !important;
+        border: 1px solid rgba(148, 163, 184, 0.18) !important;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34) !important;
+    }
+
+    html[data-theme="dark"] .assignments-table td {
+        background: transparent !important;
+        color: #e5e7eb !important;
+        border-bottom-color: rgba(148, 163, 184, 0.16) !important;
+    }
+
+        html[data-theme="dark"] .assignments-table td::before {
+            color: #cbd5e1 !important;
+        }
+
+    html[data-theme="dark glass"] .assignments-table tbody tr {
+        background: rgba(15, 23, 42, 0.92) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    html[data-theme="dark glass"] .assignments-table td {
+        background: transparent !important;
+        color: #e5e7eb !important;
+        border-bottom-color: rgba(255, 255, 255, 0.10) !important;
+    }
+
+        html[data-theme="dark glass"] .assignments-table td::before {
+            color: #cbd5e1 !important;
+        }
+
+    html[data-theme="liquid glass"] .assignments-table tbody tr {
+        background: rgba(255, 255, 255, 0.56) !important;
+        border: 1px solid rgba(255, 255, 255, 0.68) !important;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.78) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    html[data-theme="liquid glass"] .assignments-table td {
+        background: transparent !important;
+        color: #334155 !important;
+        border-bottom-color: rgba(100, 116, 139, 0.20) !important;
+    }
+
+        html[data-theme="liquid glass"] .assignments-table td::before {
+            color: #475569 !important;
+        }
 }
 
 @media (max-width: 520px) {
@@ -1948,6 +1658,20 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
         font-size: 18px;
     }
 
+    .list-filters {
+        gap: 17px !important;
+    }
+
+    .month-filter {
+        gap: 8px !important;
+    }
+
+        .month-filter label,
+        .form-group label {
+            font-size: 11.5px !important;
+            min-height: 15px !important;
+        }
+
     .form-control,
     .employee-filter-select,
     .filter-select,
@@ -1959,19 +1683,23 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
     .btn-secondary,
     .btn-filter-clear,
     .btn-update-xlsx {
-        min-height: 44px;
+        height: 48px !important;
+        min-height: 48px !important;
         font-size: 14px;
         border-radius: 12px;
     }
 
     .search-box {
-        height: 44px;
-        padding: 0 10px;
+        padding: 0 10px !important;
     }
 
         .search-box input {
-            font-size: 14px;
+            font-size: 13px !important;
         }
+
+            .search-box input::placeholder {
+                font-size: 12px !important;
+            }
 
     .stat-card strong,
     .import-stats strong,
@@ -1979,10 +1707,14 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
         font-size: 21px;
     }
 
-    .assignments-table tbody tr {
-        border-radius: 16px;
-        padding: 10px;
+    .assignments-table tbody {
+        gap: 16px !important;
     }
+
+        .assignments-table tbody tr {
+            border-radius: 16px !important;
+            padding: 10px !important;
+        }
 
     .assignments-table td {
         padding: 11px 8px 11px 43% !important;
@@ -1990,19 +1722,23 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
     }
 
         .assignments-table td::before {
-            left: 8px;
-            width: 38%;
-            font-size: 11px;
+            left: 8px !important;
+            width: 38% !important;
+            font-size: 11px !important;
         }
 
-        .icon-btn,
-        .assignments-table td.actions-cell .icon-btn,
-        .assignments-table td.actions-cell button.icon-btn {
-            width: 40px !important;
-            height: 40px !important;
-            min-width: 40px !important;
-            min-height: 40px !important;
+        .assignments-table td.actions-cell {
+            padding: 14px 8px 14px 43% !important;
         }
+
+            .icon-btn,
+            .assignments-table td.actions-cell .icon-btn,
+            .assignments-table td.actions-cell button.icon-btn {
+                width: 40px !important;
+                height: 40px !important;
+                min-width: 40px !important;
+                min-height: 40px !important;
+            }
 
     .modal-close-btn,
     .assignment-modal-close,
@@ -2020,100 +1756,88 @@ html[data-theme="liquid glass"] .assignments-page .page-hero .stat-card strong {
 }
 
 @media (max-width: 768px) {
-    html[data-theme="dark"] .assignments-table tbody tr {
-        background: #111827;
-        border-color: rgba(255,255,255,.10);
-        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    html:has(.assignments-page),
+    body:has(.assignments-page) {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
     }
 
-    html[data-theme="dark"] .assignments-table td {
-        border-bottom-color: rgba(255,255,255,.08);
-        color: #e2e8f0;
+    .assignments-page {
+        height: auto !important;
+        min-height: 100dvh !important;
+        overflow: visible !important;
+        padding-bottom: 96px !important;
     }
 
-        html[data-theme="dark"] .assignments-table td::before {
-            color: #94a3b8;
+        .assignments-page .list-card {
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            padding-bottom: 20px !important;
         }
 
-    html[data-theme="dark glass"] .assignments-table tbody tr {
-        background: rgba(15,23,42,.62);
-        border-color: rgba(255,255,255,.10);
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
-        box-shadow: 0 14px 34px rgba(0,0,0,.28);
-    }
-
-    html[data-theme="dark glass"] .assignments-table td {
-        border-bottom-color: rgba(255,255,255,.08);
-        color: #e2e8f0;
-    }
-
-        html[data-theme="dark glass"] .assignments-table td::before {
-            color: #cbd5e1;
-        }
-
-    html[data-theme="liquid glass"] .assignments-table tbody tr {
-        background: rgba(255,255,255,.42);
-        border-color: rgba(255,255,255,.62);
-        backdrop-filter: blur(22px) saturate(170%);
-        -webkit-backdrop-filter: blur(22px) saturate(170%);
-        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
-    }
-
-    html[data-theme="liquid glass"] .assignments-table td {
-        border-bottom-color: rgba(255,255,255,.42);
-        color: #334155;
-    }
-
-        html[data-theme="liquid glass"] .assignments-table td::before {
-            color: #475569;
-        }
-}
-
-@media (max-width: 768px) {
-    .assignments-page .assignments-table tbody {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-
-        .assignments-page .assignments-table tbody tr {
+        .assignments-page .table-container {
             display: block !important;
             width: 100% !important;
-            margin: 0 !important;
-            border-radius: 18px !important;
+            max-width: 100% !important;
+            max-height: calc(100dvh - 235px) !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            overscroll-behavior: contain !important;
+            padding-right: 2px !important;
+            padding-bottom: 26px !important;
         }
 
-            .assignments-page .assignments-table tbody tr:not(:last-child) {
-                margin-bottom: 0 !important;
+        .assignments-page .assignments-table {
+            display: block !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            overflow: visible !important;
+        }
+
+            .assignments-page .assignments-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                width: 100% !important;
+                padding-bottom: 26px !important;
+                overflow: visible !important;
             }
 
-    .assignments-page .assignments-table {
-        border-spacing: 0 !important;
-    }
+                .assignments-page .assignments-table tbody tr {
+                    flex: 0 0 auto !important;
+                }
+
+            .assignments-page .assignments-table td {
+                min-height: 40px !important;
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+            }
+
+                .assignments-page .assignments-table td.actions-cell {
+                    min-height: 54px !important;
+                    padding-bottom: 12px !important;
+                }
 }
 
 @media (max-width: 520px) {
+    .assignments-page .table-container {
+        max-height: calc(100dvh - 210px) !important;
+        padding-bottom: 32px !important;
+    }
+
     .assignments-page .assignments-table tbody {
-        gap: 16px !important;
+        gap: 14px !important;
+        padding-bottom: 32px !important;
     }
 
-        .assignments-page .assignments-table tbody tr {
-            border-radius: 16px !important;
-        }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark glass"] .assignments-page .assignments-table tbody tr {
-        background: rgba(15, 23, 42, 0.88) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-
-    html[data-theme="liquid glass"] .assignments-page .assignments-table tbody tr {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+    .assignments-page .assignments-table td {
+        min-height: 38px !important;
+        padding-top: 9px !important;
+        padding-bottom: 9px !important;
     }
 }

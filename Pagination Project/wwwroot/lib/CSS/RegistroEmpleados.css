@@ -1,1081 +1,1102 @@
-﻿.employees-page {
-    padding: 24px;
-    min-height: 100vh;
-    background: linear-gradient(180deg, #f5f7fb 0%, #eef3f9 100%);
-}
-
-.employees-header {
-    margin-bottom: 24px;
-}
-
-    .employees-header h1 {
-        margin: 0;
-        font-size: 2rem;
-        font-weight: 800;
-        color: #182230;
-        letter-spacing: -0.02em;
-    }
-
-    .employees-header p {
-        margin: 8px 0 0 0;
-        color: #667085;
-        font-size: 0.98rem;
-    }
-
-.employees-layout {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 24px;
-    align-items: start;
-}
-
-.employee-form-card,
-.employee-list-card,
-.no-access-card {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    border-radius: 24px;
-    box-shadow: 0 12px 35px rgba(16, 24, 40, 0.08);
-    backdrop-filter: blur(6px);
-}
-
-.employee-form-card {
-    padding: 24px;
-    position: sticky;
-    top: 20px;
-}
-
-.employee-list-card {
-    padding: 24px;
-}
-
-.no-access-card {
-    padding: 28px;
-    text-align: center;
-}
-
-    .no-access-card h3 {
-        margin: 0 0 8px 0;
-        color: #1d2939;
-        font-size: 1.3rem;
-        font-weight: 700;
-    }
-
-    .no-access-card p {
-        margin: 0;
-        color: #667085;
-    }
-
-.card-title {
-    margin-bottom: 22px;
-}
-
-    .card-title h2 {
-        margin: 0;
-        font-size: 1.35rem;
-        font-weight: 750;
-        color: #182230;
-    }
-
-    .card-title span {
-        display: block;
-        margin-top: 6px;
-        color: #667085;
-        font-size: 0.93rem;
-    }
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-group label {
-    margin-bottom: 8px;
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: #344054;
-}
-
-.form-input {
-    width: 100%;
-    height: 48px;
-    border-radius: 16px;
-    border: 1px solid #d0d5dd;
-    background: #f8fafc;
-    padding: 0 14px;
-    font-size: 0.96rem;
-    color: #101828;
-    transition: all 0.22s ease;
+﻿.employees-management-page,
+.employees-management-page * {
     box-sizing: border-box;
 }
 
-    .form-input:focus {
-        outline: none;
-        border-color: #3b82f6;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
-    }
-
-    .form-input:disabled {
-        background: #f2f4f7;
-        color: #98a2b3;
-        cursor: not-allowed;
-    }
-
-.form-actions {
+.employees-management-page {
+    --bg-card: #ffffff;
+    --bg-soft: #f8fafc;
+    --bg-soft-2: #f1f5f9;
+    --border: #e2e8f0;
+    --border-strong: #dbe4ee;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --primary: #2563eb;
+    --primary-strong: #1d4ed8;
+    --primary-soft: rgba(37, 99, 235, 0.12);
+    --danger: #be123c;
+    --danger-soft: #fff1f2;
+    --success: #15803d;
+    --success-soft: #ecfdf3;
+    --shadow-card: 0 14px 40px rgba(15, 23, 42, 0.06);
+    --shadow-modal: 0 24px 60px rgba(15, 23, 42, 0.25);
+    --overlay: rgba(15, 23, 42, 0.45);
+    --radius-xl: 24px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --transition-fast: 0.18s ease;
+    --transition-normal: 0.24s ease;
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    flex-wrap: wrap;
-}
-
-.btn-primary,
-.btn-secondary,
-.btn-action {
-    border: none;
-    border-radius: 16px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: all 0.2s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: white;
-    padding: 12px 18px;
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
-}
-
-    .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.30);
-    }
-
-.btn-secondary {
-    background: #eef2f7;
-    color: #344054;
-    padding: 12px 18px;
-}
-
-    .btn-secondary:hover {
-        background: #e4eaf2;
-        transform: translateY(-1px);
-    }
-
-.alert-box {
-    margin-bottom: 18px;
-    padding: 14px 18px;
-    border-radius: 16px;
-    font-weight: 600;
-    animation: fadeInUp 0.25s ease;
-}
-
-    .alert-box.success {
-        background: #ecfdf3;
-        color: #027a48;
-        border: 1px solid #abefc6;
-    }
-
-    .alert-box.error {
-        background: #fef3f2;
-        color: #b42318;
-        border: 1px solid #fecdca;
-    }
-
-.table-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 20px;
-}
-
-    .table-header h2 {
-        margin: 0;
-        font-size: 1.3rem;
-        color: #182230;
-        font-weight: 750;
-    }
-
-    .table-header p {
-        margin: 6px 0 0 0;
-        color: #667085;
-        font-size: 0.93rem;
-    }
-
-.search-box {
-    width: 320px;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
     max-width: 100%;
-    height: 46px;
-    border-radius: 16px;
-    border: 1px solid #d0d5dd;
-    background: #f8fafc;
-    padding: 0 14px;
-    font-size: 0.95rem;
-    transition: all 0.22s ease;
+    overflow-x: hidden;
+    color: var(--text);
 }
 
-    .search-box:focus {
-        outline: none;
-        border-color: #3b82f6;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    .employees-management-page .thryv-users-header {
+        width: 100%;
+        min-height: 150px;
+        padding: 28px 30px;
+        border-radius: 24px;
+        background: linear-gradient(115deg, #081827 0%, #0f172a 48%, #111827 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
     }
 
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 18px;
-}
-
-.employee-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 700px;
-}
-
-    .employee-table thead th {
-        text-align: left;
-        padding: 15px 14px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #667085;
-        background: #f8fafc;
-        border-bottom: 1px solid #eaecf0;
-        white-space: nowrap;
-    }
-
-    .employee-table tbody td {
-        padding: 16px 14px;
-        border-bottom: 1px solid #f2f4f7;
-        color: #101828;
-        vertical-align: middle;
-    }
-
-    .employee-table tbody tr {
-        transition: background 0.18s ease;
-    }
-
-        .employee-table tbody tr:hover {
-            background: #f9fbff;
+        .employees-management-page .thryv-users-header h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
         }
 
-.actions-column {
-    width: 170px;
-}
+        .employees-management-page .thryv-users-header p {
+            margin: 10px 0 0;
+            max-width: 780px;
+            color: #e5e7eb;
+            font-size: 17px;
+            line-height: 1.4;
+        }
 
-.status-badge {
-    display: inline-flex;
+    .employees-management-page .thryv-users-card {
+        width: 100%;
+        max-width: 100%;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-card);
+        padding: 28px;
+        transition: background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+    }
+
+    .employees-management-page .thryv-form-card-full,
+    .employees-management-page .thryv-list-large {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .employees-management-page .thryv-card-top,
+    .employees-management-page .thryv-list-header {
+        margin-bottom: 24px;
+    }
+
+        .employees-management-page .thryv-card-top h3,
+        .employees-management-page .thryv-list-header h3 {
+            margin: 0;
+            color: var(--text);
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .employees-management-page .thryv-card-top span,
+        .employees-management-page .thryv-list-header span {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+    .employees-management-page .thryv-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .employees-management-page .thryv-form-grid-large {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(300px, 1fr));
+        gap: 18px 24px;
+        max-width: 100%;
+    }
+
+    .employees-management-page .thryv-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .employees-management-page .thryv-floating-field {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+
+    .employees-management-page .thryv-input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        opacity: 0.72;
+        pointer-events: none;
+        z-index: 2;
+        color: var(--text-muted);
+        transition: color var(--transition-fast), opacity var(--transition-fast);
+    }
+
+        .employees-management-page .thryv-input-icon svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            stroke: currentColor;
+        }
+
+    .employees-management-page .thryv-floating-label {
+        position: absolute;
+        left: 42px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0 6px;
+        background: var(--bg-card);
+        color: var(--text-muted);
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 2;
+        transition: all var(--transition-fast);
+    }
+
+    .employees-management-page .thryv-input,
+    .employees-management-page .thryv-search-input {
+        width: 100%;
+        border: 1px solid var(--border-strong);
+        background: var(--bg-soft);
+        border-radius: var(--radius-md);
+        color: var(--text);
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        transition: background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal), color var(--transition-normal), transform var(--transition-fast);
+    }
+
+        .employees-management-page .thryv-input.modern {
+            height: 42px;
+            padding: 8px 12px 8px 42px;
+        }
+
+    .employees-management-page .thryv-search-input {
+        max-width: 340px;
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+
+        .employees-management-page .thryv-input.modern:focus,
+        .employees-management-page .thryv-search-input:focus {
+            background: var(--bg-card);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-soft);
+            transform: translateY(-1px);
+        }
+
+    .employees-management-page .thryv-floating-field:focus-within .thryv-input-icon {
+        color: var(--primary);
+        opacity: 1;
+    }
+
+    .employees-management-page .thryv-input.modern:focus + .thryv-floating-label,
+    .employees-management-page .thryv-input.modern:not(:placeholder-shown) + .thryv-floating-label {
+        top: -8px;
+        transform: none;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .employees-management-page .thryv-switch-card {
+        min-height: 42px;
+        width: fit-content;
+        max-width: 280px;
+        padding: 10px 12px;
+        border: 1px solid var(--border-strong);
+        background: var(--bg-soft);
+        border-radius: var(--radius-md);
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        transition: background var(--transition-normal), border-color var(--transition-normal);
+    }
+
+    .employees-management-page .thryv-switch-text {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+    }
+
+    .employees-management-page .thryv-switch-title {
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .employees-management-page .thryv-switch-subtitle {
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.1;
+    }
+
+    .employees-management-page .thryv-switch {
+        position: relative;
+        display: inline-block;
+        width: 46px;
+        height: 26px;
+        flex-shrink: 0;
+        margin-left: 2px;
+    }
+
+        .employees-management-page .thryv-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+    .employees-management-page .thryv-slider {
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
+        background: #cbd5e1;
+        transition: 0.25s;
+        border-radius: 999px;
+    }
+
+        .employees-management-page .thryv-slider::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: 0.25s;
+        }
+
+    .employees-management-page .thryv-switch input:checked + .thryv-slider {
+        background: var(--primary);
+    }
+
+        .employees-management-page .thryv-switch input:checked + .thryv-slider::before {
+            transform: translateX(20px);
+        }
+
+    .employees-management-page .thryv-form-actions {
+        display: flex;
+        gap: 14px;
+        margin-top: 26px;
+        flex-wrap: wrap;
+    }
+
+    .employees-management-page .thryv-primary-btn,
+    .employees-management-page .thryv-secondary-btn,
+    .employees-management-page .thryv-danger-btn,
+    .employees-management-page .thryv-table-btn {
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 13px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform var(--transition-fast), background var(--transition-normal), color var(--transition-normal), opacity var(--transition-fast), box-shadow var(--transition-normal);
+    }
+
+    .employees-management-page .thryv-primary-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+    }
+
+    .employees-management-page .thryv-secondary-btn {
+        background: #eef4ff;
+        color: var(--primary);
+    }
+
+    .employees-management-page .thryv-danger-btn {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .employees-management-page .thryv-table-btn {
+        background: var(--bg-soft-2);
+        color: var(--text);
+        padding: 9px 14px;
+        border-radius: var(--radius-sm);
+    }
+
+        .employees-management-page .thryv-primary-btn:hover,
+        .employees-management-page .thryv-table-btn:hover,
+        .employees-management-page .thryv-secondary-btn:hover,
+        .employees-management-page .thryv-danger-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .employees-management-page .thryv-primary-btn:disabled,
+        .employees-management-page .thryv-secondary-btn:disabled,
+        .employees-management-page .thryv-danger-btn:disabled,
+        .employees-management-page .thryv-table-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .employees-management-page tr {
+        cursor: default;
+    }
+
+        .employees-management-page tr[ondblclick] {
+            cursor: pointer;
+        }
+
+    .employees-management-page .thryv-table-wrap {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+        .employees-management-page .thryv-table-wrap.large {
+            position: relative;
+            isolation: isolate;
+            max-height: 650px;
+            overflow-y: auto;
+            border-radius: 18px;
+            background: var(--bg-card);
+        }
+
+    .employees-management-page .thryv-users-table {
+        width: 100%;
+        max-width: 100%;
+        border-collapse: collapse;
+    }
+
+        .employees-management-page .thryv-users-table thead {
+            position: relative;
+            z-index: 30;
+        }
+
+            .employees-management-page .thryv-users-table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 40 !important;
+                padding: 16px 14px;
+                background: #f8fafc !important;
+                color: #64748b !important;
+                border-bottom: 1px solid var(--border);
+                box-shadow: 0 1px 0 var(--border), 0 8px 18px rgba(15, 23, 42, 0.08);
+                text-align: left;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                white-space: nowrap;
+            }
+
+        .employees-management-page .thryv-users-table tbody tr {
+            position: relative;
+            z-index: 1;
+            transition: background var(--transition-fast);
+        }
+
+            .employees-management-page .thryv-users-table tbody tr:hover {
+                background: rgba(37, 99, 235, 0.04);
+            }
+
+            .employees-management-page .thryv-users-table tbody tr.selected {
+                background: rgba(37, 99, 235, 0.08);
+            }
+
+        .employees-management-page .thryv-users-table tbody td {
+            position: relative;
+            z-index: 1;
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-size: 14px;
+            vertical-align: middle;
+            overflow-wrap: anywhere;
+        }
+
+        .employees-management-page .thryv-users-table tbody tr td:first-child {
+            font-weight: 600;
+        }
+
+    .employees-management-page .thryv-empty-row {
+        padding: 30px !important;
+        text-align: center;
+        color: var(--text-muted) !important;
+    }
+
+    .employees-management-page .thryv-status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+        .employees-management-page .thryv-status-badge.active {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .employees-management-page .thryv-status-badge.inactive {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+.thryv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 90px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 700;
+    animation: employeesFadeIn 0.18s ease;
 }
 
-    .status-badge.active {
-        background: #dcfae6;
-        color: #067647;
+.thryv-modal-card {
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+    animation: employeesPopIn 0.18s ease;
+}
+
+.thryv-result-modal {
+    max-width: 430px;
+}
+
+.thryv-modal-header {
+    padding: 22px 24px 12px;
+}
+
+    .thryv-modal-header h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 800;
     }
 
-    .status-badge.inactive {
-        background: #fee4e2;
-        color: #b42318;
+.thryv-modal-body {
+    padding: 0 24px 18px;
+    color: #0f172a;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+    .thryv-modal-body p {
+        margin: 0 0 12px 0;
     }
 
-.action-buttons {
+.thryv-modal-userbox {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    color: #0f172a;
+}
+
+.thryv-modal-warning {
+    color: #be123c;
+    font-weight: 600;
+}
+
+.thryv-modal-actions {
     display: flex;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 24px 24px;
+    border-top: 1px solid #e2e8f0;
     flex-wrap: wrap;
 }
 
-.btn-action {
-    padding: 9px 12px;
-    font-size: 0.84rem;
+.validation-message,
+.validation-errors,
+.validation-summary-errors,
+div.validation-message {
+    color: var(--danger);
+    font-size: 12px;
 }
 
-    .btn-action.edit {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-        .btn-action.edit:hover {
-            background: #bfdbfe;
-            transform: translateY(-1px);
-        }
-
-    .btn-action.delete {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
-
-        .btn-action.delete:hover {
-            background: #fecaca;
-            transform: translateY(-1px);
-        }
-
-.empty-row {
-    text-align: center;
-    color: #667085 !important;
-    padding: 28px !important;
+.validation-message {
+    margin-top: 4px;
 }
 
-@keyframes fadeInUp {
+.employees-management-page .thryv-svg-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+    .employees-management-page .thryv-svg-icon svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+@keyframes employeesFadeIn {
     from {
         opacity: 0;
-        transform: translateY(6px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
-@media (max-width: 1100px) {
-    .employees-layout {
-        grid-template-columns: 1fr;
+@keyframes employeesPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
     }
 
-    .employee-form-card {
-        position: static;
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
-@media (max-width: 768px) {
-    .employees-page {
-        padding: 16px;
+html.dark .employees-management-page,
+body.dark .employees-management-page,
+html[data-theme="dark"] .employees-management-page {
+    --bg-card: #0f172a;
+    --bg-soft: #111c2f;
+    --bg-soft-2: #1e293b;
+    --border: rgba(148, 163, 184, 0.18);
+    --border-strong: rgba(148, 163, 184, 0.26);
+    --text: #f8fafc;
+    --text-muted: #cbd5e1;
+    --primary: #ff5a1f;
+    --primary-strong: #ea580c;
+    --primary-soft: rgba(255, 90, 31, 0.16);
+    --danger: #fb7185;
+    --danger-soft: rgba(244, 63, 94, 0.12);
+    --success: #22c55e;
+    --success-soft: rgba(34, 197, 94, 0.14);
+    --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+    html.dark .employees-management-page .thryv-users-card,
+    body.dark .employees-management-page .thryv-users-card,
+    html[data-theme="dark"] .employees-management-page .thryv-users-card {
+        background: #0f172a;
+        border-color: rgba(148, 163, 184, 0.18);
+        color: #f8fafc;
     }
 
-    .form-grid {
-        grid-template-columns: 1fr;
+    html.dark .employees-management-page .thryv-card-top h3,
+    html.dark .employees-management-page .thryv-list-header h3,
+    body.dark .employees-management-page .thryv-card-top h3,
+    body.dark .employees-management-page .thryv-list-header h3,
+    html[data-theme="dark"] .employees-management-page .thryv-card-top h3,
+    html[data-theme="dark"] .employees-management-page .thryv-list-header h3 {
+        color: #ffffff;
     }
 
-    .table-header {
+    html.dark .employees-management-page .thryv-card-top span,
+    html.dark .employees-management-page .thryv-list-header span,
+    body.dark .employees-management-page .thryv-card-top span,
+    body.dark .employees-management-page .thryv-list-header span,
+    html[data-theme="dark"] .employees-management-page .thryv-card-top span,
+    html[data-theme="dark"] .employees-management-page .thryv-list-header span {
+        color: #94a3b8;
+    }
+
+    html.dark .employees-management-page .thryv-input,
+    html.dark .employees-management-page .thryv-search-input,
+    body.dark .employees-management-page .thryv-input,
+    body.dark .employees-management-page .thryv-search-input,
+    html[data-theme="dark"] .employees-management-page .thryv-input,
+    html[data-theme="dark"] .employees-management-page .thryv-search-input {
+        background: #0b1324;
+        border-color: rgba(148, 163, 184, 0.22);
+        color: #ffffff;
+    }
+
+        html.dark .employees-management-page .thryv-input::placeholder,
+        html.dark .employees-management-page .thryv-search-input::placeholder,
+        body.dark .employees-management-page .thryv-input::placeholder,
+        body.dark .employees-management-page .thryv-search-input::placeholder,
+        html[data-theme="dark"] .employees-management-page .thryv-input::placeholder,
+        html[data-theme="dark"] .employees-management-page .thryv-search-input::placeholder {
+            color: #94a3b8;
+        }
+
+    html.dark .employees-management-page .thryv-floating-label,
+    body.dark .employees-management-page .thryv-floating-label,
+    html[data-theme="dark"] .employees-management-page .thryv-floating-label {
+        background: #0f172a;
+        color: #ff5a1f;
+    }
+
+    html.dark .employees-management-page .thryv-input-icon,
+    body.dark .employees-management-page .thryv-input-icon,
+    html[data-theme="dark"] .employees-management-page .thryv-input-icon {
+        color: #ff5a1f;
+        opacity: 1;
+    }
+
+    html.dark .employees-management-page .thryv-switch-card,
+    body.dark .employees-management-page .thryv-switch-card,
+    html[data-theme="dark"] .employees-management-page .thryv-switch-card {
+        background: #0b1324;
+        border-color: rgba(148, 163, 184, 0.22);
+    }
+
+    html.dark .employees-management-page .thryv-switch-title,
+    body.dark .employees-management-page .thryv-switch-title,
+    html[data-theme="dark"] .employees-management-page .thryv-switch-title {
+        color: #ffffff;
+    }
+
+    html.dark .employees-management-page .thryv-switch-subtitle,
+    body.dark .employees-management-page .thryv-switch-subtitle,
+    html[data-theme="dark"] .employees-management-page .thryv-switch-subtitle {
+        color: #cbd5e1;
+    }
+
+    html.dark .employees-management-page .thryv-users-table thead th,
+    body.dark .employees-management-page .thryv-users-table thead th,
+    html[data-theme="dark"] .employees-management-page .thryv-users-table thead th {
+        background: #0b1324 !important;
+        color: #cbd5e1 !important;
+        border-bottom-color: rgba(148, 163, 184, 0.18);
+        box-shadow: 0 1px 0 rgba(148, 163, 184, 0.18), 0 10px 22px rgba(0, 0, 0, 0.35);
+    }
+
+    html.dark .employees-management-page .thryv-users-table tbody td,
+    body.dark .employees-management-page .thryv-users-table tbody td,
+    html[data-theme="dark"] .employees-management-page .thryv-users-table tbody td {
+        color: #ffffff;
+        border-bottom-color: rgba(148, 163, 184, 0.14);
+    }
+
+    html.dark .employees-management-page .thryv-users-table tbody tr:hover,
+    body.dark .employees-management-page .thryv-users-table tbody tr:hover,
+    html[data-theme="dark"] .employees-management-page .thryv-users-table tbody tr:hover {
+        background: rgba(255, 90, 31, 0.08);
+    }
+
+    html.dark .employees-management-page .thryv-users-table tbody tr.selected,
+    body.dark .employees-management-page .thryv-users-table tbody tr.selected,
+    html[data-theme="dark"] .employees-management-page .thryv-users-table tbody tr.selected {
+        background: rgba(255, 90, 31, 0.12);
+    }
+
+    html.dark .employees-management-page .thryv-table-btn,
+    body.dark .employees-management-page .thryv-table-btn,
+    html[data-theme="dark"] .employees-management-page .thryv-table-btn {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+
+    html.dark .employees-management-page .thryv-primary-btn,
+    body.dark .employees-management-page .thryv-primary-btn,
+    html[data-theme="dark"] .employees-management-page .thryv-primary-btn {
+        background: linear-gradient(135deg, #ff5a1f, #ea580c);
+        box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24);
+    }
+
+html.dark .thryv-modal-card,
+body.dark .thryv-modal-card,
+html[data-theme="dark"] .thryv-modal-card {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+html.dark .thryv-modal-header h3,
+html.dark .thryv-modal-body,
+body.dark .thryv-modal-header h3,
+body.dark .thryv-modal-body,
+html[data-theme="dark"] .thryv-modal-header h3,
+html[data-theme="dark"] .thryv-modal-body {
+    color: #f8fafc;
+}
+
+html.dark .thryv-modal-actions,
+body.dark .thryv-modal-actions,
+html[data-theme="dark"] .thryv-modal-actions {
+    border-top-color: rgba(148, 163, 184, 0.18);
+}
+
+html.dark .thryv-modal-userbox,
+body.dark .thryv-modal-userbox,
+html[data-theme="dark"] .thryv-modal-userbox {
+    background: #111c2f;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #f8fafc;
+}
+
+html[data-theme="dark glass"] .employees-management-page {
+    --bg-card: rgba(15, 23, 42, 0.68);
+    --bg-soft: rgba(15, 23, 42, 0.74);
+    --bg-soft-2: rgba(30, 41, 59, 0.82);
+    --border: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #f8fafc;
+    --text-muted: #cbd5e1;
+    --primary: #ff5a1f;
+    --primary-strong: #ea580c;
+    --primary-soft: rgba(255, 90, 31, 0.16);
+    --danger: #fb7185;
+    --danger-soft: rgba(244, 63, 94, 0.14);
+    --success: #22c55e;
+    --success-soft: rgba(34, 197, 94, 0.16);
+}
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-users-card {
+        background: rgba(15, 23, 42, 0.62) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06) !important;
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-card-top h3,
+    html[data-theme="dark glass"] .employees-management-page .thryv-list-header h3 {
+        color: #f8fafc !important;
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-card-top span,
+    html[data-theme="dark glass"] .employees-management-page .thryv-list-header span {
+        color: #cbd5e1 !important;
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-input,
+    html[data-theme="dark glass"] .employees-management-page .thryv-search-input {
+        background: rgba(15, 23, 42, 0.72) !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        color: #f8fafc !important;
+    }
+
+        html[data-theme="dark glass"] .employees-management-page .thryv-input::placeholder,
+        html[data-theme="dark glass"] .employees-management-page .thryv-search-input::placeholder {
+            color: #cbd5e1 !important;
+            opacity: 1 !important;
+        }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-floating-label {
+        background: rgba(15, 23, 42, 0.92) !important;
+        color: #ff5a1f !important;
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-input-icon {
+        color: #ff5a1f !important;
+        opacity: 1 !important;
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-switch-card {
+        background: rgba(15, 23, 42, 0.72) !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-users-table thead th {
+        background: #07111f !important;
+        color: #cbd5e1 !important;
+        border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.10), 0 12px 28px rgba(0, 0, 0, 0.42);
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-users-table tbody td {
+        color: #e2e8f0 !important;
+        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+    }
+
+    html[data-theme="dark glass"] .employees-management-page .thryv-users-table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+html[data-theme="dark glass"] .thryv-modal-card {
+    background: rgba(15, 23, 42, 0.82);
+    border-color: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+}
+
+html[data-theme="dark glass"] .thryv-modal-header h3,
+html[data-theme="dark glass"] .thryv-modal-body {
+    color: #f8fafc;
+}
+
+html[data-theme="dark glass"] .thryv-modal-actions {
+    border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark glass"] .thryv-modal-userbox {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+}
+
+html[data-theme="liquid glass"] .employees-management-page .thryv-users-card {
+    background: rgba(255, 255, 255, 0.36);
+    border-color: rgba(255, 255, 255, 0.62);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+
+html[data-theme="liquid glass"] .employees-management-page .thryv-users-table thead th {
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: #475569 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 1px 0 rgba(226, 232, 240, 0.9), 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+html[data-theme="liquid glass"] .employees-management-page .thryv-input,
+html[data-theme="liquid glass"] .employees-management-page .thryv-search-input {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-color: rgba(255, 255, 255, 0.65);
+    color: #111827;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.80);
+}
+
+@media (max-width: 1200px) {
+    .employees-management-page .thryv-users-header {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .search-box {
-        width: 100%;
-    }
-
-    .employee-form-card,
-    .employee-list-card,
-    .no-access-card {
-        border-radius: 20px;
-        padding: 18px;
-    }
-
-    .employees-header h1 {
-        font-size: 1.6rem;
-    }
-}
-
-html[data-theme="dark"] .employees-page {
-    background: #0f172a;
-}
-
-html[data-theme="dark"] .employee-form-card,
-html[data-theme="dark"] .employee-list-card,
-html[data-theme="dark"] .no-access-card {
-    background: #111827;
-    border-color: rgba(255,255,255,.10);
-    box-shadow: 0 18px 40px rgba(0,0,0,.28);
-}
-
-    html[data-theme="dark"] .employees-header h1,
-    html[data-theme="dark"] .card-title h2,
-    html[data-theme="dark"] .table-header h2,
-    html[data-theme="dark"] .no-access-card h3 {
-        color: #f8fafc;
-    }
-
-    html[data-theme="dark"] .employees-header p,
-    html[data-theme="dark"] .card-title span,
-    html[data-theme="dark"] .table-header p,
-    html[data-theme="dark"] .no-access-card p,
-    html[data-theme="dark"] .form-group label {
-        color: #94a3b8;
-    }
-
-html[data-theme="dark"] .form-input,
-html[data-theme="dark"] .search-box {
-    background: #0f172a;
-    border-color: rgba(255,255,255,.14);
-    color: #f8fafc;
-}
-
-    html[data-theme="dark"] .form-input:disabled {
-        background: #1e293b;
-        color: #94a3b8;
-    }
-
-html[data-theme="dark"] .employee-table thead th {
-    background: #020617;
-    color: #cbd5e1;
-    border-bottom-color: rgba(255,255,255,.08);
-}
-
-html[data-theme="dark"] .employee-table tbody td {
-    color: #e2e8f0;
-    border-bottom-color: rgba(255,255,255,.06);
-}
-
-html[data-theme="dark"] .employee-table tbody tr:hover {
-    background: rgba(255,255,255,.04);
-}
-
-html[data-theme="dark"] .empty-row {
-    color: #94a3b8 !important;
-}
-
-html[data-theme="dark"] .btn-secondary {
-    background: #1e293b;
-    color: #f8fafc;
-}
-
-html[data-theme="liquid glass"] .employees-page {
-    background: transparent;
-}
-
-html[data-theme="liquid glass"] .employee-form-card,
-html[data-theme="liquid glass"] .employee-list-card,
-html[data-theme="liquid glass"] .no-access-card {
-    position: relative;
-    overflow: hidden;
-    background: rgba(255,255,255,.34);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255,255,255,.62);
-    box-shadow: 0 24px 60px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
-}
-
-    html[data-theme="liquid glass"] .employee-form-card::before,
-    html[data-theme="liquid glass"] .employee-list-card::before {
-        content: "";
-        position: absolute;
-        inset: 1px;
-        border-radius: inherit;
-        pointer-events: none;
-        background: linear-gradient(135deg, rgba(255,255,255,.60), transparent 40%), radial-gradient(circle at 18% 0%, rgba(255,255,255,.75), transparent 30%);
-        opacity: .82;
-    }
-
-    html[data-theme="liquid glass"] .employee-form-card > *,
-    html[data-theme="liquid glass"] .employee-list-card > * {
-        position: relative;
-        z-index: 1;
-    }
-
-    html[data-theme="liquid glass"] .employees-header h1,
-    html[data-theme="liquid glass"] .card-title h2,
-    html[data-theme="liquid glass"] .table-header h2,
-    html[data-theme="liquid glass"] .no-access-card h3 {
-        color: #111827;
-        text-shadow: 0 1px 1px rgba(255,255,255,.85);
-    }
-
-    html[data-theme="liquid glass"] .employees-header p,
-    html[data-theme="liquid glass"] .card-title span,
-    html[data-theme="liquid glass"] .table-header p,
-    html[data-theme="liquid glass"] .no-access-card p,
-    html[data-theme="liquid glass"] .form-group label {
-        color: #475569;
-    }
-
-html[data-theme="liquid glass"] .form-input,
-html[data-theme="liquid glass"] .search-box {
-    background: rgba(255,255,255,.45);
-    backdrop-filter: blur(20px) saturate(170%);
-    -webkit-backdrop-filter: blur(20px) saturate(170%);
-    border-color: rgba(255,255,255,.65);
-    color: #111827;
-    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80);
-}
-
-html[data-theme="liquid glass"] .employee-table thead th {
-    background: rgba(17,24,39,.88);
-    color: #ffffff;
-}
-
-html[data-theme="liquid glass"] .employee-table tbody td {
-    color: #334155;
-}
-
-html[data-theme="liquid glass"] .employee-table tbody tr:hover {
-    background: rgba(255,255,255,.22);
-}
-
-html[data-theme="liquid glass"] .btn-secondary {
-    background: rgba(255,255,255,.42);
-    border: 1px solid rgba(255,255,255,.62);
-    backdrop-filter: blur(18px);
-}
-
-html[data-theme="dark glass"] .employees-page {
-    background: transparent;
-}
-
-html[data-theme="dark glass"] .employee-form-card,
-html[data-theme="dark glass"] .employee-list-card,
-html[data-theme="dark glass"] .no-access-card {
-    background: rgba(15,23,42,.55);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 24px 60px rgba(0,0,0,.28), inset 0 1px 1px rgba(255,255,255,.06);
-}
-
-    html[data-theme="dark glass"] .employees-header h1,
-    html[data-theme="dark glass"] .card-title h2,
-    html[data-theme="dark glass"] .table-header h2,
-    html[data-theme="dark glass"] .no-access-card h3 {
-        color: #f8fafc;
-    }
-
-    html[data-theme="dark glass"] .employees-header p,
-    html[data-theme="dark glass"] .card-title span,
-    html[data-theme="dark glass"] .table-header p,
-    html[data-theme="dark glass"] .no-access-card p,
-    html[data-theme="dark glass"] .form-group label {
-        color: #cbd5e1;
-    }
-
-html[data-theme="dark glass"] .form-input,
-html[data-theme="dark glass"] .search-box {
-    background: rgba(15,23,42,.58);
-    color: #f8fafc;
-    border-color: rgba(255,255,255,.12);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
-
-    html[data-theme="dark glass"] .form-input:disabled {
-        background: rgba(30,41,59,.60);
-        color: #94a3b8;
-    }
-
-html[data-theme="dark glass"] .employee-table thead th {
-    background: rgba(2,6,23,.78);
-    color: #cbd5e1;
-}
-
-html[data-theme="dark glass"] .employee-table tbody td {
-    color: #e2e8f0;
-    border-bottom-color: rgba(255,255,255,.07);
-}
-
-html[data-theme="dark glass"] .employee-table tbody tr:hover {
-    background: rgba(255,255,255,.05);
-}
-
-html[data-theme="dark glass"] .empty-row {
-    color: #cbd5e1 !important;
-}
-
-html[data-theme="dark glass"] .btn-secondary {
-    background: rgba(15,23,42,.58);
-    color: #f8fafc;
-    border: 1px solid rgba(255,255,255,.12);
-}
-
-html[data-theme="dark"] .employees-page,
-body.dark .employees-page,
-html.dark .employees-page {
-    background: #07111f !important;
-    color: #f8fafc;
-}
-
-html[data-theme="dark"] .employee-form-card,
-html[data-theme="dark"] .employee-list-card,
-html[data-theme="dark"] .no-access-card,
-body.dark .employee-form-card,
-body.dark .employee-list-card,
-body.dark .no-access-card,
-html.dark .employee-form-card,
-html.dark .employee-list-card,
-html.dark .no-access-card {
-    background: #ffffff !important;
-    border: 1px solid rgba(226, 232, 240, 0.95) !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18) !important;
-}
-
-html[data-theme="dark"] .employees-header h1,
-html[data-theme="dark"] .card-title h2,
-html[data-theme="dark"] .table-header h2,
-body.dark .employees-header h1,
-body.dark .card-title h2,
-body.dark .table-header h2,
-html.dark .employees-header h1,
-html.dark .card-title h2,
-html.dark .table-header h2 {
-    color: #020617 !important;
-}
-
-html[data-theme="dark"] .employees-header p,
-html[data-theme="dark"] .card-title span,
-html[data-theme="dark"] .table-header p,
-body.dark .employees-header p,
-body.dark .card-title span,
-body.dark .table-header p,
-html.dark .employees-header p,
-html.dark .card-title span,
-html.dark .table-header p {
-    color: #475569 !important;
-}
-
-html[data-theme="dark"] .form-input,
-body.dark .form-input,
-html.dark .form-input {
-    background: #0f172a !important;
-    border-color: rgba(148, 163, 184, 0.28) !important;
-    color: #ffffff !important;
-}
-
-    html[data-theme="dark"] .form-input::placeholder,
-    body.dark .form-input::placeholder,
-    html.dark .form-input::placeholder {
-        color: #94a3b8 !important;
-    }
-
-    html[data-theme="dark"] .form-input:disabled,
-    body.dark .form-input:disabled,
-    html.dark .form-input:disabled {
-        background: #0f172a !important;
-        color: #ffffff !important;
-        opacity: 1;
-    }
-
-html[data-theme="dark"] .form-group label,
-body.dark .form-group label,
-html.dark .form-group label {
-    color: #ff5a1f !important;
-}
-
-html[data-theme="dark"] .search-box,
-body.dark .search-box,
-html.dark .search-box {
-    background: #f8fafc !important;
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
-}
-
-    html[data-theme="dark"] .search-box::placeholder,
-    body.dark .search-box::placeholder,
-    html.dark .search-box::placeholder {
-        color: #64748b !important;
-    }
-
-html[data-theme="dark"] .table-wrapper,
-body.dark .table-wrapper,
-html.dark .table-wrapper {
-    background: #0f172a;
-    border-radius: 18px;
-}
-
-html[data-theme="dark"] .employee-table thead th,
-body.dark .employee-table thead th,
-html.dark .employee-table thead th {
-    background: #f8fafc !important;
-    color: #cbd5e1 !important;
-    border-bottom-color: rgba(148, 163, 184, 0.20) !important;
-}
-
-html[data-theme="dark"] .employee-table tbody td,
-body.dark .employee-table tbody td,
-html.dark .employee-table tbody td {
-    background: #0f172a !important;
-    color: #ffffff !important;
-    border-bottom-color: rgba(148, 163, 184, 0.14) !important;
-}
-
-html[data-theme="dark"] .employee-table tbody tr:hover td,
-body.dark .employee-table tbody tr:hover td,
-html.dark .employee-table tbody tr:hover td {
-    background: #111c2f !important;
-}
-
-html[data-theme="dark"] .btn-primary,
-body.dark .btn-primary,
-html.dark .btn-primary {
-    background: linear-gradient(135deg, #ff5a1f, #ea580c) !important;
-    color: #ffffff !important;
-    box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24) !important;
-}
-
-html[data-theme="dark"] .btn-secondary,
-body.dark .btn-secondary,
-html.dark .btn-secondary {
-    background: #fff1f2 !important;
-    color: #be123c !important;
-}
-
-html[data-theme="dark"] .btn-action.edit,
-body.dark .btn-action.edit,
-html.dark .btn-action.edit {
-    background: #f8fafc !important;
-    color: #020617 !important;
-}
-
-html[data-theme="dark"] .status-badge.active,
-body.dark .status-badge.active,
-html.dark .status-badge.active {
-    background: #ecfdf3 !important;
-    color: #15803d !important;
-}
-
-html[data-theme="liquid glass"] .employees-page .form-input:disabled {
-    background: rgba(255,255,255,.45) !important;
-    color: #475569 !important;
-    opacity: 1 !important;
-    border-color: rgba(255,255,255,.65) !important;
-    box-shadow: 0 12px 26px rgba(15,23,42,.06), inset 0 1px 1px rgba(255,255,255,.80) !important;
-}
-
-    html[data-theme="liquid glass"] .employees-page .form-input:disabled::placeholder {
-        color: #475569 !important;
-        opacity: 1 !important;
-    }
-
-html[data-theme="liquid glass"] .employees-page .btn-primary {
-    background: rgba(148, 163, 184, 0.82) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255,255,255,.62) !important;
-    box-shadow: 0 12px 26px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.45) !important;
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-    html[data-theme="liquid glass"] .employees-page .btn-primary:hover {
-        background: rgba(100, 116, 139, 0.9) !important;
-        transform: translateY(-1px);
-    }
-
-html[data-theme="dark glass"] .employees-page {
-    background: transparent !important;
-    color: #f8fafc !important;
-}
-
-html[data-theme="dark glass"] .employee-form-card,
-html[data-theme="dark glass"] .employee-list-card,
-html[data-theme="dark glass"] .no-access-card {
-    background: rgba(15, 23, 42, 0.62) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(24px) saturate(170%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
-}
-
-html[data-theme="dark glass"] .employees-header h1,
-html[data-theme="dark glass"] .card-title h2,
-html[data-theme="dark glass"] .table-header h2 {
-    color: #f8fafc !important;
-}
-
-html[data-theme="dark glass"] .employees-header p,
-html[data-theme="dark glass"] .card-title span,
-html[data-theme="dark glass"] .table-header p {
-    color: #cbd5e1 !important;
-}
-
-html[data-theme="dark glass"] .form-input,
-html[data-theme="dark glass"] .search-box {
-    background: rgba(15, 23, 42, 0.72) !important;
-    border-color: rgba(255, 255, 255, 0.16) !important;
-    color: #f8fafc !important;
-}
-
-    html[data-theme="dark glass"] .form-input:disabled {
-        background: rgba(15, 23, 42, 0.72) !important;
-        color: #f8fafc !important;
-        opacity: 1 !important;
-    }
-
-    html[data-theme="dark glass"] .form-input::placeholder,
-    html[data-theme="dark glass"] .search-box::placeholder {
-        color: #cbd5e1 !important;
-        opacity: 1 !important;
-    }
-
-html[data-theme="dark glass"] .form-group label {
-    color: #ff5a1f !important;
-}
-
-html[data-theme="dark glass"] .table-wrapper {
-    background: rgba(15, 23, 42, 0.72) !important;
-    border-radius: 18px !important;
-}
-
-html[data-theme="dark glass"] .employee-table thead th {
-    background: rgba(2, 6, 23, 0.78) !important;
-    color: #cbd5e1 !important;
-    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-html[data-theme="dark glass"] .employee-table tbody td {
-    background: rgba(15, 23, 42, 0.54) !important;
-    color: #e2e8f0 !important;
-    border-bottom-color: rgba(255, 255, 255, 0.07) !important;
-}
-
-html[data-theme="dark glass"] .employee-table tbody tr:hover td {
-    background: rgba(255, 255, 255, 0.05) !important;
-}
-
-html[data-theme="dark glass"] .btn-primary {
-    background: linear-gradient(135deg, #ff5a1f, #ea580c) !important;
-    color: #ffffff !important;
-    box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24) !important;
-}
-
-html[data-theme="dark glass"] .btn-secondary {
-    background: rgba(244, 63, 94, 0.12) !important;
-    color: #fb7185 !important;
-    border: 1px solid rgba(244, 63, 94, 0.18) !important;
-}
-
-.employees-page,
-.employees-page * {
-    box-sizing: border-box;
-}
-
-.employees-page {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.employees-layout,
-.employee-form-card,
-.employee-list-card,
-.no-access-card,
-.table-wrapper,
-.employee-table {
-    max-width: 100%;
-}
-
-.employees-page .employee-table th,
-.employees-page .employee-table td,
-.employees-page .employees-header,
-.employees-page .card-title,
-.employees-page .table-header {
-    overflow-wrap: anywhere;
-}
-
-@media (max-width: 1280px) {
-    .employees-layout {
-        grid-template-columns: 340px minmax(0, 1fr);
-        gap: 20px;
-    }
-
-    .employee-form-card,
-    .employee-list-card {
-        padding: 22px;
-    }
-}
-
-@media (max-width: 1100px) {
-    .employees-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .employee-form-card {
-        position: static;
-        top: auto;
-    }
-
-    .form-grid {
-        grid-template-columns: repeat(2, minmax(220px, 1fr));
-    }
-
-    .table-header {
-        align-items: flex-start;
+    .employees-management-page .thryv-form-grid-large {
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
     }
 }
 
 @media (max-width: 900px) {
-    .employees-page {
-        padding: 18px;
+    .employees-management-page {
+        gap: 18px;
     }
 
-    .employees-header {
-        margin-bottom: 20px;
-    }
-
-        .employees-header h1 {
-            font-size: 1.75rem;
-            line-height: 1.15;
+        .employees-management-page .thryv-users-header {
+            min-height: auto;
+            padding: 24px;
+            border-radius: 22px;
+            gap: 18px;
         }
 
-        .employees-header p {
-            font-size: 0.92rem;
-            line-height: 1.45;
+            .employees-management-page .thryv-users-header h2 {
+                font-size: 29px;
+                line-height: 1.15;
+            }
+
+            .employees-management-page .thryv-users-header p {
+                font-size: 15px;
+                line-height: 1.45;
+            }
+
+        .employees-management-page .thryv-users-card {
+            padding: 22px;
+            border-radius: 22px;
         }
 
-    .employee-form-card,
-    .employee-list-card,
-    .no-access-card {
-        padding: 20px;
-        border-radius: 20px;
-    }
+        .employees-management-page .thryv-card-top,
+        .employees-management-page .thryv-list-header {
+            margin-bottom: 18px;
+        }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
+            .employees-management-page .thryv-card-top h3,
+            .employees-management-page .thryv-list-header h3 {
+                font-size: 21px;
+                line-height: 1.2;
+            }
 
-    .table-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 14px;
-    }
+            .employees-management-page .thryv-card-top span,
+            .employees-management-page .thryv-list-header span {
+                font-size: 13px;
+                line-height: 1.45;
+            }
 
-    .search-box {
-        width: 100%;
-        min-width: 0;
-    }
+        .employees-management-page .thryv-form-grid-large {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
 
-    .form-actions {
-        justify-content: flex-start;
-    }
+        .employees-management-page .thryv-list-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .employees-management-page .thryv-search-input {
+            max-width: 100%;
+            width: 100%;
+        }
 }
 
 @media (max-width: 768px) {
-    .employees-page {
-        padding: 14px;
-    }
-
-    .employees-layout {
+    .employees-management-page {
         gap: 16px;
     }
 
-    .employees-header h1 {
-        font-size: 1.45rem;
-    }
-
-    .employees-header p {
-        font-size: 0.86rem;
-    }
-
-    .employee-form-card,
-    .employee-list-card,
-    .no-access-card {
-        padding: 18px;
-        border-radius: 18px;
-    }
-
-    .card-title {
-        margin-bottom: 18px;
-    }
-
-        .card-title h2,
-        .table-header h2 {
-            font-size: 1.12rem;
-            line-height: 1.2;
+        .employees-management-page .thryv-users-header {
+            padding: 18px;
+            border-radius: 18px;
+            gap: 16px;
         }
 
-        .card-title span,
-        .table-header p {
-            font-size: 0.84rem;
-            line-height: 1.4;
-        }
-
-    .form-group label {
-        font-size: 0.84rem;
-    }
-
-    .form-input,
-    .search-box {
-        height: 44px;
-        border-radius: 13px;
-        font-size: 0.88rem;
-    }
-
-    .form-actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-        width: 100%;
-        min-height: 44px;
-        border-radius: 13px;
-    }
-
-    .alert-box {
-        padding: 13px 15px;
-        border-radius: 14px;
-        font-size: 0.86rem;
-    }
-
-    .no-access-card {
-        padding: 24px 18px;
-    }
-
-        .no-access-card h3 {
-            font-size: 1.1rem;
-        }
-
-        .no-access-card p {
-            font-size: 0.88rem;
-        }
-
-    .table-wrapper {
-        overflow: visible;
-        border-radius: 0;
-        background: transparent;
-    }
-
-    .employee-table {
-        width: 100%;
-        min-width: 0 !important;
-        border-collapse: separate;
-        border-spacing: 0 14px;
-        background: transparent;
-    }
-
-        .employee-table thead {
-            display: none;
-        }
-
-        .employee-table,
-        .employee-table tbody,
-        .employee-table tr,
-        .employee-table td {
-            display: block;
-            width: 100%;
-        }
-
-            .employee-table tbody tr {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 18px;
-                padding: 12px;
-                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
-                overflow: hidden;
+            .employees-management-page .thryv-users-header h2 {
+                font-size: 24px;
+                line-height: 1.15;
             }
 
-                .employee-table tbody tr:hover {
+            .employees-management-page .thryv-users-header p {
+                font-size: 13.5px;
+                line-height: 1.45;
+            }
+
+            .employees-management-page .thryv-users-header .thryv-secondary-btn,
+            .employees-management-page .thryv-primary-btn,
+            .employees-management-page .thryv-secondary-btn,
+            .employees-management-page .thryv-danger-btn,
+            .employees-management-page .thryv-table-btn {
+                width: 100%;
+                min-height: 44px;
+                border-radius: 13px;
+                font-size: 13px;
+            }
+
+        .employees-management-page .thryv-users-card {
+            padding: 18px;
+            border-radius: 18px;
+        }
+
+        .employees-management-page .thryv-card-top h3,
+        .employees-management-page .thryv-list-header h3 {
+            font-size: 18px;
+        }
+
+        .employees-management-page .thryv-card-top span,
+        .employees-management-page .thryv-list-header span {
+            font-size: 12.5px;
+        }
+
+        .employees-management-page .thryv-input.modern,
+        .employees-management-page .thryv-search-input {
+            height: 44px;
+            min-height: 44px;
+            border-radius: 13px;
+            font-size: 13px;
+        }
+
+        .employees-management-page .thryv-floating-label {
+            font-size: 13px;
+        }
+
+        .employees-management-page .thryv-input.modern:focus + .thryv-floating-label,
+        .employees-management-page .thryv-input.modern:not(:placeholder-shown) + .thryv-floating-label {
+            font-size: 10.5px;
+        }
+
+        .employees-management-page .thryv-switch-card {
+            width: 100%;
+            max-width: 100%;
+            min-height: 46px;
+            justify-content: space-between;
+        }
+
+        .employees-management-page .thryv-form-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .employees-management-page .thryv-table-wrap.large,
+        .employees-management-page .thryv-table-wrap {
+            max-height: none;
+            overflow: visible;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .employees-management-page .thryv-users-table {
+            display: block;
+            width: 100%;
+            min-width: 0 !important;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: transparent;
+        }
+
+            .employees-management-page .thryv-users-table thead {
+                display: none;
+            }
+
+            .employees-management-page .thryv-users-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 18px !important;
+                width: 100% !important;
+            }
+
+            .employees-management-page .thryv-users-table tr,
+            .employees-management-page .thryv-users-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .employees-management-page .thryv-users-table tbody tr {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 12px;
+                border-radius: 18px !important;
+                overflow: hidden;
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+            }
+
+                .employees-management-page .thryv-users-table tbody tr:hover {
                     background: #ffffff;
                 }
 
-            .employee-table tbody td {
+                .employees-management-page .thryv-users-table tbody tr.selected {
+                    background: #eff6ff;
+                    border-color: #bfdbfe;
+                    box-shadow: inset 4px 0 0 #2563eb, 0 10px 26px rgba(15, 23, 42, 0.08);
+                }
+
+            .employees-management-page .thryv-users-table tbody td {
                 position: relative;
                 min-height: 44px;
                 padding: 12px 10px 12px 44% !important;
@@ -1089,11 +1110,12 @@ html[data-theme="dark glass"] .btn-secondary {
                 color: #1f2937;
             }
 
-                .employee-table tbody td:last-child {
+                .employees-management-page .thryv-users-table tbody td:last-child {
                     border-bottom: none;
                 }
 
-                .employee-table tbody td::before {
+                .employees-management-page .thryv-users-table tbody td::before {
+                    content: attr(data-label) !important;
                     position: absolute;
                     left: 10px;
                     top: 50%;
@@ -1109,317 +1131,295 @@ html[data-theme="dark glass"] .btn-secondary {
                     white-space: normal;
                 }
 
-                .employee-table tbody td:nth-child(1)::before {
-                    content: "Employee ID";
+                .employees-management-page .thryv-users-table tbody td:nth-child(1)::before {
+                    content: "Employee ID" !important;
                 }
 
-                .employee-table tbody td:nth-child(2)::before {
-                    content: "Name";
+                .employees-management-page .thryv-users-table tbody td:nth-child(2)::before {
+                    content: "Name" !important;
                 }
 
-                .employee-table tbody td:nth-child(3)::before {
-                    content: "Email";
+                .employees-management-page .thryv-users-table tbody td:nth-child(3)::before {
+                    content: "Email" !important;
                 }
 
-                .employee-table tbody td:nth-child(4)::before {
-                    content: "Status";
+                .employees-management-page .thryv-users-table tbody td:nth-child(4)::before {
+                    content: "Status" !important;
                 }
 
-                .employee-table tbody td:nth-child(5)::before {
-                    content: "Actions";
+                .employees-management-page .thryv-users-table tbody td:nth-child(5)::before {
+                    content: "Action" !important;
                 }
 
-    .actions-column {
+                .employees-management-page .thryv-users-table tbody td.thryv-empty-row::before {
+                    content: none !important;
+                    display: none !important;
+                }
+
+                .employees-management-page .thryv-users-table tbody td.thryv-empty-row {
+                    display: block !important;
+                    width: 100% !important;
+                    padding: 28px 16px !important;
+                    text-align: center !important;
+                    border-bottom: none !important;
+                    color: #64748b !important;
+                }
+
+                .employees-management-page .thryv-users-table tbody td:nth-child(5) {
+                    min-height: 58px !important;
+                    padding: 14px 8px 8px 43% !important;
+                    align-items: center !important;
+                    justify-content: flex-end !important;
+                    border-bottom: none !important;
+                }
+
+                    .employees-management-page .thryv-users-table tbody td:nth-child(5) .thryv-table-btn {
+                        width: min(170px, 100%) !important;
+                        min-height: 42px !important;
+                        margin: 0 !important;
+                        justify-content: center !important;
+                    }
+
+        .employees-management-page .thryv-status-badge {
+            max-width: 100%;
+            white-space: normal;
+            text-align: center;
+            justify-content: center;
+        }
+
+    .thryv-modal-overlay {
+        padding: 12px;
+        align-items: flex-start;
+        overflow-y: auto;
+    }
+
+    .thryv-modal-card {
         width: 100%;
+        max-width: 100%;
+        margin: 12px 0;
+        border-radius: 18px;
     }
 
-    .status-badge {
-        min-width: 0;
-        white-space: normal;
-        text-align: center;
-        line-height: 1.2;
+    .thryv-modal-header {
+        padding: 20px 18px 10px;
     }
 
-    .action-buttons {
-        width: 100%;
-        justify-content: flex-end;
-        gap: 8px;
-    }
-
-    .btn-action {
-        min-height: 36px;
-        padding: 8px 11px;
-        border-radius: 12px;
-        font-size: 0.78rem;
-    }
-
-    .empty-row {
-        display: block;
-        padding: 24px 12px !important;
-        text-align: center !important;
-    }
-
-        .empty-row::before {
-            display: none;
-        }
-}
-
-@media (max-width: 520px) {
-    .employees-page {
-        padding: 10px;
-    }
-
-    .employees-header {
-        margin-bottom: 16px;
-    }
-
-        .employees-header h1 {
-            font-size: 1.28rem;
+        .thryv-modal-header h3 {
+            font-size: 18px;
+            line-height: 1.25;
         }
 
-        .employees-header p {
-            font-size: 0.82rem;
+    .thryv-modal-body {
+        padding: 0 18px 16px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .thryv-modal-actions {
+        padding: 16px 18px 18px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .thryv-modal-actions .thryv-secondary-btn,
+        .thryv-modal-actions .thryv-danger-btn,
+        .thryv-modal-actions .thryv-primary-btn {
+            width: 100%;
         }
 
-    .employee-form-card,
-    .employee-list-card,
-    .no-access-card {
-        padding: 16px;
-        border-radius: 16px;
-    }
-
-    .card-title h2,
-    .table-header h2 {
-        font-size: 1rem;
-    }
-
-    .card-title span,
-    .table-header p {
-        font-size: 0.8rem;
-    }
-
-    .form-grid {
-        gap: 13px;
-    }
-
-    .form-input,
-    .search-box,
-    .btn-primary,
-    .btn-secondary {
-        height: 42px;
-        min-height: 42px;
-        border-radius: 12px;
-        font-size: 0.84rem;
-    }
-
-    .employee-table {
-        border-spacing: 0 12px;
-    }
-
-        .employee-table tbody tr {
-            border-radius: 16px;
-            padding: 10px;
-        }
-
-        .employee-table tbody td {
-            padding: 11px 8px 11px 42% !important;
-            min-height: 42px;
-            font-size: 12.5px;
-        }
-
-            .employee-table tbody td::before {
-                left: 8px;
-                width: 36%;
-                font-size: 10px;
-            }
-
-    .action-buttons {
-        gap: 6px;
-    }
-
-    .btn-action {
+    .thryv-modal-userbox {
         width: 100%;
         justify-content: center;
         text-align: center;
     }
 
-    .status-badge {
-        font-size: 0.76rem;
-        padding: 7px 10px;
-    }
-}
-
-@media (max-width: 390px) {
-    .employees-page {
-        padding: 8px;
-    }
-
-    .employee-form-card,
-    .employee-list-card,
-    .no-access-card {
-        padding: 14px;
-    }
-
-    .employees-header h1 {
-        font-size: 1.18rem;
-    }
-
-    .employee-table tbody td {
-        padding-left: 40% !important;
-    }
-
-        .employee-table tbody td::before {
-            width: 34%;
-            font-size: 9.5px;
-        }
-}
-
-@media (max-width: 900px) and (orientation: landscape) {
-    .employees-page {
-        padding: 14px;
-    }
-
-    .employee-form-card,
-    .employee-list-card {
-        padding: 18px;
-        border-radius: 18px;
-    }
-
-    .form-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .form-input {
-        height: 42px;
-    }
-
-    .form-actions {
-        flex-direction: row;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-        width: auto;
-    }
-}
-
-@media (max-width: 768px) {
-    html[data-theme="dark"] .employees-page .employee-table tbody tr,
-    body.dark .employees-page .employee-table tbody tr,
-    html.dark .employees-page .employee-table tbody tr {
+    html[data-theme="dark"] .employees-management-page .thryv-users-table tbody tr,
+    html.dark .employees-management-page .thryv-users-table tbody tr,
+    body.dark .employees-management-page .thryv-users-table tbody tr {
         background: #0f172a;
         border-color: rgba(148, 163, 184, 0.18);
-        box-shadow: 0 12px 30px rgba(0,0,0,.30);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
     }
 
-        html[data-theme="dark"] .employees-page .employee-table tbody tr:hover,
-        body.dark .employees-page .employee-table tbody tr:hover,
-        html.dark .employees-page .employee-table tbody tr:hover {
+        html[data-theme="dark"] .employees-management-page .thryv-users-table tbody tr:hover,
+        html.dark .employees-management-page .thryv-users-table tbody tr:hover,
+        body.dark .employees-management-page .thryv-users-table tbody tr:hover {
             background: #111c2f;
         }
 
-    html[data-theme="dark"] .employees-page .employee-table tbody td,
-    body.dark .employees-page .employee-table tbody td,
-    html.dark .employees-page .employee-table tbody td {
-        background: transparent !important;
-        color: #ffffff !important;
-        border-bottom-color: rgba(148, 163, 184, 0.14) !important;
+        html[data-theme="dark"] .employees-management-page .thryv-users-table tbody tr.selected,
+        html.dark .employees-management-page .thryv-users-table tbody tr.selected,
+        body.dark .employees-management-page .thryv-users-table tbody tr.selected {
+            background: rgba(255, 90, 31, 0.12);
+            border-color: rgba(255, 90, 31, 0.28);
+            box-shadow: inset 4px 0 0 #ff5a1f, 0 12px 30px rgba(0, 0, 0, 0.30);
+        }
+
+    html[data-theme="dark"] .employees-management-page .thryv-users-table tbody td,
+    html.dark .employees-management-page .thryv-users-table tbody td,
+    body.dark .employees-management-page .thryv-users-table tbody td {
+        color: #ffffff;
+        border-bottom-color: rgba(148, 163, 184, 0.14);
     }
 
-        html[data-theme="dark"] .employees-page .employee-table tbody td::before,
-        body.dark .employees-page .employee-table tbody td::before,
-        html.dark .employees-page .employee-table tbody td::before {
+        html[data-theme="dark"] .employees-management-page .thryv-users-table tbody td::before,
+        html.dark .employees-management-page .thryv-users-table tbody td::before,
+        body.dark .employees-management-page .thryv-users-table tbody td::before {
             color: #94a3b8;
         }
 
-    html[data-theme="dark glass"] .employees-page .employee-table tbody tr {
-        background: rgba(15,23,42,.62);
-        border-color: rgba(255,255,255,.10);
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
-        box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    html[data-theme="dark glass"] .employees-management-page .thryv-users-table tbody tr {
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
-        html[data-theme="dark glass"] .employees-page .employee-table tbody tr:hover {
-            background: rgba(15,23,42,.68);
+        html[data-theme="dark glass"] .employees-management-page .thryv-users-table tbody tr:hover {
+            background: rgba(15, 23, 42, 0.94) !important;
         }
 
-    html[data-theme="dark glass"] .employees-page .employee-table tbody td {
-        background: transparent !important;
+    html[data-theme="dark glass"] .employees-management-page .thryv-users-table tbody td {
         color: #e2e8f0 !important;
-        border-bottom-color: rgba(255,255,255,.08) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.08) !important;
     }
 
-        html[data-theme="dark glass"] .employees-page .employee-table tbody td::before {
-            color: #cbd5e1;
+        html[data-theme="dark glass"] .employees-management-page .thryv-users-table tbody td::before {
+            color: #cbd5e1 !important;
         }
 
-    html[data-theme="liquid glass"] .employees-page .employee-table tbody tr {
-        background: rgba(255,255,255,.42);
-        border-color: rgba(255,255,255,.62);
-        backdrop-filter: blur(22px) saturate(170%);
-        -webkit-backdrop-filter: blur(22px) saturate(170%);
-        box-shadow: 0 16px 38px rgba(15,23,42,.12), inset 0 1px 1px rgba(255,255,255,.75);
+    html[data-theme="liquid glass"] .employees-management-page .thryv-users-table tbody tr {
+        background: rgba(255, 255, 255, 0.42);
+        border-color: rgba(255, 255, 255, 0.62);
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
-        html[data-theme="liquid glass"] .employees-page .employee-table tbody tr:hover {
-            background: rgba(255,255,255,.50);
+        html[data-theme="liquid glass"] .employees-management-page .thryv-users-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.50);
         }
 
-    html[data-theme="liquid glass"] .employees-page .employee-table tbody td {
+    html[data-theme="liquid glass"] .employees-management-page .thryv-users-table tbody td {
         color: #334155;
-        border-bottom-color: rgba(255,255,255,.42);
+        border-bottom-color: rgba(255, 255, 255, 0.42);
     }
 
-        html[data-theme="liquid glass"] .employees-page .employee-table tbody td::before {
+        html[data-theme="liquid glass"] .employees-management-page .thryv-users-table tbody td::before {
             color: #475569;
         }
 }
 
-@media (max-width: 768px) {
-    .employees-page .employee-table tbody {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 18px !important;
-        width: 100% !important;
+@media (max-width: 520px) {
+    .employees-management-page {
+        gap: 14px;
     }
 
-        .employees-page .employee-table tbody tr {
-            display: block !important;
-            width: 100% !important;
-            margin: 0 !important;
-            border-radius: 18px !important;
+        .employees-management-page .thryv-users-header,
+        .employees-management-page .thryv-users-card {
+            padding: 16px;
+            border-radius: 16px;
         }
 
-            .employees-page .employee-table tbody tr:not(:last-child) {
-                margin-bottom: 0 !important;
+            .employees-management-page .thryv-users-header h2 {
+                font-size: 21px;
             }
 
-    .employees-page .employee-table {
-        border-spacing: 0 !important;
-    }
-}
+            .employees-management-page .thryv-users-header p {
+                font-size: 13px;
+            }
 
-@media (max-width: 520px) {
-    .employees-page .employee-table tbody {
-        gap: 16px !important;
-    }
-
-        .employees-page .employee-table tbody tr {
-            border-radius: 16px !important;
+        .employees-management-page .thryv-card-top h3,
+        .employees-management-page .thryv-list-header h3 {
+            font-size: 17px;
         }
+
+        .employees-management-page .thryv-card-top span,
+        .employees-management-page .thryv-list-header span {
+            font-size: 12px;
+        }
+
+        .employees-management-page .thryv-input.modern,
+        .employees-management-page .thryv-search-input,
+        .employees-management-page .thryv-primary-btn,
+        .employees-management-page .thryv-secondary-btn,
+        .employees-management-page .thryv-danger-btn,
+        .employees-management-page .thryv-table-btn {
+            min-height: 42px;
+            height: 42px;
+            border-radius: 12px;
+            font-size: 12.5px;
+        }
+
+        .employees-management-page .thryv-switch-card {
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .employees-management-page .thryv-switch-title {
+            font-size: 13px;
+        }
+
+        .employees-management-page .thryv-switch-subtitle {
+            font-size: 11px;
+        }
+
+        .employees-management-page .thryv-users-table tbody {
+            gap: 16px !important;
+        }
+
+            .employees-management-page .thryv-users-table tbody tr {
+                border-radius: 16px !important;
+                padding: 10px;
+            }
+
+            .employees-management-page .thryv-users-table tbody td {
+                padding: 11px 8px 11px 42% !important;
+                min-height: 42px;
+                font-size: 12.5px;
+            }
+
+                .employees-management-page .thryv-users-table tbody td::before {
+                    left: 8px;
+                    width: 36%;
+                    font-size: 10px;
+                }
+
+                .employees-management-page .thryv-users-table tbody td:nth-child(5) {
+                    padding: 14px 8px 8px 42% !important;
+                }
+
+                    .employees-management-page .thryv-users-table tbody td:nth-child(5) .thryv-table-btn {
+                        width: 100% !important;
+                    }
+
+        .employees-management-page .thryv-status-badge {
+            font-size: 10.5px;
+            padding: 6px 9px;
+        }
+
+    .thryv-modal-card {
+        border-radius: 16px;
+    }
 }
 
-@media (max-width: 768px) {
-    html[data-theme="dark glass"] .employees-page .employee-table tbody tr {
-        background: rgba(15, 23, 42, 0.88) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+@media (max-width: 390px) {
+    .employees-management-page .thryv-users-header,
+    .employees-management-page .thryv-users-card {
+        padding: 14px;
     }
 
-    html[data-theme="liquid glass"] .employees-page .employee-table tbody tr {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        .employees-management-page .thryv-users-header h2 {
+            font-size: 20px;
+        }
+
+    .employees-management-page .thryv-users-table tbody td {
+        padding-left: 40% !important;
     }
+
+        .employees-management-page .thryv-users-table tbody td::before {
+            width: 34%;
+            font-size: 9.5px;
+        }
 }
