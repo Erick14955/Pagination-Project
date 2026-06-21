@@ -1616,3 +1616,237 @@ html[data-theme="dark glass"] .thryv-code-pill {
             font-size: 9.5px;
         }
 }
+
+.weekly-evaluation-modal-backdrop {
+    overscroll-behavior: contain;
+}
+
+.weekly-evaluation-modal {
+    scrollbar-width: thin;
+}
+
+@media (max-width: 900px) {
+    .weekly-evaluation-modal-backdrop {
+        padding: 14px;
+        align-items: flex-start;
+        overflow: hidden;
+        height: 100dvh;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: calc(100dvh - 28px);
+        overflow-y: auto;
+        border-radius: 22px;
+    }
+
+    .weekly-evaluation-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-radius: 22px 22px 0 0;
+        padding: 20px;
+    }
+
+    .weekly-evaluation-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 18px 18px 0;
+        gap: 12px;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 14px 18px 0;
+        gap: 12px;
+    }
+
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr;
+        padding: 18px;
+        gap: 14px;
+    }
+}
+
+@media (max-width: 640px) {
+    .weekly-evaluation-modal-backdrop {
+        padding: 8px;
+        align-items: flex-start;
+        justify-content: center;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100%;
+        max-height: calc(100dvh - 16px);
+        border-radius: 18px;
+        overflow-y: auto;
+    }
+
+    .weekly-evaluation-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 16px;
+        border-radius: 18px 18px 0 0;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .weekly-modal-eyebrow {
+        font-size: 0.66rem;
+        letter-spacing: 0.10em;
+        margin-bottom: 6px;
+    }
+
+    .weekly-evaluation-modal-header h3 {
+        font-size: 1.05rem;
+        line-height: 1.22;
+        word-break: break-word;
+    }
+
+    .weekly-evaluation-modal-header p {
+        font-size: 0.82rem;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .weekly-modal-close {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 11px;
+        font-size: 15px;
+    }
+
+    .weekly-evaluation-summary-grid {
+        grid-template-columns: 1fr;
+        padding: 14px 14px 0;
+        gap: 10px;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 12px 14px 0;
+        gap: 10px;
+    }
+
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .weekly-summary-card,
+    .weekly-percent-mini-card,
+    .weekly-detail-card {
+        border-radius: 15px;
+        padding: 13px;
+    }
+
+        .weekly-summary-card span,
+        .weekly-percent-mini-card span {
+            font-size: 0.68rem;
+        }
+
+        .weekly-summary-card strong,
+        .weekly-percent-mini-card strong {
+            font-size: 0.95rem;
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
+        .weekly-summary-card.total strong {
+            font-size: 1.08rem;
+        }
+
+    .weekly-detail-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+        .weekly-detail-card-header h4 {
+            font-size: 0.95rem;
+            line-height: 1.25;
+        }
+
+        .weekly-detail-card-header span {
+            font-size: 0.68rem;
+        }
+
+    .weekly-radio-row {
+        grid-template-columns: 20px 1fr;
+        align-items: start;
+        gap: 8px;
+        padding: 9px 8px;
+        margin-bottom: 7px;
+    }
+
+        .weekly-radio-row input {
+            width: 15px;
+            height: 15px;
+            margin-top: 2px;
+        }
+
+        .weekly-radio-row span {
+            font-size: 0.80rem;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .weekly-radio-row small {
+            grid-column: 2;
+            justify-self: flex-start;
+            font-size: 0.66rem;
+        }
+}
+
+@media (max-width: 390px) {
+    .weekly-evaluation-modal-backdrop {
+        padding: 6px;
+    }
+
+    .weekly-evaluation-modal {
+        max-height: calc(100dvh - 12px);
+        border-radius: 16px;
+    }
+
+    .weekly-evaluation-modal-header {
+        padding: 14px;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .weekly-evaluation-summary-grid,
+    .weekly-evaluation-percent-grid,
+    .weekly-evaluation-detail-grid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .weekly-detail-card {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    html[data-theme="dark"] .weekly-evaluation-modal,
+    html[data-theme="dark glass"] .weekly-evaluation-modal {
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    html[data-theme="dark"] .weekly-evaluation-modal-header,
+    html[data-theme="dark glass"] .weekly-evaluation-modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    html[data-theme="liquid glass"] .weekly-evaluation-modal {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
