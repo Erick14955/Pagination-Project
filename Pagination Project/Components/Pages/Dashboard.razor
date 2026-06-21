@@ -491,7 +491,9 @@
 
 @if (showWeeklyEvaluationModal && selectedWeeklyEvaluation is not null)
 {
-    <div class="weekly-evaluation-modal-backdrop" @onclick="CloseWeeklyEvaluationModal">
+    <div id="weeklyEvaluationModalBackdrop"
+         class="weekly-evaluation-modal-backdrop"
+         @onclick="CloseWeeklyEvaluationModal">
         <div class="weekly-evaluation-modal" @onclick:stopPropagation="true">
 
             <div class="weekly-evaluation-modal-header">
@@ -1066,15 +1068,15 @@
         showWeeklyEvaluationModal = true;
 
         await InvokeAsync(StateHasChanged);
-        await JS.InvokeVoidAsync("thryvModalScroll.open");
+        await JS.InvokeVoidAsync("thryvModalPortal.open", "weeklyEvaluationModalBackdrop");
     }
 
     private async Task CloseWeeklyEvaluationModal()
     {
+        await JS.InvokeVoidAsync("thryvModalPortal.close", "weeklyEvaluationModalBackdrop");
+
         showWeeklyEvaluationModal = false;
         selectedWeeklyEvaluation = null;
-
-        await JS.InvokeVoidAsync("thryvModalScroll.close");
     }
 
     private static string GetAccuracyClass(decimal value)
