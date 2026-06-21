@@ -346,8 +346,11 @@
 
 @if (MostrarFormularioTemporal)
 {
-    <div class="temporary-modal-backdrop">
-        <div class="temporary-modal">
+    <div id="temporaryAssignmentModalBackdrop"
+         class="temporary-modal-backdrop"
+         @onclick="CerrarFormularioAsignacionTemporal">
+
+        <div class="temporary-modal" @onclick:stopPropagation="true">
 
             <div class="temporary-modal-header">
                 <div>
@@ -362,77 +365,81 @@
                 </button>
             </div>
 
-            <div class="form-grid">
-                <div class="form-group large">
-                    <label>Assignment</label>
-                    <select class="form-control"
-                            value="@AsignacionTemporalSeleccionadaId"
-                            @onchange="OnAsignacionTemporalChanged">
-                        <option value="">Select assignment</option>
+            <div class="temporary-modal-scroll">
 
-                        @foreach (var item in AsignacionesListado)
+                <div class="form-grid">
+                    <div class="form-group large">
+                        <label>Assignment</label>
+                        <select class="form-control"
+                                value="@AsignacionTemporalSeleccionadaId"
+                                @onchange="OnAsignacionTemporalChanged">
+                            <option value="">Select assignment</option>
+
+                            @foreach (var item in AsignacionesListado)
+                            {
+                                <option value="@item.Id">
+                                    @item.EmpleadoNombre - @item.BookName - KGEN: @item.KGENCode
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group large">
+                        <label>Temporary Employee</label>
+                        <select class="form-control"
+                                @bind="EmpleadoTemporalSeleccionadoId"
+                                disabled="@(AsignacionTemporalSeleccionadaId is null)">
+                            <option value="">Select employee</option>
+
+                            @foreach (var empleado in EmpleadosDisponiblesParaTemporal)
+                            {
+                                <option value="@empleado.Id">
+                                    @empleado.Nombre | ID: @empleado.IdEmpleado
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                @if (AsignacionTemporalSeleccionadaId is null)
+                {
+                    <div class="empty-state" style="margin-top: 18px;">
+                        <strong>Select an assignment first.</strong>
+                        <span>The pending stages will appear here.</span>
+                    </div>
+                }
+                else if (!EtapasDisponiblesParaTemporal.Any())
+                {
+                    <div class="empty-state" style="margin-top: 18px;">
+                        <strong>No pending stages available.</strong>
+                        <span>All stages for this book have already passed or are not applicable.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="temporary-stages">
+                        @foreach (var etapa in EtapasDisponiblesParaTemporal)
                         {
-                            <option value="@item.Id">
-                                @item.EmpleadoNombre - @item.BookName - KGEN: @item.KGENCode
-                            </option>
+                            <label class="temporary-stage-card">
+                                <input type="checkbox"
+                                       checked="@EtapaSeleccionada(etapa.Codigo)"
+                                       @onchange="(e) => CambiarEtapaTemporal(etapa.Codigo, e)" />
+                                <strong>@etapa.Nombre</strong>
+                            </label>
                         }
-                    </select>
+                    </div>
+                }
+
+                <div class="form-grid" style="margin-top: 18px;">
+                    <div class="form-group large">
+                        <label>Reason</label>
+                        <input class="form-control"
+                               placeholder="Example: Vacation coverage, sick leave, temporary support..."
+                               @bind="MotivoTemporal"
+                               @bind:event="oninput" />
+                    </div>
                 </div>
 
-                <div class="form-group large">
-                    <label>Temporary Employee</label>
-                    <select class="form-control"
-                            @bind="EmpleadoTemporalSeleccionadoId"
-                            disabled="@(AsignacionTemporalSeleccionadaId is null)">
-                        <option value="">Select employee</option>
-
-                        @foreach (var empleado in EmpleadosDisponiblesParaTemporal)
-                        {
-                            <option value="@empleado.Id">
-                                @empleado.Nombre | ID: @empleado.IdEmpleado
-                            </option>
-                        }
-                    </select>
-                </div>
-            </div>
-
-            @if (AsignacionTemporalSeleccionadaId is null)
-            {
-                <div class="empty-state" style="margin-top: 18px;">
-                    <strong>Select an assignment first.</strong>
-                    <span>The pending stages will appear here.</span>
-                </div>
-            }
-            else if (!EtapasDisponiblesParaTemporal.Any())
-            {
-                <div class="empty-state" style="margin-top: 18px;">
-                    <strong>No pending stages available.</strong>
-                    <span>All stages for this book have already passed or are not applicable.</span>
-                </div>
-            }
-            else
-            {
-                <div class="temporary-stages">
-                    @foreach (var etapa in EtapasDisponiblesParaTemporal)
-                    {
-                        <label class="temporary-stage-card">
-                            <input type="checkbox"
-                                   checked="@EtapaSeleccionada(etapa.Codigo)"
-                                   @onchange="(e) => CambiarEtapaTemporal(etapa.Codigo, e)" />
-                            <strong>@etapa.Nombre</strong>
-                        </label>
-                    }
-                </div>
-            }
-
-            <div class="form-grid" style="margin-top: 18px;">
-                <div class="form-group large">
-                    <label>Reason</label>
-                    <input class="form-control"
-                           placeholder="Example: Vacation coverage, sick leave, temporary support..."
-                           @bind="MotivoTemporal"
-                           @bind:event="oninput" />
-                </div>
             </div>
 
             <div class="temporary-modal-actions">
@@ -448,6 +455,7 @@
                     Cancel
                 </button>
             </div>
+
         </div>
     </div>
 }
@@ -508,6 +516,9 @@
 
     private Empleados? EmpleadoSeleccionado => BuscarEmpleadoSeleccionado();
     private Libros? LibroSeleccionado => BuscarLibroSeleccionado();
+
+    private const string TemporaryAssignmentModalId = "temporaryAssignmentModalBackdrop";
+    private bool AbrirTemporalPortalPendiente { get; set; } = false;
 
     private static readonly string[] RolesPermitidosParaAsignaciones =
     {
@@ -633,14 +644,41 @@
     private async Task AbrirFormularioAsignacionTemporal()
     {
         LimpiarFormularioTemporal();
+
         MostrarFormularioTemporal = true;
+        AbrirTemporalPortalPendiente = true;
 
         await InvokeAsync(StateHasChanged);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (AbrirTemporalPortalPendiente && MostrarFormularioTemporal)
+        {
+            AbrirTemporalPortalPendiente = false;
+
+            await JS.InvokeVoidAsync(
+                "thryvModalPortal.open",
+                TemporaryAssignmentModalId);
+        }
+    }
+
     private async Task CerrarFormularioAsignacionTemporal()
     {
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "thryvModalPortal.close",
+                TemporaryAssignmentModalId);
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("thryvModalPortal.forceClose");
+        }
+
         MostrarFormularioTemporal = false;
+        AbrirTemporalPortalPendiente = false;
+
         LimpiarFormularioTemporal();
 
         await InvokeAsync(StateHasChanged);

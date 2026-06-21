@@ -10,6 +10,7 @@
 @inject IUsuarioService UsuarioService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 @layout Pagination_Project.Components.Layout.DashboardLayout
 @rendermode InteractiveServer
@@ -365,7 +366,9 @@
 
 @if (MostrarModalDesbloqueo && PuedeDesbloquearUsuarios)
 {
-    <div class="thryv-modal-overlay" @onclick="CerrarModalDesbloqueo">
+    <div id="unlockUsersModalOverlay"
+         class="thryv-modal-overlay"
+         @onclick="CerrarModalDesbloqueo">
         <div class="thryv-modal-card thryv-unlock-modal" @onclick:stopPropagation="true">
             <div class="thryv-modal-header">
                 <h3>Unlock blocked users</h3>
@@ -552,18 +555,24 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
     }
-    private void AbrirModalDesbloqueo()
+
+    private async Task AbrirModalDesbloqueo()
     {
         if (!PuedeDesbloquearUsuarios)
             return;
 
         MostrarModalDesbloqueo = true;
+
+        await InvokeAsync(StateHasChanged);
+        await JS.InvokeVoidAsync("thryvModalPortal.open", "unlockUsersModalOverlay");
     }
 
-    private void CerrarModalDesbloqueo()
+    private async Task CerrarModalDesbloqueo()
     {
         if (Desbloqueando)
             return;
+
+        await JS.InvokeVoidAsync("thryvModalPortal.close", "unlockUsersModalOverlay");
 
         MostrarModalDesbloqueo = false;
     }
@@ -592,6 +601,7 @@
 
             if (!usuariosBloqueados.Any())
             {
+                await JS.InvokeVoidAsync("thryvModalPortal.close", "unlockUsersModalOverlay");
                 MostrarModalDesbloqueo = false;
             }
 

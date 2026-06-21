@@ -2106,3 +2106,221 @@ body:has(.temporary-modal-backdrop) {
         min-width: 34px !important;
     }
 }
+
+html.thryv-modal-open,
+body.thryv-modal-open {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+
+    html.thryv-modal-open .thryv-top-header,
+    body.thryv-modal-open .thryv-top-header,
+    html.thryv-modal-open .thryv-sidebar,
+    body.thryv-modal-open .thryv-sidebar,
+    html.thryv-modal-open .thryv-sidebar-overlay,
+    body.thryv-modal-open .thryv-sidebar-overlay {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+body > .temporary-modal-backdrop,
+.temporary-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: rgba(2, 6, 23, 0.78) !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+    body > .temporary-modal-backdrop .temporary-modal,
+    .temporary-modal-backdrop .temporary-modal {
+        position: relative !important;
+        z-index: 2147483647 !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-top: none !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+    }
+
+    body > .temporary-modal-backdrop .temporary-modal-header,
+    .temporary-modal-backdrop .temporary-modal-header {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 14px !important;
+        padding-top: calc(18px + env(safe-area-inset-top)) !important;
+        padding-right: calc(16px + env(safe-area-inset-right)) !important;
+        padding-bottom: 16px !important;
+        padding-left: calc(16px + env(safe-area-inset-left)) !important;
+        margin: 0 !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        background: #ffffff !important;
+    }
+
+        body > .temporary-modal-backdrop .temporary-modal-header h2,
+        .temporary-modal-backdrop .temporary-modal-header h2 {
+            margin: 0 !important;
+            font-size: 1.15rem !important;
+            line-height: 1.2 !important;
+            color: #111827 !important;
+        }
+
+        body > .temporary-modal-backdrop .temporary-modal-header p,
+        .temporary-modal-backdrop .temporary-modal-header p {
+            margin: 6px 0 0 !important;
+            font-size: 0.86rem !important;
+            line-height: 1.35 !important;
+            color: #64748b !important;
+        }
+
+    body > .temporary-modal-backdrop .temporary-modal-scroll,
+    .temporary-modal-backdrop .temporary-modal-scroll {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+        touch-action: pan-y !important;
+        padding: 16px !important;
+        padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    }
+
+    body > .temporary-modal-backdrop .temporary-modal-actions,
+    .temporary-modal-backdrop .temporary-modal-actions {
+        flex: 0 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: stretch !important;
+        gap: 10px !important;
+        margin: 0 !important;
+        padding-top: 14px !important;
+        padding-right: calc(16px + env(safe-area-inset-right)) !important;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+        padding-left: calc(16px + env(safe-area-inset-left)) !important;
+        border-top: 1px solid #e5e7eb !important;
+        background: #ffffff !important;
+    }
+
+        body > .temporary-modal-backdrop .temporary-modal-actions button,
+        .temporary-modal-backdrop .temporary-modal-actions button {
+            width: 100% !important;
+            min-height: 46px !important;
+        }
+
+    body > .temporary-modal-backdrop .temporary-stages,
+    .temporary-modal-backdrop .temporary-stages {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin-top: 18px !important;
+    }
+
+    body > .temporary-modal-backdrop .temporary-stage-card,
+    .temporary-modal-backdrop .temporary-stage-card {
+        min-height: 54px !important;
+        padding: 14px !important;
+        border-radius: 15px !important;
+    }
+
+html[data-theme="dark"] body > .temporary-modal-backdrop .temporary-modal,
+html[data-theme="dark glass"] body > .temporary-modal-backdrop .temporary-modal {
+    background: #111827 !important;
+    color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] body > .temporary-modal-backdrop .temporary-modal-header,
+html[data-theme="dark"] body > .temporary-modal-backdrop .temporary-modal-actions,
+html[data-theme="dark glass"] body > .temporary-modal-backdrop .temporary-modal-header,
+html[data-theme="dark glass"] body > .temporary-modal-backdrop .temporary-modal-actions {
+    background: #111827 !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+    html[data-theme="dark"] body > .temporary-modal-backdrop .temporary-modal-header h2,
+    html[data-theme="dark glass"] body > .temporary-modal-backdrop .temporary-modal-header h2 {
+        color: #f8fafc !important;
+    }
+
+    html[data-theme="dark"] body > .temporary-modal-backdrop .temporary-modal-header p,
+    html[data-theme="dark glass"] body > .temporary-modal-backdrop .temporary-modal-header p {
+        color: #cbd5e1 !important;
+    }
+
+@media (min-width: 769px) {
+    body > .temporary-modal-backdrop,
+    .temporary-modal-backdrop {
+        align-items: center !important;
+        padding: 24px !important;
+    }
+
+        body > .temporary-modal-backdrop .temporary-modal,
+        .temporary-modal-backdrop .temporary-modal {
+            width: min(980px, calc(100vw - 48px)) !important;
+            height: min(720px, calc(100dvh - 48px)) !important;
+            max-height: calc(100dvh - 48px) !important;
+            border-radius: 24px !important;
+            border: 1px solid #e5e7eb !important;
+            border-top: 8px solid #7c3aed !important;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35) !important;
+        }
+
+        body > .temporary-modal-backdrop .temporary-modal-header,
+        .temporary-modal-backdrop .temporary-modal-header {
+            padding: 24px 26px 18px !important;
+            border-radius: 24px 24px 0 0 !important;
+        }
+
+        body > .temporary-modal-backdrop .temporary-modal-scroll,
+        .temporary-modal-backdrop .temporary-modal-scroll {
+            padding: 22px 26px !important;
+        }
+
+        body > .temporary-modal-backdrop .temporary-modal-actions,
+        .temporary-modal-backdrop .temporary-modal-actions {
+            flex-direction: row !important;
+            justify-content: flex-end !important;
+            padding: 18px 26px 24px !important;
+        }
+
+            body > .temporary-modal-backdrop .temporary-modal-actions button,
+            .temporary-modal-backdrop .temporary-modal-actions button {
+                width: auto !important;
+                min-width: 170px !important;
+            }
+
+        body > .temporary-modal-backdrop .temporary-stages,
+        .temporary-modal-backdrop .temporary-stages {
+            grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
+        }
+}

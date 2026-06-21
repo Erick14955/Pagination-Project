@@ -2017,3 +2017,164 @@ body:has(.thryv-modal-overlay) {
             padding: 16px 12px !important;
         }
 }
+
+html.thryv-modal-open,
+body.thryv-modal-open {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+
+    html.thryv-modal-open .thryv-top-header,
+    body.thryv-modal-open .thryv-top-header,
+    html.thryv-modal-open .thryv-sidebar,
+    body.thryv-modal-open .thryv-sidebar,
+    html.thryv-modal-open .thryv-sidebar-overlay,
+    body.thryv-modal-open .thryv-sidebar-overlay {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+body > .thryv-modal-overlay,
+.thryv-modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: rgba(2, 6, 23, 0.78) !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+    body > .thryv-modal-overlay .thryv-modal-card,
+    .thryv-modal-overlay .thryv-modal-card {
+        position: relative !important;
+        z-index: 2147483647 !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        max-height: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+        background: var(--bg-card) !important;
+    }
+
+    body > .thryv-modal-overlay .thryv-modal-header,
+    .thryv-modal-overlay .thryv-modal-header {
+        flex: 0 0 auto !important;
+        padding-top: calc(20px + env(safe-area-inset-top)) !important;
+        padding-right: calc(16px + env(safe-area-inset-right)) !important;
+        padding-bottom: 16px !important;
+        padding-left: calc(16px + env(safe-area-inset-left)) !important;
+        border-bottom: 1px solid var(--border) !important;
+        background: var(--bg-card) !important;
+    }
+
+    body > .thryv-modal-overlay .thryv-modal-body,
+    .thryv-modal-overlay .thryv-modal-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+        touch-action: pan-y !important;
+        padding: 16px !important;
+        padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important;
+    }
+
+    body > .thryv-modal-overlay .thryv-modal-actions,
+    .thryv-modal-overlay .thryv-modal-actions {
+        flex: 0 0 auto !important;
+        padding: 14px 16px calc(16px + env(safe-area-inset-bottom)) !important;
+        border-top: 1px solid var(--border) !important;
+        background: var(--bg-card) !important;
+    }
+
+    body > .thryv-modal-overlay .thryv-modal-card.thryv-unlock-modal,
+    .thryv-modal-overlay .thryv-modal-card.thryv-unlock-modal {
+        width: 100vw !important;
+        max-width: none !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        max-height: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+.thryv-unlock-modal .thryv-table-wrap,
+.thryv-unlock-modal .thryv-unlock-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 16px !important;
+}
+
+.thryv-unlock-modal .thryv-users-table,
+.thryv-unlock-modal .thryv-unlock-table {
+    min-width: 760px !important;
+}
+
+@media (min-width: 769px) {
+    body > .thryv-modal-overlay,
+    .thryv-modal-overlay {
+        align-items: center !important;
+        padding: 24px !important;
+    }
+
+        body > .thryv-modal-overlay .thryv-modal-card,
+        .thryv-modal-overlay .thryv-modal-card {
+            width: min(460px, calc(100vw - 48px)) !important;
+            height: auto !important;
+            max-height: calc(100dvh - 48px) !important;
+            border-radius: var(--radius-xl) !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: var(--shadow-modal) !important;
+        }
+
+            body > .thryv-modal-overlay .thryv-modal-card.thryv-unlock-modal,
+            .thryv-modal-overlay .thryv-modal-card.thryv-unlock-modal {
+                width: min(1100px, calc(100vw - 48px)) !important;
+                height: min(760px, calc(100dvh - 48px)) !important;
+                max-height: calc(100dvh - 48px) !important;
+                border-radius: 24px !important;
+            }
+
+        body > .thryv-modal-overlay .thryv-modal-header,
+        .thryv-modal-overlay .thryv-modal-header {
+            padding: 24px 28px 14px !important;
+        }
+
+        body > .thryv-modal-overlay .thryv-modal-body,
+        .thryv-modal-overlay .thryv-modal-body {
+            padding: 0 28px 20px !important;
+        }
+
+        body > .thryv-modal-overlay .thryv-modal-actions,
+        .thryv-modal-overlay .thryv-modal-actions {
+            padding: 18px 28px 24px !important;
+        }
+}
