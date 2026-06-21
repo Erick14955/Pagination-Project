@@ -1502,28 +1502,65 @@ html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
     }
 }
 
-html.thryv-modal-open .thryv-top-header,
-body.thryv-modal-open .thryv-top-header,
-html.thryv-modal-open .thryv-sidebar,
-body.thryv-modal-open .thryv-sidebar,
-html.thryv-modal-open .thryv-sidebar-overlay,
-body.thryv-modal-open .thryv-sidebar-overlay {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    z-index: -1 !important;
-}
-
-html.thryv-modal-open .thryv-dashboard-layout,
-body.thryv-modal-open .thryv-dashboard-layout,
-html.thryv-modal-open .thryv-main-content,
-body.thryv-modal-open .thryv-main-content,
-html.thryv-modal-open .thryv-page-content,
-body.thryv-modal-open .thryv-page-content {
+html.thryv-modal-open,
+body.thryv-modal-open,
+html:has(.weekly-evaluation-modal-backdrop),
+body:has(.weekly-evaluation-modal-backdrop) {
+    width: 100% !important;
+    height: 100% !important;
     overflow: hidden !important;
+    overscroll-behavior: none !important;
 }
 
-.weekly-evaluation-modal-backdrop {
+    html.thryv-modal-open .thryv-top-header,
+    body.thryv-modal-open .thryv-top-header,
+    html:has(.weekly-evaluation-modal-backdrop) .thryv-top-header,
+    body:has(.weekly-evaluation-modal-backdrop) .thryv-top-header,
+    html.thryv-modal-open .thryv-sidebar,
+    body.thryv-modal-open .thryv-sidebar,
+    html:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar,
+    body:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar,
+    html.thryv-modal-open .thryv-sidebar-overlay,
+    body.thryv-modal-open .thryv-sidebar-overlay,
+    html:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar-overlay,
+    body:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar-overlay {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .thryv-dashboard-layout:has(.weekly-evaluation-modal-backdrop) .thryv-page-content,
+    html.thryv-modal-open .thryv-page-content,
+    body.thryv-modal-open .thryv-page-content {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 2147483646 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        background: transparent !important;
+    }
+
+    .thryv-dashboard-layout:has(.weekly-evaluation-modal-backdrop) .thryv-main-content,
+    html.thryv-modal-open .thryv-main-content,
+    body.thryv-modal-open .thryv-main-content {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 2147483645 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        overflow: hidden !important;
+    }
+
+.weekly-evaluation-modal-backdrop,
+body > .weekly-evaluation-modal-backdrop {
     position: fixed !important;
     inset: 0 !important;
     z-index: 2147483647 !important;
@@ -1531,14 +1568,143 @@ body.thryv-modal-open .thryv-page-content {
     height: 100vh !important;
     height: 100svh !important;
     height: 100dvh !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: rgba(2, 6, 23, 0.82) !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+}
+
+.weekly-evaluation-modal {
+    position: relative !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100vh !important;
+    height: 100svh !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    background: #f8fafc !important;
 }
 
 .weekly-evaluation-modal-header {
-    padding-top: calc(22px + env(safe-area-inset-top)) !important;
+    position: relative !important;
+    top: auto !important;
+    z-index: 30 !important;
+    flex: 0 0 auto !important;
+    padding-top: calc(20px + env(safe-area-inset-top)) !important;
+    padding-right: calc(14px + env(safe-area-inset-right)) !important;
+    padding-bottom: 16px !important;
+    padding-left: calc(14px + env(safe-area-inset-left)) !important;
+    border-radius: 0 !important;
+    background: linear-gradient(135deg, #020617, #0f172a) !important;
+    color: #ffffff !important;
+}
+
+.weekly-evaluation-modal-scroll {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom)) !important;
+}
+
+.weekly-evaluation-modal-header h3 {
+    max-width: 100% !important;
+    font-size: 1.08rem !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+}
+
+.weekly-evaluation-modal-header p {
+    font-size: 0.84rem !important;
+    line-height: 1.35 !important;
+    word-break: break-word !important;
+}
+
+.weekly-modal-close {
+    flex-shrink: 0 !important;
+}
+
+@media (min-width: 769px) {
+    html:not(:has(.weekly-evaluation-modal-backdrop)) .weekly-evaluation-modal {
+        width: min(1180px, calc(100vw - 48px)) !important;
+        height: min(920px, calc(100dvh - 48px)) !important;
+        border-radius: 28px !important;
+        border: 1px solid rgba(226, 232, 240, 0.9) !important;
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
+    }
+
+    .weekly-evaluation-modal-backdrop {
+        align-items: center !important;
+        padding: 24px !important;
+    }
+
+    .weekly-evaluation-modal {
+        width: min(1180px, calc(100vw - 48px)) !important;
+        height: min(920px, calc(100dvh - 48px)) !important;
+        border-radius: 28px !important;
+        border: 1px solid rgba(226, 232, 240, 0.9) !important;
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
+    }
+
+    .weekly-evaluation-modal-header {
+        border-radius: 28px 28px 0 0 !important;
+        padding: 24px 28px !important;
+    }
+
+    .weekly-evaluation-modal-scroll {
+        padding-bottom: 28px !important;
+    }
 }
 
 @media (max-width: 768px) {
-    .weekly-evaluation-modal-header {
-        padding-top: calc(24px + env(safe-area-inset-top)) !important;
+    .weekly-evaluation-modal-backdrop {
+        padding: 0 !important;
+        align-items: stretch !important;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100svh !important;
+        height: 100dvh !important;
+        border-radius: 0 !important;
+    }
+
+    .weekly-evaluation-summary-grid {
+        grid-template-columns: 1fr !important;
+        padding: 14px 14px 0 !important;
+    }
+
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        padding: 12px 14px 0 !important;
+    }
+
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr !important;
+        padding: 14px !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .weekly-evaluation-percent-grid {
+        grid-template-columns: 1fr !important;
     }
 }

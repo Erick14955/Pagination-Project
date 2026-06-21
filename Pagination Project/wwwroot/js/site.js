@@ -21,13 +21,17 @@ window.thryvModalPortal = {
         const modal = document.getElementById(elementId);
 
         if (!modal) {
+            console.warn("Modal not found:", elementId);
             return;
         }
 
         if (!modal.__thryvPlaceholder) {
             const placeholder = document.createComment("thryv-modal-placeholder");
-            modal.parentNode.insertBefore(placeholder, modal);
-            modal.__thryvPlaceholder = placeholder;
+
+            if (modal.parentNode) {
+                modal.parentNode.insertBefore(placeholder, modal);
+                modal.__thryvPlaceholder = placeholder;
+            }
         }
 
         document.body.appendChild(modal);
