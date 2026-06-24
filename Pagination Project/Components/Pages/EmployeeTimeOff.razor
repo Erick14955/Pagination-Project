@@ -365,6 +365,12 @@
         "Other"
     };
 
+    private static readonly string[] RolesPermitidosParaAsignaciones =
+    {
+        "EMPLOYEE",
+        "ASSISTANT"
+    };
+
     protected override async Task OnInitializedAsync()
     {
         await LoadCatalogsAsync();
@@ -375,9 +381,14 @@
     {
         await using var db = await DbFactory.CreateDbContextAsync();
 
+        var empleadosPermitidosIds =
+            await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
+
         Employees = await db.Empleados
             .AsNoTracking()
-            .Where(x => x.Activo)
+            .Where(x =>
+                x.Activo &&
+                empleadosPermitidosIds.Contains(x.Id))
             .OrderBy(x => x.Nombre)
             .ToListAsync();
 
@@ -454,6 +465,27 @@
         {
             Loading = false;
         }
+    }
+
+    private async Task<HashSet<Guid>> ObtenerEmpleadosPermitidosParaAsignacionesAsync(
+    AppDbContext db)
+    {
+        var empleadosIds = await (
+            from usuario in db.Users.AsNoTracking()
+            join nivel in db.PermissionLevels.AsNoTracking()
+                on usuario.lvl_Id equals nivel.Id
+            where usuario.Activo &&
+                  usuario.EmployeeId != null &&
+                  RolesPermitidosParaAsignaciones.Contains(
+                      (nivel.Name ?? string.Empty)
+                          .Trim()
+                          .ToUpper())
+            select usuario.EmployeeId!.Value
+        )
+        .Distinct()
+        .ToListAsync();
+
+        return empleadosIds.ToHashSet();
     }
 
     private IEnumerable<TimeOffViewModel> FilteredTimeOff
@@ -650,6 +682,15 @@
                 continue;
             }
 
+            var empleadosPermitidosIds =
+                await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
+
+            if (!empleadosPermitidosIds.Contains(temporaryEmployeeId.Value))
+            {
+                result.Skipped++;
+                continue;
+            }
+
             var existingTemporaryAssignments = await db.TemporaryAssignments
                 .Where(x => x.AssignmentId == assignment.Id && x.Active)
                 .ToListAsync();
@@ -793,10 +834,14 @@
             .Select(x => x.EmployeeId)
             .ToListAsync();
 
+        var empleadosPermitidosIds =
+            await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
+
         var candidates = await db.Empleados
             .AsNoTracking()
             .Where(x =>
                 x.Activo &&
+                empleadosPermitidosIds.Contains(x.Id) &&
                 x.Id != originalEmployeeId &&
                 !absentEmployees.Contains(x.Id))
             .OrderBy(x => x.Nombre)
