@@ -125,6 +125,61 @@
     transition: all 0.2s ease;
 }
 
+/* RESULT MODAL - FIX TEXT VISIBILITY */
+.thryv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(2, 6, 23, 0.62);
+    backdrop-filter: blur(8px);
+}
+
+.thryv-modal-card.thryv-result-modal {
+    width: min(460px, calc(100vw - 32px));
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-radius: 24px;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.35);
+    overflow: hidden;
+}
+
+.thryv-result-modal .thryv-modal-header {
+    padding: 24px 28px 14px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+    .thryv-result-modal .thryv-modal-header h3 {
+        margin: 0;
+        color: #0f172a !important;
+        font-size: 1.15rem;
+        font-weight: 850;
+        letter-spacing: -0.02em;
+    }
+
+.thryv-result-modal .thryv-modal-body {
+    padding: 18px 28px 10px;
+}
+
+    .thryv-result-modal .thryv-modal-body p {
+        margin: 0;
+        color: #475569 !important;
+        font-size: 0.96rem;
+        line-height: 1.55;
+        font-weight: 500;
+    }
+
+.thryv-result-modal .thryv-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 18px 28px 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
     .thryv-input.modern:focus + .thryv-floating-label,
     .thryv-input.modern:not(:placeholder-shown) + .thryv-floating-label,
     .thryv-floating-label.always-float {

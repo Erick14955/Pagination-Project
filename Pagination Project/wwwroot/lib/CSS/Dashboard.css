@@ -1806,3 +1806,143 @@ html[data-theme="dark glass"] .thryv-code-pill {
         padding: 12px;
     }
 }
+
+.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
+    border-color: rgba(245, 158, 11, 0.34) !important;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.10)), rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 34px rgba(245, 158, 11, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
+    border-color: rgba(34, 197, 94, 0.34) !important;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(15, 23, 42, 0.10)), rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 34px rgba(34, 197, 94, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
+    color: #fde68a !important;
+    text-shadow: 0 1px 8px rgba(245, 158, 11, 0.22);
+}
+
+.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
+    color: #fbbf24 !important;
+    text-shadow: 0 2px 14px rgba(245, 158, 11, 0.35);
+}
+
+.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
+    color: #bbf7d0 !important;
+    text-shadow: 0 1px 8px rgba(34, 197, 94, 0.22);
+}
+
+.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
+    color: #4ade80 !important;
+    text-shadow: 0 2px 14px rgba(34, 197, 94, 0.35);
+}
+
+
+html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending,
+html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 55%, #fef3c7 100%) !important;
+    border-color: #fcd34d !important;
+    box-shadow: 0 16px 34px rgba(180, 83, 9, 0.12) !important;
+}
+
+    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span,
+    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
+        color: #b45309 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong,
+    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
+        color: #92400e !important;
+        text-shadow: none !important;
+    }
+
+html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed,
+html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
+    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 55%, #dcfce7 100%) !important;
+    border-color: #86efac !important;
+    box-shadow: 0 16px 34px rgba(21, 128, 61, 0.12) !important;
+}
+
+    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span,
+    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
+        color: #047857 !important;
+        text-shadow: none !important;
+    }
+
+    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong,
+    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
+        color: #065f46 !important;
+        text-shadow: none !important;
+    }
+
+
+html[data-theme="dark"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(15, 23, 42, 0.92)) !important;
+    border-color: rgba(251, 191, 36, 0.34) !important;
+}
+
+html[data-theme="dark"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(15, 23, 42, 0.92)) !important;
+    border-color: rgba(74, 222, 128, 0.34) !important;
+}
+
+
+html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
+    background: rgba(255, 251, 235, 0.48) !important;
+    border-color: rgba(245, 158, 11, 0.36) !important;
+}
+
+    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
+        color: #b45309 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
+        color: #92400e !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
+    }
+
+html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
+    background: rgba(236, 253, 245, 0.48) !important;
+    border-color: rgba(34, 197, 94, 0.36) !important;
+}
+
+    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
+        color: #047857 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
+        color: #065f46 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
+    }
+
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
+    background: rgba(120, 53, 15, 0.30) !important;
+    border-color: rgba(251, 191, 36, 0.34) !important;
+}
+
+    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
+        color: #fde68a !important;
+    }
+
+    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
+        color: #fbbf24 !important;
+    }
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
+    background: rgba(20, 83, 45, 0.30) !important;
+    border-color: rgba(74, 222, 128, 0.34) !important;
+}
+
+    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
+        color: #bbf7d0 !important;
+    }
+
+    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
+        color: #4ade80 !important;
+    }
