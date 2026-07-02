@@ -207,9 +207,18 @@
 
                                     <td>@item.BookName</td>
 
-                                    <td>
-                                        <span class="thryv-code-pill secondary">
-                                            @(string.IsNullOrWhiteSpace(item.Database) ? "-" : item.Database)
+                                    <td class="thryv-database-cell">
+                                        @{
+                                            var databaseCode = GetDatabaseCode(item.Database);
+                                            var databaseFullName = GetDatabaseFullName(item.Database);
+                                        }
+
+                                        <span class="thryv-database-pill"
+                                              title="@databaseFullName"
+                                              data-db-fullname="@databaseFullName"
+                                              aria-label="@databaseFullName">
+                                            <span class="thryv-database-dot"></span>
+                                            <span class="thryv-database-code">@databaseCode</span>
                                         </span>
                                     </td>
 
@@ -794,6 +803,31 @@
         var completedClass = completed ? " completed-stage-pill" : string.Empty;
 
         return $"thryv-stage-pill thryv-stage-{key}{completedClass}";
+    }
+
+    private static string GetDatabaseCode(string? database)
+    {
+        if (string.IsNullOrWhiteSpace(database))
+            return "-";
+
+        return database.Trim().ToUpperInvariant();
+    }
+
+    private static string GetDatabaseFullName(string? database)
+    {
+        if (string.IsNullOrWhiteSpace(database))
+            return "Database not available";
+
+        var code = database.Trim().ToUpperInvariant();
+
+        return code switch
+        {
+            "DW" => "WEST",
+            "SN" => "vNorth",
+            "SW" => "vWest",
+            "SS" => "vSouth",
+            _ => database.Trim()
+        };
     }
 
     private List<AssignedBookDashboardDto> CompletedAssignmentsFiltered

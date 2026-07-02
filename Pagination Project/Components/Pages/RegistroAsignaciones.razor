@@ -13,6 +13,7 @@
 @using Pagination_Project.Models
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -355,7 +356,7 @@
             <div class="temporary-modal-header">
                 <div>
                     <h2>Temporary Assignment</h2>
-                    <p>Select an existing assignment, temporary employee and the stages to cover.</p>
+                    <p>Search an existing assignment by KGEN or LSA code, confirm the assignment and select the temporary employee.</p>
                 </div>
 
                 <button type="button"
@@ -367,25 +368,33 @@
 
             <div class="temporary-modal-scroll">
 
-                <div class="form-grid">
-                    <div class="form-group large">
-                        <label>Assignment</label>
-                        <select class="form-control"
-                                value="@AsignacionTemporalSeleccionadaId"
-                                @onchange="OnAsignacionTemporalChanged">
-                            <option value="">Select assignment</option>
+                <div class="temporary-assignment-top-grid">
 
-                            @foreach (var item in AsignacionesListado)
-                            {
-                                <option value="@item.Id">
-                                    @item.EmpleadoNombre - @item.BookName - KGEN: @item.KGENCode
-                                </option>
-                            }
-                        </select>
+                    <div class="form-group temporary-search-field">
+                        <label>Search Assignment</label>
+
+                        <div class="temporary-assignment-search-box">
+                            <input class="form-control"
+                                   value="@TextoBusquedaAsignacionTemporal"
+                                   placeholder="Search by KGEN Code or LSA Code..."
+                                   @oninput="OnTextoBusquedaAsignacionTemporalInput"
+                                   @onkeydown="BuscarAsignacionTemporalConEnter" />
+
+                            <button type="button"
+                                    class="btn-primary temporary-search-button"
+                                    @onclick="BuscarAsignacionTemporalAsync">
+                                Search
+                            </button>
+                        </div>
+
+                        <small class="temporary-field-hint">
+                            Type the KGEN or LSA code to find the assignment.
+                        </small>
                     </div>
 
-                    <div class="form-group large">
+                    <div class="form-group temporary-employee-field">
                         <label>Temporary Employee</label>
+
                         <select class="form-control"
                                 @bind="EmpleadoTemporalSeleccionadoId"
                                 disabled="@(AsignacionTemporalSeleccionadaId is null)">
@@ -399,7 +408,56 @@
                             }
                         </select>
                     </div>
+
                 </div>
+
+                @if (AsignacionTemporalSeleccionada is not null)
+                {
+                    <div class="temporary-assignment-cards-grid">
+
+                        <div class="temporary-assignment-card-fixed">
+                            <span>Employee</span>
+                            <strong>@AsignacionTemporalSeleccionada.EmpleadoNombre</strong>
+                            <small>Assigned employee</small>
+                            <small>ID: @AsignacionTemporalSeleccionada.EmpleadoCodigo</small>
+                        </div>
+
+                        <div class="temporary-assignment-card-fixed">
+                            <span>Book Information</span>
+                            <strong>@AsignacionTemporalSeleccionada.KGENCode</strong>
+                            <small>@AsignacionTemporalSeleccionada.BookName</small>
+                            <small>LSA: @AsignacionTemporalSeleccionada.LSACode</small>
+                        </div>
+
+                        <div class="temporary-assignment-card-fixed">
+                            <span>Production Info</span>
+                            <strong>@AsignacionTemporalSeleccionada.DatabaseName</strong>
+                            <small>Bind Plant: @AsignacionTemporalSeleccionada.BindPlantName</small>
+                            <small>State: @AsignacionTemporalSeleccionada.StateName</small>
+                        </div>
+
+                        <div class="temporary-assignment-card-fixed">
+                            <span>Current Status</span>
+
+                            <strong>
+                                @(AsignacionTemporalSeleccionada.TieneAsignacionTemporal
+                                                        ? "Has temporary assignment"
+                                                        : "No temporary assignment")
+                    </strong>
+
+                    @if (AsignacionTemporalSeleccionada.TieneAsignacionTemporal)
+                            {
+                                <small>Covering: @AsignacionTemporalSeleccionada.EtapasTemporales</small>
+                                <small>Temporary: @AsignacionTemporalSeleccionada.EmpleadoTemporalNombre</small>
+                            }
+                            else
+                            {
+                                <small>Ready to assign temporary coverage</small>
+                            }
+                        </div>
+
+                    </div>
+                }
 
                 @if (AsignacionTemporalSeleccionadaId is null)
                 {
@@ -501,6 +559,20 @@
     private Guid? AsignacionTemporalSeleccionadaId { get; set; }
     private Guid? EmpleadoTemporalSeleccionadoId { get; set; }
 
+    private string TextoBusquedaAsignacionTemporal { get; set; } = string.Empty;
+
+    private AsignacionViewModel? AsignacionTemporalSeleccionada
+    {
+        get
+        {
+            if (AsignacionTemporalSeleccionadaId is null)
+                return null;
+
+            return AsignacionesListado
+                .FirstOrDefault(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
+        }
+    }
+
     private bool TempProof { get; set; }
     private bool TempFinal { get; set; }
     private bool TempMemo { get; set; }
@@ -510,7 +582,6 @@
     private bool TempPubDate { get; set; }
 
     private string MotivoTemporal { get; set; } = string.Empty;
-
 
     private ImportacionAsignacionesResultado? ResultadoImportacion { get; set; }
 
@@ -615,10 +686,76 @@
     }
 
 
-    private async Task OnAsignacionTemporalChanged(ChangeEventArgs e)
+    private void OnTextoBusquedaAsignacionTemporalInput(ChangeEventArgs e)
     {
+        TextoBusquedaAsignacionTemporal = e.Value?.ToString() ?? string.Empty;
+
+        AsignacionTemporalSeleccionadaId = null;
         EmpleadoTemporalSeleccionadoId = null;
 
+        LimpiarEtapasTemporales();
+    }
+
+    private async Task BuscarAsignacionTemporalConEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await BuscarAsignacionTemporalAsync();
+    }
+
+    private async Task BuscarAsignacionTemporalAsync()
+    {
+        EmpleadoTemporalSeleccionadoId = null;
+        LimpiarEtapasTemporales();
+
+        var filtro = TextoBusquedaAsignacionTemporal?.Trim();
+
+        if (string.IsNullOrWhiteSpace(filtro))
+        {
+            AsignacionTemporalSeleccionadaId = null;
+            MostrarMensaje("Enter a KGEN Code or LSA Code.", "error");
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        var filtroNormalizado = Normalizar(filtro);
+
+        var asignacion = AsignacionesListado
+            .Where(x =>
+                Normalizar(x.KGENCode) == filtroNormalizado ||
+                Normalizar(x.LSACode) == filtroNormalizado)
+            .OrderBy(x => x.EmpleadoNombre)
+            .ThenBy(x => x.BookName)
+            .FirstOrDefault();
+
+        asignacion ??= AsignacionesListado
+            .Where(x =>
+                Normalizar(x.KGENCode).Contains(filtroNormalizado) ||
+                Normalizar(x.LSACode).Contains(filtroNormalizado))
+            .OrderBy(x => x.EmpleadoNombre)
+            .ThenBy(x => x.BookName)
+            .FirstOrDefault();
+
+        if (asignacion is null)
+        {
+            AsignacionTemporalSeleccionadaId = null;
+            MostrarMensaje("No assignment was found with that KGEN Code or LSA Code.", "error");
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        AsignacionTemporalSeleccionadaId = asignacion.Id;
+
+        TextoBusquedaAsignacionTemporal = !string.IsNullOrWhiteSpace(asignacion.KGENCode)
+            ? asignacion.KGENCode
+            : asignacion.LSACode;
+
+        LimpiarMensaje();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void LimpiarEtapasTemporales()
+    {
         TempProof = false;
         TempFinal = false;
         TempMemo = false;
@@ -626,19 +763,6 @@
         TempShipping = false;
         TempDirxion = false;
         TempPubDate = false;
-
-        var valor = e.Value?.ToString();
-
-        if (Guid.TryParse(valor, out var asignacionId))
-        {
-            AsignacionTemporalSeleccionadaId = asignacionId;
-        }
-        else
-        {
-            AsignacionTemporalSeleccionadaId = null;
-        }
-
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task AbrirFormularioAsignacionTemporal()
@@ -686,16 +810,12 @@
 
     private void LimpiarFormularioTemporal()
     {
+        TextoBusquedaAsignacionTemporal = string.Empty;
+
         AsignacionTemporalSeleccionadaId = null;
         EmpleadoTemporalSeleccionadoId = null;
 
-        TempProof = false;
-        TempFinal = false;
-        TempMemo = false;
-        TempFinalPO = false;
-        TempShipping = false;
-        TempDirxion = false;
-        TempPubDate = false;
+        LimpiarEtapasTemporales();
 
         MotivoTemporal = string.Empty;
     }

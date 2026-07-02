@@ -1946,3 +1946,139 @@ html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-
     html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
         color: #4ade80 !important;
     }
+
+.thryv-database-cell {
+    position: relative;
+    overflow: visible !important;
+}
+
+.thryv-database-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 58px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(0, 100, 82, 0.12), rgba(20, 184, 166, 0.10));
+    color: #006452;
+    border: 1px solid rgba(0, 100, 82, 0.18);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    cursor: help;
+    white-space: nowrap;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+    .thryv-database-pill:hover {
+        transform: translateY(-1px);
+        border-color: rgba(0, 100, 82, 0.34);
+        box-shadow: 0 10px 22px rgba(0, 100, 82, 0.14);
+    }
+
+.thryv-database-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #006452;
+    box-shadow: 0 0 0 4px rgba(0, 100, 82, 0.12);
+    flex-shrink: 0;
+}
+
+.thryv-database-code {
+    line-height: 1;
+}
+
+.thryv-database-pill::before {
+    content: attr(data-db-fullname);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 12px);
+    transform: translateX(-50%) translateY(6px);
+    min-width: max-content;
+    max-width: 220px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    text-align: center;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.28);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 50;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.thryv-database-pill::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%) translateY(6px);
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+    border-color: #0f172a transparent transparent transparent;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 51;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.thryv-database-pill:hover::before,
+.thryv-database-pill:hover::after,
+.thryv-database-pill:focus-visible::before,
+.thryv-database-pill:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+html[data-theme="dark"] .thryv-database-pill,
+html[data-theme="dark glass"] .thryv-database-pill {
+    background: rgba(20, 184, 166, 0.12);
+    color: #ccfbf1;
+    border-color: rgba(45, 212, 191, 0.24);
+}
+
+html[data-theme="dark"] .thryv-database-dot,
+html[data-theme="dark glass"] .thryv-database-dot {
+    background: #5eead4;
+    box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.14);
+}
+
+html[data-theme="liquid glass"] .thryv-database-pill {
+    background: rgba(255, 255, 255, 0.36);
+    color: #065f46;
+    border-color: rgba(0, 100, 82, 0.22);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+@media (max-width: 768px) {
+    .thryv-database-pill::before {
+        left: auto;
+        right: 0;
+        transform: translateY(6px);
+    }
+
+    .thryv-database-pill::after {
+        left: auto;
+        right: 18px;
+        transform: translateY(6px);
+    }
+
+    .thryv-database-pill:hover::before,
+    .thryv-database-pill:hover::after,
+    .thryv-database-pill:focus-visible::before,
+    .thryv-database-pill:focus-visible::after {
+        transform: translateY(0);
+    }
+}
