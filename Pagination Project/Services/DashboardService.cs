@@ -503,7 +503,7 @@ namespace Pagination_Project.Services
                 return new StageDashboardInfo
                 {
                     StageKey = "FinalPO",
-                    StageName = "Final PO Date",
+                    StageName = ObtenerNombreEtapaFinalPO(bindPlantName),
                     CompletionStatus = "Final PO Sent",
                     StageDate = finalPODisplayDate
                 };
@@ -532,6 +532,32 @@ namespace Pagination_Project.Services
             }
 
             return null;
+        }
+
+        private static string ObtenerNombreEtapaFinalPO(string bindPlantName)
+        {
+            var bindPlantsPermitidos = new[]
+            {
+                "WAUK",
+                "LMRA",
+                "DIRX",
+                "IVEAU",
+                "SUSX",
+                "PREM",
+                "WSTR"
+            };
+
+            var bindPlantNormalizado = (bindPlantName ?? string.Empty)
+                .Trim()
+                .ToUpperInvariant();
+
+            var bindPlantEncontrado = bindPlantsPermitidos.FirstOrDefault(codigo =>
+                EsBindPlant(bindPlantNormalizado, codigo));
+
+            if (!string.IsNullOrWhiteSpace(bindPlantEncontrado))
+                return $"Final PO {bindPlantEncontrado}";
+
+            return "Final PO Date";
         }
 
         private static DateOnly ObtenerFinalPODisplayDate(

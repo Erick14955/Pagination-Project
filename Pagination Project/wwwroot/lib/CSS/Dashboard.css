@@ -2003,16 +2003,18 @@ html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-
     border-radius: 14px;
     background: #0f172a;
     color: #ffffff;
+    border: 1px solid #475569;
     font-size: 12px;
     font-weight: 900;
+    line-height: 1.25;
     letter-spacing: 0.02em;
     text-transform: none;
     text-align: center;
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.28);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.08);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    z-index: 50;
+    z-index: 100;
     transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
 }
 
@@ -2025,10 +2027,11 @@ html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-
     border-width: 6px 6px 0 6px;
     border-style: solid;
     border-color: #0f172a transparent transparent transparent;
+    filter: drop-shadow(0 1px 0 #475569);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    z-index: 51;
+    z-index: 101;
     transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
 }
 
@@ -2081,4 +2084,44 @@ html[data-theme="liquid glass"] .thryv-database-pill {
     .thryv-database-pill:focus-visible::after {
         transform: translateY(0);
     }
+}
+
+html[data-theme="dark"] .thryv-database-pill::before {
+    background: #020617;
+    color: #f8fafc;
+    border-color: #64748b;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(148, 163, 184, 0.22);
+}
+
+html[data-theme="dark"] .thryv-database-pill::after {
+    border-top-color: #020617;
+    filter: drop-shadow(0 1px 0 #64748b);
+}
+
+html[data-theme="liquid glass"] .thryv-database-pill::before {
+    background: rgba(255, 255, 255, 0.96);
+    color: #0f172a;
+    border-color: rgba(0, 100, 82, 0.55);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.20), 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+html[data-theme="liquid glass"] .thryv-database-pill::after {
+    border-top-color: rgba(255, 255, 255, 0.96);
+    filter: drop-shadow(0 1px 0 rgba(0, 100, 82, 0.55));
+}
+
+html[data-theme="dark glass"] .thryv-database-pill::before {
+    background: rgba(2, 6, 23, 0.96);
+    color: #f8fafc;
+    border-color: rgba(94, 234, 212, 0.62);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(94, 234, 212, 0.12);
+}
+
+html[data-theme="dark glass"] .thryv-database-pill::after {
+    border-top-color: rgba(2, 6, 23, 0.96);
+    filter: drop-shadow(0 1px 0 rgba(94, 234, 212, 0.62));
 }
