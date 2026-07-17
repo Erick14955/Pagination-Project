@@ -45,24 +45,87 @@ namespace Pagination_Project.Services
                         !ev.Asignacion.Libro.Finalizado)
             };
 
-            var trabajadasHoy = await db.AsignacionesTrabajadas
+            var asignacionesHoy = await CargarAsignacionesPorFechaAsync(
+                db,
+                today);
+
+            var assignedBooks = asignacionesHoy.Pending;
+            var completedAssignments = asignacionesHoy.Completed;
+
+            var weeklyEvaluations =
+                await CargarEvaluacionesSemanaAnteriorAsync(db, today);
+
+            return new DashboardSummaryDto
+            {
+                Stats = stats,
+                AssignedBooks = assignedBooks,
+                CompletedAssignments = completedAssignments,
+                WeeklyEvaluations = weeklyEvaluations
+            };
+        }
+
+        public async Task<List<AssignedBookDashboardDto>>
+            GetAssignedBooksForDateAsync(DateOnly targetDate)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            /*
+             * Los libros deben finalizarse utilizando la fecha real de hoy.
+             *
+             * No se debe utilizar targetDate para finalizar libros porque,
+             * cuando se consulta una fecha futura, no queremos finalizar
+             * libros anticipadamente.
+             */
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            await ActualizarFinalizadosPorDirxionAsync(db, today);
+
+            var result = await CargarAsignacionesPorFechaAsync(
+                db,
+                targetDate);
+
+            /*
+             * El reporte Next Day Assignments solamente mostrará
+             * las asignaciones pendientes para la fecha solicitada.
+             */
+            return result.Pending;
+        }
+
+        private static async Task<(
+            List<AssignedBookDashboardDto> Pending,
+            List<AssignedBookDashboardDto> Completed)>
+            CargarAsignacionesPorFechaAsync(
+                AppDbContext db,
+                DateOnly targetDate)
+        {
+            var trabajadasFecha = await db.AsignacionesTrabajadas
                 .AsNoTracking()
-                .Where(x => x.FechaTrabajo == today)
+                .Where(x => x.FechaTrabajo == targetDate)
                 .ToListAsync();
 
-            var trabajadasPorAsignacion = trabajadasHoy
+            var trabajadasPorAsignacion = trabajadasFecha
                 .GroupBy(x => x.IdAsignacion)
-                .ToDictionary(x => x.Key, x => x.First());
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.First());
 
             var data = await (
                 from a in db.Asignaciones.AsNoTracking()
-                join l in db.Libros.AsNoTracking() on a.IdLibro equals l.Id
-                join e in db.Empleados.AsNoTracking() on a.IdEmpleado equals e.Id
-                join d in db.Databases.AsNoTracking() on l.DatabaseId equals d.Id into database
+
+                join l in db.Libros.AsNoTracking()
+                    on a.IdLibro equals l.Id
+
+                join e in db.Empleados.AsNoTracking()
+                    on a.IdEmpleado equals e.Id
+
+                join d in db.Databases.AsNoTracking()
+                    on l.DatabaseId equals d.Id into database
+
                 from d in database.DefaultIfEmpty()
 
                 join bpJoin in db.Bind_Plants.AsNoTracking()
                     on l.BindPlantId equals bpJoin.Id into bindPlantGroup
+
                 from bp in bindPlantGroup.DefaultIfEmpty()
 
                 where !a.Finalizado &&
@@ -78,7 +141,10 @@ namespace Pagination_Project.Services
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
                     BookName = l.BookName ?? string.Empty,
-                    Database = d != null ? d.Database_Name : string.Empty,
+
+                    Database = d != null
+                        ? d.Database_Name
+                        : string.Empty,
 
                     ProofExtract = l.ProofExtract,
                     FinalExtract = l.FinalExtract,
@@ -87,7 +153,9 @@ namespace Pagination_Project.Services
                     FinalPODate = l.FinalPODate,
                     ShippingDate = l.ShippingDate,
 
-                    BindPlantName = bp != null ? bp.Bind_Plant_Name : string.Empty
+                    BindPlantName = bp != null
+                        ? bp.Bind_Plant_Name
+                        : string.Empty
                 }
             ).ToListAsync();
 
@@ -100,34 +168,46 @@ namespace Pagination_Project.Services
                 ? await db.TemporaryAssignments
                     .AsNoTracking()
                     .Include(x => x.TemporaryEmployee)
-                    .Where(x => x.Active &&
-                                assignmentIds.Contains(x.AssignmentId))
+                    .Where(x =>
+                        x.Active &&
+                        assignmentIds.Contains(x.AssignmentId))
                     .OrderByDescending(x => x.CreatedAt)
                     .ToListAsync()
                 : new List<TemporaryAssignment>();
 
-            var assignedBooks = new List<AssignedBookDashboardDto>();
-            var completedAssignments = new List<AssignedBookDashboardDto>();
+            var pending = new List<AssignedBookDashboardDto>();
+            var completed = new List<AssignedBookDashboardDto>();
 
             foreach (var item in data)
             {
-                var stageInfo = ObtenerEtapaDelDia(item, today);
+                var stageInfo = ObtenerEtapaDelDia(
+                    item,
+                    targetDate);
 
                 if (stageInfo is null)
                     continue;
 
-                trabajadasPorAsignacion.TryGetValue(item.AssignmentId, out var registroTrabajado);
+                trabajadasPorAsignacion.TryGetValue(
+                    item.AssignmentId,
+                    out var registroTrabajado);
 
-                var etapaCompletada = EstaEtapaCompletada(registroTrabajado, stageInfo.StageKey);
+                var etapaCompletada = EstaEtapaCompletada(
+                    registroTrabajado,
+                    stageInfo.StageKey);
 
                 var temporalAplicable = temporalesActivas
                     .FirstOrDefault(x =>
                         x.AssignmentId == item.AssignmentId &&
-                        AsignacionTemporalAplicaEtapa(x, stageInfo.StageKey));
+                        AsignacionTemporalAplicaEtapa(
+                            x,
+                            stageInfo.StageKey));
 
-                var employeeId = temporalAplicable?.TemporaryEmployeeId ?? item.EmployeeId;
+                var employeeId =
+                    temporalAplicable?.TemporaryEmployeeId ??
+                    item.EmployeeId;
 
-                var employeeName = temporalAplicable?.TemporaryEmployee?.Nombre;
+                var employeeName =
+                    temporalAplicable?.TemporaryEmployee?.Nombre;
 
                 if (string.IsNullOrWhiteSpace(employeeName))
                     employeeName = item.EmployeeName;
@@ -151,32 +231,28 @@ namespace Pagination_Project.Services
                 };
 
                 if (etapaCompletada)
-                    completedAssignments.Add(dto);
+                {
+                    completed.Add(dto);
+                }
                 else
-                    assignedBooks.Add(dto);
+                {
+                    pending.Add(dto);
+                }
             }
 
-            assignedBooks = assignedBooks
+            pending = pending
                 .OrderBy(x => x.StageDate)
                 .ThenBy(x => x.EmployeeName)
                 .ThenBy(x => x.BookName)
                 .ToList();
 
-            completedAssignments = completedAssignments
+            completed = completed
                 .OrderBy(x => x.StageDate)
                 .ThenBy(x => x.EmployeeName)
                 .ThenBy(x => x.BookName)
                 .ToList();
 
-            var weeklyEvaluations = await CargarEvaluacionesSemanaAnteriorAsync(db, today);
-
-            return new DashboardSummaryDto
-            {
-                Stats = stats,
-                AssignedBooks = assignedBooks,
-                CompletedAssignments = completedAssignments,
-                WeeklyEvaluations = weeklyEvaluations
-            };
+            return (pending, completed);
         }
 
         private static bool AsignacionTemporalAplicaEtapa(
@@ -195,19 +271,28 @@ namespace Pagination_Project.Services
             };
         }
 
-        private static async Task<List<WeeklyEvaluationDashboardDto>> CargarEvaluacionesSemanaAnteriorAsync(
-            AppDbContext db,
-            DateOnly today)
+        private static async Task<List<WeeklyEvaluationDashboardDto>>
+            CargarEvaluacionesSemanaAnteriorAsync(
+                AppDbContext db,
+                DateOnly today)
         {
             var rango = ObtenerRangoSemanaAnterior(today);
 
             var data = await (
                 from ev in db.Evaluaciones.AsNoTracking()
-                join a in db.Asignaciones.AsNoTracking() on ev.AssignationId equals a.Id
-                join l in db.Libros.AsNoTracking() on a.IdLibro equals l.Id
-                join e in db.Empleados.AsNoTracking() on a.IdEmpleado equals e.Id
+
+                join a in db.Asignaciones.AsNoTracking()
+                    on ev.AssignationId equals a.Id
+
+                join l in db.Libros.AsNoTracking()
+                    on a.IdLibro equals l.Id
+
+                join e in db.Empleados.AsNoTracking()
+                    on a.IdEmpleado equals e.Id
+
                 where l.ShippingDate >= rango.Start &&
                       l.ShippingDate <= rango.End
+
                 select new RawWeeklyEvaluationDashboardDto
                 {
                     EvaluationId = ev.Id,
@@ -224,14 +309,16 @@ namespace Pagination_Project.Services
                     MotifYp = ev.MotifYp,
                     MotifWp = ev.MotifWp,
                     InventoryReport = ev.InventoryReport,
-                    ProductShippingFolder = ev.ProductShippingFolder,
+                    ProductShippingFolder =
+                        ev.ProductShippingFolder,
                     TaskMemo = ev.TaskMemo,
 
                     TouchingRule = ev.TouchingRule,
                     PagesSwapped = ev.PagesSwapped,
                     PplpWrongPlace = ev.PplpWrongPlace,
                     CouponsHeading = ev.CouponsHeading,
-                    DoubleTruckWrongPlace = ev.DoubleTruckWrongPlace,
+                    DoubleTruckWrongPlace =
+                        ev.DoubleTruckWrongPlace,
                     FillersOutside = ev.FillersOutside,
                     MissingYspFiller = ev.MissingYspFiller,
                     GradeUnder75 = ev.GradeUnder75,
@@ -248,7 +335,8 @@ namespace Pagination_Project.Services
                     FileNamingIssue = ev.FileNamingIssue,
                     OutputWrongDate = ev.OutputWrongDate,
                     WrongPitstop = ev.WrongPitstop,
-                    RestaurantBleedIssue = ev.RestaurantBleedIssue,
+                    RestaurantBleedIssue =
+                        ev.RestaurantBleedIssue,
                     WrongSigFiller = ev.WrongSigFiller,
                     FobFolder = ev.FobFolder,
                     MissingPaidItem = ev.MissingPaidItem,
@@ -256,7 +344,8 @@ namespace Pagination_Project.Services
 
                     Corrections = ev.Corrections,
                     PendingCorrections = ev.PendingCorrections,
-                    TaskMemoWrongComment = ev.TaskMemoWrongComment
+                    TaskMemoWrongComment =
+                        ev.TaskMemoWrongComment
                 }
             ).ToListAsync();
 
@@ -268,71 +357,87 @@ namespace Pagination_Project.Services
             var temporalesShipping = await db.TemporaryAssignments
                 .AsNoTracking()
                 .Include(x => x.TemporaryEmployee)
-                .Where(x => x.Active &&
-                            x.Shipping &&
-                            assignmentIds.Contains(x.AssignmentId))
+                .Where(x =>
+                    x.Active &&
+                    x.Shipping &&
+                    assignmentIds.Contains(x.AssignmentId))
                 .OrderByDescending(x => x.CreatedAt)
                 .ToListAsync();
 
-            var result = new List<WeeklyEvaluationDashboardDto>();
+            var result =
+                new List<WeeklyEvaluationDashboardDto>();
 
             foreach (var item in data)
             {
                 var temporalAplicable = temporalesShipping
-                    .FirstOrDefault(x => x.AssignmentId == item.AssignmentId);
+                    .FirstOrDefault(x =>
+                        x.AssignmentId == item.AssignmentId);
 
-                var employeeId = temporalAplicable?.TemporaryEmployeeId ?? item.EmployeeId;
+                var employeeId =
+                    temporalAplicable?.TemporaryEmployeeId ??
+                    item.EmployeeId;
 
-                var employeeName = temporalAplicable?.TemporaryEmployee?.Nombre;
+                var employeeName =
+                    temporalAplicable?.TemporaryEmployee?.Nombre;
 
                 if (string.IsNullOrWhiteSpace(employeeName))
                     employeeName = item.EmployeeName;
 
-                var motifYp = item.MotifYp ?? CalcularPorcentaje(
-                    CountErrors(
-                        item.TouchingRule,
-                        item.PagesSwapped,
-                        item.PplpWrongPlace,
-                        item.CouponsHeading,
-                        item.DoubleTruckWrongPlace,
-                        item.FillersOutside,
-                        item.MissingYspFiller,
-                        item.GradeUnder75),
-                    8);
+                var motifYp =
+                    item.MotifYp ??
+                    CalcularPorcentaje(
+                        CountErrors(
+                            item.TouchingRule,
+                            item.PagesSwapped,
+                            item.PplpWrongPlace,
+                            item.CouponsHeading,
+                            item.DoubleTruckWrongPlace,
+                            item.FillersOutside,
+                            item.MissingYspFiller,
+                            item.GradeUnder75),
+                        8);
 
-                var motifWp = item.MotifWp ?? CalcularPorcentaje(
-                    CountErrors(
-                        item.WhpsNoAnchors,
-                        item.WfpsNoAnchors,
-                        item.WdqcsNoAnchors),
-                    3);
+                var motifWp =
+                    item.MotifWp ??
+                    CalcularPorcentaje(
+                        CountErrors(
+                            item.WhpsNoAnchors,
+                            item.WfpsNoAnchors,
+                            item.WdqcsNoAnchors),
+                        3);
 
-                var inventory = item.InventoryReport ?? CalcularPorcentaje(
-                    CountErrors(
-                        item.MissingCornerAd,
-                        item.MissingBanner,
-                        item.MissingRandomTab,
-                        item.MissingForcedTab),
-                    4);
+                var inventory =
+                    item.InventoryReport ??
+                    CalcularPorcentaje(
+                        CountErrors(
+                            item.MissingCornerAd,
+                            item.MissingBanner,
+                            item.MissingRandomTab,
+                            item.MissingForcedTab),
+                        4);
 
-                var shipping = item.ProductShippingFolder ?? CalcularPorcentaje(
-                    CountErrors(
-                        item.FileNamingIssue,
-                        item.OutputWrongDate,
-                        item.WrongPitstop,
-                        item.RestaurantBleedIssue,
-                        item.WrongSigFiller,
-                        item.FobFolder,
-                        item.MissingPaidItem,
-                        item.MissingSelfPromo),
-                    8);
+                var shipping =
+                    item.ProductShippingFolder ??
+                    CalcularPorcentaje(
+                        CountErrors(
+                            item.FileNamingIssue,
+                            item.OutputWrongDate,
+                            item.WrongPitstop,
+                            item.RestaurantBleedIssue,
+                            item.WrongSigFiller,
+                            item.FobFolder,
+                            item.MissingPaidItem,
+                            item.MissingSelfPromo),
+                        8);
 
-                var taskMemo = item.TaskMemo ?? CalcularPorcentaje(
-                    CountErrors(
-                        item.Corrections,
-                        item.PendingCorrections,
-                        item.TaskMemoWrongComment),
-                    3);
+                var taskMemo =
+                    item.TaskMemo ??
+                    CalcularPorcentaje(
+                        CountErrors(
+                            item.Corrections,
+                            item.PendingCorrections,
+                            item.TaskMemoWrongComment),
+                        3);
 
                 var totalAverage = CalcularPromedio(
                     motifYp,
@@ -365,7 +470,8 @@ namespace Pagination_Project.Services
                     PagesSwapped = item.PagesSwapped,
                     PplpWrongPlace = item.PplpWrongPlace,
                     CouponsHeading = item.CouponsHeading,
-                    DoubleTruckWrongPlace = item.DoubleTruckWrongPlace,
+                    DoubleTruckWrongPlace =
+                        item.DoubleTruckWrongPlace,
                     FillersOutside = item.FillersOutside,
                     MissingYspFiller = item.MissingYspFiller,
                     GradeUnder75 = item.GradeUnder75,
@@ -382,7 +488,8 @@ namespace Pagination_Project.Services
                     FileNamingIssue = item.FileNamingIssue,
                     OutputWrongDate = item.OutputWrongDate,
                     WrongPitstop = item.WrongPitstop,
-                    RestaurantBleedIssue = item.RestaurantBleedIssue,
+                    RestaurantBleedIssue =
+                        item.RestaurantBleedIssue,
                     WrongSigFiller = item.WrongSigFiller,
                     FobFolder = item.FobFolder,
                     MissingPaidItem = item.MissingPaidItem,
@@ -390,7 +497,8 @@ namespace Pagination_Project.Services
 
                     Corrections = item.Corrections,
                     PendingCorrections = item.PendingCorrections,
-                    TaskMemoWrongComment = item.TaskMemoWrongComment
+                    TaskMemoWrongComment =
+                        item.TaskMemoWrongComment
                 });
             }
 
@@ -401,68 +509,116 @@ namespace Pagination_Project.Services
                 .ToList();
         }
 
-        private static (DateOnly Start, DateOnly End) ObtenerRangoSemanaAnterior(DateOnly today)
+        private static (
+            DateOnly Start,
+            DateOnly End)
+            ObtenerRangoSemanaAnterior(DateOnly today)
         {
-            var diff = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            var diff =
+                ((int)today.DayOfWeek -
+                 (int)DayOfWeek.Monday + 7) % 7;
 
-            var inicioSemanaActual = today.AddDays(-diff);
-            var inicioSemanaAnterior = inicioSemanaActual.AddDays(-7);
-            var finSemanaAnterior = inicioSemanaActual.AddDays(-1);
+            var inicioSemanaActual =
+                today.AddDays(-diff);
 
-            return (inicioSemanaAnterior, finSemanaAnterior);
+            var inicioSemanaAnterior =
+                inicioSemanaActual.AddDays(-7);
+
+            var finSemanaAnterior =
+                inicioSemanaActual.AddDays(-1);
+
+            return (
+                inicioSemanaAnterior,
+                finSemanaAnterior);
         }
 
-        private static decimal CalcularPromedio(params decimal[] valores)
+        private static decimal CalcularPromedio(
+            params decimal[] valores)
         {
             if (valores.Length == 0)
                 return 0;
 
-            return Math.Round(valores.Average(), 2);
+            return Math.Round(
+                valores.Average(),
+                2);
         }
 
-        private static decimal CalcularPorcentaje(int errores, int total)
+        private static decimal CalcularPorcentaje(
+            int errores,
+            int total)
         {
             if (total <= 0)
                 return 0;
 
-            var porcentaje = ((total - errores) * 100m) / total;
+            var porcentaje =
+                ((total - errores) * 100m) / total;
 
             if (porcentaje < 0)
                 porcentaje = 0;
 
-            return Math.Round(porcentaje, 2);
+            return Math.Round(
+                porcentaje,
+                2);
         }
 
-        private static int CountErrors(params bool[] values)
+        private static int CountErrors(
+            params bool[] values)
         {
             return values.Count(x => x);
         }
 
-        private static StageDashboardInfo? ObtenerEtapaDelDia(RawAssignmentDashboardDto item, DateOnly today)
+        private static StageDashboardInfo? ObtenerEtapaDelDia(
+            RawAssignmentDashboardDto item,
+            DateOnly today)
         {
-            var bindPlantName = (item.BindPlantName ?? string.Empty)
-                .Trim()
-                .ToUpperInvariant();
+            var bindPlantName =
+                (item.BindPlantName ?? string.Empty)
+                    .Trim()
+                    .ToUpperInvariant();
 
-            var esIveau = EsBindPlant(bindPlantName, "IVEAU", "WSTR");
-            var esAu = EsBindPlant(bindPlantName, "AU");
-            var esNz = EsBindPlant(bindPlantName, "NZ");
+            var esIveau = EsBindPlant(
+                bindPlantName,
+                "IVEAU",
+                "WSTR");
+
+            var esAu = EsBindPlant(
+                bindPlantName,
+                "AU");
+
+            var esNz = EsBindPlant(
+                bindPlantName,
+                "NZ");
 
             var excluirMemoPorBindPlant =
-                EsBindPlant(bindPlantName, "PREM", "DIRX", "WSTR", "IVEAU", "AU", "NZ");
+                EsBindPlant(
+                    bindPlantName,
+                    "PREM",
+                    "DIRX",
+                    "WSTR",
+                    "IVEAU",
+                    "AU",
+                    "NZ");
 
-            var proofDisplayDate = GetNextBusinessDay(item.ProofExtract);
-            var finalDisplayDate = GetNextBusinessDay(item.FinalExtract);
-            var memoDisplayDate = GetNextBusinessDay(item.MemoExtract);
+            var proofDisplayDate =
+                GetNextBusinessDay(item.ProofExtract);
 
-            var finalPODisplayDate = ObtenerFinalPODisplayDate(
-                item,
-                esIveau,
-                esAu,
-                esNz);
+            var finalDisplayDate =
+                GetNextBusinessDay(item.FinalExtract);
+
+            var memoDisplayDate =
+                GetNextBusinessDay(item.MemoExtract);
+
+            var finalPODisplayDate =
+                ObtenerFinalPODisplayDate(
+                    item,
+                    esIveau,
+                    esAu,
+                    esNz);
 
             var shippingDisplayDate = esIveau
-                ? GetPreviousWorkDate(item.ShippingDate, 1)
+                ? GetPreviousWorkDate(
+                    item.ShippingDate,
+                    1)
                 : item.ShippingDate;
 
             if (proofDisplayDate == today)
@@ -471,7 +627,8 @@ namespace Pagination_Project.Services
                 {
                     StageKey = "ProofExtract",
                     StageName = "Proof Extract",
-                    CompletionStatus = "Proof Extract Completed",
+                    CompletionStatus =
+                        "Proof Extract Completed",
                     StageDate = proofDisplayDate
                 };
             }
@@ -482,18 +639,21 @@ namespace Pagination_Project.Services
                 {
                     StageKey = "FinalExtract",
                     StageName = "Final Extract",
-                    CompletionStatus = "Final Extract Completed",
+                    CompletionStatus =
+                        "Final Extract Completed",
                     StageDate = finalDisplayDate
                 };
             }
 
-            if (memoDisplayDate == today && !excluirMemoPorBindPlant)
+            if (memoDisplayDate == today &&
+                !excluirMemoPorBindPlant)
             {
                 return new StageDashboardInfo
                 {
                     StageKey = "MemoExtract",
                     StageName = "Memo Extract",
-                    CompletionStatus = "Memo Extract Completed",
+                    CompletionStatus =
+                        "Memo Extract Completed",
                     StageDate = memoDisplayDate
                 };
             }
@@ -503,8 +663,11 @@ namespace Pagination_Project.Services
                 return new StageDashboardInfo
                 {
                     StageKey = "FinalPO",
-                    StageName = ObtenerNombreEtapaFinalPO(bindPlantName),
-                    CompletionStatus = "Final PO Sent",
+                    StageName =
+                        ObtenerNombreEtapaFinalPO(
+                            bindPlantName),
+                    CompletionStatus =
+                        "Final PO Sent",
                     StageDate = finalPODisplayDate
                 };
             }
@@ -515,7 +678,8 @@ namespace Pagination_Project.Services
                 {
                     StageKey = "Shipping",
                     StageName = "Shipping Date",
-                    CompletionStatus = "Shipped Pages",
+                    CompletionStatus =
+                        "Shipped Pages",
                     StageDate = shippingDisplayDate
                 };
             }
@@ -526,7 +690,8 @@ namespace Pagination_Project.Services
                 {
                     StageKey = "Dirxion",
                     StageName = "Dirxion Date",
-                    CompletionStatus = "Dirxion Sent",
+                    CompletionStatus =
+                        "Dirxion Sent",
                     StageDate = item.DirxionDate
                 };
             }
@@ -534,7 +699,8 @@ namespace Pagination_Project.Services
             return null;
         }
 
-        private static string ObtenerNombreEtapaFinalPO(string bindPlantName)
+        private static string ObtenerNombreEtapaFinalPO(
+            string bindPlantName)
         {
             var bindPlantsPermitidos = new[]
             {
@@ -547,15 +713,23 @@ namespace Pagination_Project.Services
                 "WSTR"
             };
 
-            var bindPlantNormalizado = (bindPlantName ?? string.Empty)
-                .Trim()
-                .ToUpperInvariant();
+            var bindPlantNormalizado =
+                (bindPlantName ?? string.Empty)
+                    .Trim()
+                    .ToUpperInvariant();
 
-            var bindPlantEncontrado = bindPlantsPermitidos.FirstOrDefault(codigo =>
-                EsBindPlant(bindPlantNormalizado, codigo));
+            var bindPlantEncontrado =
+                bindPlantsPermitidos
+                    .FirstOrDefault(codigo =>
+                        EsBindPlant(
+                            bindPlantNormalizado,
+                            codigo));
 
-            if (!string.IsNullOrWhiteSpace(bindPlantEncontrado))
+            if (!string.IsNullOrWhiteSpace(
+                    bindPlantEncontrado))
+            {
                 return $"Final PO {bindPlantEncontrado}";
+            }
 
             return "Final PO Date";
         }
@@ -568,7 +742,8 @@ namespace Pagination_Project.Services
         {
             if (esNz)
             {
-                return GetSameOrNextBusinessDay(item.MemoExtract);
+                return GetSameOrNextBusinessDay(
+                    item.MemoExtract);
             }
 
             if (esAu)
@@ -576,43 +751,77 @@ namespace Pagination_Project.Services
                 if (item.MemoExtract == default)
                     return default;
 
-                return GetSameOrNextBusinessDay(item.MemoExtract.AddDays(1));
+                return GetSameOrNextBusinessDay(
+                    item.MemoExtract.AddDays(1));
             }
 
             if (esIveau)
             {
-                return GetPreviousWorkDate(item.FinalPODate, 3);
+                return GetPreviousWorkDate(
+                    item.FinalPODate,
+                    3);
             }
 
             return item.FinalPODate;
         }
 
-        private static bool EsBindPlant(string bindPlantName, params string[] codigos)
+        private static bool EsBindPlant(
+            string bindPlantName,
+            params string[] codigos)
         {
             if (string.IsNullOrWhiteSpace(bindPlantName))
                 return false;
 
-            var normalizado = bindPlantName.Trim().ToUpperInvariant();
+            var normalizado =
+                bindPlantName
+                    .Trim()
+                    .ToUpperInvariant();
 
-            if (codigos.Any(c => normalizado == c.Trim().ToUpperInvariant()))
+            if (codigos.Any(c =>
+                    normalizado ==
+                    c.Trim().ToUpperInvariant()))
+            {
                 return true;
+            }
 
             var partes = normalizado.Split(
-                new[] { ' ', '-', '_', '/', '\\', ',', ';', '.', '|', '(', ')', '[', ']' },
+                new[]
+                {
+                    ' ',
+                    '-',
+                    '_',
+                    '/',
+                    '\\',
+                    ',',
+                    ';',
+                    '.',
+                    '|',
+                    '(',
+                    ')',
+                    '[',
+                    ']'
+                },
                 StringSplitOptions.RemoveEmptyEntries);
 
             return partes.Any(parte =>
-                codigos.Any(c => parte == c.Trim().ToUpperInvariant()));
+                codigos.Any(c =>
+                    parte ==
+                    c.Trim().ToUpperInvariant()));
         }
 
-        private static DateOnly GetPreviousWorkDate(DateOnly sourceDate, int daysBefore)
+        private static DateOnly GetPreviousWorkDate(
+            DateOnly sourceDate,
+            int daysBefore)
         {
             if (sourceDate == default)
                 return default;
 
-            var result = sourceDate.AddDays(-daysBefore);
+            var result =
+                sourceDate.AddDays(-daysBefore);
 
-            while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            while (result.DayOfWeek is
+                   DayOfWeek.Saturday or
+                   DayOfWeek.Sunday)
             {
                 result = result.AddDays(-1);
             }
@@ -620,14 +829,17 @@ namespace Pagination_Project.Services
             return result;
         }
 
-        private static DateOnly GetSameOrNextBusinessDay(DateOnly sourceDate)
+        private static DateOnly GetSameOrNextBusinessDay(
+            DateOnly sourceDate)
         {
             if (sourceDate == default)
                 return default;
 
             var result = sourceDate;
 
-            while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            while (result.DayOfWeek is
+                   DayOfWeek.Saturday or
+                   DayOfWeek.Sunday)
             {
                 result = result.AddDays(1);
             }
@@ -635,31 +847,48 @@ namespace Pagination_Project.Services
             return result;
         }
 
-        private static bool EstaEtapaCompletada(AsignacionTrabajada? registro, string stageKey)
+        private static bool EstaEtapaCompletada(
+            AsignacionTrabajada? registro,
+            string stageKey)
         {
             if (registro is null)
                 return false;
 
             return stageKey switch
             {
-                "ProofExtract" => registro.ProofExtractWorked,
-                "FinalExtract" => registro.FinalExtractWorked,
-                "MemoExtract" => registro.MemoExtractWorked,
-                "FinalPO" => registro.FinalPOWorked,
-                "Shipping" => registro.ShippingWorked,
-                "Dirxion" => registro.DirxionWorked,
+                "ProofExtract" =>
+                    registro.ProofExtractWorked,
+
+                "FinalExtract" =>
+                    registro.FinalExtractWorked,
+
+                "MemoExtract" =>
+                    registro.MemoExtractWorked,
+
+                "FinalPO" =>
+                    registro.FinalPOWorked,
+
+                "Shipping" =>
+                    registro.ShippingWorked,
+
+                "Dirxion" =>
+                    registro.DirxionWorked,
+
                 _ => false
             };
         }
 
-        private static DateOnly GetNextBusinessDay(DateOnly sourceDate)
+        private static DateOnly GetNextBusinessDay(
+            DateOnly sourceDate)
         {
             if (sourceDate == default)
                 return default;
 
             var result = sourceDate.AddDays(1);
 
-            while (result.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            while (result.DayOfWeek is
+                   DayOfWeek.Saturday or
+                   DayOfWeek.Sunday)
             {
                 result = result.AddDays(1);
             }
@@ -667,7 +896,10 @@ namespace Pagination_Project.Services
             return result;
         }
 
-        private static async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db, DateOnly today)
+        private static async Task
+            ActualizarFinalizadosPorDirxionAsync(
+                AppDbContext db,
+                DateOnly today)
         {
             var librosParaFinalizar = await db.Libros
                 .Include(l => l.Asignaciones)
@@ -688,7 +920,8 @@ namespace Pagination_Project.Services
                 {
                     asignacion.Finalizado = true;
 
-                    foreach (var evaluacion in asignacion.Evaluaciones)
+                    foreach (var evaluacion
+                             in asignacion.Evaluaciones)
                     {
                         evaluacion.Finalizado = true;
                     }
@@ -701,81 +934,140 @@ namespace Pagination_Project.Services
         private class RawAssignmentDashboardDto
         {
             public Guid AssignmentId { get; set; }
+
             public Guid BookId { get; set; }
+
             public Guid EmployeeId { get; set; }
 
-            public string EmployeeName { get; set; } = string.Empty;
-            public string KgenCode { get; set; } = string.Empty;
-            public string LsaCode { get; set; } = string.Empty;
-            public string BookName { get; set; } = string.Empty;
-            public string BindPlantName { get; set; } = string.Empty;
-            public string Database { get; set; } = string.Empty;
+            public string EmployeeName { get; set; }
+                = string.Empty;
+
+            public string KgenCode { get; set; }
+                = string.Empty;
+
+            public string LsaCode { get; set; }
+                = string.Empty;
+
+            public string BookName { get; set; }
+                = string.Empty;
+
+            public string BindPlantName { get; set; }
+                = string.Empty;
+
+            public string Database { get; set; }
+                = string.Empty;
 
             public DateOnly ProofExtract { get; set; }
+
             public DateOnly FinalExtract { get; set; }
+
             public DateOnly MemoExtract { get; set; }
+
             public DateOnly DirxionDate { get; set; }
+
             public DateOnly FinalPODate { get; set; }
+
             public DateOnly ShippingDate { get; set; }
         }
 
         private class RawWeeklyEvaluationDashboardDto
         {
             public Guid EvaluationId { get; set; }
+
             public Guid AssignmentId { get; set; }
+
             public Guid BookId { get; set; }
+
             public Guid EmployeeId { get; set; }
 
-            public string EmployeeName { get; set; } = string.Empty;
-            public string KgenCode { get; set; } = string.Empty;
-            public string LsaCode { get; set; } = string.Empty;
-            public string BookName { get; set; } = string.Empty;
+            public string EmployeeName { get; set; }
+                = string.Empty;
+
+            public string KgenCode { get; set; }
+                = string.Empty;
+
+            public string LsaCode { get; set; }
+                = string.Empty;
+
+            public string BookName { get; set; }
+                = string.Empty;
 
             public DateOnly ShippingDate { get; set; }
 
             public decimal? MotifYp { get; set; }
+
             public decimal? MotifWp { get; set; }
+
             public decimal? InventoryReport { get; set; }
+
             public decimal? ProductShippingFolder { get; set; }
+
             public decimal? TaskMemo { get; set; }
 
             public bool TouchingRule { get; set; }
+
             public bool PagesSwapped { get; set; }
+
             public bool PplpWrongPlace { get; set; }
+
             public bool CouponsHeading { get; set; }
+
             public bool DoubleTruckWrongPlace { get; set; }
+
             public bool FillersOutside { get; set; }
+
             public bool MissingYspFiller { get; set; }
+
             public bool GradeUnder75 { get; set; }
 
             public bool WhpsNoAnchors { get; set; }
+
             public bool WfpsNoAnchors { get; set; }
+
             public bool WdqcsNoAnchors { get; set; }
 
             public bool MissingCornerAd { get; set; }
+
             public bool MissingBanner { get; set; }
+
             public bool MissingRandomTab { get; set; }
+
             public bool MissingForcedTab { get; set; }
 
             public bool FileNamingIssue { get; set; }
+
             public bool OutputWrongDate { get; set; }
+
             public bool WrongPitstop { get; set; }
+
             public bool RestaurantBleedIssue { get; set; }
+
             public bool WrongSigFiller { get; set; }
+
             public bool FobFolder { get; set; }
+
             public bool MissingPaidItem { get; set; }
+
             public bool MissingSelfPromo { get; set; }
 
             public bool Corrections { get; set; }
+
             public bool PendingCorrections { get; set; }
+
             public bool TaskMemoWrongComment { get; set; }
         }
 
         private class StageDashboardInfo
         {
-            public string StageKey { get; set; } = string.Empty;
-            public string StageName { get; set; } = string.Empty;
-            public string CompletionStatus { get; set; } = string.Empty;
+            public string StageKey { get; set; }
+                = string.Empty;
+
+            public string StageName { get; set; }
+                = string.Empty;
+
+            public string CompletionStatus { get; set; }
+                = string.Empty;
+
             public DateOnly StageDate { get; set; }
         }
     }

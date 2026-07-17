@@ -9,12 +9,14 @@
 @using Microsoft.JSInterop
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
 @using ClosedXML.Excel
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
+@inject IDashboardService DashboardService
 @inject IJSRuntime JS
 
 <PageTitle>Finished Reports</PageTitle>
@@ -49,6 +51,7 @@
                 <span>Late Work</span>
                 <strong>@LateWorksReporte.Count</strong>
             </div>
+
         </div>
     </section>
 
@@ -70,17 +73,18 @@
                     <option value="Asignaciones">Finished Assignments</option>
                     <option value="Evaluaciones">Finished Evaluations</option>
                     <option value="LateWork">Finished Late Work</option>
+                    <option value="NextDayAssignments">Next Day Assignments</option>
                 </select>
             </div>
 
             <div class="field">
                 <label>Date From</label>
-                <input type="date" @bind="FechaDesde" />
+                <input type="date" @bind="FechaDesde" disabled="@(!PermiteFiltroFechas)" />
             </div>
 
             <div class="field">
                 <label>Date To</label>
-                <input type="date" @bind="FechaHasta" />
+                <input type="date" @bind="FechaHasta" disabled="@(!PermiteFiltroFechas)" />
             </div>
 
             <div class="field">
@@ -134,7 +138,7 @@
         else if (!TieneDatos)
         {
             <div class="empty-box">
-                No finalized records found with the selected filters.
+                @MensajeSinDatos
             </div>
         }
         else
@@ -277,6 +281,59 @@
                 </div>
             }
 
+            @if (TipoReporteSeleccionado == "NextDayAssignments")
+            {
+                <div class="table-shell">
+                    <table class="reports-table reports-table-next-day">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>KGEN Code</th>
+                                <th>LSA Code</th>
+                                <th>Book</th>
+                                <th>Database</th>
+                                <th>Stage</th>
+                                <th>Stage Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in AsignacionesDiaSiguienteReporte)
+                            {
+                                <tr>
+                                    <td class="strong-cell">@item.EmployeeName</td>
+                                    <td>
+                                        <span class="kgen-pill">@item.KgenCode</span>
+                                    </td>
+                                    <td>
+                                        <span class="kgen-pill secondary">@item.LsaCode</span>
+                                    </td>
+                                    <td>@item.BookName</td>
+                                    <td>
+                                        @{
+                                            var databaseCode = GetDatabaseCode(item.Database);
+                                            var databaseFullName = GetDatabaseFullName(item.Database);
+                                        }
+
+                                        <span class="report-database-pill"
+                                              title="@databaseFullName"
+                                              aria-label="@databaseFullName">
+                                            @databaseCode
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="report-stage-pill @GetReportStageClass(item.StageKey)">
+                                            @item.Stage
+                                        </span>
+                                    </td>
+                                    <td>@FormatDate(item.StageDate)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
             @if (TipoReporteSeleccionado == "LateWork")
             {
                 <div class="table-shell">
@@ -337,6 +394,8 @@
     private DateTime? FechaDesde { get; set; }
     private DateTime? FechaHasta { get; set; }
 
+    private DateOnly FechaAsignacionesDiaSiguiente { get; set; }
+
     private Guid? EmpleadoIdSeleccionado { get; set; }
 
     private bool Cargando { get; set; }
@@ -347,6 +406,7 @@
     private List<AsignacionReporteDto> AsignacionesReporte { get; set; } = new();
     private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } = new();
     private List<LateWorkReporteDto> LateWorksReporte { get; set; } = new();
+    private List<AssignedBookDashboardDto> AsignacionesDiaSiguienteReporte { get; set; } = new();
     private List<Database> Databases { get; set; } = new();
     private List<Legacy_Code> LegacyCodes { get; set; } = new();
     private List<State> States { get; set; } = new();
@@ -354,7 +414,11 @@
     private bool PermiteFiltroEmpleado =>
         TipoReporteSeleccionado == "Asignaciones" ||
         TipoReporteSeleccionado == "Evaluaciones" ||
-        TipoReporteSeleccionado == "LateWork";
+        TipoReporteSeleccionado == "LateWork" ||
+        TipoReporteSeleccionado == "NextDayAssignments";
+
+    private bool PermiteFiltroFechas =>
+        TipoReporteSeleccionado != "NextDayAssignments";
 
     private bool TieneDatos =>
         TipoReporteSeleccionado switch
@@ -363,6 +427,7 @@
             "Asignaciones" => AsignacionesReporte.Any(),
             "Evaluaciones" => EvaluacionesReporte.Any(),
             "LateWork" => LateWorksReporte.Any(),
+            "NextDayAssignments" => AsignacionesDiaSiguienteReporte.Any(),
             _ => false
         };
 
@@ -373,6 +438,7 @@
             "Asignaciones" => AsignacionesReporte.Count,
             "Evaluaciones" => EvaluacionesReporte.Count,
             "LateWork" => LateWorksReporte.Count,
+            "NextDayAssignments" => AsignacionesDiaSiguienteReporte.Count,
             _ => 0
         };
 
@@ -383,6 +449,7 @@
             "Asignaciones" => "Finished Assignments List",
             "Evaluaciones" => "Finished Evaluations List",
             "LateWork" => "Finished Late Work List",
+            "NextDayAssignments" => "Next Day Assignments List",
             _ => "Finished Report"
         };
 
@@ -393,13 +460,21 @@
             "Asignaciones" => "Showing only finalized assignments.",
             "Evaluaciones" => "Showing only finalized evaluations.",
             "LateWork" => "Showing Late Work activities from books already finalized by Dirxion date.",
+            "NextDayAssignments" => $"Assignments scheduled for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}, using the same stage rules as Assigned Books.",
             _ => string.Empty
         };
+
+    private string MensajeSinDatos =>
+        TipoReporteSeleccionado == "NextDayAssignments"
+            ? $"No assignments found for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}."
+            : "No finalized records found with the selected filters.";
 
     protected override async Task OnInitializedAsync()
     {
         FechaDesde = DateTime.Today.AddMonths(-1);
         FechaHasta = DateTime.Today;
+        FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
+            DateOnly.FromDateTime(DateTime.Today));
 
         await CargarCatalogosAsync();
         await CargarEmpleadosAsync();
@@ -488,9 +563,16 @@
         AsignacionesReporte.Clear();
         EvaluacionesReporte.Clear();
         LateWorksReporte.Clear();
+        AsignacionesDiaSiguienteReporte.Clear();
 
         try
         {
+            if (TipoReporteSeleccionado == "NextDayAssignments")
+            {
+                await CargarAsignacionesDiaSiguienteAsync();
+                return;
+            }
+
             await using var db = await DbFactory.CreateDbContextAsync();
 
             await MarcarFinalizadosAutomaticamenteAsync(db);
@@ -543,6 +625,10 @@
             {
                 GenerarHojaLateWork(workbook);
             }
+            else if (TipoReporteSeleccionado == "NextDayAssignments")
+            {
+                GenerarHojaAsignacionesDiaSiguiente(workbook);
+            }
 
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
@@ -556,6 +642,7 @@
                 "Asignaciones" => $"Finished_Assignments_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 "Evaluaciones" => $"Finished_Evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 "LateWork" => $"Finished_Late_Work_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                "NextDayAssignments" => $"Next_Day_Assignments_{FechaAsignacionesDiaSiguiente:yyyyMMdd}.xlsx",
                 _ => $"Finished_Report_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
             };
 
@@ -569,6 +656,78 @@
         {
             Console.WriteLine($"Error generating XLSX: {ex.Message}");
         }
+    }
+
+    private async Task CargarAsignacionesDiaSiguienteAsync()
+    {
+        FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
+            DateOnly.FromDateTime(DateTime.Today));
+
+        var asignaciones = await DashboardService.GetAssignedBooksForDateAsync(
+            FechaAsignacionesDiaSiguiente);
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            asignaciones = asignaciones
+                .Where(x => x.EmployeeId == EmpleadoIdSeleccionado.Value)
+                .ToList();
+        }
+
+        AsignacionesDiaSiguienteReporte = asignaciones
+            .OrderBy(x => x.StageDate)
+            .ThenBy(x => x.EmployeeName)
+            .ThenBy(x => x.BookName)
+            .ToList();
+    }
+
+    private static DateOnly ObtenerSiguienteDiaLaborable(DateOnly fechaActual)
+    {
+        var fecha = fechaActual.AddDays(1);
+
+        while (fecha.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            fecha = fecha.AddDays(1);
+        }
+
+        return fecha;
+    }
+
+    private static string GetDatabaseCode(string? database)
+    {
+        return string.IsNullOrWhiteSpace(database)
+            ? "-"
+            : database.Trim().ToUpperInvariant();
+    }
+
+    private static string GetDatabaseFullName(string? database)
+    {
+        if (string.IsNullOrWhiteSpace(database))
+            return "Database not available";
+
+        var code = database.Trim().ToUpperInvariant();
+
+        return code switch
+        {
+            "DW" => "WEST",
+            "SN" => "vNorth",
+            "SW" => "vWest",
+            "SS" => "vSouth",
+            _ => database.Trim()
+        };
+    }
+
+    private static string GetReportStageClass(string? stageKey)
+    {
+        return (stageKey ?? string.Empty).Trim() switch
+        {
+            "ProofExtract" => "stage-proofextract",
+            "FinalExtract" => "stage-finalextract",
+            "MemoExtract" => "stage-memoextract",
+            "FinalPO" => "stage-finalpo",
+            "Shipping" => "stage-shipping",
+            "Dirxion" => "stage-dirxion",
+            _ => "stage-default"
+        };
     }
 
     private async Task CargarLateWorkFinalizadosAsync(AppDbContext db)
@@ -650,6 +809,36 @@
                         : null
             })
             .ToListAsync();
+    }
+
+    private void GenerarHojaAsignacionesDiaSiguiente(XLWorkbook workbook)
+    {
+        var worksheet = workbook.Worksheets.Add("Next Day Assignments");
+
+        worksheet.Cell(1, 1).Value = "Employee";
+        worksheet.Cell(1, 2).Value = "KGEN Code";
+        worksheet.Cell(1, 3).Value = "LSA Code";
+        worksheet.Cell(1, 4).Value = "Book";
+        worksheet.Cell(1, 5).Value = "Database";
+        worksheet.Cell(1, 6).Value = "Stage";
+        worksheet.Cell(1, 7).Value = "Stage Date";
+
+        var row = 2;
+
+        foreach (var item in AsignacionesDiaSiguienteReporte)
+        {
+            worksheet.Cell(row, 1).Value = item.EmployeeName;
+            worksheet.Cell(row, 2).Value = item.KgenCode;
+            worksheet.Cell(row, 3).Value = item.LsaCode;
+            worksheet.Cell(row, 4).Value = item.BookName;
+            worksheet.Cell(row, 5).Value = item.Database;
+            worksheet.Cell(row, 6).Value = item.Stage;
+            EscribirFechaExcel(worksheet.Cell(row, 7), item.StageDate);
+
+            row++;
+        }
+
+        AplicarEstiloExcel(worksheet, row - 1, 7);
     }
 
     private void GenerarHojaLateWork(XLWorkbook workbook)
