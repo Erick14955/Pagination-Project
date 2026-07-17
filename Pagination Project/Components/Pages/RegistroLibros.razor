@@ -590,13 +590,54 @@
                                 <td>@GetTrimSizeName(libro.TrimSizeId)</td>
                                 <td>@GetBindPlantName(libro.BindPlantId)</td>
                                 <td>@libro.ProductIssue</td>
-                                <td>@FormatoFecha(libro.ProofExtract)</td>
-                                <td>@FormatoFecha(libro.FinalExtract)</td>
-                                <td>@FormatoFecha(libro.MemoExtract)</td>
-                                <td>@FormatoFecha(libro.FinalPODate)</td>
-                                <td>@FormatoFecha(libro.ShippingDate)</td>
-                                <td>@FormatoFecha(libro.DirxionDate)</td>
-                                <td>@FormatoFecha(libro.PubDate)</td>
+                                <td>
+                                    <span class='@GetDateTextClass(libro.Id, "ProofExtract", libro.ProofExtract)'
+                                          title='@GetDateTextTitle(libro.Id, "ProofExtract", libro.ProofExtract)'>
+                                        @FormatoFecha(libro.ProofExtract)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class='@GetDateTextClass(libro.Id, "FinalExtract", libro.FinalExtract)'
+                                          title='@GetDateTextTitle(libro.Id, "FinalExtract", libro.FinalExtract)'>
+                                        @FormatoFecha(libro.FinalExtract)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class='@GetDateTextClass(libro.Id, "MemoExtract", libro.MemoExtract)'
+                                          title='@GetDateTextTitle(libro.Id, "MemoExtract", libro.MemoExtract)'>
+                                        @FormatoFecha(libro.MemoExtract)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class='@GetDateTextClass(libro.Id, "FinalPO", libro.FinalPODate)'
+                                          title='@GetDateTextTitle(libro.Id, "FinalPO", libro.FinalPODate)'>
+                                        @FormatoFecha(libro.FinalPODate)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class='@GetDateTextClass(libro.Id, "Shipping", libro.ShippingDate)'
+                                          title='@GetDateTextTitle(libro.Id, "Shipping", libro.ShippingDate)'>
+                                        @FormatoFecha(libro.ShippingDate)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class='@GetDateTextClass(libro.Id, "Dirxion", libro.DirxionDate)'
+                                          title='@GetDateTextTitle(libro.Id, "Dirxion", libro.DirxionDate)'>
+                                        @FormatoFecha(libro.DirxionDate)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="book-date-text book-date-without-work-status"
+                                          title="Pub Date does not have a worked flag in Assignments_Worked.">
+                                        @FormatoFecha(libro.PubDate)
+                                    </span>
+                                </td>
                                 <td>@(libro.SRLSuppression ? "Yes" : "No")</td>
                                 <td>@(libro.NWP ? "Yes" : "No")</td>
 
@@ -622,6 +663,10 @@
 
 @code {
     private List<Libros> Libros { get; set; } = new();
+
+    // Estado acumulado de las etapas trabajadas por libro.
+    // Se construye desde Assignments_Worked a través de la asignación del libro.
+    private Dictionary<Guid, BookWorkedStages> EtapasTrabajadasPorLibro { get; set; } = new();
 
     private ClaimsPrincipal? _user;
 
@@ -1482,6 +1527,8 @@
                 .Where(l => !l.Finalizado)
                 .OrderBy(l => l.BookName)
                 .ToListAsync();
+
+            await CargarEtapasTrabajadasAsync(db);
         }
         catch (Exception ex)
         {
@@ -1491,6 +1538,87 @@
         {
             Cargando = false;
         }
+    }
+
+    private async Task CargarEtapasTrabajadasAsync(AppDbContext db)
+    {
+        EtapasTrabajadasPorLibro = new Dictionary<Guid, BookWorkedStages>();
+
+        var bookIds = Libros
+            .Select(x => x.Id)
+            .Distinct()
+            .ToList();
+
+        if (!bookIds.Any())
+            return;
+
+        var registros = await (
+            from trabajado in db.AsignacionesTrabajadas.AsNoTracking()
+            join asignacion in db.Asignaciones.AsNoTracking()
+                on trabajado.IdAsignacion equals asignacion.Id
+            where bookIds.Contains(asignacion.IdLibro)
+            select new
+            {
+                BookId = asignacion.IdLibro,
+                trabajado.ProofExtractWorked,
+                trabajado.FinalExtractWorked,
+                trabajado.MemoExtractWorked,
+                trabajado.FinalPOWorked,
+                trabajado.ShippingWorked,
+                trabajado.DirxionWorked
+            }
+        ).ToListAsync();
+
+        EtapasTrabajadasPorLibro = registros
+            .GroupBy(x => x.BookId)
+            .ToDictionary(
+                group => group.Key,
+                group => new BookWorkedStages
+                {
+                    ProofExtractWorked = group.Any(x => x.ProofExtractWorked),
+                    FinalExtractWorked = group.Any(x => x.FinalExtractWorked),
+                    MemoExtractWorked = group.Any(x => x.MemoExtractWorked),
+                    FinalPOWorked = group.Any(x => x.FinalPOWorked),
+                    ShippingWorked = group.Any(x => x.ShippingWorked),
+                    DirxionWorked = group.Any(x => x.DirxionWorked)
+                });
+    }
+
+    private bool IsStageWorked(Guid bookId, string stageKey)
+    {
+        if (!EtapasTrabajadasPorLibro.TryGetValue(bookId, out var stages))
+            return false;
+
+        return stageKey switch
+        {
+            "ProofExtract" => stages.ProofExtractWorked,
+            "FinalExtract" => stages.FinalExtractWorked,
+            "MemoExtract" => stages.MemoExtractWorked,
+            "FinalPO" => stages.FinalPOWorked,
+            "Shipping" => stages.ShippingWorked,
+            "Dirxion" => stages.DirxionWorked,
+            _ => false
+        };
+    }
+
+    private string GetDateTextClass(Guid bookId, string stageKey, DateOnly date)
+    {
+        if (date == default)
+            return "book-date-text book-date-empty";
+
+        return IsStageWorked(bookId, stageKey)
+            ? "book-date-text book-date-worked"
+            : "book-date-text";
+    }
+
+    private string GetDateTextTitle(Guid bookId, string stageKey, DateOnly date)
+    {
+        if (date == default)
+            return "Date not available.";
+
+        return IsStageWorked(bookId, stageKey)
+            ? "This stage has already been worked."
+            : "This stage has not been marked as worked.";
     }
 
     private async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db)
@@ -2417,6 +2545,16 @@
         public string Value { get; set; } = string.Empty;
         public string Label { get; set; } = string.Empty;
         public int Count { get; set; }
+    }
+
+    private sealed class BookWorkedStages
+    {
+        public bool ProofExtractWorked { get; set; }
+        public bool FinalExtractWorked { get; set; }
+        public bool MemoExtractWorked { get; set; }
+        public bool FinalPOWorked { get; set; }
+        public bool ShippingWorked { get; set; }
+        public bool DirxionWorked { get; set; }
     }
 
     private sealed class ActualizacionLibrosResultado

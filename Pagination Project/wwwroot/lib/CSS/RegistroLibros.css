@@ -546,6 +546,63 @@
         line-height: 1.2;
     }
 
+    /* DATE STATUS --------------------------------------------------------- */
+    .books-page .book-date-text {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        color: inherit;
+        font-weight: 800;
+        line-height: 1.15;
+        white-space: nowrap;
+        transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .books-page .books-table td .book-date-text.book-date-worked {
+        color: #15803d !important;
+        background: #dcfce7 !important;
+        border: 1px solid #86efac !important;
+        box-shadow: 0 5px 14px rgba(22, 163, 74, 0.14);
+        font-weight: 900 !important;
+        -webkit-text-fill-color: #15803d;
+    }
+
+    .books-page .book-date-worked::before {
+        content: none;
+    }
+
+    .books-page .book-date-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
+        border-radius: 999px;
+        background: #16a34a;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff;
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .books-page .book-date-worked:hover {
+        transform: translateY(-1px);
+        background: #bbf7d0;
+        box-shadow: 0 8px 18px rgba(22, 163, 74, 0.20);
+    }
+
+    .books-page .book-date-empty,
+    .books-page .book-date-without-work-status {
+        color: #64748b;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+
     .books-page .actions-cell {
         width: 76px !important;
         min-width: 76px !important;
@@ -912,6 +969,21 @@ html[data-theme="dark"] .books-page {
         border-color: rgba(255, 255, 255, 0.12);
     }
 
+    html[data-theme="dark"] .books-page .books-table td .book-date-text.book-date-worked {
+        color: #4ade80 !important;
+        -webkit-text-fill-color: #4ade80;
+        background: rgba(22, 163, 74, 0.20) !important;
+        border-color: rgba(74, 222, 128, 0.48) !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    html[data-theme="dark"] .books-page .book-date-empty,
+    html[data-theme="dark"] .books-page .book-date-without-work-status {
+        color: #94a3b8;
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.10);
+    }
+
 html[data-theme="liquid glass"] .books-page {
     background: transparent;
     color: #111827;
@@ -1066,6 +1138,22 @@ html[data-theme="liquid glass"] .xlsx-modal-backdrop {
     -webkit-backdrop-filter: blur(10px);
 }
 
+html[data-theme="liquid glass"] .books-page .books-table td .book-date-text.book-date-worked {
+    color: #166534 !important;
+    background: rgba(220, 252, 231, 0.78);
+    border-color: rgba(34, 197, 94, 0.40);
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+}
+
+html[data-theme="liquid glass"] .books-page .book-date-empty,
+html[data-theme="liquid glass"] .books-page .book-date-without-work-status {
+    color: #64748b;
+    background: rgba(241, 245, 249, 0.62);
+    border-color: rgba(255, 255, 255, 0.65);
+}
+
 html[data-theme="dark glass"] .books-page {
     background: transparent;
     color: #e5e7eb;
@@ -1176,6 +1264,22 @@ html[data-theme="dark glass"] .xlsx-modal-backdrop {
     background: rgba(2, 6, 23, 0.52);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark glass"] .books-page .books-table td .book-date-text.book-date-worked {
+    color: #bbf7d0 !important;
+    background: rgba(22, 163, 74, 0.22);
+    border-color: rgba(74, 222, 128, 0.34);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.20);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+html[data-theme="dark glass"] .books-page .book-date-empty,
+html[data-theme="dark glass"] .books-page .book-date-without-work-status {
+    color: #94a3b8;
+    background: rgba(30, 41, 59, 0.64);
+    border-color: rgba(255, 255, 255, 0.10);
 }
 
 @media (max-width: 1280px) {
@@ -1595,6 +1699,15 @@ html[data-theme="dark glass"] .xlsx-modal-backdrop {
         }
 
     .books-page .pill {
+        white-space: normal;
+        text-align: center;
+    }
+
+    .books-page .book-date-text {
+        max-width: 100%;
+        min-height: 27px;
+        padding: 5px 8px;
+        font-size: 12px;
         white-space: normal;
         text-align: center;
     }

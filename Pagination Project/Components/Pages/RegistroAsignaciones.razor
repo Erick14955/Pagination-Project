@@ -25,8 +25,6 @@
 
 <PageTitle>Assignments</PageTitle>
 
-<link href="style/asignaciones.css" rel="stylesheet" />
-
 <div class="assignments-page">
 
     <section class="page-hero">
@@ -156,10 +154,10 @@
                                 @(LibroSeleccionado is null
                                                         ? "No valid book selected"
                                                         : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
-                            </small>
-                        </div>
-                    </div>
-                }
+                    </small>
+                </div>
+            </div>
+                        }
 
                 <div class="button-row">
                     <button type="submit" class="btn-primary" disabled="@Guardando">
@@ -234,6 +232,13 @@
                     📤 Export XLSX
                 </button>
 
+                <button type="button"
+                        class="btn-status-books"
+                        disabled="@GenerandoStatusBooks"
+                        @onclick="ExportarStatusOfBooksXlsxAsync">
+                    @(GenerandoStatusBooks ? "Generating..." : "📊 Status of Books")
+                </button>
+
                 <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
                     Clear
                 </button>
@@ -271,6 +276,8 @@
                             <th>Trim Size</th>
                             <th>Bind Plant</th>
                             <th>Pub Date</th>
+                            <th>Last Stage Worked</th>
+                            <th>Next Stage</th>
                             @if (CreateAssignations)
                             {
                                 <th></th>
@@ -325,6 +332,25 @@
                                 <td data-label="Bind Plant">@item.BindPlantName</td>
                                 <td data-label="Pub Date">@FormatoFecha(item.PubDate)</td>
 
+                                <td data-label="Last Stage Worked">
+                                    <div class="stage-status-cell">
+                                        <span class="@GetLastStageChipClass(item)">
+                                            @item.LastStageWorked
+                                        </span>
+
+                                        @if (item.LastStageWorkedDate.HasValue)
+                                        {
+                                            <small>Worked: @FormatoFecha(item.LastStageWorkedDate.Value)</small>
+                                        }
+                                    </div>
+                                </td>
+
+                                <td data-label="Next Stage">
+                                    <span class="@GetNextStageChipClass(item.NextStage)">
+                                        @item.NextStage
+                                    </span>
+                                </td>
+
                                 @if (CreateAssignations)
                                 {
                                     <td data-label="Actions" class="actions-cell">
@@ -344,6 +370,39 @@
         }
     </section>
 </div>
+
+@if (MostrarModalEmpleadoRequerido)
+{
+    <div class="status-books-modal-backdrop"
+         role="presentation"
+         @onclick="CerrarModalEmpleadoRequerido">
+
+        <div class="status-books-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="statusBooksEmployeeRequiredTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="status-books-modal-icon">👤</div>
+
+            <div class="status-books-modal-content">
+                <h2 id="statusBooksEmployeeRequiredTitle">Employee Required</h2>
+                <p>
+                    Please select an employee from the employee filter before generating
+                    the Status of Books report.
+                </p>
+            </div>
+
+            <div class="status-books-modal-actions">
+                <button type="button"
+                        class="status-books-modal-ok"
+                        @onclick="CerrarModalEmpleadoRequerido">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
 
 @if (MostrarFormularioTemporal)
 {
@@ -536,6 +595,9 @@
 
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
+
+    private bool MostrarModalEmpleadoRequerido { get; set; }
+    private bool GenerandoStatusBooks { get; set; }
 
     private ClaimsPrincipal? UsuarioActual { get; set; }
     private bool CreateAssignations { get; set; } = false;
@@ -1178,12 +1240,57 @@
                 .Where(x => x.Active && asignacionIds.Contains(x.AssignmentId))
                 .ToListAsync();
 
+            var registrosTrabajados = await db.AsignacionesTrabajadas
+                .AsNoTracking()
+                .Where(x => asignacionIds.Contains(x.IdAsignacion))
+                .Select(x => new AssignmentWorkedRaw
+                {
+                    AssignmentId = x.IdAsignacion,
+                    WorkDate = x.FechaTrabajo,
+                    ProofExtractWorked = x.ProofExtractWorked,
+                    FinalExtractWorked = x.FinalExtractWorked,
+                    MemoExtractWorked = x.MemoExtractWorked,
+                    FinalPOWorked = x.FinalPOWorked,
+                    ShippingWorked = x.ShippingWorked,
+                    DirxionWorked = x.DirxionWorked
+                })
+                .ToListAsync();
+
+            var progresoPorAsignacion = registrosTrabajados
+                .GroupBy(x => x.AssignmentId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => new AssignmentWorkedProgress
+                    {
+                        ProofExtractWorked = group.Any(x => x.ProofExtractWorked),
+                        FinalExtractWorked = group.Any(x => x.FinalExtractWorked),
+                        MemoExtractWorked = group.Any(x => x.MemoExtractWorked),
+                        FinalPOWorked = group.Any(x => x.FinalPOWorked),
+                        ShippingWorked = group.Any(x => x.ShippingWorked),
+                        DirxionWorked = group.Any(x => x.DirxionWorked),
+
+                        ProofWorkedDate = GetLastWorkedDate(group, x => x.ProofExtractWorked),
+                        FinalWorkedDate = GetLastWorkedDate(group, x => x.FinalExtractWorked),
+                        MemoWorkedDate = GetLastWorkedDate(group, x => x.MemoExtractWorked),
+                        FinalPOWorkedDate = GetLastWorkedDate(group, x => x.FinalPOWorked),
+                        ShippingWorkedDate = GetLastWorkedDate(group, x => x.ShippingWorked),
+                        DirxionWorkedDate = GetLastWorkedDate(group, x => x.DirxionWorked)
+                    });
+
             AsignacionesListado = asignacionesDb.Select(x =>
             {
                 var temporal = temporalesDb
                     .Where(t => t.AssignmentId == x.Id)
                     .OrderByDescending(t => t.CreatedAt)
                     .FirstOrDefault();
+
+                var bindPlantName = GetBindPlantName(x.Libro?.BindPlantId);
+
+                var progreso = progresoPorAsignacion.TryGetValue(x.Id, out var progresoEncontrado)
+                    ? progresoEncontrado
+                    : new AssignmentWorkedProgress();
+
+                var estadoEtapas = ObtenerEstadoEtapas(progreso, bindPlantName);
 
                 return new AsignacionViewModel
                 {
@@ -1205,7 +1312,7 @@
                     LegacyCodeName = GetLegacyCodeName(x.Libro?.LegacyCodeId),
                     PrintFootName = GetPrintFootName(x.Libro?.PrintFootId),
                     TrimSizeName = GetTrimSizeName(x.Libro?.TrimSizeId),
-                    BindPlantName = GetBindPlantName(x.Libro?.BindPlantId),
+                    BindPlantName = bindPlantName,
 
                     PubDate = x.Libro?.PubDate ?? default,
 
@@ -1222,7 +1329,19 @@
                     TieneAsignacionTemporal = temporal is not null,
                     EmpleadoOriginalNombre = x.Empleado?.Nombre ?? string.Empty,
                     EmpleadoTemporalNombre = temporal?.TemporaryEmployee?.Nombre ?? string.Empty,
-                    EtapasTemporales = temporal is null ? string.Empty : GetEtapasTemporalesTexto(temporal)
+                    EtapasTemporales = temporal is null ? string.Empty : GetEtapasTemporalesTexto(temporal),
+
+                    ProofExtractWorked = progreso.ProofExtractWorked,
+                    FinalExtractWorked = progreso.FinalExtractWorked,
+                    MemoExtractWorked = progreso.MemoExtractWorked,
+                    FinalPOWorked = progreso.FinalPOWorked,
+                    ShippingWorked = progreso.ShippingWorked,
+                    DirxionWorked = progreso.DirxionWorked,
+                    MemoApplicable = AplicaEtapaMemo(bindPlantName),
+
+                    LastStageWorked = estadoEtapas.LastStageWorked,
+                    LastStageWorkedDate = estadoEtapas.LastStageWorkedDate,
+                    NextStage = estadoEtapas.NextStage
                 };
             }).ToList();
         }
@@ -1479,6 +1598,129 @@
             etapas.Add("Dirxion");
 
         return etapas.Any() ? string.Join(", ", etapas) : "-";
+    }
+
+    private static DateOnly? GetLastWorkedDate(
+        IEnumerable<AssignmentWorkedRaw> records,
+        Func<AssignmentWorkedRaw, bool> predicate)
+    {
+        return records
+            .Where(predicate)
+            .Select(x => (DateOnly?)x.WorkDate)
+            .DefaultIfEmpty(null)
+            .Max();
+    }
+
+    private static AssignmentStageStatus ObtenerEstadoEtapas(
+        AssignmentWorkedProgress progress,
+        string bindPlantName)
+    {
+        var stageKeys = new List<string>
+        {
+            "Proof",
+            "Final"
+        };
+
+        // Memo is only part of the workflow for Vivial books.
+        if (AplicaEtapaMemo(bindPlantName))
+            stageKeys.Add("Memo");
+
+        stageKeys.Add("FinalPO");
+        stageKeys.Add("Shipping");
+        stageKeys.Add("Dirxion");
+
+        var lastWorkedIndex = -1;
+
+        for (var index = 0; index < stageKeys.Count; index++)
+        {
+            if (IsStageWorked(progress, stageKeys[index]))
+                lastWorkedIndex = index;
+        }
+
+        if (lastWorkedIndex < 0)
+        {
+            return new AssignmentStageStatus
+            {
+                LastStageWorked = "Not Started",
+                LastStageWorkedDate = null,
+                NextStage = GetStageDisplayName(stageKeys[0])
+            };
+        }
+
+        var lastStageKey = stageKeys[lastWorkedIndex];
+        var nextStage = lastWorkedIndex + 1 < stageKeys.Count
+            ? GetStageDisplayName(stageKeys[lastWorkedIndex + 1])
+            : "Completed";
+
+        return new AssignmentStageStatus
+        {
+            LastStageWorked = GetStageDisplayName(lastStageKey),
+            LastStageWorkedDate = GetStageWorkedDate(progress, lastStageKey),
+            NextStage = nextStage
+        };
+    }
+
+    private static bool AplicaEtapaMemo(string bindPlantName)
+    {
+        return EsBindPlant(bindPlantName, "WAUK", "SUSX", "LMRA");
+    }
+
+    private static bool IsStageWorked(AssignmentWorkedProgress progress, string stageKey)
+    {
+        return stageKey switch
+        {
+            "Proof" => progress.ProofExtractWorked,
+            "Final" => progress.FinalExtractWorked,
+            "Memo" => progress.MemoExtractWorked,
+            "FinalPO" => progress.FinalPOWorked,
+            "Shipping" => progress.ShippingWorked,
+            "Dirxion" => progress.DirxionWorked,
+            _ => false
+        };
+    }
+
+    private static DateOnly? GetStageWorkedDate(
+        AssignmentWorkedProgress progress,
+        string stageKey)
+    {
+        return stageKey switch
+        {
+            "Proof" => progress.ProofWorkedDate,
+            "Final" => progress.FinalWorkedDate,
+            "Memo" => progress.MemoWorkedDate,
+            "FinalPO" => progress.FinalPOWorkedDate,
+            "Shipping" => progress.ShippingWorkedDate,
+            "Dirxion" => progress.DirxionWorkedDate,
+            _ => null
+        };
+    }
+
+    private static string GetStageDisplayName(string stageKey)
+    {
+        return stageKey switch
+        {
+            "Proof" => "Proof",
+            "Final" => "Final",
+            "Memo" => "Memo",
+            "FinalPO" => "Final PO",
+            "Shipping" => "Shipping",
+            "Dirxion" => "Dirxion",
+            _ => stageKey
+        };
+    }
+
+    private static string GetLastStageChipClass(AsignacionViewModel item)
+    {
+        return string.Equals(item.LastStageWorked, "Not Started", StringComparison.OrdinalIgnoreCase)
+            ? "stage-chip stage-chip-not-started"
+            : "stage-chip stage-chip-worked";
+    }
+
+    private static string GetNextStageChipClass(string nextStage)
+    {
+        return string.Equals(nextStage, "Completed", StringComparison.OrdinalIgnoreCase)
+            ? "stage-chip stage-chip-completed"
+            : "stage-chip stage-chip-next";
     }
 
     private async Task CargarCatalogosAsync()
@@ -2494,6 +2736,261 @@
         }
     }
 
+    private void CerrarModalEmpleadoRequerido()
+    {
+        MostrarModalEmpleadoRequerido = false;
+    }
+
+    private async Task ExportarStatusOfBooksXlsxAsync()
+    {
+        if (string.IsNullOrWhiteSpace(EmpleadoFiltroId) ||
+            !Guid.TryParse(EmpleadoFiltroId, out var empleadoId))
+        {
+            MostrarModalEmpleadoRequerido = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        var empleado = AsignacionesListado
+            .FirstOrDefault(x => x.EmpleadoId == empleadoId);
+
+        if (empleado is null)
+        {
+            MostrarModalEmpleadoRequerido = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            GenerandoStatusBooks = true;
+            LimpiarMensaje();
+
+            var datos = AsignacionesListado
+                .Where(x => x.EmpleadoId == empleadoId)
+                .OrderBy(x => x.BookName)
+                .ThenBy(x => x.KGENCode)
+                .ToList();
+
+            if (!datos.Any())
+            {
+                MostrarMensaje(
+                    "The selected employee does not have active book assignments.",
+                    "error");
+                return;
+            }
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Status of Books");
+
+            const int lastColumn = 14;
+            const int headerRow = 5;
+
+            worksheet.Cell(1, 1).Value = "Status of Books";
+            worksheet.Range(1, 1, 1, lastColumn).Merge();
+
+            worksheet.Cell(2, 1).Value = $"Employee: {empleado.EmpleadoNombre}";
+            worksheet.Range(2, 1, 2, lastColumn).Merge();
+
+            worksheet.Cell(3, 1).Value =
+                $"Generated: {DateTime.Now:MM/dd/yyyy hh:mm tt} | " +
+                $"Total Books: {datos.Count}";
+            worksheet.Range(3, 1, 3, lastColumn).Merge();
+
+            worksheet.Cell(headerRow, 1).Value = "Employee Name";
+            worksheet.Cell(headerRow, 2).Value = "KGEN Code";
+            worksheet.Cell(headerRow, 3).Value = "LSA Code";
+            worksheet.Cell(headerRow, 4).Value = "Book Name";
+            worksheet.Cell(headerRow, 5).Value = "Bind Plant";
+            worksheet.Cell(headerRow, 6).Value = "Database";
+            worksheet.Cell(headerRow, 7).Value = "Status of Proof Extract";
+            worksheet.Cell(headerRow, 8).Value = "Status of Final Extract";
+            worksheet.Cell(headerRow, 9).Value = "Status of Memo Extract";
+            worksheet.Cell(headerRow, 10).Value = "Final PO Sent";
+            worksheet.Cell(headerRow, 11).Value = "Shipped Pages";
+            worksheet.Cell(headerRow, 12).Value = "Dirxion Sent";
+            worksheet.Cell(headerRow, 13).Value = "Last Stage Worked";
+            worksheet.Cell(headerRow, 14).Value = "Next Stage";
+
+            var row = headerRow + 1;
+
+            foreach (var item in datos)
+            {
+                worksheet.Cell(row, 1).Value = item.EmpleadoNombre;
+                worksheet.Cell(row, 2).Value = item.KGENCode;
+                worksheet.Cell(row, 3).Value = item.LSACode;
+                worksheet.Cell(row, 4).Value = item.BookName;
+                worksheet.Cell(row, 5).Value = item.BindPlantName;
+                worksheet.Cell(row, 6).Value = item.DatabaseName;
+
+                worksheet.Cell(row, 7).Value =
+                    item.ProofExtractWorked ? "Completed" : "Pending";
+
+                worksheet.Cell(row, 8).Value =
+                    item.FinalExtractWorked ? "Completed" : "Pending";
+
+                worksheet.Cell(row, 9).Value =
+                    !item.MemoApplicable
+                        ? "N/A"
+                        : item.MemoExtractWorked
+                            ? "Completed"
+                            : "Pending";
+
+                worksheet.Cell(row, 10).Value =
+                    item.FinalPOWorked ? "Sent" : "Pending";
+
+                worksheet.Cell(row, 11).Value =
+                    item.ShippingWorked ? "Completed" : "Pending";
+
+                worksheet.Cell(row, 12).Value =
+                    item.DirxionWorked ? "Sent" : "Pending";
+
+                worksheet.Cell(row, 13).Value =
+                    item.LastStageWorked == "Not Started"
+                        ? string.Empty
+                        : item.LastStageWorked;
+
+                worksheet.Cell(row, 14).Value =
+                    item.DirxionWorked
+                        ? string.Empty
+                        : item.NextStage;
+
+                AplicarEstiloEstadoStatusBooks(
+                    worksheet.Cell(row, 7),
+                    item.ProofExtractWorked ? "Completed" : "Pending");
+
+                AplicarEstiloEstadoStatusBooks(
+                    worksheet.Cell(row, 8),
+                    item.FinalExtractWorked ? "Completed" : "Pending");
+
+                AplicarEstiloEstadoStatusBooks(
+                    worksheet.Cell(row, 9),
+                    !item.MemoApplicable
+                        ? "N/A"
+                        : item.MemoExtractWorked
+                            ? "Completed"
+                            : "Pending");
+
+                AplicarEstiloEstadoStatusBooks(
+                    worksheet.Cell(row, 10),
+                    item.FinalPOWorked ? "Sent" : "Pending");
+
+                AplicarEstiloEstadoStatusBooks(
+                    worksheet.Cell(row, 11),
+                    item.ShippingWorked ? "Completed" : "Pending");
+
+                AplicarEstiloEstadoStatusBooks(
+                    worksheet.Cell(row, 12),
+                    item.DirxionWorked ? "Sent" : "Pending");
+
+                row++;
+            }
+
+            var titleRange = worksheet.Range(1, 1, 1, lastColumn);
+            titleRange.Style.Font.Bold = true;
+            titleRange.Style.Font.FontSize = 17;
+            titleRange.Style.Font.FontColor = XLColor.White;
+            titleRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#0F766E");
+            titleRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            titleRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet.Row(1).Height = 28;
+
+            worksheet.Range(2, 1, 3, lastColumn).Style.Font.Italic = true;
+            worksheet.Range(2, 1, 3, lastColumn).Style.Alignment.Horizontal =
+                XLAlignmentHorizontalValues.Center;
+
+            var header = worksheet.Range(headerRow, 1, headerRow, lastColumn);
+            header.Style.Font.Bold = true;
+            header.Style.Font.FontColor = XLColor.White;
+            header.Style.Fill.BackgroundColor = XLColor.FromHtml("#111827");
+            header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            header.Style.Alignment.WrapText = true;
+            worksheet.Row(headerRow).Height = 38;
+
+            var dataRange = worksheet.Range(headerRow, 1, row - 1, lastColumn);
+            dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            dataRange.Style.Border.OutsideBorderColor = XLColor.FromHtml("#CBD5E1");
+            dataRange.Style.Border.InsideBorderColor = XLColor.FromHtml("#E2E8F0");
+            dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            worksheet.Range(headerRow + 1, 5, row - 1, 14)
+                .Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            worksheet.Range(headerRow + 1, 13, row - 1, 14)
+                .Style.Font.Bold = true;
+
+            worksheet.SheetView.FreezeRows(headerRow);
+            worksheet.Range(headerRow, 1, row - 1, lastColumn).SetAutoFilter();
+
+            worksheet.Column(1).Width = 26;
+            worksheet.Column(2).Width = 16;
+            worksheet.Column(3).Width = 16;
+            worksheet.Column(4).Width = 38;
+            worksheet.Column(5).Width = 18;
+            worksheet.Column(6).Width = 18;
+            worksheet.Columns(7, 12).Width = 21;
+            worksheet.Columns(13, 14).Width = 20;
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            var base64 = Convert.ToBase64String(stream.ToArray());
+            var employeeNameFile = LimpiarNombreArchivo(empleado.EmpleadoNombre);
+            var fileName =
+                $"Status_of_Books_{employeeNameFile}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+
+            MostrarMensaje(
+                $"Status of Books report generated successfully for {empleado.EmpleadoNombre}. " +
+                $"Total: {datos.Count}.",
+                "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(
+                $"Error generating Status of Books report: {ex.Message}",
+                "error");
+        }
+        finally
+        {
+            GenerandoStatusBooks = false;
+        }
+    }
+
+    private static void AplicarEstiloEstadoStatusBooks(
+        IXLCell cell,
+        string status)
+    {
+        cell.Style.Font.Bold = true;
+        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+        switch (status)
+        {
+            case "Completed":
+            case "Sent":
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#DCFCE7");
+                cell.Style.Font.FontColor = XLColor.FromHtml("#166534");
+                break;
+
+            case "N/A":
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#E2E8F0");
+                cell.Style.Font.FontColor = XLColor.FromHtml("#475569");
+                break;
+
+            default:
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#FEF3C7");
+                cell.Style.Font.FontColor = XLColor.FromHtml("#92400E");
+                break;
+        }
+    }
+
     private static void EscribirFechaExcel(IXLCell cell, DateOnly? fecha)
     {
         if (fecha is null || fecha.Value == default)
@@ -3132,7 +3629,7 @@
                     resultado.Errores,
                     rowNumber,
                     false,
-                    "Dirxion Date", 
+                    "Dirxion Date",
                     "Dirxion",
                     "File Due Online/LSA/Galley Update Summary RPT",
                     "File Due Online",
@@ -3265,6 +3762,43 @@
         });
     }
 
+    private sealed class AssignmentWorkedRaw
+    {
+        public Guid AssignmentId { get; set; }
+        public DateOnly WorkDate { get; set; }
+
+        public bool ProofExtractWorked { get; set; }
+        public bool FinalExtractWorked { get; set; }
+        public bool MemoExtractWorked { get; set; }
+        public bool FinalPOWorked { get; set; }
+        public bool ShippingWorked { get; set; }
+        public bool DirxionWorked { get; set; }
+    }
+
+    private sealed class AssignmentWorkedProgress
+    {
+        public bool ProofExtractWorked { get; set; }
+        public bool FinalExtractWorked { get; set; }
+        public bool MemoExtractWorked { get; set; }
+        public bool FinalPOWorked { get; set; }
+        public bool ShippingWorked { get; set; }
+        public bool DirxionWorked { get; set; }
+
+        public DateOnly? ProofWorkedDate { get; set; }
+        public DateOnly? FinalWorkedDate { get; set; }
+        public DateOnly? MemoWorkedDate { get; set; }
+        public DateOnly? FinalPOWorkedDate { get; set; }
+        public DateOnly? ShippingWorkedDate { get; set; }
+        public DateOnly? DirxionWorkedDate { get; set; }
+    }
+
+    private sealed class AssignmentStageStatus
+    {
+        public string LastStageWorked { get; set; } = "Not Started";
+        public DateOnly? LastStageWorkedDate { get; set; }
+        public string NextStage { get; set; } = "Proof";
+    }
+
     private sealed class AsignacionViewModel
     {
         public Guid Id { get; set; }
@@ -3303,6 +3837,18 @@
         public DateOnly PubDateValue { get; set; }
 
         public string BindPlantCode { get; set; } = string.Empty;
+
+        public bool ProofExtractWorked { get; set; }
+        public bool FinalExtractWorked { get; set; }
+        public bool MemoExtractWorked { get; set; }
+        public bool FinalPOWorked { get; set; }
+        public bool ShippingWorked { get; set; }
+        public bool DirxionWorked { get; set; }
+        public bool MemoApplicable { get; set; }
+
+        public string LastStageWorked { get; set; } = "Not Started";
+        public DateOnly? LastStageWorkedDate { get; set; }
+        public string NextStage { get; set; } = "Proof";
     }
 
     private sealed class ActualizacionLibrosResultado
