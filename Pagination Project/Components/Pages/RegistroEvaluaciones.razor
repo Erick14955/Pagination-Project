@@ -7,12 +7,16 @@
 @using Microsoft.JSInterop
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserDataScopeService UserDataScopeService
 
 <PageTitle>Evaluations</PageTitle>
 
@@ -91,6 +95,15 @@
                     <strong>@AsignacionSeleccionada.EmpleadoNombre</strong>
                     <small>Assigned employee</small>
                 </div>
+
+                @if (Scope.ViewAllEmployeeTypes)
+                {
+                    <div class="assignment-card-fixed">
+                        <span>Department</span>
+                        <strong>@AsignacionSeleccionada.EmployeeTypeCode</strong>
+                        <small>Employee type</small>
+                    </div>
+                }
 
                 <div class="assignment-card-fixed">
                     <span>Book Information</span>
@@ -525,6 +538,10 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
                             <th>KGEN</th>
                             <th>Motif YP</th>
                             <th>Motif WP</th>
@@ -544,6 +561,11 @@
                                         <strong>@item.EmpleadoNombre</strong>
                                     </div>
                                 </td>
+
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                }
 
                                 <td>
                                     <span class="kgen-pill">@item.KGENCode</span>
@@ -571,6 +593,7 @@
 </div>
 
 @code {
+    private UserDataScope Scope { get; set; } = new();
     private Evaluaciones Evaluacion { get; set; } = new();
 
     private List<AsignacionComboDto> Asignaciones { get; set; } = new();
@@ -603,6 +626,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Scope = await UserDataScopeService.GetScopeAsync(authState.User);
         await CargarDatosAsync();
         LimpiarFormulario();
     }
@@ -656,8 +681,10 @@
 
             var asignacion = await db.Asignaciones
                 .AsNoTracking()
+                .ApplyScope(Scope)
                 .Include(a => a.Empleado)
                 .Include(a => a.Libro)
+                    .ThenInclude(l => l!.EmployeeType)
                 .Where(a => !a.Finalizado &&
                             a.Libro != null &&
                             !a.Libro.Finalizado &&
@@ -674,7 +701,10 @@
                     EmpleadoNombre = a.Empleado != null ? a.Empleado.Nombre : "-",
                     BookName = a.Libro != null ? a.Libro.BookName : "-",
                     KGENCode = a.Libro != null ? a.Libro.KGENCode : "-",
-                    LSACode = a.Libro != null ? a.Libro.LSACode : "-"
+                    LSACode = a.Libro != null ? a.Libro.LSACode : "-",
+                    EmployeeTypeCode = a.Libro != null && a.Libro.EmployeeType != null
+                        ? a.Libro.EmployeeType.Code
+                        : string.Empty
                 })
                 .FirstOrDefaultAsync();
 
@@ -712,7 +742,8 @@
                 EmpleadoNombre = empleadoNombre,
                 BookName = asignacion.BookName ?? "-",
                 KGENCode = asignacion.KGENCode ?? "-",
-                LSACode = asignacion.LSACode ?? "-"
+                LSACode = asignacion.LSACode ?? "-",
+                EmployeeTypeCode = asignacion.EmployeeTypeCode ?? string.Empty
             };
 
             ModoEdicion = false;
@@ -747,8 +778,10 @@
 
         Asignaciones = await db.Asignaciones
             .AsNoTracking()
+            .ApplyScope(Scope)
             .Include(a => a.Empleado)
             .Include(a => a.Libro)
+                .ThenInclude(l => l!.EmployeeType)
             .Where(a => !a.Finalizado &&
                         a.Libro != null &&
                         !a.Libro.Finalizado &&
@@ -768,7 +801,10 @@
                     " | KGEN: " +
                     (a.Libro != null ? a.Libro.KGENCode : "-") +
                     " | LSA: " +
-                    (a.Libro != null ? a.Libro.LSACode : "-")
+                    (a.Libro != null ? a.Libro.LSACode : "-") +
+                    (Scope.ViewAllEmployeeTypes && a.Libro != null && a.Libro.EmployeeType != null
+                        ? " | " + a.Libro.EmployeeType.Code
+                        : string.Empty)
             })
             .ToListAsync();
     }
@@ -777,10 +813,12 @@
     {
         var evaluacionesDb = await db.Evaluaciones
             .AsNoTracking()
+            .ApplyScope(Scope)
             .Include(e => e.Asignacion)
                 .ThenInclude(a => a.Empleado)
             .Include(e => e.Asignacion)
                 .ThenInclude(a => a.Libro)
+                    .ThenInclude(l => l!.EmployeeType)
             .OrderBy(e => e.Asignacion.Empleado!.Nombre)
             .ThenBy(e => e.Asignacion.Libro!.KGENCode)
             .ToListAsync();
@@ -815,6 +853,7 @@
                 EmpleadoNombre = empleadoNombre,
 
                 KGENCode = e.Asignacion?.Libro?.KGENCode ?? "-",
+                EmployeeTypeCode = e.Asignacion?.Libro?.EmployeeType?.Code ?? string.Empty,
 
                 MotifYp = e.MotifYp,
                 MotifWp = e.MotifWp,
@@ -851,7 +890,8 @@
 
                 query = query.Where(x =>
                     (x.EmpleadoNombre ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
-                    (x.KGENCode ?? string.Empty).ToUpperInvariant().Contains(filtro));
+                    (x.KGENCode ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
+                    (x.EmployeeTypeCode ?? string.Empty).ToUpperInvariant().Contains(filtro));
             }
 
             return query;
@@ -1073,6 +1113,7 @@
         var hoy = DateOnly.FromDateTime(DateTime.Today);
 
         var librosParaFinalizar = await db.Libros
+            .ApplyScope(Scope)
             .Include(x => x.Asignaciones)
                 .ThenInclude(a => a.Evaluaciones)
             .Where(x => !x.Finalizado &&
@@ -1269,6 +1310,7 @@ CalcularPorcentajeVistaDecimal(TotalMotifYpVista, 8);
 
         public string EmpleadoNombre { get; set; } = string.Empty;
         public string KGENCode { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } = string.Empty;
 
         public decimal? MotifYp { get; set; }
         public decimal? MotifWp { get; set; }
@@ -1286,5 +1328,6 @@ CalcularPorcentajeVistaDecimal(TotalMotifYpVista, 8);
         public string BookName { get; set; } = string.Empty;
         public string KGENCode { get; set; } = string.Empty;
         public string LSACode { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } = string.Empty;
     }
 }

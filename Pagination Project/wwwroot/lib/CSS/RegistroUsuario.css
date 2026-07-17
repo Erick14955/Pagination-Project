@@ -2178,3 +2178,162 @@ body > .thryv-modal-overlay,
             padding: 18px 28px 24px !important;
         }
 }
+
+html[data-theme="dark glass"] {
+    --modal-bg-card: rgba(15, 23, 42, 0.92);
+    --modal-bg-soft: rgba(30, 41, 59, 0.86);
+    --modal-border: rgba(255, 255, 255, 0.13);
+    --modal-text: #f8fafc;
+    --modal-text-muted: #cbd5e1;
+    --modal-danger: #fb7185;
+    --modal-danger-soft: rgba(244, 63, 94, 0.14);
+}
+
+    html[data-theme="dark glass"] body > .thryv-modal-overlay,
+    html[data-theme="dark glass"] .thryv-modal-overlay {
+        background: rgba(2, 6, 23, 0.82) !important;
+        backdrop-filter: blur(12px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(12px) saturate(145%) !important;
+    }
+
+        html[data-theme="dark glass"]
+        body > .thryv-modal-overlay
+        .thryv-modal-card,
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-modal-card {
+            background: var(--modal-bg-card) !important;
+            border: 1px solid var(--modal-border) !important;
+            color: var(--modal-text) !important;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.48), inset 0 1px 1px rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(26px) saturate(170%) !important;
+            -webkit-backdrop-filter: blur(26px) saturate(170%) !important;
+        }
+
+        html[data-theme="dark glass"]
+        body > .thryv-modal-overlay
+        .thryv-modal-header,
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-modal-header {
+            background: rgba(15, 23, 42, 0.76) !important;
+            border-bottom: 1px solid var(--modal-border) !important;
+        }
+
+            html[data-theme="dark glass"]
+            body > .thryv-modal-overlay
+            .thryv-modal-header h3,
+            html[data-theme="dark glass"]
+            .thryv-modal-overlay
+            .thryv-modal-header h3 {
+                color: var(--modal-text) !important;
+            }
+
+        html[data-theme="dark glass"]
+        body > .thryv-modal-overlay
+        .thryv-modal-body,
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-modal-body {
+            background: transparent !important;
+            color: var(--modal-text) !important;
+        }
+
+            html[data-theme="dark glass"]
+            .thryv-modal-overlay
+            .thryv-modal-body p {
+                color: var(--modal-text) !important;
+            }
+
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-modal-userbox {
+            background: var(--modal-bg-soft) !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            color: var(--modal-text) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 20px rgba(0, 0, 0, 0.18) !important;
+        }
+
+            html[data-theme="dark glass"]
+            .thryv-modal-overlay
+            .thryv-modal-userbox strong,
+            html[data-theme="dark glass"]
+            .thryv-modal-overlay
+            .thryv-modal-userbox span {
+                color: var(--modal-text) !important;
+            }
+
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-modal-warning {
+            color: var(--modal-danger) !important;
+        }
+
+        html[data-theme="dark glass"]
+        body > .thryv-modal-overlay
+        .thryv-modal-actions,
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-modal-actions {
+            background: rgba(15, 23, 42, 0.76) !important;
+            border-top: 1px solid var(--modal-border) !important;
+        }
+
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-secondary-btn {
+            background: rgba(148, 163, 184, 0.15) !important;
+            border: 1px solid rgba(148, 163, 184, 0.22) !important;
+            color: #f8fafc !important;
+            box-shadow: none !important;
+        }
+
+            html[data-theme="dark glass"]
+            .thryv-modal-overlay
+            .thryv-secondary-btn:hover {
+                background: rgba(148, 163, 184, 0.24) !important;
+                border-color: rgba(148, 163, 184, 0.34) !important;
+            }
+
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-danger-btn {
+            background: var(--modal-danger-soft) !important;
+            border: 1px solid rgba(251, 113, 133, 0.22) !important;
+            color: var(--modal-danger) !important;
+            box-shadow: none !important;
+        }
+
+            html[data-theme="dark glass"]
+            .thryv-modal-overlay
+            .thryv-danger-btn:hover {
+                background: rgba(244, 63, 94, 0.22) !important;
+                border-color: rgba(251, 113, 133, 0.36) !important;
+            }
+
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-primary-btn {
+            background: linear-gradient( 135deg, #ff5a1f, #ea580c ) !important;
+            color: #ffffff !important;
+            box-shadow: 0 10px 24px rgba(255, 90, 31, 0.22) !important;
+        }
+
+        html[data-theme="dark glass"]
+        .thryv-modal-overlay
+        .thryv-unlock-modal {
+            background: var(--modal-bg-card) !important;
+        }
+
+    html[data-theme="dark glass"]
+    .thryv-unlock-modal
+    .thryv-table-wrap {
+        background: rgba(15, 23, 42, 0.54) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html[data-theme="dark glass"]
+    .thryv-modal-overlay ::selection {
+        background: rgba(255, 90, 31, 0.38);
+        color: #ffffff;
+    }

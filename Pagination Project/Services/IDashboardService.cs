@@ -4,7 +4,10 @@ namespace Pagination_Project.Services
 {
     public interface IDashboardService
     {
-        Task<DashboardSummaryDto> GetDashboardSummaryAsync();
-        Task<List<AssignedBookDashboardDto>> GetAssignedBooksForDateAsync(DateOnly targetDate);
+        Task<DashboardSummaryDto> GetDashboardSummaryAsync(UserDataScope scope);
+
+        Task<List<AssignedBookDashboardDto>> GetAssignedBooksForDateAsync(
+            DateOnly targetDate,
+            UserDataScope scope);
     }
 }

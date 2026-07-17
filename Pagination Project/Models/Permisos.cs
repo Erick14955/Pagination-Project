@@ -32,6 +32,7 @@ namespace Pagination_Project.Models
         public bool EditLateWork { get; set; }
         public bool DeleteLateWork { get; set; }
         public bool CompleteLateWork { get; set; }
+        public bool ViewAllEmployeeTypes { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();

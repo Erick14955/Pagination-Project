@@ -16,6 +16,7 @@ namespace Pagination_Project.Data
         public DbSet<Libros> Libros => Set<Libros>();
         public DbSet<Asignaciones> Asignaciones => Set<Asignaciones>();
         public DbSet<Empleados> Empleados => Set<Empleados>();
+        public DbSet<EmployeeType> EmployeeTypes => Set<EmployeeType>();
         public DbSet<Evaluaciones> Evaluaciones => Set<Evaluaciones>();
         public DbSet<Bind_Plant> Bind_Plants => Set<Bind_Plant>();
         public DbSet<Database> Databases => Set<Database>();
@@ -345,6 +346,35 @@ namespace Pagination_Project.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<EmployeeType>(entity =>
+            {
+                entity.ToTable("Employee_Types");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Code)
+                    .HasColumnName("Code")
+                    .HasMaxLength(20)
+                    .IsRequired();
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("Name")
+                    .HasMaxLength(60)
+                    .IsRequired();
+
+                entity.Property(e => e.Active)
+                    .HasColumnName("Active")
+                    .HasDefaultValue(true)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.Code)
+                    .IsUnique()
+                    .HasDatabaseName("UQ_Employee_Types_Code");
+            });
+
             modelBuilder.Entity<Empleados>(entity =>
             {
                 entity.ToTable("Employees");
@@ -354,6 +384,17 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.Email).HasColumnName("Email");
                 entity.Property(e => e.IdEmpleado).HasColumnName("Employee_ID").IsRequired();
                 entity.Property(e => e.Activo).HasColumnName("Active").IsRequired();
+                entity.Property(e => e.EmployeeTypeId)
+                    .HasColumnName("Employee_Type_Id")
+                    .IsRequired();
+
+                entity.HasOne(e => e.EmployeeType)
+                    .WithMany(t => t.Employees)
+                    .HasForeignKey(e => e.EmployeeTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.EmployeeTypeId)
+                    .HasDatabaseName("IX_Employees_Employee_Type_Id");
             });
 
             modelBuilder.Entity<Bind_Plant>(entity =>
@@ -456,6 +497,18 @@ namespace Pagination_Project.Data
                     .HasColumnName("Bind_Plant")
                     .HasColumnType("uuid");
 
+                entity.Property(e => e.EmployeeTypeId)
+                    .HasColumnName("Employee_Type_Id")
+                    .IsRequired();
+
+                entity.HasOne(e => e.EmployeeType)
+                    .WithMany(t => t.Books)
+                    .HasForeignKey(e => e.EmployeeTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.EmployeeTypeId)
+                    .HasDatabaseName("IX_Books_Employee_Type_Id");
+
                 entity.Property(e => e.ProofExtract)
                     .HasColumnName("Proof_Extract");
 
@@ -512,6 +565,7 @@ namespace Pagination_Project.Data
                 entity.Property(e => e.EditLateWork).HasColumnName("Edit_Late_Work");
                 entity.Property(e => e.DeleteLateWork).HasColumnName("Delete_Late_Work");
                 entity.Property(e => e.CompleteLateWork).HasColumnName("Complete_Late_Work");
+                entity.Property(e => e.ViewAllEmployeeTypes).HasColumnName("View_All_Employee_Types");
                 entity.Property(e => e.UnlockUsers).HasColumnName("UnlockUsers");
 
                 entity.Property(e => e.Name)

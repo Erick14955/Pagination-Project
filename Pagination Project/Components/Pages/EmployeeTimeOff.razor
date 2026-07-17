@@ -6,15 +6,19 @@
 @using System.Text
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.JSInterop
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserDataScopeService UserDataScopeService
 @inject IJSRuntime JS
 
 <PageTitle>Employee Time Off</PageTitle>
@@ -82,9 +86,7 @@
 
                         @foreach (var employee in Employees)
                         {
-                            <option value="@employee.Id">
-                                @employee.Nombre | ID: @employee.IdEmpleado
-                            </option>
+                            <option value="@employee.Id">@GetEmployeeOptionText(employee)</option>
                         }
                     </select>
                 </div>
@@ -215,6 +217,10 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
                             <th>Type</th>
                             <th>Date Range</th>
                             <th>Days</th>
@@ -235,6 +241,11 @@
                                         <span>ID: @item.EmployeeCode</span>
                                     </div>
                                 </td>
+
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <td><span class="pill type">@item.EmployeeTypeCode</span></td>
+                                }
 
                                 <td>
                                     <span class="pill type">@item.LeaveType</span>
@@ -333,6 +344,7 @@
     private List<Empleados> Employees { get; set; } = new();
     private List<Bind_Plant> BindPlants { get; set; } = new();
     private List<TimeOffViewModel> TimeOffList { get; set; } = new();
+    private UserDataScope Scope { get; set; } = new();
 
     private TimeOffFormModel FormModel { get; set; } = new();
 
@@ -373,6 +385,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Scope = await UserDataScopeService.GetScopeAsync(authState.User);
+
         await LoadCatalogsAsync();
         await LoadDataAsync();
     }
@@ -386,6 +401,8 @@
 
         Employees = await db.Empleados
             .AsNoTracking()
+            .Include(x => x.EmployeeType)
+            .ApplyScope(Scope)
             .Where(x =>
                 x.Activo &&
                 empleadosPermitidosIds.Contains(x.Id))
@@ -408,9 +425,10 @@
 
             await UpdateExpiredTemporaryAssignmentsAsync(db);
 
-            var records = await db.EmployeeLeaveCoverages
+            var records = await ScopedCoverageQuery(db)
                 .AsNoTracking()
                 .Include(x => x.Employee)
+                    .ThenInclude(x => x!.EmployeeType)
                 .Include(x => x.Details)
                 .OrderByDescending(x => x.CreatedAt)
                 .ToListAsync();
@@ -432,6 +450,7 @@
                 EmployeeId = x.EmployeeId,
                 EmployeeName = x.Employee?.Nombre ?? "-",
                 EmployeeCode = x.Employee?.IdEmpleado ?? 0,
+                EmployeeTypeCode = x.Employee?.EmployeeType?.Code ?? "",
                 LeaveType = x.LeaveType,
                 StartDate = x.StartDate,
                 EndDate = x.EndDate,
@@ -556,6 +575,14 @@
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
+            var employee = await db.Empleados
+                .AsNoTracking()
+                .ApplyScope(Scope)
+                .FirstOrDefaultAsync(x => x.Id == employeeId && x.Activo);
+
+            if (employee is null)
+                throw new InvalidOperationException("The selected employee is outside your department scope.");
+
             EmployeeLeaveCoverage record;
 
             if (EditingId is null)
@@ -578,7 +605,7 @@
             }
             else
             {
-                record = await db.EmployeeLeaveCoverages
+                record = await ScopedCoverageQuery(db)
                     .Include(x => x.Details)
                     .FirstOrDefaultAsync(x => x.Id == EditingId.Value)
                     ?? throw new InvalidOperationException("The selected record was not found.");
@@ -643,6 +670,7 @@
         var assignments = await db.Asignaciones
             .Include(x => x.Empleado)
             .Include(x => x.Libro)
+            .ApplyScope(Scope)
             .Where(x =>
                 !x.Finalizado &&
                 x.IdEmpleado == record.EmployeeId &&
@@ -674,6 +702,7 @@
                 record.EmployeeId,
                 firstStage.StageDate,
                 firstStage.Code,
+                assignment.Libro.EmployeeTypeId,
                 localWorkload);
 
             if (temporaryEmployeeId is null)
@@ -823,6 +852,7 @@
         Guid originalEmployeeId,
         DateOnly stageDate,
         string stageCode,
+        short employeeTypeId,
         Dictionary<string, int> localWorkload)
     {
         var absentEmployees = await db.EmployeeLeaveCoverages
@@ -839,8 +869,10 @@
 
         var candidates = await db.Empleados
             .AsNoTracking()
+            .ApplyScope(Scope)
             .Where(x =>
                 x.Activo &&
+                x.EmployeeTypeId == employeeTypeId &&
                 empleadosPermitidosIds.Contains(x.Id) &&
                 x.Id != originalEmployeeId &&
                 !absentEmployees.Contains(x.Id))
@@ -855,9 +887,11 @@
         var activeAssignments = await db.Asignaciones
             .AsNoTracking()
             .Include(x => x.Libro)
+            .ApplyScope(Scope)
             .Where(x =>
                 !x.Finalizado &&
                 x.Libro != null &&
+                x.Libro.EmployeeTypeId == employeeTypeId &&
                 !x.Libro.Finalizado)
             .ToListAsync();
 
@@ -990,6 +1024,27 @@
         return $"{employeeId:N}|{stageDate:yyyyMMdd}|{stageCode}";
     }
 
+
+    private string GetEmployeeOptionText(Empleados employee)
+    {
+        var text = $"{employee.Nombre} | ID: {employee.IdEmpleado}";
+
+        if (Scope.ViewAllEmployeeTypes)
+            text += $" | {employee.EmployeeType?.Code ?? "-"}";
+
+        return text;
+    }
+
+    private IQueryable<EmployeeLeaveCoverage> ScopedCoverageQuery(AppDbContext db)
+    {
+        var query = db.EmployeeLeaveCoverages
+            .Where(x => x.Employee != null);
+
+        return Scope.ViewAllEmployeeTypes
+            ? query
+            : query.Where(x => x.Employee!.EmployeeTypeId == Scope.EmployeeTypeId);
+    }
+
     private async Task CloseTemporaryAssignmentsFromRecordAsync(AppDbContext db, Guid recordId)
     {
         var temporaryIds = await db.EmployeeLeaveCoverageDetails
@@ -1024,7 +1079,7 @@
         {
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            var record = await db.EmployeeLeaveCoverages
+            var record = await ScopedCoverageQuery(db)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (record is null)
@@ -1064,7 +1119,7 @@
         {
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            var record = await db.EmployeeLeaveCoverages
+            var record = await ScopedCoverageQuery(db)
                 .Include(x => x.Details)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -1130,7 +1185,7 @@
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
 
-        var expiredRecords = await db.EmployeeLeaveCoverages
+        var expiredRecords = await ScopedCoverageQuery(db)
             .Where(x => x.Active && x.EndDate < today)
             .ToListAsync();
 
@@ -1218,6 +1273,7 @@
         public Guid EmployeeId { get; set; }
 
         public string EmployeeName { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public int EmployeeCode { get; set; }
 
         public string LeaveType { get; set; } = string.Empty;

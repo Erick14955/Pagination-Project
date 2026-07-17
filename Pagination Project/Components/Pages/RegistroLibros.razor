@@ -10,6 +10,7 @@
 @using ClosedXML.Excel
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -19,6 +20,7 @@
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserDataScopeService UserDataScopeService
 
 <PageTitle>Books - BibliotecaApp</PageTitle>
 
@@ -161,6 +163,15 @@
                 </div>
 
                 <div class="header-actions">
+                    @if (PuedeDescargarPlantilla)
+                    {
+                        <button type="button"
+                                class="btn-template-xlsx"
+                                disabled="@DescargandoPlantillaXlsx"
+                                @onclick="DownloadBooksTemplateAsync">
+                            @(DescargandoPlantillaXlsx ? "Downloading..." : "📄 Download Template")
+                        </button>
+                    }
                     @if (CreateBook || EditBook)
                     {
                         <InputFile @key="XlsxInputKey"
@@ -196,6 +207,19 @@
             <form @onsubmit="GuardarLibroAsync" @onsubmit:preventDefault>
                 <div class="form-grid">
 
+                    <div class="form-group">
+                        <label>Employee Type</label>
+                        <select class="form-control"
+                                @bind="Formulario.EmployeeTypeId"
+                                disabled="@(!Scope.ViewAllEmployeeTypes)">
+                            <option value="0">Select employee type</option>
+                            @foreach (var item in EmployeeTypes)
+                            {
+                                <option value="@item.Id">@item.Code</option>
+                            }
+                        </select>
+                    </div>
+
                     <div class="form-group large">
                         <label>Book Name</label>
                         <input class="form-control"
@@ -208,7 +232,8 @@
                         <label>KGEN Code</label>
                         <input class="form-control"
                                @bind="Formulario.KGENCode"
-                               placeholder="KGEN Code" />
+                               placeholder="KGEN Code"
+                               required />
                     </div>
 
                     <div class="form-group">
@@ -478,6 +503,11 @@
                                 </button>
                             </th>
 
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
+
                             <th>
                                 <button type="button" class="sortable-header" @onclick='() => SortBy("KGEN")'>
                                     KGEN <span>@GetSortIcon("KGEN")</span>
@@ -577,6 +607,11 @@
                                     </div>
                                 </td>
 
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <td><span class="pill">@GetEmployeeTypeCode(libro.EmployeeTypeId)</span></td>
+                                }
+
                                 <td>@libro.KGENCode</td>
                                 <td>@libro.LSACode</td>
 
@@ -669,6 +704,7 @@
     private Dictionary<Guid, BookWorkedStages> EtapasTrabajadasPorLibro { get; set; } = new();
 
     private ClaimsPrincipal? _user;
+    private UserDataScope Scope { get; set; } = new();
 
     private bool CreateBook { get; set; }
     private bool EditBook { get; set; }
@@ -678,7 +714,9 @@
     private bool PuedeCrearOEditarLibro => LibroSeleccionadoId is null ? CreateBook : EditBook;
     private bool PuedeVerFormularioLibro => CreateBook || EditBook;
     private bool SoloVistaLibros => BooksView && !CreateBook && !EditBook && !DeleteBook;
+    private bool PuedeDescargarPlantilla => Scope.ViewAllEmployeeTypes;
 
+    private List<EmployeeType> EmployeeTypes { get; set; } = new();
     private List<Bind_Plant> BindPlants { get; set; } = new();
     private List<Pagination_Project.Models.Database> Databases { get; set; } = new();
     private List<Legacy_Code> LegacyCodes { get; set; } = new();
@@ -686,7 +724,7 @@
     private List<State> States { get; set; } = new();
     private List<Trim_Size> TrimSizes { get; set; } = new();
 
-    private Libros Formulario { get; set; } = CrearNuevoLibro();
+    private Libros Formulario { get; set; } = new();
 
     private Guid? LibroSeleccionadoId { get; set; }
 
@@ -694,6 +732,7 @@
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
     private bool ExportandoXlsx { get; set; } = false;
+    private bool DescargandoPlantillaXlsx { get; set; } = false;
 
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
@@ -732,6 +771,7 @@
                     (l.KGENCode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
                     (l.LSACode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
                     (l.ProductIssue ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
+                    GetEmployeeTypeCode(l.EmployeeTypeId).ToLowerInvariant().Contains(filtro) ||
                     GetStateName(l.StateId).ToLowerInvariant().Contains(filtro) ||
                     GetDatabaseName(l.DatabaseId).ToLowerInvariant().Contains(filtro) ||
                     GetLegacyCodeName(l.LegacyCodeId).ToLowerInvariant().Contains(filtro) ||
@@ -818,6 +858,517 @@
         ResultadoActualizacionModal = null;
     }
 
+
+    private async Task DownloadBooksTemplateAsync()
+    {
+        if (!PuedeDescargarPlantilla)
+        {
+            MostrarMensaje(
+                "Only supervisors and administrators can download the books template.",
+                "error");
+            return;
+        }
+
+        try
+        {
+            DescargandoPlantillaXlsx = true;
+            LimpiarMensaje();
+
+            if (!EmployeeTypes.Any() ||
+                !BindPlants.Any() ||
+                !Databases.Any() ||
+                !LegacyCodes.Any() ||
+                !PrintFeet.Any() ||
+                !States.Any() ||
+                !TrimSizes.Any())
+            {
+                await CargarCatalogosAsync();
+            }
+
+            using var workbook = new XLWorkbook();
+
+            // =========================================================
+            // FIRST WORKSHEET: THIS IS THE SHEET THE IMPORTER WILL READ.
+            // DO NOT PLACE ANY TITLE OR EXTRA ROW ABOVE THE HEADER.
+            // =========================================================
+            var worksheet = workbook.Worksheets.Add("Books Upload");
+
+            var headers = new[]
+            {
+                "employee_type",
+                "Product Name",
+                "KGen Product Code",
+                "LSA Code",
+                "Product Issue",
+                "Foot Print",
+                "Legacy Co",
+                "State",
+                "Graphics Database",
+                "Trim Size",
+                "Bind Plant",
+                "First Due Printer",
+                "Proof Extract",
+                "Extract - Final",
+                "Memo Extract",
+                "Dirxion",
+                "Pub Date",
+                "SRL Suppression Flag",
+                "NWP"
+            };
+
+            const int headerRow = 1;
+            const int firstDataRow = 2;
+            const int lastTemplateRow = 500;
+            var lastColumn = headers.Length;
+
+            for (var column = 1; column <= lastColumn; column++)
+            {
+                worksheet.Cell(headerRow, column).Value = headers[column - 1];
+            }
+
+            var headerRange = worksheet.Range(
+                headerRow,
+                1,
+                headerRow,
+                lastColumn);
+
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            headerRange.Style.Alignment.WrapText = true;
+            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Required columns: employee_type, Product Name and KGen Product Code.
+            foreach (var requiredColumn in new[] { 1, 2, 3 })
+            {
+                worksheet.Cell(headerRow, requiredColumn)
+                    .Style.Fill.BackgroundColor = XLColor.FromHtml("#EA580C");
+            }
+
+            worksheet.Row(headerRow).Height = 32;
+            worksheet.SheetView.FreezeRows(1);
+            headerRange.SetAutoFilter();
+
+            // Date columns accepted by the importer.
+            worksheet.Range(
+                    firstDataRow,
+                    12,
+                    lastTemplateRow,
+                    17)
+                .Style.DateFormat.Format = "MM/dd/yyyy";
+
+            worksheet.Range(
+                    firstDataRow,
+                    1,
+                    lastTemplateRow,
+                    lastColumn)
+                .Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            // Useful widths for data entry.
+            var widths = new double[]
+            {
+                18, // employee_type
+                34, // Product Name
+                22, // KGen Product Code
+                18, // LSA Code
+                20, // Product Issue
+                20, // Foot Print
+                18, // Legacy Co
+                18, // State
+                22, // Graphics Database
+                18, // Trim Size
+                18, // Bind Plant
+                19, // First Due Printer
+                18, // Proof Extract
+                18, // Extract - Final
+                18, // Memo Extract
+                18, // Dirxion
+                18, // Pub Date
+                22, // SRL Suppression Flag
+                12  // NWP
+            };
+
+            for (var column = 1; column <= widths.Length; column++)
+            {
+                worksheet.Column(column).Width = widths[column - 1];
+            }
+
+            // =========================================================
+            // INSTRUCTIONS WORKSHEET
+            // =========================================================
+            var instructionsSheet = workbook.Worksheets.Add("Instructions");
+
+            instructionsSheet.Cell(1, 1).Value = "Books Upload Template";
+            instructionsSheet.Range(1, 1, 1, 4).Merge();
+
+            instructionsSheet.Cell(2, 1).Value =
+                "Complete the 'Books Upload' worksheet. Keep the column names exactly as provided and upload the file as .xlsx.";
+
+            instructionsSheet.Range(2, 1, 2, 4).Merge();
+
+            instructionsSheet.Cell(3, 1).Value =
+                "Important: empty date cells are imported using the current date. Leave a date blank only when today's date is intended.";
+
+            instructionsSheet.Range(3, 1, 3, 4).Merge();
+
+            instructionsSheet.Cell(5, 1).Value = "Column";
+            instructionsSheet.Cell(5, 2).Value = "Required";
+            instructionsSheet.Cell(5, 3).Value = "Accepted value / format";
+            instructionsSheet.Cell(5, 4).Value = "Notes";
+
+            var columnInstructions = new[]
+            {
+                new
+                {
+                    Column = "employee_type",
+                    Required = "Yes",
+                    Format = "DR or ECLERX",
+                    Notes = "Determines the department that owns the book."
+                },
+                new
+                {
+                    Column = "Product Name",
+                    Required = "Yes",
+                    Format = "Text",
+                    Notes = "Book name."
+                },
+                new
+                {
+                    Column = "KGen Product Code",
+                    Required = "Yes",
+                    Format = "Text",
+                    Notes = "Global identifier. It must not be duplicated."
+                },
+                new
+                {
+                    Column = "LSA Code",
+                    Required = "No",
+                    Format = "Text",
+                    Notes = "Optional LSA identifier."
+                },
+                new
+                {
+                    Column = "Product Issue",
+                    Required = "No",
+                    Format = "Text",
+                    Notes = "Product issue associated with the book."
+                },
+                new
+                {
+                    Column = "Foot Print",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Must match an existing Foot Print name."
+                },
+                new
+                {
+                    Column = "Legacy Co",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Must match an existing Legacy Code name."
+                },
+                new
+                {
+                    Column = "State",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Must match an existing state."
+                },
+                new
+                {
+                    Column = "Graphics Database",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Must match an existing database."
+                },
+                new
+                {
+                    Column = "Trim Size",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Must match an existing trim size."
+                },
+                new
+                {
+                    Column = "Bind Plant",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Must match an existing bind plant."
+                },
+                new
+                {
+                    Column = "First Due Printer",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used as Shipping Date. Final PO is calculated as the previous business day."
+                },
+                new
+                {
+                    Column = "Proof Extract",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Proof extract date."
+                },
+                new
+                {
+                    Column = "Extract - Final",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Final extract date."
+                },
+                new
+                {
+                    Column = "Memo Extract",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Memo extract date."
+                },
+                new
+                {
+                    Column = "Dirxion",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Dirxion date. Past dates mark the book as completed."
+                },
+                new
+                {
+                    Column = "Pub Date",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Publication date."
+                },
+                new
+                {
+                    Column = "SRL Suppression Flag",
+                    Required = "No",
+                    Format = "YES / NO",
+                    Notes = "YES, Y, TRUE, 1 or X are treated as true."
+                },
+                new
+                {
+                    Column = "NWP",
+                    Required = "No",
+                    Format = "YES / NO",
+                    Notes = "YES, Y, TRUE, 1 or X are treated as true."
+                }
+            };
+
+            var instructionRow = 6;
+
+            foreach (var item in columnInstructions)
+            {
+                instructionsSheet.Cell(instructionRow, 1).Value = item.Column;
+                instructionsSheet.Cell(instructionRow, 2).Value = item.Required;
+                instructionsSheet.Cell(instructionRow, 3).Value = item.Format;
+                instructionsSheet.Cell(instructionRow, 4).Value = item.Notes;
+
+                instructionRow++;
+            }
+
+            instructionsSheet.Range(1, 1, 1, 4)
+                .Style.Font.Bold = true;
+
+            instructionsSheet.Range(1, 1, 1, 4)
+                .Style.Font.FontSize = 16;
+
+            instructionsSheet.Range(1, 1, 1, 4)
+                .Style.Fill.BackgroundColor = XLColor.FromHtml("#0F172A");
+
+            instructionsSheet.Range(1, 1, 1, 4)
+                .Style.Font.FontColor = XLColor.White;
+
+            instructionsSheet.Range(1, 1, 1, 4)
+                .Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            instructionsSheet.Range(2, 1, 3, 4)
+                .Style.Alignment.WrapText = true;
+
+            instructionsSheet.Range(5, 1, 5, 4)
+                .Style.Font.Bold = true;
+
+            instructionsSheet.Range(5, 1, 5, 4)
+                .Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+
+            instructionsSheet.Range(5, 1, 5, 4)
+                .Style.Font.FontColor = XLColor.White;
+
+            var instructionsTableRange = instructionsSheet.Range(
+                5,
+                1,
+                instructionRow - 1,
+                4);
+
+            instructionsTableRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            instructionsTableRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            instructionsTableRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+            instructionsTableRange.Style.Alignment.WrapText = true;
+
+            for (var row = 6; row < instructionRow; row++)
+            {
+                if (string.Equals(
+                    instructionsSheet.Cell(row, 2).GetString(),
+                    "Yes",
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    instructionsSheet.Cell(row, 2)
+                        .Style.Fill.BackgroundColor = XLColor.FromHtml("#FFEDD5");
+
+                    instructionsSheet.Cell(row, 2)
+                        .Style.Font.FontColor = XLColor.FromHtml("#C2410C");
+
+                    instructionsSheet.Cell(row, 2)
+                        .Style.Font.Bold = true;
+                }
+            }
+
+            instructionsSheet.Column(1).Width = 24;
+            instructionsSheet.Column(2).Width = 12;
+            instructionsSheet.Column(3).Width = 34;
+            instructionsSheet.Column(4).Width = 72;
+            instructionsSheet.Row(2).Height = 36;
+            instructionsSheet.Row(3).Height = 42;
+            instructionsSheet.SheetView.FreezeRows(5);
+
+            // =========================================================
+            // ALLOWED VALUES WORKSHEET
+            // =========================================================
+            var allowedValuesSheet = workbook.Worksheets.Add("Allowed Values");
+
+            var allowedLists = new List<(string Header, IEnumerable<string> Values)>
+            {
+                (
+                    "employee_type",
+                    EmployeeTypes
+                        .Where(x => x.Active)
+                        .Select(x => x.Code)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Foot Print",
+                    PrintFeet
+                        .Select(x => x.Print_Foot_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Legacy Co",
+                    LegacyCodes
+                        .Select(x => x.Legacy_Code_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "State",
+                    States
+                        .Select(x => x.State_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Graphics Database",
+                    Databases
+                        .Select(x => x.Database_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Trim Size",
+                    TrimSizes
+                        .Select(x => x.Trim_Size_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Bind Plant",
+                    BindPlants
+                        .Select(x => x.Bind_Plant_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "YES / NO",
+                    new[] { "YES", "NO" }
+                )
+            };
+
+            for (var listColumn = 1; listColumn <= allowedLists.Count; listColumn++)
+            {
+                var list = allowedLists[listColumn - 1];
+
+                allowedValuesSheet.Cell(1, listColumn).Value = list.Header;
+
+                var listRow = 2;
+
+                foreach (var value in list.Values)
+                {
+                    allowedValuesSheet.Cell(listRow, listColumn).Value = value;
+                    listRow++;
+                }
+            }
+
+            var allowedHeaderRange = allowedValuesSheet.Range(
+                1,
+                1,
+                1,
+                allowedLists.Count);
+
+            allowedHeaderRange.Style.Font.Bold = true;
+            allowedHeaderRange.Style.Font.FontColor = XLColor.White;
+            allowedHeaderRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+            allowedHeaderRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            allowedHeaderRange.Style.Alignment.WrapText = true;
+
+            allowedValuesSheet.SheetView.FreezeRows(1);
+            allowedValuesSheet.Columns().AdjustToContents();
+
+            foreach (var column in allowedValuesSheet.ColumnsUsed())
+            {
+                if (column.Width < 16)
+                    column.Width = 16;
+
+                if (column.Width > 35)
+                    column.Width = 35;
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            var base64 = Convert.ToBase64String(stream.ToArray());
+            var fileName = $"Books_Upload_Template_{DateTime.Now:yyyyMMdd}.xlsx";
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+
+            MostrarMensaje(
+                "Books upload template downloaded successfully.",
+                "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(
+                $"Error downloading the books template: {ex.Message}",
+                "error");
+        }
+        finally
+        {
+            DescargandoPlantillaXlsx = false;
+        }
+    }
+
     private async Task ExportBooksToXlsxAsync()
     {
         try
@@ -836,7 +1387,7 @@
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Books");
 
-            const int lastColumn = 19;
+            const int lastColumn = 20;
 
             worksheet.Cell(1, 1).Value = "Books Export";
             worksheet.Range(1, 1, 1, lastColumn).Merge();
@@ -867,51 +1418,53 @@
 
             var headerRow = 5;
 
-            worksheet.Cell(headerRow, 1).Value = "Book Name";
-            worksheet.Cell(headerRow, 2).Value = "KGEN";
-            worksheet.Cell(headerRow, 3).Value = "LSA";
-            worksheet.Cell(headerRow, 4).Value = "State";
-            worksheet.Cell(headerRow, 5).Value = "Database";
-            worksheet.Cell(headerRow, 6).Value = "Legacy Code";
-            worksheet.Cell(headerRow, 7).Value = "Print Foot";
-            worksheet.Cell(headerRow, 8).Value = "Trim Size";
-            worksheet.Cell(headerRow, 9).Value = "Bind Plant";
-            worksheet.Cell(headerRow, 10).Value = "Product Issue";
-            worksheet.Cell(headerRow, 11).Value = "Proof";
-            worksheet.Cell(headerRow, 12).Value = "Final";
-            worksheet.Cell(headerRow, 13).Value = "Memo";
-            worksheet.Cell(headerRow, 14).Value = "Final PO";
-            worksheet.Cell(headerRow, 15).Value = "Shipping";
-            worksheet.Cell(headerRow, 16).Value = "Dirxion";
-            worksheet.Cell(headerRow, 17).Value = "Pub Date";
-            worksheet.Cell(headerRow, 18).Value = "SRL";
-            worksheet.Cell(headerRow, 19).Value = "NWP";
+            worksheet.Cell(headerRow, 1).Value = "employee_type";
+            worksheet.Cell(headerRow, 2).Value = "Book Name";
+            worksheet.Cell(headerRow, 3).Value = "KGEN";
+            worksheet.Cell(headerRow, 4).Value = "LSA";
+            worksheet.Cell(headerRow, 5).Value = "State";
+            worksheet.Cell(headerRow, 6).Value = "Database";
+            worksheet.Cell(headerRow, 7).Value = "Legacy Code";
+            worksheet.Cell(headerRow, 8).Value = "Print Foot";
+            worksheet.Cell(headerRow, 9).Value = "Trim Size";
+            worksheet.Cell(headerRow, 10).Value = "Bind Plant";
+            worksheet.Cell(headerRow, 11).Value = "Product Issue";
+            worksheet.Cell(headerRow, 12).Value = "Proof";
+            worksheet.Cell(headerRow, 13).Value = "Final";
+            worksheet.Cell(headerRow, 14).Value = "Memo";
+            worksheet.Cell(headerRow, 15).Value = "Final PO";
+            worksheet.Cell(headerRow, 16).Value = "Shipping";
+            worksheet.Cell(headerRow, 17).Value = "Dirxion";
+            worksheet.Cell(headerRow, 18).Value = "Pub Date";
+            worksheet.Cell(headerRow, 19).Value = "SRL";
+            worksheet.Cell(headerRow, 20).Value = "NWP";
 
             var row = headerRow + 1;
 
             foreach (var libro in librosExportar)
             {
-                worksheet.Cell(row, 1).Value = libro.BookName ?? string.Empty;
-                worksheet.Cell(row, 2).Value = libro.KGENCode ?? string.Empty;
-                worksheet.Cell(row, 3).Value = libro.LSACode ?? string.Empty;
-                worksheet.Cell(row, 4).Value = GetStateName(libro.StateId);
-                worksheet.Cell(row, 5).Value = GetDatabaseName(libro.DatabaseId);
-                worksheet.Cell(row, 6).Value = GetLegacyCodeName(libro.LegacyCodeId);
-                worksheet.Cell(row, 7).Value = GetPrintFootName(libro.PrintFootId);
-                worksheet.Cell(row, 8).Value = GetTrimSizeName(libro.TrimSizeId);
-                worksheet.Cell(row, 9).Value = GetBindPlantName(libro.BindPlantId);
-                worksheet.Cell(row, 10).Value = libro.ProductIssue ?? string.Empty;
+                worksheet.Cell(row, 1).Value = GetEmployeeTypeCode(libro.EmployeeTypeId);
+                worksheet.Cell(row, 2).Value = libro.BookName ?? string.Empty;
+                worksheet.Cell(row, 3).Value = libro.KGENCode ?? string.Empty;
+                worksheet.Cell(row, 4).Value = libro.LSACode ?? string.Empty;
+                worksheet.Cell(row, 5).Value = GetStateName(libro.StateId);
+                worksheet.Cell(row, 6).Value = GetDatabaseName(libro.DatabaseId);
+                worksheet.Cell(row, 7).Value = GetLegacyCodeName(libro.LegacyCodeId);
+                worksheet.Cell(row, 8).Value = GetPrintFootName(libro.PrintFootId);
+                worksheet.Cell(row, 9).Value = GetTrimSizeName(libro.TrimSizeId);
+                worksheet.Cell(row, 10).Value = GetBindPlantName(libro.BindPlantId);
+                worksheet.Cell(row, 11).Value = libro.ProductIssue ?? string.Empty;
 
-                SetExcelDate(worksheet.Cell(row, 11), libro.ProofExtract);
-                SetExcelDate(worksheet.Cell(row, 12), libro.FinalExtract);
-                SetExcelDate(worksheet.Cell(row, 13), libro.MemoExtract);
-                SetExcelDate(worksheet.Cell(row, 14), libro.FinalPODate);
-                SetExcelDate(worksheet.Cell(row, 15), libro.ShippingDate);
-                SetExcelDate(worksheet.Cell(row, 16), libro.DirxionDate);
-                SetExcelDate(worksheet.Cell(row, 17), libro.PubDate);
+                SetExcelDate(worksheet.Cell(row, 12), libro.ProofExtract);
+                SetExcelDate(worksheet.Cell(row, 13), libro.FinalExtract);
+                SetExcelDate(worksheet.Cell(row, 14), libro.MemoExtract);
+                SetExcelDate(worksheet.Cell(row, 15), libro.FinalPODate);
+                SetExcelDate(worksheet.Cell(row, 16), libro.ShippingDate);
+                SetExcelDate(worksheet.Cell(row, 17), libro.DirxionDate);
+                SetExcelDate(worksheet.Cell(row, 18), libro.PubDate);
 
-                worksheet.Cell(row, 18).Value = libro.SRLSuppression ? "Yes" : "No";
-                worksheet.Cell(row, 19).Value = libro.NWP ? "Yes" : "No";
+                worksheet.Cell(row, 19).Value = libro.SRLSuppression ? "Yes" : "No";
+                worksheet.Cell(row, 20).Value = libro.NWP ? "Yes" : "No";
 
                 row++;
             }
@@ -935,7 +1488,7 @@
             dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
-            worksheet.Range(headerRow + 1, 11, row - 1, 17).Style.DateFormat.Format = "MM/dd/yyyy";
+            worksheet.Range(headerRow + 1, 12, row - 1, 18).Style.DateFormat.Format = "MM/dd/yyyy";
 
             worksheet.Columns().AdjustToContents();
 
@@ -1049,10 +1602,15 @@
 
             var headerMap = BuildHeaderMap(headerRow);
 
-            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code") &&
-                !HeaderExists(headerMap, "LSA Code", "LSA"))
+            if (!HeaderExists(headerMap, "employee_type", "Employee Type"))
             {
-                MostrarMensaje("The XLSX file must contain KGEN Code or LSA Code to find the book.", "error");
+                MostrarMensaje("The XLSX file must contain the 'employee_type' column.", "error");
+                return;
+            }
+
+            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code"))
+            {
+                MostrarMensaje("The XLSX file must contain KGEN Code. KGEN is the global book identifier.", "error");
                 return;
             }
 
@@ -1071,6 +1629,8 @@
                 var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code");
                 var lsaCode = ReadText(row, headerMap, "LSA Code", "LSA");
                 var productIssue = ReadText(row, headerMap, "Product Issue");
+                var employeeTypeCode = ReadText(row, headerMap, "employee_type", "Employee Type");
+                var employeeType = ResolveEmployeeType(employeeTypeCode);
 
                 if (string.IsNullOrWhiteSpace(bookName) &&
                     string.IsNullOrWhiteSpace(kgenCode) &&
@@ -1080,11 +1640,24 @@
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(kgenCode) &&
-                    string.IsNullOrWhiteSpace(lsaCode))
+                if (employeeType is null)
                 {
                     resultado.FilasOmitidas++;
-                    resultado.Errores.Add($"Row {rowNumber}: KGEN Code or LSA Code is required to update the book.");
+                    resultado.Errores.Add($"Row {rowNumber}: employee_type must be DR or ECLERX.");
+                    continue;
+                }
+
+                if (!Scope.CanAccess(employeeType.Id))
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: You cannot update books from {employeeType.Code}.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(kgenCode))
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: KGEN Code is required to update the book.");
                     continue;
                 }
 
@@ -1095,6 +1668,14 @@
                     resultado.LibrosNoEncontrados++;
                     resultado.Advertencias.Add(
                         $"Row {rowNumber}: Book was not found. KGEN: '{kgenCode}', LSA: '{lsaCode}', Product Name: '{bookName}'.");
+                    continue;
+                }
+
+                if (libro.EmployeeTypeId != employeeType.Id)
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add(
+                        $"Row {rowNumber}: KGEN '{libro.KGENCode}' belongs to {GetEmployeeTypeCode(libro.EmployeeTypeId)}, not {employeeType.Code}.");
                     continue;
                 }
 
@@ -1180,6 +1761,22 @@
                     resultado.FilasOmitidas++;
                     resultado.Errores.Add($"Row {rowNumber}: The row was skipped because it contains invalid date values.");
                     continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(kgenCode))
+                {
+                    var normalizedNewKgen = kgenCode.Trim();
+                    var duplicateKgen = librosDb.Any(x =>
+                        x.Id != libro.Id &&
+                        string.Equals(x.KGENCode?.Trim(), normalizedNewKgen, StringComparison.OrdinalIgnoreCase));
+
+                    if (duplicateKgen)
+                    {
+                        resultado.FilasOmitidas++;
+                        resultado.Errores.Add(
+                            $"Row {rowNumber}: KGEN '{kgenCode}' already exists. KGEN is globally unique.");
+                        continue;
+                    }
                 }
 
                 // Datos principales
@@ -1339,13 +1936,12 @@
     private static Libros? BuscarLibroPorCodigos(List<Libros> libros, string kgenCode, string lsaCode)
     {
         var kgen = kgenCode?.Trim();
-        var lsa = lsaCode?.Trim();
+
+        if (string.IsNullOrWhiteSpace(kgen))
+            return null;
 
         return libros.FirstOrDefault(x =>
-            (!string.IsNullOrWhiteSpace(kgen) &&
-             string.Equals(x.KGENCode?.Trim(), kgen, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrWhiteSpace(lsa) &&
-             string.Equals(x.LSACode?.Trim(), lsa, StringComparison.OrdinalIgnoreCase)));
+            string.Equals(x.KGENCode?.Trim(), kgen, StringComparison.OrdinalIgnoreCase));
     }
 
     private static DateOnly? ReadOptionalDateWithValidation(
@@ -1449,6 +2045,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
+        Scope = await UserDataScopeService.GetScopeAsync(_user);
 
         CreateBook = HasPermission(_user, "CreateBook");
         EditBook = HasPermission(_user, "EditBook");
@@ -1456,6 +2053,7 @@
         BooksView = HasPermission(_user, "BooksView");
 
         await CargarCatalogosAsync();
+        Formulario = CrearNuevoLibro();
         await CargarLibrosAsync();
     }
 
@@ -1475,6 +2073,12 @@
         try
         {
             await using var db = await DbFactory.CreateDbContextAsync();
+
+            EmployeeTypes = await db.EmployeeTypes
+                .AsNoTracking()
+                .Where(x => x.Active)
+                .OrderBy(x => x.Code)
+                .ToListAsync();
 
             BindPlants = await db.Bind_Plants
                 .AsNoTracking()
@@ -1524,6 +2128,8 @@
 
             Libros = await db.Libros
                 .AsNoTracking()
+                .Include(l => l.EmployeeType)
+                .ApplyScope(Scope)
                 .Where(l => !l.Finalizado)
                 .OrderBy(l => l.BookName)
                 .ToListAsync();
@@ -1626,6 +2232,7 @@
         var hoy = DateOnly.FromDateTime(DateTime.Today);
 
         var librosParaFinalizar = await db.Libros
+            .ApplyScope(Scope)
             .Include(l => l.Asignaciones)
                 .ThenInclude(a => a.Evaluaciones)
             .Where(l => !l.Finalizado &&
@@ -1671,7 +2278,32 @@
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(Formulario.KGENCode))
+            {
+                MostrarMensaje("KGEN Code is required.", "error");
+                return;
+            }
+
+            if (Formulario.EmployeeTypeId <= 0 || !Scope.CanAccess(Formulario.EmployeeTypeId))
+            {
+                MostrarMensaje("Select a valid employee type.", "error");
+                return;
+            }
+
+            Formulario.KGENCode = Formulario.KGENCode.Trim();
+
             await using var db = await DbFactory.CreateDbContextAsync();
+
+            var normalizedKgen = Formulario.KGENCode.ToUpperInvariant();
+            var duplicatedKgen = await db.Libros.AnyAsync(l =>
+                l.Id != Formulario.Id &&
+                l.KGENCode.Trim().ToUpper() == normalizedKgen);
+
+            if (duplicatedKgen)
+            {
+                MostrarMensaje("The KGEN Code already exists. KGEN is unique across DR and Eclerx.", "error");
+                return;
+            }
 
             if (Formulario.Id == Guid.Empty)
             {
@@ -1684,7 +2316,9 @@
             }
             else
             {
-                var libroDb = await db.Libros.FirstOrDefaultAsync(l => l.Id == Formulario.Id);
+                var libroDb = await db.Libros
+                    .ApplyScope(Scope)
+                    .FirstOrDefaultAsync(l => l.Id == Formulario.Id);
 
                 if (libroDb is null)
                 {
@@ -1692,6 +2326,14 @@
                     return;
                 }
 
+                if (libroDb.EmployeeTypeId != Formulario.EmployeeTypeId &&
+                    await db.Asignaciones.AnyAsync(a => a.IdLibro == libroDb.Id))
+                {
+                    MostrarMensaje("The employee type cannot be changed because this book already has assignments.", "error");
+                    return;
+                }
+
+                libroDb.EmployeeTypeId = Formulario.EmployeeTypeId;
                 libroDb.PrintFootId = Formulario.PrintFootId;
                 libroDb.LegacyCodeId = Formulario.LegacyCodeId;
                 libroDb.StateId = Formulario.StateId;
@@ -1771,7 +2413,9 @@
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            var libroDb = await db.Libros.FirstOrDefaultAsync(l => l.Id == Formulario.Id);
+            var libroDb = await db.Libros
+                .ApplyScope(Scope)
+                .FirstOrDefaultAsync(l => l.Id == Formulario.Id);
 
             if (libroDb is null)
             {
@@ -1807,13 +2451,16 @@
         LimpiarMensaje();
     }
 
-    private static Libros CrearNuevoLibro()
+    private Libros CrearNuevoLibro()
     {
         var hoy = DateOnly.FromDateTime(DateTime.Today);
 
         return new Libros
         {
             Id = Guid.Empty,
+            EmployeeTypeId = Scope.ViewAllEmployeeTypes
+                ? EmployeeTypes.FirstOrDefault()?.Id ?? (short)0
+                : Scope.EmployeeTypeId ?? (short)0,
 
             PrintFootId = null,
             LegacyCodeId = null,
@@ -1846,6 +2493,8 @@
         return new Libros
         {
             Id = libro.Id,
+            EmployeeTypeId = libro.EmployeeTypeId,
+            EmployeeType = libro.EmployeeType,
 
             PrintFootId = libro.PrintFootId,
             LegacyCodeId = libro.LegacyCodeId,
@@ -1934,6 +2583,12 @@
 
             var headerMap = BuildHeaderMap(headerRow);
 
+            if (!HeaderExists(headerMap, "employee_type", "Employee Type"))
+            {
+                MostrarMensaje("The XLSX file must contain the 'employee_type' column.", "error");
+                return;
+            }
+
             if (!HeaderExists(headerMap, "Product Name"))
             {
                 MostrarMensaje("The XLSX file must contain the 'Product Name' column.", "error");
@@ -1955,10 +2610,26 @@
             {
                 var bookName = ReadText(row, headerMap, "Product Name");
                 var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code");
+                var employeeTypeCode = ReadText(row, headerMap, "employee_type", "Employee Type");
+                var employeeType = ResolveEmployeeType(employeeTypeCode);
 
                 if (string.IsNullOrWhiteSpace(bookName) && string.IsNullOrWhiteSpace(kgenCode))
                 {
                     skippedRows++;
+                    continue;
+                }
+
+                if (employeeType is null)
+                {
+                    skippedRows++;
+                    catalogWarnings.Add($"Row {row.RowNumber()}: employee_type must be DR or ECLERX");
+                    continue;
+                }
+
+                if (!Scope.CanAccess(employeeType.Id))
+                {
+                    skippedRows++;
+                    catalogWarnings.Add($"Row {row.RowNumber()}: You cannot import books for {employeeType.Code}");
                     continue;
                 }
 
@@ -2004,6 +2675,7 @@
                 var libro = new Libros
                 {
                     Id = Guid.NewGuid(),
+                    EmployeeTypeId = employeeType.Id,
 
                     BookName = bookName,
                     KGENCode = kgenCode,
@@ -2040,16 +2712,25 @@
                 return;
             }
 
-            await using var db = await DbFactory.CreateDbContextAsync();
-
-            var kgenCodes = importedBooks
+            var duplicateImportedKgens = importedBooks
                 .Where(x => !string.IsNullOrWhiteSpace(x.KGENCode))
-                .Select(x => x.KGENCode.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .GroupBy(x => x.KGENCode.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .OrderBy(x => x)
                 .ToList();
 
+            if (duplicateImportedKgens.Any())
+            {
+                MostrarMensaje(
+                    $"The XLSX contains duplicated KGEN values: {string.Join(", ", duplicateImportedKgens)}. KGEN must be globally unique.",
+                    "error");
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+
             var existingBooks = await db.Libros
-                .Where(x => kgenCodes.Contains(x.KGENCode))
                 .ToListAsync();
 
             var existingDictionary = existingBooks
@@ -2065,6 +2746,14 @@
                 if (!string.IsNullOrWhiteSpace(imported.KGENCode) &&
                     existingDictionary.TryGetValue(imported.KGENCode.Trim(), out var existing))
                 {
+                    if (existing.EmployeeTypeId != imported.EmployeeTypeId)
+                    {
+                        skippedRows++;
+                        catalogWarnings.Add(
+                            $"KGEN {imported.KGENCode} already belongs to {GetEmployeeTypeCode(existing.EmployeeTypeId)} and cannot be imported as {GetEmployeeTypeCode(imported.EmployeeTypeId)}.");
+                        continue;
+                    }
+
                     CopyBookValues(existing, imported);
                     updated++;
                 }
@@ -2108,6 +2797,7 @@
 
     private static void CopyBookValues(Libros destination, Libros source)
     {
+        destination.EmployeeTypeId = source.EmployeeTypeId;
         destination.PrintFootId = source.PrintFootId;
         destination.LegacyCodeId = source.LegacyCodeId;
         destination.StateId = source.StateId;
@@ -2133,6 +2823,19 @@
 
         var hoy = DateOnly.FromDateTime(DateTime.Today);
         destination.Finalizado = source.DirxionDate < hoy;
+    }
+
+    private EmployeeType? ResolveEmployeeType(string? code)
+    {
+        var normalized = (code ?? string.Empty).Trim().ToUpperInvariant();
+        return EmployeeTypes.FirstOrDefault(x =>
+            string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetEmployeeTypeCode(short employeeTypeId)
+    {
+        return EmployeeTypes.FirstOrDefault(x => x.Id == employeeTypeId)?.Code
+            ?? (employeeTypeId == Scope.EmployeeTypeId ? Scope.EmployeeTypeCode : string.Empty);
     }
 
     private static DateOnly CalculateFinalPoDate(DateOnly firstDuePrinter)

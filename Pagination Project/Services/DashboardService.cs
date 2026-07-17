@@ -13,30 +13,40 @@ namespace Pagination_Project.Services
             _dbFactory = dbFactory;
         }
 
-        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(UserDataScope scope)
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
 
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            await ActualizarFinalizadosPorDirxionAsync(db, today);
+            await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
+
+            var usersQuery = db.Users.AsNoTracking().AsQueryable();
+
+            if (!scope.ViewAllEmployeeTypes)
+            {
+                usersQuery = usersQuery.Where(u =>
+                    u.Empleado != null &&
+                    u.Empleado.EmployeeTypeId == scope.EmployeeTypeId);
+            }
 
             DashboardStatsDto stats = new DashboardStatsDto
             {
-                TotalUsers = await db.Users
-                    .AsNoTracking()
-                    .CountAsync(),
+                TotalUsers = await usersQuery.CountAsync(),
 
                 TotalEmployees = await db.Empleados
                     .AsNoTracking()
+                    .ApplyScope(scope)
                     .CountAsync(),
 
                 TotalBooks = await db.Libros
                     .AsNoTracking()
+                    .ApplyScope(scope)
                     .CountAsync(l => !l.Finalizado),
 
                 TotalEvaluations = await db.Evaluaciones
                     .AsNoTracking()
+                    .ApplyScope(scope)
                     .CountAsync(ev =>
                         !ev.Finalizado &&
                         ev.Asignacion != null &&
@@ -47,13 +57,14 @@ namespace Pagination_Project.Services
 
             var asignacionesHoy = await CargarAsignacionesPorFechaAsync(
                 db,
-                today);
+                today,
+                scope);
 
             var assignedBooks = asignacionesHoy.Pending;
             var completedAssignments = asignacionesHoy.Completed;
 
             var weeklyEvaluations =
-                await CargarEvaluacionesSemanaAnteriorAsync(db, today);
+                await CargarEvaluacionesSemanaAnteriorAsync(db, today, scope);
 
             return new DashboardSummaryDto
             {
@@ -65,7 +76,9 @@ namespace Pagination_Project.Services
         }
 
         public async Task<List<AssignedBookDashboardDto>>
-            GetAssignedBooksForDateAsync(DateOnly targetDate)
+            GetAssignedBooksForDateAsync(
+                DateOnly targetDate,
+                UserDataScope scope)
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
 
@@ -78,11 +91,12 @@ namespace Pagination_Project.Services
              */
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            await ActualizarFinalizadosPorDirxionAsync(db, today);
+            await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
 
             var result = await CargarAsignacionesPorFechaAsync(
                 db,
-                targetDate);
+                targetDate,
+                scope);
 
             /*
              * El reporte Next Day Assignments solamente mostrará
@@ -96,7 +110,8 @@ namespace Pagination_Project.Services
             List<AssignedBookDashboardDto> Completed)>
             CargarAsignacionesPorFechaAsync(
                 AppDbContext db,
-                DateOnly targetDate)
+                DateOnly targetDate,
+                UserDataScope scope)
         {
             var trabajadasFecha = await db.AsignacionesTrabajadas
                 .AsNoTracking()
@@ -118,6 +133,9 @@ namespace Pagination_Project.Services
                 join e in db.Empleados.AsNoTracking()
                     on a.IdEmpleado equals e.Id
 
+                join et in db.EmployeeTypes.AsNoTracking()
+                    on l.EmployeeTypeId equals et.Id
+
                 join d in db.Databases.AsNoTracking()
                     on l.DatabaseId equals d.Id into database
 
@@ -129,7 +147,9 @@ namespace Pagination_Project.Services
                 from bp in bindPlantGroup.DefaultIfEmpty()
 
                 where !a.Finalizado &&
-                      !l.Finalizado
+                      !l.Finalizado &&
+                      (scope.ViewAllEmployeeTypes ||
+                       l.EmployeeTypeId == scope.EmployeeTypeId)
 
                 select new RawAssignmentDashboardDto
                 {
@@ -145,6 +165,8 @@ namespace Pagination_Project.Services
                     Database = d != null
                         ? d.Database_Name
                         : string.Empty,
+                    EmployeeTypeId = l.EmployeeTypeId,
+                    EmployeeTypeCode = et.Code,
 
                     ProofExtract = l.ProofExtract,
                     FinalExtract = l.FinalExtract,
@@ -223,6 +245,8 @@ namespace Pagination_Project.Services
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
                     Database = item.Database,
+                    EmployeeTypeId = item.EmployeeTypeId,
+                    EmployeeTypeCode = item.EmployeeTypeCode,
 
                     StageKey = stageInfo.StageKey,
                     Stage = stageInfo.StageName,
@@ -274,7 +298,8 @@ namespace Pagination_Project.Services
         private static async Task<List<WeeklyEvaluationDashboardDto>>
             CargarEvaluacionesSemanaAnteriorAsync(
                 AppDbContext db,
-                DateOnly today)
+                DateOnly today,
+                UserDataScope scope)
         {
             var rango = ObtenerRangoSemanaAnterior(today);
 
@@ -290,8 +315,13 @@ namespace Pagination_Project.Services
                 join e in db.Empleados.AsNoTracking()
                     on a.IdEmpleado equals e.Id
 
+                join et in db.EmployeeTypes.AsNoTracking()
+                    on l.EmployeeTypeId equals et.Id
+
                 where l.ShippingDate >= rango.Start &&
-                      l.ShippingDate <= rango.End
+                      l.ShippingDate <= rango.End &&
+                      (scope.ViewAllEmployeeTypes ||
+                       l.EmployeeTypeId == scope.EmployeeTypeId)
 
                 select new RawWeeklyEvaluationDashboardDto
                 {
@@ -304,6 +334,8 @@ namespace Pagination_Project.Services
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
                     BookName = l.BookName ?? string.Empty,
+                    EmployeeTypeId = l.EmployeeTypeId,
+                    EmployeeTypeCode = et.Code,
                     ShippingDate = l.ShippingDate,
 
                     MotifYp = ev.MotifYp,
@@ -457,6 +489,8 @@ namespace Pagination_Project.Services
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
+                    EmployeeTypeId = item.EmployeeTypeId,
+                    EmployeeTypeCode = item.EmployeeTypeCode,
                     ShippingDate = item.ShippingDate,
 
                     MotifYp = motifYp,
@@ -899,11 +933,13 @@ namespace Pagination_Project.Services
         private static async Task
             ActualizarFinalizadosPorDirxionAsync(
                 AppDbContext db,
-                DateOnly today)
+                DateOnly today,
+                UserDataScope scope)
         {
             var librosParaFinalizar = await db.Libros
                 .Include(l => l.Asignaciones)
                     .ThenInclude(a => a.Evaluaciones)
+                .ApplyScope(scope)
                 .Where(l =>
                     !l.Finalizado &&
                     l.DirxionDate < today)
@@ -957,6 +993,11 @@ namespace Pagination_Project.Services
             public string Database { get; set; }
                 = string.Empty;
 
+            public short EmployeeTypeId { get; set; }
+
+            public string EmployeeTypeCode { get; set; }
+                = string.Empty;
+
             public DateOnly ProofExtract { get; set; }
 
             public DateOnly FinalExtract { get; set; }
@@ -990,6 +1031,11 @@ namespace Pagination_Project.Services
                 = string.Empty;
 
             public string BookName { get; set; }
+                = string.Empty;
+
+            public short EmployeeTypeId { get; set; }
+
+            public string EmployeeTypeCode { get; set; }
                 = string.Empty;
 
             public DateOnly ShippingDate { get; set; }

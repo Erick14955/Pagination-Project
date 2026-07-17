@@ -16,13 +16,16 @@ namespace Pagination_Project.Services
 
         private readonly IDbContextFactory<AppDbContext> _dbFactory;
         private readonly IWebHostEnvironment _env;
+        private readonly IUserDataScopeService _userDataScopeService;
 
         public PaginationChecklistService(
             IDbContextFactory<AppDbContext> dbFactory,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IUserDataScopeService userDataScopeService)
         {
             _dbFactory = dbFactory;
             _env = env;
+            _userDataScopeService = userDataScopeService;
         }
 
         public async Task<PaginationChecklistDownloadResult> GeneratePaginationChecklistAsync(
@@ -31,9 +34,23 @@ namespace Pagination_Project.Services
             ClaimsPrincipal user)
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
+            var scope = await _userDataScopeService.GetScopeAsync(user);
+
+            var assignmentIsAccessible = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Libro)
+                .ApplyScope(scope)
+                .AnyAsync(x => x.Id == assignmentId && x.IdLibro == bookId);
+
+            if (!assignmentIsAccessible)
+                throw new InvalidOperationException("The selected assignment is outside your department scope.");
+
+            var scopedBooks = db.Libros
+                .AsNoTracking()
+                .ApplyScope(scope);
 
             var book = await (
-                from l in db.Libros.AsNoTracking()
+                from l in scopedBooks
 
                 join d in db.Databases.AsNoTracking()
                     on l.DatabaseId equals d.Id into databaseGroup
@@ -60,7 +77,7 @@ namespace Pagination_Project.Services
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
 
-                    FootPrint = pf.Print_Foot_Name?? string.Empty,
+                    FootPrint = pf.Print_Foot_Name ?? string.Empty,
                     LegacyCode = lc.Legacy_Code_Name ?? string.Empty,
 
                     GraphicsDatabase = d != null ? d.Database_Name ?? string.Empty : string.Empty,

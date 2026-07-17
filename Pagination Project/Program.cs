@@ -48,6 +48,7 @@ builder.Services.AddHttpClient<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IPaginationChecklistService, PaginationChecklistService>();
+builder.Services.AddScoped<IUserDataScopeService, UserDataScopeService>();
 
 builder.Services.AddControllers();
 
@@ -335,6 +336,12 @@ app.MapPost("/account/login", async (
         claims.Add(new("EmployeeCode", usuario.Empleado.IdEmpleado.ToString()));
         claims.Add(new("EmployeeName", usuario.Empleado.Nombre ?? string.Empty));
         claims.Add(new("EmployeeEmail", usuario.Empleado.Email ?? string.Empty));
+        claims.Add(new("EmployeeTypeId", usuario.Empleado.EmployeeTypeId.ToString()));
+
+        if (usuario.Empleado.EmployeeType is not null)
+        {
+            claims.Add(new("EmployeeTypeCode", usuario.Empleado.EmployeeType.Code ?? string.Empty));
+        }
     }
 
     if (usuario.Permisos is not null)
@@ -367,6 +374,7 @@ app.MapPost("/account/login", async (
         claims.Add(new("CompleteLateWork", usuario.Permisos.CompleteLateWork.ToString()));
 
         claims.Add(new("EditPermissionLevels", usuario.Permisos.EditPermissionLevels.ToString()));
+        claims.Add(new("ViewAllEmployeeTypes", usuario.Permisos.ViewAllEmployeeTypes.ToString()));
     }
 
     var identity = new ClaimsIdentity(

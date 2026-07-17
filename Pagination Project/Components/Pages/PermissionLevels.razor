@@ -431,6 +431,14 @@
                     <span>Edit Permission Levels</span>
                 </div>
 
+                <div class="toggle-item">
+                    <label class="switch">
+                        <input type="checkbox" @bind="PermisoActual.ViewAllEmployeeTypes" />
+                        <span class="slider"></span>
+                    </label>
+                    <span>View All Employee Types</span>
+                </div>
+
             </div>
         </div>
 
@@ -755,6 +763,7 @@
                 permisoDb.ViewEmployees = PermisoActual.ViewEmployees;
 
                 permisoDb.EditPermissionLevels = PermisoActual.EditPermissionLevels;
+                permisoDb.ViewAllEmployeeTypes = PermisoActual.ViewAllEmployeeTypes;
                 permisoDb.ViewAssignations = PermisoActual.ViewAssignations;
                 permisoDb.CreateAssignations = PermisoActual.CreateAssignations;
 
@@ -865,6 +874,7 @@
         PermisoActual.ViewEmployees = true;
 
         PermisoActual.EditPermissionLevels = true;
+        PermisoActual.ViewAllEmployeeTypes = true;
         PermisoActual.ViewAssignations = true;
         PermisoActual.CreateAssignations = true;
 
@@ -899,6 +909,7 @@
         PermisoActual.ViewEmployees = false;
 
         PermisoActual.EditPermissionLevels = false;
+        PermisoActual.ViewAllEmployeeTypes = false;
         PermisoActual.ViewAssignations = false;
         PermisoActual.CreateAssignations = false;
 
@@ -960,7 +971,8 @@
         Contar(PermisoActual.CompleteLateWork);
 
     private int TotalSystem =>
-        Contar(PermisoActual.EditPermissionLevels);
+        Contar(PermisoActual.EditPermissionLevels) +
+        Contar(PermisoActual.ViewAllEmployeeTypes);
 
     private static int Contar(bool valor)
     {
@@ -1014,7 +1026,8 @@
 
     private static int ContarGrupoSystem(Permisos item)
     {
-        return Contar(item.EditPermissionLevels);
+        return Contar(item.EditPermissionLevels) +
+               Contar(item.ViewAllEmployeeTypes);
     }
 
     private int ContarTotalPermisos(Permisos item)
@@ -1053,6 +1066,7 @@
             ViewEmployees = permiso.ViewEmployees,
 
             EditPermissionLevels = permiso.EditPermissionLevels,
+            ViewAllEmployeeTypes = permiso.ViewAllEmployeeTypes,
             ViewAssignations = permiso.ViewAssignations,
             CreateAssignations = permiso.CreateAssignations,
 

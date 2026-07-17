@@ -9,6 +9,7 @@
 @using Pagination_Project.Services
 
 @inject IDashboardService DashboardService
+@inject IUserDataScopeService UserDataScopeService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IPaginationChecklistService ChecklistService
 @inject IJSRuntime JS
@@ -156,6 +157,10 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
                             <th>KGEN Code</th>
                             <th>LSA Code</th>
                             <th>Book</th>
@@ -170,7 +175,7 @@
                         @if (loading)
                         {
                             <tr>
-                                <td colspan="8" class="thryv-empty-row">
+                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 9 : 8)" class="thryv-empty-row">
                                     Loading statistics...
                                 </td>
                             </tr>
@@ -178,7 +183,7 @@
                         else if (AssignedBooksFiltered.Count == 0)
                         {
                             <tr>
-                                <td colspan="8" class="thryv-empty-row">
+                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 9 : 8)" class="thryv-empty-row">
                                     No pending assignments for today.
                                 </td>
                             </tr>
@@ -196,6 +201,11 @@
                                             </div>
                                         </div>
                                     </td>
+
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="thryv-code-pill secondary">@item.EmployeeTypeCode</span></td>
+                                    }
 
                                     <td>
                                         <span class="thryv-code-pill">@item.KgenCode</span>
@@ -314,6 +324,10 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
                             <th>KGEN Code</th>
                             <th>LSA Code</th>
                             <th>Book</th>
@@ -326,7 +340,7 @@
                         @if (loading)
                         {
                             <tr>
-                                <td colspan="6" class="thryv-empty-row">
+                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
                                     Loading completed assignments...
                                 </td>
                             </tr>
@@ -334,7 +348,7 @@
                         else if (CompletedAssignmentsFiltered.Count == 0)
                         {
                             <tr>
-                                <td colspan="6" class="thryv-empty-row">
+                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
                                     No completed assignments for today.
                                 </td>
                             </tr>
@@ -352,6 +366,11 @@
                                             </div>
                                         </div>
                                     </td>
+
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="thryv-code-pill secondary">@item.EmployeeTypeCode</span></td>
+                                    }
 
                                     <td>
                                         <span class="thryv-code-pill">@item.KgenCode</span>
@@ -428,6 +447,10 @@
                 <thead>
                     <tr>
                         <th>Employee</th>
+                        @if (Scope.ViewAllEmployeeTypes)
+                        {
+                            <th>Department</th>
+                        }
                         <th>KGEN Code</th>
                         <th>Book</th>
                         <th>Shipping Date</th>
@@ -440,7 +463,7 @@
                     @if (loading)
                     {
                         <tr>
-                            <td colspan="6" class="thryv-empty-row">
+                            <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
                                 Loading weekly evaluations...
                             </td>
                         </tr>
@@ -448,7 +471,7 @@
                     else if (WeeklyEvaluationsFiltered.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="thryv-empty-row">
+                            <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
                                 No weekly evaluations to display.
                             </td>
                         </tr>
@@ -466,6 +489,11 @@
                                         </div>
                                     </div>
                                 </td>
+
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <td><span class="thryv-code-pill secondary">@item.EmployeeTypeCode</span></td>
+                                }
 
                                 <td>
                                     <span class="thryv-code-pill">@item.KgenCode</span>
@@ -681,6 +709,7 @@
     private bool showWeeklyEvaluationModal = false;
 
     private ClaimsPrincipal? _user;
+    private UserDataScope Scope { get; set; } = new();
 
     private bool loading = true;
 
@@ -1017,8 +1046,9 @@
             _user = authState.User;
 
             CargarPermisosDashboard();
+            Scope = await UserDataScopeService.GetScopeAsync(_user);
 
-            var result = await DashboardService.GetDashboardSummaryAsync();
+            var result = await DashboardService.GetDashboardSummaryAsync(Scope);
 
             if (result is not null)
             {

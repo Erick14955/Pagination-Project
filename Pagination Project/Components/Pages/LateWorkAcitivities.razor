@@ -7,6 +7,7 @@
 @using Microsoft.EntityFrameworkCore
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
 @using System.Security.Claims
 
 @attribute [Authorize]
@@ -14,6 +15,7 @@
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserDataScopeService UserDataScopeService
 @inject NavigationManager Navigation
 
 <PageTitle>Late Work Activities</PageTitle>
@@ -143,11 +145,11 @@ else
 
                         <textarea rows="8"
                                   placeholder="Example:
-                                    100234, 24001
-                                    100235, 24002
-                                    100236, 24003"
+                                            100234, 24001
+                                            100235, 24002
+                                            100236, 24003"
                                   @bind="TextoMasivo">
-                                </textarea>
+                                        </textarea>
 
                         <button type="button" class="btn-dark" @onclick="GuardarMasivoAsync">
                             Save Bulk
@@ -243,6 +245,10 @@ else
                                 <th>Late Work ID</th>
                                 <th>Client ID</th>
                                 <th>Assignment</th>
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <th>Department</th>
+                                }
                                 <th>Status</th>
                                 <th>Completed At</th>
 
@@ -284,6 +290,11 @@ else
                                         <td>@item.ClientId</td>
 
                                         <td>@item.AssignmentName</td>
+
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <td><span class="status pending">@item.EmployeeTypeCode</span></td>
+                                        }
 
                                         <td>
                                             @if (item.Completed)
@@ -378,6 +389,7 @@ else
     private bool CargandoPermisos { get; set; } = true;
 
     private Permisos? PermisosUsuarioActual { get; set; }
+    private UserDataScope Scope { get; set; } = new();
 
     private bool PuedeVerLateWork => PermisosUsuarioActual?.LateWork == true;
 
@@ -391,6 +403,7 @@ else
 
     private int ColspanTabla =>
         5 +
+        (Scope.ViewAllEmployeeTypes ? 1 : 0) +
         (PuedeCompletarLateWork ? 1 : 0) +
         ((PuedeCompletarLateWork || PuedeEditarLateWork || PuedeEliminarLateWork) ? 1 : 0);
 
@@ -423,6 +436,7 @@ else
 
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
+            Scope = await UserDataScopeService.GetScopeAsync(user);
 
             if (user?.Identity?.IsAuthenticated != true)
             {
@@ -488,7 +502,9 @@ else
         Asignaciones = await db.Asignaciones
             .AsNoTracking()
             .Include(x => x.Libro)
+                .ThenInclude(x => x!.EmployeeType)
             .Include(x => x.Empleado)
+            .ApplyScope(Scope)
             .Where(x => !x.Finalizado &&
                         x.Libro != null &&
                         !x.Libro.Finalizado)
@@ -496,8 +512,14 @@ else
             .Select(x => new AssignmentComboItem
             {
                 Id = x.Id,
+                EmployeeTypeCode = x.Libro != null && x.Libro.EmployeeType != null
+                    ? x.Libro.EmployeeType.Code
+                    : "",
                 DisplayName =
-                    (x.Libro != null ? x.Libro.BookName : "Book without name")
+                    (Scope.ViewAllEmployeeTypes && x.Libro != null && x.Libro.EmployeeType != null
+                        ? "[" + x.Libro.EmployeeType.Code + "] "
+                        : "")
+                    + (x.Libro != null ? x.Libro.BookName : "Book without name")
                     + " - "
                     + (x.Empleado != null ? x.Empleado.Nombre : "Employee without name")
             })
@@ -507,17 +529,23 @@ else
             .AsNoTracking()
             .Include(x => x.Assignment)
                 .ThenInclude(x => x!.Libro)
+                    .ThenInclude(x => x!.EmployeeType)
             .Include(x => x.Assignment)
                 .ThenInclude(x => x!.Empleado)
             .Where(x => x.Assignment != null &&
                         !x.Assignment.Finalizado &&
                         x.Assignment.Libro != null &&
-                        !x.Assignment.Libro.Finalizado)
+                        !x.Assignment.Libro.Finalizado &&
+                        (Scope.ViewAllEmployeeTypes ||
+                         x.Assignment.Libro.EmployeeTypeId == Scope.EmployeeTypeId))
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new LateWorkListItem
             {
                 Id = x.Id,
                 AssignmentId = x.AssignmentId,
+                EmployeeTypeCode = x.Assignment != null && x.Assignment.Libro != null && x.Assignment.Libro.EmployeeType != null
+                    ? x.Assignment.Libro.EmployeeType.Code
+                    : "",
                 LateWorkId = x.LateWorkId,
                 ClientId = x.ClientId,
                 Completed = x.Completed,
@@ -541,6 +569,7 @@ else
         var librosParaFinalizar = await db.Libros
             .Include(x => x.Asignaciones)
                 .ThenInclude(a => a.Evaluaciones)
+            .ApplyScope(Scope)
             .Where(x => !x.Finalizado &&
                         x.DirxionDate < hoy)
             .ToListAsync();
@@ -611,6 +640,7 @@ else
         var asignacionActiva = await db.Asignaciones
             .AsNoTracking()
             .Include(x => x.Libro)
+            .ApplyScope(Scope)
             .AnyAsync(x =>
                 x.Id == AssignmentSeleccionadoId.Value &&
                 !x.Finalizado &&
@@ -623,7 +653,7 @@ else
             return;
         }
 
-        var existe = await db.LateWorkActivities.AnyAsync(x =>
+        var existe = await ScopedLateWorkQuery(db).AnyAsync(x =>
             x.AssignmentId == AssignmentSeleccionadoId.Value &&
             x.LateWorkId == lateWorkId &&
             x.ClientId == clientId);
@@ -752,6 +782,7 @@ else
         var asignacionActiva = await db.Asignaciones
             .AsNoTracking()
             .Include(x => x.Libro)
+            .ApplyScope(Scope)
             .AnyAsync(x =>
                 x.Id == assignmentId &&
                 !x.Finalizado &&
@@ -764,7 +795,7 @@ else
             return;
         }
 
-        var existentes = await db.LateWorkActivities
+        var existentes = await ScopedLateWorkQuery(db)
             .Where(x => x.AssignmentId == assignmentId)
             .Select(x => new
             {
@@ -823,7 +854,8 @@ else
 
         await using var db = await DbFactory.CreateDbContextAsync();
 
-        var item = await db.LateWorkActivities.FirstOrDefaultAsync(x => x.Id == id);
+        var item = await ScopedLateWorkQuery(db)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (item is null)
         {
@@ -871,7 +903,7 @@ else
 
         await using var db = await DbFactory.CreateDbContextAsync();
 
-        var registros = await db.LateWorkActivities
+        var registros = await ScopedLateWorkQuery(db)
             .Where(x => ids.Contains(x.Id) && !x.Completed)
             .ToListAsync();
 
@@ -903,7 +935,8 @@ else
 
         await using var db = await DbFactory.CreateDbContextAsync();
 
-        var item = await db.LateWorkActivities.FirstOrDefaultAsync(x => x.Id == id);
+        var item = await ScopedLateWorkQuery(db)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         if (item is null)
         {
@@ -947,6 +980,17 @@ else
         {
             item.Seleccionado = TodosSeleccionados;
         }
+    }
+
+
+    private IQueryable<LateWorkActivity> ScopedLateWorkQuery(AppDbContext db)
+    {
+        var query = db.LateWorkActivities
+            .Where(x => x.Assignment != null && x.Assignment.Libro != null);
+
+        return Scope.ViewAllEmployeeTypes
+            ? query
+            : query.Where(x => x.Assignment!.Libro!.EmployeeTypeId == Scope.EmployeeTypeId);
     }
 
     private void AplicarFiltro()
@@ -1019,6 +1063,7 @@ else
     private class AssignmentComboItem
     {
         public Guid Id { get; set; }
+        public string EmployeeTypeCode { get; set; } = string.Empty;
 
         public string DisplayName { get; set; } = string.Empty;
     }
@@ -1028,6 +1073,7 @@ else
         public Guid Id { get; set; }
 
         public Guid AssignmentId { get; set; }
+        public string EmployeeTypeCode { get; set; } = string.Empty;
 
         public long LateWorkId { get; set; }
 

@@ -7,6 +7,8 @@
         public int IdEmpleado { get; set; }
         public string Email { get; set; } = string.Empty;
         public bool Activo { get; set; }
+        public short EmployeeTypeId { get; set; }
+        public EmployeeType? EmployeeType { get; set; }
         public ICollection<Asignaciones> Asignaciones { get; set; } = new List<Asignaciones>();
         public Usuario? Usuario { get; set; }
     }

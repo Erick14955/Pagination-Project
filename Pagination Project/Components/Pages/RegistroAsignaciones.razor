@@ -11,6 +11,7 @@
 @using ClosedXML.Excel
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Web
@@ -22,6 +23,7 @@
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
+@inject IUserDataScopeService UserDataScopeService
 
 <PageTitle>Assignments</PageTitle>
 
@@ -65,6 +67,16 @@
                 </div>
 
                 <div class="header-actions">
+                    @if (PuedeDescargarPlantilla)
+                    {
+                        <button type="button"
+                                class="btn-template-xlsx"
+                                disabled="@DescargandoPlantillaXlsx"
+                                @onclick="DownloadAssignmentsTemplateAsync">
+                            @(DescargandoPlantillaXlsx ? "Downloading..." : "📄 Download Template")
+                        </button>
+                    }
+
                     <InputFile @key="XlsxInputKey"
                                id="xlsxAssignmentsUpload"
                                class="file-input-hidden"
@@ -265,6 +277,10 @@
                     <thead>
                         <tr>
                             <th>Employee</th>
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
                             <th>Temporary Assignment</th>
                             <th>Book Name</th>
                             <th>KGEN</th>
@@ -295,6 +311,11 @@
                                         <span>@item.EmpleadoEmail</span>
                                     </div>
                                 </td>
+
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <td data-label="Department"><span class="pill">@item.EmployeeTypeCode</span></td>
+                                }
 
                                 <td data-label="Temporary">
                                     @if (item.TieneAsignacionTemporal)
@@ -578,6 +599,8 @@
 }
 
 @code {
+    private UserDataScope Scope { get; set; } = new();
+    private List<EmployeeType> EmployeeTypes { get; set; } = new();
     private List<Empleados> Empleados { get; set; } = new();
     private List<Libros> Libros { get; set; } = new();
     private List<AsignacionViewModel> AsignacionesListado { get; set; } = new();
@@ -602,9 +625,14 @@
     private ClaimsPrincipal? UsuarioActual { get; set; }
     private bool CreateAssignations { get; set; } = false;
 
+    // En este proyecto ViewAllEmployeeTypes está reservado para
+    // ADMIN, ADMINISTRATOR y SUPERVISOR.
+    private bool PuedeDescargarPlantilla => Scope.ViewAllEmployeeTypes;
+
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
+    private bool DescargandoPlantillaXlsx { get; set; } = false;
     private bool ActualizandoLibrosXlsx { get; set; } = false;
     private Guid XlsxBooksUpdateInputKey { get; set; } = Guid.NewGuid();
     //private DotNetObjectReference<Asignaciones>? _dotNetRef;
@@ -666,6 +694,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         UsuarioActual = authState.User;
+        Scope = await UserDataScopeService.GetScopeAsync(UsuarioActual);
         CreateAssignations = HasPermission(UsuarioActual, "CreateAssignations");
 
         await CargarCatalogosAsync();
@@ -976,6 +1005,7 @@
             await using var db = await DbFactory.CreateDbContextAsync();
 
             var asignacion = await db.Asignaciones
+                .ApplyScope(Scope)
                 .Include(x => x.Empleado)
                 .Include(x => x.Libro)
                 .FirstOrDefaultAsync(x => x.Id == AsignacionTemporalSeleccionadaId.Value);
@@ -995,12 +1025,19 @@
             var empleadosPermitidosIds =
                 await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
 
+            var empleadoTemporal = await db.Empleados
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == EmpleadoTemporalSeleccionadoId.Value);
+
             var empleadoTemporalPermitido =
-                empleadosPermitidosIds.Contains(EmpleadoTemporalSeleccionadoId.Value);
+                empleadosPermitidosIds.Contains(EmpleadoTemporalSeleccionadoId.Value) &&
+                empleadoTemporal is not null &&
+                asignacion.Libro is not null &&
+                empleadoTemporal.EmployeeTypeId == asignacion.Libro.EmployeeTypeId;
 
             if (!empleadoTemporalPermitido)
             {
-                MostrarMensaje("The selected temporary employee is not allowed to work assignments.", "error");
+                MostrarMensaje("The temporary employee must be active, allowed, and belong to the same employee type as the book.", "error");
                 return;
             }
 
@@ -1063,7 +1100,9 @@
 
                 if (asignacion is not null)
                 {
-                    query = query.Where(x => x.Id != asignacion.EmpleadoId);
+                    query = query.Where(x =>
+                        x.Id != asignacion.EmpleadoId &&
+                        x.EmployeeTypeId == asignacion.EmployeeTypeId);
                 }
             }
 
@@ -1204,6 +1243,8 @@
 
             Empleados = await db.Empleados
                 .AsNoTracking()
+                .Include(x => x.EmployeeType)
+                .ApplyScope(Scope)
                 .Where(x => x.Activo &&
                             EmpleadosPermitidosAsignacionesIds.Contains(x.Id))
                 .OrderBy(x => x.Nombre)
@@ -1211,6 +1252,8 @@
 
             Libros = await db.Libros
                 .AsNoTracking()
+                .Include(x => x.EmployeeType)
+                .ApplyScope(Scope)
                 .Where(x =>
                     !x.Finalizado &&
                     !db.Asignaciones.Any(a =>
@@ -1221,8 +1264,10 @@
 
             var asignacionesDb = await db.Asignaciones
                 .AsNoTracking()
+                .ApplyScope(Scope)
                 .Include(x => x.Empleado)
                 .Include(x => x.Libro)
+                    .ThenInclude(l => l!.EmployeeType)
                 .Where(x => !x.Finalizado &&
                             x.Libro != null &&
                             !x.Libro.Finalizado)
@@ -1300,6 +1345,9 @@
                     EmpleadoNombre = x.Empleado?.Nombre ?? string.Empty,
                     EmpleadoCodigo = x.Empleado?.IdEmpleado ?? 0,
                     EmpleadoEmail = x.Empleado?.Email ?? string.Empty,
+                    EmployeeTypeId = x.Libro?.EmployeeTypeId ?? (short)0,
+                    EmployeeTypeCode = x.Libro?.EmployeeType?.Code
+                        ?? GetEmployeeTypeCode(x.Libro?.EmployeeTypeId ?? (short)0),
 
                     LibroId = x.IdLibro,
                     BookName = x.Libro?.BookName ?? string.Empty,
@@ -1729,6 +1777,12 @@
         {
             await using var db = await DbFactory.CreateDbContextAsync();
 
+            EmployeeTypes = await db.EmployeeTypes
+                .AsNoTracking()
+                .Where(x => x.Active)
+                .OrderBy(x => x.Code)
+                .ToListAsync();
+
             BindPlants = await db.Bind_Plants
                 .AsNoTracking()
                 .OrderBy(x => x.Bind_Plant_Name)
@@ -1769,12 +1823,18 @@
     {
         get
         {
+            IEnumerable<Empleados> query = Empleados;
+            var selectedBook = LibroSeleccionado;
+
+            if (selectedBook is not null)
+                query = query.Where(x => x.EmployeeTypeId == selectedBook.EmployeeTypeId);
+
             if (string.IsNullOrWhiteSpace(EmpleadoTexto))
-                return Empleados.Take(100);
+                return query.Take(100);
 
             var filtro = Normalizar(EmpleadoTexto);
 
-            return Empleados
+            return query
                 .Where(x =>
                     Normalizar(x.Nombre).Contains(filtro) ||
                     x.IdEmpleado.ToString(CultureInfo.InvariantCulture).Contains(filtro))
@@ -1786,12 +1846,18 @@
     {
         get
         {
+            IEnumerable<Libros> query = Libros;
+            var selectedEmployee = EmpleadoSeleccionado;
+
+            if (selectedEmployee is not null)
+                query = query.Where(x => x.EmployeeTypeId == selectedEmployee.EmployeeTypeId);
+
             if (string.IsNullOrWhiteSpace(LibroTexto))
-                return Libros.Take(100);
+                return query.Take(100);
 
             var filtro = Normalizar(LibroTexto);
 
-            return Libros
+            return query
                 .Where(x =>
                     Normalizar(x.BookName).Contains(filtro) ||
                     Normalizar(x.KGENCode).Contains(filtro) ||
@@ -1856,7 +1922,8 @@
                     Normalizar(x.LegacyCodeName).Contains(filtro) ||
                     Normalizar(x.PrintFootName).Contains(filtro) ||
                     Normalizar(x.TrimSizeName).Contains(filtro) ||
-                    Normalizar(x.BindPlantName).Contains(filtro));
+                    Normalizar(x.BindPlantName).Contains(filtro) ||
+                    Normalizar(x.EmployeeTypeCode).Contains(filtro));
             }
 
             return query;
@@ -1906,6 +1973,18 @@
             if (libro is null)
             {
                 MostrarMensaje("Select a valid book. You can search by Book Name, KGEN Code or LSA Code.", "error");
+                return;
+            }
+
+            if (empleado.EmployeeTypeId != libro.EmployeeTypeId)
+            {
+                MostrarMensaje("The employee and book belong to different employee types.", "error");
+                return;
+            }
+
+            if (!Scope.CanAccess(libro.EmployeeTypeId))
+            {
+                MostrarMensaje("You cannot create assignments for this employee type.", "error");
                 return;
             }
 
@@ -1973,6 +2052,7 @@
             await using var db = await DbFactory.CreateDbContextAsync();
 
             var asignacion = await db.Asignaciones
+                .ApplyScope(Scope)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (asignacion is null)
@@ -1999,6 +2079,7 @@
         var hoy = DateOnly.FromDateTime(DateTime.Today);
 
         var librosParaFinalizar = await db.Libros
+            .ApplyScope(Scope)
             .Include(x => x.Asignaciones)
                 .ThenInclude(a => a.Evaluaciones)
             .Where(x => !x.Finalizado &&
@@ -2042,6 +2123,631 @@
             errors = ResultadoImportacion.Errores,
             warnings = ResultadoImportacion.Advertencias
         });
+    }
+
+    private async Task DownloadAssignmentsTemplateAsync()
+    {
+        if (!PuedeDescargarPlantilla)
+        {
+            MostrarMensaje(
+                "Only supervisors and administrators can download the assignments template.",
+                "error");
+            return;
+        }
+
+        try
+        {
+            DescargandoPlantillaXlsx = true;
+            LimpiarMensaje();
+
+            if (!EmployeeTypes.Any() ||
+                !BindPlants.Any() ||
+                !Databases.Any() ||
+                !LegacyCodes.Any() ||
+                !PrintFeet.Any() ||
+                !States.Any() ||
+                !TrimSizes.Any())
+            {
+                await CargarCatalogosAsync();
+            }
+
+            using var workbook = new XLWorkbook();
+
+            // =========================================================
+            // FIRST WORKSHEET: THE IMPORTER READS THE FIRST SHEET.
+            // KEEP THE HEADER IN ROW 1 WITH NO TITLE ABOVE IT.
+            // =========================================================
+            var worksheet = workbook.Worksheets.Add("Assignments Upload");
+
+            var headers = new[]
+            {
+                "employee_type",
+                "Employee ID",
+                "Employee",
+                "Product Name",
+                "KGen Product Code",
+                "LSA Code",
+                "Product Issue",
+                "Foot Print",
+                "Legacy Co",
+                "State",
+                "Graphics Database",
+                "Trim Size",
+                "Bind Plant",
+                "First Due Printer",
+                "Proof Extract",
+                "Extract - Final",
+                "Memo Extract",
+                "Dirxion",
+                "Pub Date",
+                "SRL Suppression Flag",
+                "NWP"
+            };
+
+            const int headerRow = 1;
+            const int firstDataRow = 2;
+            const int lastTemplateRow = 500;
+            var lastColumn = headers.Length;
+
+            for (var column = 1; column <= lastColumn; column++)
+            {
+                worksheet.Cell(headerRow, column).Value = headers[column - 1];
+            }
+
+            var headerRange = worksheet.Range(
+                headerRow,
+                1,
+                headerRow,
+                lastColumn);
+
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            headerRange.Style.Alignment.WrapText = true;
+            headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Fully required columns.
+            foreach (var requiredColumn in new[] { 1, 4, 5 })
+            {
+                worksheet.Cell(headerRow, requiredColumn)
+                    .Style.Fill.BackgroundColor = XLColor.FromHtml("#EA580C");
+            }
+
+            // Employee ID or Employee Name: at least one must be completed.
+            foreach (var conditionalColumn in new[] { 2, 3 })
+            {
+                worksheet.Cell(headerRow, conditionalColumn)
+                    .Style.Fill.BackgroundColor = XLColor.FromHtml("#D97706");
+            }
+
+            worksheet.Row(headerRow).Height = 34;
+            worksheet.SheetView.FreezeRows(1);
+            headerRange.SetAutoFilter();
+
+            worksheet.Range(
+                    firstDataRow,
+                    14,
+                    lastTemplateRow,
+                    19)
+                .Style.DateFormat.Format = "MM/dd/yyyy";
+
+            worksheet.Range(
+                    firstDataRow,
+                    1,
+                    lastTemplateRow,
+                    lastColumn)
+                .Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            var widths = new double[]
+            {
+                18, // employee_type
+                16, // Employee ID
+                30, // Employee
+                34, // Product Name
+                22, // KGen Product Code
+                18, // LSA Code
+                20, // Product Issue
+                20, // Foot Print
+                18, // Legacy Co
+                18, // State
+                22, // Graphics Database
+                18, // Trim Size
+                18, // Bind Plant
+                19, // First Due Printer
+                18, // Proof Extract
+                18, // Extract - Final
+                18, // Memo Extract
+                18, // Dirxion
+                18, // Pub Date
+                22, // SRL Suppression Flag
+                12  // NWP
+            };
+
+            for (var column = 1; column <= widths.Length; column++)
+            {
+                worksheet.Column(column).Width = widths[column - 1];
+            }
+
+            // =========================================================
+            // INSTRUCTIONS
+            // =========================================================
+            var instructionsSheet = workbook.Worksheets.Add("Instructions");
+
+            instructionsSheet.Cell(1, 1).Value = "Assignments Upload Template";
+            instructionsSheet.Range(1, 1, 1, 4).Merge();
+
+            instructionsSheet.Cell(2, 1).Value =
+                "Complete the 'Assignments Upload' worksheet. Keep the column names exactly as provided and upload the file as .xlsx.";
+            instructionsSheet.Range(2, 1, 2, 4).Merge();
+
+            instructionsSheet.Cell(3, 1).Value =
+                "Use Employee ID whenever possible. If Employee ID is blank, Employee must exactly match one active employee name.";
+            instructionsSheet.Range(3, 1, 3, 4).Merge();
+
+            instructionsSheet.Cell(4, 1).Value =
+                "Book catalog and date columns are used only when the KGEN does not already exist and a new book must be created. Blank dates for a new book use the current date.";
+            instructionsSheet.Range(4, 1, 4, 4).Merge();
+
+            instructionsSheet.Cell(6, 1).Value = "Column";
+            instructionsSheet.Cell(6, 2).Value = "Required";
+            instructionsSheet.Cell(6, 3).Value = "Accepted value / format";
+            instructionsSheet.Cell(6, 4).Value = "Notes";
+
+            var columnInstructions = new[]
+            {
+                new
+                {
+                    Column = "employee_type",
+                    Required = "Yes",
+                    Format = "DR or ECLERX",
+                    Notes = "The employee and book must belong to this same employee type."
+                },
+                new
+                {
+                    Column = "Employee ID",
+                    Required = "Employee ID or Employee",
+                    Format = "Whole number",
+                    Notes = "Recommended. Must identify an active employee allowed to receive assignments."
+                },
+                new
+                {
+                    Column = "Employee",
+                    Required = "Employee ID or Employee",
+                    Format = "Exact employee name",
+                    Notes = "Used only when Employee ID is blank or was not found. Use Employee ID when names are duplicated."
+                },
+                new
+                {
+                    Column = "Product Name",
+                    Required = "Yes for new books",
+                    Format = "Text",
+                    Notes = "Required by the template and required when the KGEN does not already exist."
+                },
+                new
+                {
+                    Column = "KGen Product Code",
+                    Required = "Yes",
+                    Format = "Text",
+                    Notes = "Global book identifier. It must be unique."
+                },
+                new
+                {
+                    Column = "LSA Code",
+                    Required = "No",
+                    Format = "Text",
+                    Notes = "Optional LSA identifier."
+                },
+                new
+                {
+                    Column = "Product Issue",
+                    Required = "No",
+                    Format = "Text",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Foot Print",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Legacy Co",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "State",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Graphics Database",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Trim Size",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Bind Plant",
+                    Required = "No",
+                    Format = "Use a value from 'Allowed Values'",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "First Due Printer",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used as Shipping Date for a new book. Final PO is calculated as the previous business day."
+                },
+                new
+                {
+                    Column = "Proof Extract",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Extract - Final",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Memo Extract",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Dirxion",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "Pub Date",
+                    Required = "No",
+                    Format = "MM/dd/yyyy",
+                    Notes = "Used when creating a new book."
+                },
+                new
+                {
+                    Column = "SRL Suppression Flag",
+                    Required = "No",
+                    Format = "YES / NO",
+                    Notes = "YES, Y, TRUE, 1 or X are treated as true."
+                },
+                new
+                {
+                    Column = "NWP",
+                    Required = "No",
+                    Format = "YES / NO",
+                    Notes = "YES, Y, TRUE, 1 or X are treated as true."
+                }
+            };
+
+            var instructionRow = 7;
+
+            foreach (var item in columnInstructions)
+            {
+                instructionsSheet.Cell(instructionRow, 1).Value = item.Column;
+                instructionsSheet.Cell(instructionRow, 2).Value = item.Required;
+                instructionsSheet.Cell(instructionRow, 3).Value = item.Format;
+                instructionsSheet.Cell(instructionRow, 4).Value = item.Notes;
+                instructionRow++;
+            }
+
+            var instructionsTitle = instructionsSheet.Range(1, 1, 1, 4);
+            instructionsTitle.Style.Font.Bold = true;
+            instructionsTitle.Style.Font.FontSize = 16;
+            instructionsTitle.Style.Fill.BackgroundColor = XLColor.FromHtml("#0F172A");
+            instructionsTitle.Style.Font.FontColor = XLColor.White;
+            instructionsTitle.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            instructionsSheet.Range(2, 1, 4, 4)
+                .Style.Alignment.WrapText = true;
+
+            var instructionsHeader = instructionsSheet.Range(6, 1, 6, 4);
+            instructionsHeader.Style.Font.Bold = true;
+            instructionsHeader.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+            instructionsHeader.Style.Font.FontColor = XLColor.White;
+
+            var instructionsTableRange = instructionsSheet.Range(
+                6,
+                1,
+                instructionRow - 1,
+                4);
+
+            instructionsTableRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            instructionsTableRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            instructionsTableRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+            instructionsTableRange.Style.Alignment.WrapText = true;
+
+            for (var row = 7; row < instructionRow; row++)
+            {
+                var requiredText = instructionsSheet.Cell(row, 2).GetString();
+
+                if (!string.Equals(requiredText, "No", StringComparison.OrdinalIgnoreCase))
+                {
+                    instructionsSheet.Cell(row, 2)
+                        .Style.Fill.BackgroundColor = XLColor.FromHtml("#FFEDD5");
+
+                    instructionsSheet.Cell(row, 2)
+                        .Style.Font.FontColor = XLColor.FromHtml("#C2410C");
+
+                    instructionsSheet.Cell(row, 2)
+                        .Style.Font.Bold = true;
+                }
+            }
+
+            instructionsSheet.Column(1).Width = 25;
+            instructionsSheet.Column(2).Width = 24;
+            instructionsSheet.Column(3).Width = 34;
+            instructionsSheet.Column(4).Width = 76;
+            instructionsSheet.Row(2).Height = 36;
+            instructionsSheet.Row(3).Height = 36;
+            instructionsSheet.Row(4).Height = 48;
+            instructionsSheet.SheetView.FreezeRows(6);
+
+            // =========================================================
+            // EMPLOYEES
+            // =========================================================
+            var employeesSheet = workbook.Worksheets.Add("Employees");
+
+            employeesSheet.Cell(1, 1).Value = "employee_type";
+            employeesSheet.Cell(1, 2).Value = "Employee ID";
+            employeesSheet.Cell(1, 3).Value = "Employee";
+            employeesSheet.Cell(1, 4).Value = "Email";
+
+            var employeeRow = 2;
+
+            foreach (var empleado in Empleados
+                .OrderBy(x => GetEmployeeTypeCode(x.EmployeeTypeId))
+                .ThenBy(x => x.Nombre))
+            {
+                employeesSheet.Cell(employeeRow, 1).Value =
+                    GetEmployeeTypeCode(empleado.EmployeeTypeId);
+
+                employeesSheet.Cell(employeeRow, 2).Value =
+                    empleado.IdEmpleado;
+
+                employeesSheet.Cell(employeeRow, 3).Value =
+                    empleado.Nombre ?? string.Empty;
+
+                employeesSheet.Cell(employeeRow, 4).Value =
+                    empleado.Email ?? string.Empty;
+
+                employeeRow++;
+            }
+
+            var employeesHeader = employeesSheet.Range(1, 1, 1, 4);
+            employeesHeader.Style.Font.Bold = true;
+            employeesHeader.Style.Font.FontColor = XLColor.White;
+            employeesHeader.Style.Fill.BackgroundColor = XLColor.FromHtml("#0F766E");
+            employeesHeader.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            if (employeeRow > 2)
+            {
+                var employeesRange = employeesSheet.Range(1, 1, employeeRow - 1, 4);
+                employeesRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                employeesRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                employeesRange.SetAutoFilter();
+            }
+
+            employeesSheet.SheetView.FreezeRows(1);
+            employeesSheet.Column(1).Width = 18;
+            employeesSheet.Column(2).Width = 16;
+            employeesSheet.Column(3).Width = 32;
+            employeesSheet.Column(4).Width = 34;
+
+            // =========================================================
+            // AVAILABLE BOOKS
+            // =========================================================
+            var booksSheet = workbook.Worksheets.Add("Available Books");
+
+            booksSheet.Cell(1, 1).Value = "employee_type";
+            booksSheet.Cell(1, 2).Value = "Product Name";
+            booksSheet.Cell(1, 3).Value = "KGen Product Code";
+            booksSheet.Cell(1, 4).Value = "LSA Code";
+
+            var bookRow = 2;
+
+            foreach (var libro in Libros
+                .OrderBy(x => GetEmployeeTypeCode(x.EmployeeTypeId))
+                .ThenBy(x => x.BookName))
+            {
+                booksSheet.Cell(bookRow, 1).Value =
+                    GetEmployeeTypeCode(libro.EmployeeTypeId);
+
+                booksSheet.Cell(bookRow, 2).Value =
+                    libro.BookName ?? string.Empty;
+
+                booksSheet.Cell(bookRow, 3).Value =
+                    libro.KGENCode ?? string.Empty;
+
+                booksSheet.Cell(bookRow, 4).Value =
+                    libro.LSACode ?? string.Empty;
+
+                bookRow++;
+            }
+
+            var booksHeader = booksSheet.Range(1, 1, 1, 4);
+            booksHeader.Style.Font.Bold = true;
+            booksHeader.Style.Font.FontColor = XLColor.White;
+            booksHeader.Style.Fill.BackgroundColor = XLColor.FromHtml("#7C3AED");
+            booksHeader.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            if (bookRow > 2)
+            {
+                var booksRange = booksSheet.Range(1, 1, bookRow - 1, 4);
+                booksRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                booksRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                booksRange.SetAutoFilter();
+            }
+
+            booksSheet.SheetView.FreezeRows(1);
+            booksSheet.Column(1).Width = 18;
+            booksSheet.Column(2).Width = 38;
+            booksSheet.Column(3).Width = 22;
+            booksSheet.Column(4).Width = 18;
+
+            // =========================================================
+            // ALLOWED VALUES
+            // =========================================================
+            var allowedValuesSheet = workbook.Worksheets.Add("Allowed Values");
+
+            var allowedLists = new List<(string Header, IEnumerable<string> Values)>
+            {
+                (
+                    "employee_type",
+                    EmployeeTypes
+                        .Where(x => x.Active)
+                        .Select(x => x.Code)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Foot Print",
+                    PrintFeet
+                        .Select(x => x.Print_Foot_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Legacy Co",
+                    LegacyCodes
+                        .Select(x => x.Legacy_Code_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "State",
+                    States
+                        .Select(x => x.State_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Graphics Database",
+                    Databases
+                        .Select(x => x.Database_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Trim Size",
+                    TrimSizes
+                        .Select(x => x.Trim_Size_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "Bind Plant",
+                    BindPlants
+                        .Select(x => x.Bind_Plant_Name)
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                ),
+                (
+                    "YES / NO",
+                    new[] { "YES", "NO" }
+                )
+            };
+
+            for (var listColumn = 1; listColumn <= allowedLists.Count; listColumn++)
+            {
+                var list = allowedLists[listColumn - 1];
+
+                allowedValuesSheet.Cell(1, listColumn).Value = list.Header;
+
+                var listRow = 2;
+
+                foreach (var value in list.Values)
+                {
+                    allowedValuesSheet.Cell(listRow, listColumn).Value = value;
+                    listRow++;
+                }
+            }
+
+            var allowedHeaderRange = allowedValuesSheet.Range(
+                1,
+                1,
+                1,
+                allowedLists.Count);
+
+            allowedHeaderRange.Style.Font.Bold = true;
+            allowedHeaderRange.Style.Font.FontColor = XLColor.White;
+            allowedHeaderRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+            allowedHeaderRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            allowedHeaderRange.Style.Alignment.WrapText = true;
+
+            allowedValuesSheet.SheetView.FreezeRows(1);
+            allowedValuesSheet.Columns().AdjustToContents();
+
+            foreach (var column in allowedValuesSheet.ColumnsUsed())
+            {
+                if (column.Width < 16)
+                    column.Width = 16;
+
+                if (column.Width > 35)
+                    column.Width = 35;
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            var base64 = Convert.ToBase64String(stream.ToArray());
+            var fileName =
+                $"Assignments_Upload_Template_{DateTime.Now:yyyyMMdd}.xlsx";
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+
+            MostrarMensaje(
+                "Assignments upload template downloaded successfully.",
+                "success");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(
+                $"Error downloading the assignments template: {ex.Message}",
+                "error");
+        }
+        finally
+        {
+            DescargandoPlantillaXlsx = false;
+        }
     }
 
     private async Task ImportAssignmentsFromXlsxAsync(InputFileChangeEventArgs e)
@@ -2136,9 +2842,22 @@
 
             var headerMap = BuildHeaderMap(headerRow);
 
-            if (!HeaderExists(headerMap, "Employee", "Employee Name"))
+            if (!HeaderExists(headerMap, "employee_type", "Employee Type"))
             {
-                ResultadoImportacion.Errores.Add("Missing required column: 'Employee' or 'Employee Name'.");
+                ResultadoImportacion.Errores.Add("Missing required column: 'employee_type'.");
+
+                await MostrarModalImportacionJsAsync(
+                    "XLSX import failed",
+                    "The file is missing the required employee_type column.",
+                    "error");
+
+                return;
+            }
+
+            if (!HeaderExists(headerMap, "Employee", "Employee Name") &&
+                !HeaderExists(headerMap, "Employee ID", "Employee_ID"))
+            {
+                ResultadoImportacion.Errores.Add("Missing required column: 'Employee', 'Employee Name', or 'Employee ID'.");
 
                 await MostrarModalImportacionJsAsync(
                     "XLSX import failed",
@@ -2178,6 +2897,8 @@
                 await ObtenerEmpleadosPermitidosParaAsignacionesAsync(db);
 
             var empleadosDb = await db.Empleados
+                .AsNoTracking()
+                .ApplyScope(Scope)
                 .Where(x => x.Activo &&
                             empleadosPermitidosIds.Contains(x.Id))
                 .ToListAsync();
@@ -2192,6 +2913,9 @@
             {
                 var rowNumber = row.RowNumber();
 
+                var employeeTypeCode = ReadText(row, headerMap, "employee_type", "Employee Type");
+                var employeeType = ResolveEmployeeType(employeeTypeCode);
+                var employeeIdText = ReadText(row, headerMap, "Employee ID", "Employee_ID");
                 var employeeName = ReadText(row, headerMap, "Employee", "Employee Name");
                 var bookName = ReadText(row, headerMap, "Product Name");
                 var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code");
@@ -2206,19 +2930,56 @@
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(employeeName))
+                if (employeeType is null)
                 {
                     ResultadoImportacion.FilasOmitidas++;
-                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: The column 'Employee' is empty.");
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: employee_type must be DR or ECLERX.");
                     continue;
                 }
 
-                var empleado = BuscarEmpleadoPorNombre(empleadosDb, employeeName);
+                if (!Scope.CanAccess(employeeType.Id))
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: You cannot import assignments for {employeeType.Code}.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(employeeName) && string.IsNullOrWhiteSpace(employeeIdText))
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: Employee or Employee ID is required.");
+                    continue;
+                }
+
+                Empleados? empleado = null;
+
+                if (int.TryParse(employeeIdText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var employeeId))
+                {
+                    empleado = empleadosDb.FirstOrDefault(x =>
+                        x.IdEmpleado == employeeId && x.EmployeeTypeId == employeeType.Id);
+                }
+
+                if (empleado is null && !string.IsNullOrWhiteSpace(employeeName))
+                {
+                    var matches = empleadosDb
+                        .Where(x => x.EmployeeTypeId == employeeType.Id &&
+                            Normalizar(x.Nombre) == Normalizar(employeeName))
+                        .ToList();
+
+                    if (matches.Count > 1)
+                    {
+                        ResultadoImportacion.FilasOmitidas++;
+                        ResultadoImportacion.Errores.Add($"Row {rowNumber}: More than one employee named '{employeeName}' exists in {employeeType.Code}. Use Employee ID.");
+                        continue;
+                    }
+
+                    empleado = matches.FirstOrDefault();
+                }
 
                 if (empleado is null)
                 {
                     ResultadoImportacion.FilasOmitidas++;
-                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: Employee '{employeeName}' was not found or is not active.");
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: Employee '{employeeName}' / ID '{employeeIdText}' was not found as an active {employeeType.Code} employee.");
                     continue;
                 }
 
@@ -2231,7 +2992,22 @@
                     continue;
                 }
 
+                if (string.IsNullOrWhiteSpace(kgenCode))
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: KGEN Code is required and is globally unique.");
+                    continue;
+                }
+
                 var libro = BuscarLibroPorCodigos(librosDb, kgenCode, lsaCode);
+
+                if (libro is not null && libro.EmployeeTypeId != employeeType.Id)
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Errores.Add(
+                        $"Row {rowNumber}: KGEN '{kgenCode}' belongs to {GetEmployeeTypeCode(libro.EmployeeTypeId)}, not {employeeType.Code}.");
+                    continue;
+                }
 
                 if (libro is null)
                 {
@@ -2337,6 +3113,7 @@
                     libro = new Libros
                     {
                         Id = Guid.NewGuid(),
+                        EmployeeTypeId = employeeType.Id,
 
                         BookName = bookName,
                         KGENCode = kgenCode,
@@ -2369,8 +3146,15 @@
                     ResultadoImportacion.LibrosCreados++;
                 }
 
+                if (empleado.EmployeeTypeId != libro.EmployeeTypeId)
+                {
+                    ResultadoImportacion.FilasOmitidas++;
+                    ResultadoImportacion.Errores.Add($"Row {rowNumber}: Employee and book belong to different employee types.");
+                    continue;
+                }
+
                 var existeAsignacion = await db.Asignaciones
-                    .AnyAsync(x => x.IdEmpleado == empleado.Id && x.IdLibro == libro.Id);
+                    .AnyAsync(x => x.IdLibro == libro.Id && !x.Finalizado);
 
                 if (existeAsignacion)
                 {
@@ -2491,21 +3275,21 @@
     private static Libros? BuscarLibroPorCodigos(List<Libros> libros, string kgenCode, string lsaCode)
     {
         var kgen = Normalizar(kgenCode);
-        var lsa = Normalizar(lsaCode);
 
-        return libros.FirstOrDefault(x =>
-            (!string.IsNullOrWhiteSpace(kgen) && Normalizar(x.KGENCode) == kgen) ||
-            (!string.IsNullOrWhiteSpace(lsa) && Normalizar(x.LSACode) == lsa));
+        if (string.IsNullOrWhiteSpace(kgen))
+            return null;
+
+        return libros.FirstOrDefault(x => Normalizar(x.KGENCode) == kgen);
     }
 
     private string GetEmpleadoDisplay(Empleados empleado)
     {
-        return $"{empleado.Nombre} | ID: {empleado.IdEmpleado}";
+        return $"{empleado.Nombre} | ID: {empleado.IdEmpleado} | {GetEmployeeTypeCode(empleado.EmployeeTypeId)}";
     }
 
     private string GetLibroDisplay(Libros libro)
     {
-        return $"{libro.BookName} | KGEN: {libro.KGENCode} | LSA: {libro.LSACode}";
+        return $"{libro.BookName} | KGEN: {libro.KGENCode} | LSA: {libro.LSACode} | {GetEmployeeTypeCode(libro.EmployeeTypeId)}";
     }
 
     private void LimpiarFormulario()
@@ -2575,8 +3359,10 @@
 
             var asignacionesCompletas = await db.Asignaciones
                 .AsNoTracking()
+                .ApplyScope(Scope)
                 .Include(x => x.Empleado)
                 .Include(x => x.Libro)
+                    .ThenInclude(l => l!.EmployeeType)
                 .Where(x => asignacionIds.Contains(x.Id))
                 .OrderBy(x => x.Empleado!.Nombre)
                 .ThenBy(x => x.Libro!.BookName)
@@ -2585,7 +3371,7 @@
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Assignments");
 
-            const int lastColumn = 20;
+            const int lastColumn = 22;
 
             var empleadoFiltroTexto = "All Employees";
 
@@ -2627,26 +3413,28 @@
 
             var headerRow = 5;
 
-            worksheet.Cell(headerRow, 1).Value = "Employee";
-            worksheet.Cell(headerRow, 2).Value = "Book Name";
-            worksheet.Cell(headerRow, 3).Value = "KGEN";
-            worksheet.Cell(headerRow, 4).Value = "LSA";
-            worksheet.Cell(headerRow, 5).Value = "Product Issue";
-            worksheet.Cell(headerRow, 6).Value = "State";
-            worksheet.Cell(headerRow, 7).Value = "Database";
-            worksheet.Cell(headerRow, 8).Value = "Legacy Code";
-            worksheet.Cell(headerRow, 9).Value = "Print Foot";
-            worksheet.Cell(headerRow, 10).Value = "Trim Size";
-            worksheet.Cell(headerRow, 11).Value = "Bind Plant";
-            worksheet.Cell(headerRow, 12).Value = "Proof Extract";
-            worksheet.Cell(headerRow, 13).Value = "Final Extract";
-            worksheet.Cell(headerRow, 14).Value = "Memo Extract";
-            worksheet.Cell(headerRow, 15).Value = "Final PO Date";
-            worksheet.Cell(headerRow, 16).Value = "Shipping Date";
-            worksheet.Cell(headerRow, 17).Value = "Dirxion Date";
-            worksheet.Cell(headerRow, 18).Value = "Pub Date";
-            worksheet.Cell(headerRow, 19).Value = "SRL Suppression";
-            worksheet.Cell(headerRow, 20).Value = "NWP";
+            worksheet.Cell(headerRow, 1).Value = "employee_type";
+            worksheet.Cell(headerRow, 2).Value = "Employee ID";
+            worksheet.Cell(headerRow, 3).Value = "Employee";
+            worksheet.Cell(headerRow, 4).Value = "Book Name";
+            worksheet.Cell(headerRow, 5).Value = "KGEN";
+            worksheet.Cell(headerRow, 6).Value = "LSA";
+            worksheet.Cell(headerRow, 7).Value = "Product Issue";
+            worksheet.Cell(headerRow, 8).Value = "State";
+            worksheet.Cell(headerRow, 9).Value = "Database";
+            worksheet.Cell(headerRow, 10).Value = "Legacy Code";
+            worksheet.Cell(headerRow, 11).Value = "Print Foot";
+            worksheet.Cell(headerRow, 12).Value = "Trim Size";
+            worksheet.Cell(headerRow, 13).Value = "Bind Plant";
+            worksheet.Cell(headerRow, 14).Value = "Proof Extract";
+            worksheet.Cell(headerRow, 15).Value = "Final Extract";
+            worksheet.Cell(headerRow, 16).Value = "Memo Extract";
+            worksheet.Cell(headerRow, 17).Value = "Final PO Date";
+            worksheet.Cell(headerRow, 18).Value = "Shipping Date";
+            worksheet.Cell(headerRow, 19).Value = "Dirxion Date";
+            worksheet.Cell(headerRow, 20).Value = "Pub Date";
+            worksheet.Cell(headerRow, 21).Value = "SRL Suppression";
+            worksheet.Cell(headerRow, 22).Value = "NWP";
 
             var row = headerRow + 1;
 
@@ -2654,28 +3442,30 @@
             {
                 var libro = asignacion.Libro;
 
-                worksheet.Cell(row, 1).Value = asignacion.Empleado?.Nombre ?? "-";
-                worksheet.Cell(row, 2).Value = libro?.BookName ?? "-";
-                worksheet.Cell(row, 3).Value = libro?.KGENCode ?? "-";
-                worksheet.Cell(row, 4).Value = libro?.LSACode ?? "-";
-                worksheet.Cell(row, 5).Value = libro?.ProductIssue ?? "-";
-                worksheet.Cell(row, 6).Value = GetStateName(libro?.StateId);
-                worksheet.Cell(row, 7).Value = GetDatabaseName(libro?.DatabaseId);
-                worksheet.Cell(row, 8).Value = GetLegacyCodeName(libro?.LegacyCodeId);
-                worksheet.Cell(row, 9).Value = GetPrintFootName(libro?.PrintFootId);
-                worksheet.Cell(row, 10).Value = GetTrimSizeName(libro?.TrimSizeId);
-                worksheet.Cell(row, 11).Value = GetBindPlantName(libro?.BindPlantId);
+                worksheet.Cell(row, 1).Value = libro is null ? string.Empty : GetEmployeeTypeCode(libro.EmployeeTypeId);
+                worksheet.Cell(row, 2).Value = asignacion.Empleado?.IdEmpleado ?? 0;
+                worksheet.Cell(row, 3).Value = asignacion.Empleado?.Nombre ?? "-";
+                worksheet.Cell(row, 4).Value = libro?.BookName ?? "-";
+                worksheet.Cell(row, 5).Value = libro?.KGENCode ?? "-";
+                worksheet.Cell(row, 6).Value = libro?.LSACode ?? "-";
+                worksheet.Cell(row, 7).Value = libro?.ProductIssue ?? "-";
+                worksheet.Cell(row, 8).Value = GetStateName(libro?.StateId);
+                worksheet.Cell(row, 9).Value = GetDatabaseName(libro?.DatabaseId);
+                worksheet.Cell(row, 10).Value = GetLegacyCodeName(libro?.LegacyCodeId);
+                worksheet.Cell(row, 11).Value = GetPrintFootName(libro?.PrintFootId);
+                worksheet.Cell(row, 12).Value = GetTrimSizeName(libro?.TrimSizeId);
+                worksheet.Cell(row, 13).Value = GetBindPlantName(libro?.BindPlantId);
 
-                EscribirFechaExcel(worksheet.Cell(row, 12), libro?.ProofExtract);
-                EscribirFechaExcel(worksheet.Cell(row, 13), libro?.FinalExtract);
-                EscribirFechaExcel(worksheet.Cell(row, 14), libro?.MemoExtract);
-                EscribirFechaExcel(worksheet.Cell(row, 15), libro?.FinalPODate);
-                EscribirFechaExcel(worksheet.Cell(row, 16), libro?.ShippingDate);
-                EscribirFechaExcel(worksheet.Cell(row, 17), libro?.DirxionDate);
-                EscribirFechaExcel(worksheet.Cell(row, 18), libro?.PubDate);
+                EscribirFechaExcel(worksheet.Cell(row, 14), libro?.ProofExtract);
+                EscribirFechaExcel(worksheet.Cell(row, 15), libro?.FinalExtract);
+                EscribirFechaExcel(worksheet.Cell(row, 16), libro?.MemoExtract);
+                EscribirFechaExcel(worksheet.Cell(row, 17), libro?.FinalPODate);
+                EscribirFechaExcel(worksheet.Cell(row, 18), libro?.ShippingDate);
+                EscribirFechaExcel(worksheet.Cell(row, 19), libro?.DirxionDate);
+                EscribirFechaExcel(worksheet.Cell(row, 20), libro?.PubDate);
 
-                worksheet.Cell(row, 19).Value = libro?.SRLSuppression == true ? "Yes" : "No";
-                worksheet.Cell(row, 20).Value = libro?.NWP == true ? "Yes" : "No";
+                worksheet.Cell(row, 21).Value = libro?.SRLSuppression == true ? "Yes" : "No";
+                worksheet.Cell(row, 22).Value = libro?.NWP == true ? "Yes" : "No";
 
                 row++;
             }
@@ -2699,7 +3489,7 @@
             dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
-            worksheet.Range(headerRow + 1, 12, row - 1, 18).Style.DateFormat.Format = "MM/dd/yyyy";
+            worksheet.Range(headerRow + 1, 14, row - 1, 20).Style.DateFormat.Format = "MM/dd/yyyy";
 
             worksheet.Columns().AdjustToContents();
             worksheet.SheetView.FreezeRows(headerRow);
@@ -3496,10 +4286,22 @@
 
             var headerMap = BuildHeaderMap(headerRow);
 
-            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code") &&
-                !HeaderExists(headerMap, "LSA Code", "LSA"))
+            if (!HeaderExists(headerMap, "employee_type", "Employee Type"))
             {
-                resultado.Errores.Add("Missing required column: 'KGEN Code' or 'LSA Code'. At least one is required to find the book.");
+                resultado.Errores.Add("Missing required column: 'employee_type'.");
+
+                await MostrarModalUpdateBooksJsAsync(
+                    resultado,
+                    "XLSX update failed",
+                    "The file is missing the required employee_type column.",
+                    "error");
+
+                return;
+            }
+
+            if (!HeaderExists(headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code"))
+            {
+                resultado.Errores.Add("Missing required column: 'KGEN Code'. KGEN is the global book identifier.");
 
                 await MostrarModalUpdateBooksJsAsync(
                     resultado,
@@ -3525,6 +4327,8 @@
                 var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code", "KGEN Code");
                 var lsaCode = ReadText(row, headerMap, "LSA Code", "LSA");
                 var productIssue = ReadText(row, headerMap, "Product Issue");
+                var employeeTypeCode = ReadText(row, headerMap, "employee_type", "Employee Type");
+                var employeeType = ResolveEmployeeType(employeeTypeCode);
 
                 if (string.IsNullOrWhiteSpace(bookName) &&
                     string.IsNullOrWhiteSpace(kgenCode) &&
@@ -3534,11 +4338,24 @@
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(kgenCode) &&
-                    string.IsNullOrWhiteSpace(lsaCode))
+                if (employeeType is null)
                 {
                     resultado.FilasOmitidas++;
-                    resultado.Errores.Add($"Row {rowNumber}: KGEN Code or LSA Code is required to update the book.");
+                    resultado.Errores.Add($"Row {rowNumber}: employee_type must be DR or ECLERX.");
+                    continue;
+                }
+
+                if (!Scope.CanAccess(employeeType.Id))
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: You cannot update books from {employeeType.Code}.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(kgenCode))
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add($"Row {rowNumber}: KGEN Code is required to update the book.");
                     continue;
                 }
 
@@ -3550,6 +4367,28 @@
                     resultado.Advertencias.Add(
                         $"Row {rowNumber}: Book was not found. KGEN: '{kgenCode}', LSA: '{lsaCode}', Product Name: '{bookName}'.");
                     continue;
+                }
+
+                if (libro.EmployeeTypeId != employeeType.Id)
+                {
+                    resultado.FilasOmitidas++;
+                    resultado.Errores.Add(
+                        $"Row {rowNumber}: KGEN '{libro.KGENCode}' belongs to {GetEmployeeTypeCode(libro.EmployeeTypeId)}, not {employeeType.Code}.");
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(kgenCode))
+                {
+                    var normalizedKgen = Normalizar(kgenCode);
+                    var duplicateKgen = librosDb.Any(x =>
+                        x.Id != libro.Id && Normalizar(x.KGENCode) == normalizedKgen);
+
+                    if (duplicateKgen)
+                    {
+                        resultado.FilasOmitidas++;
+                        resultado.Errores.Add($"Row {rowNumber}: KGEN '{kgenCode}' already exists. KGEN is globally unique.");
+                        continue;
+                    }
                 }
 
                 var footPrintText = ReadText(row, headerMap, "Foot Print");
@@ -3799,6 +4638,19 @@
         public string NextStage { get; set; } = "Proof";
     }
 
+    private EmployeeType? ResolveEmployeeType(string? code)
+    {
+        var normalized = (code ?? string.Empty).Trim().ToUpperInvariant();
+        return EmployeeTypes.FirstOrDefault(x =>
+            string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetEmployeeTypeCode(short employeeTypeId)
+    {
+        return EmployeeTypes.FirstOrDefault(x => x.Id == employeeTypeId)?.Code
+            ?? (employeeTypeId == Scope.EmployeeTypeId ? Scope.EmployeeTypeCode : string.Empty);
+    }
+
     private sealed class AsignacionViewModel
     {
         public Guid Id { get; set; }
@@ -3807,6 +4659,8 @@
         public string EmpleadoNombre { get; set; } = string.Empty;
         public int EmpleadoCodigo { get; set; }
         public string EmpleadoEmail { get; set; } = string.Empty;
+        public short EmployeeTypeId { get; set; }
+        public string EmployeeTypeCode { get; set; } = string.Empty;
 
         public Guid LibroId { get; set; }
         public string BookName { get; set; } = string.Empty;

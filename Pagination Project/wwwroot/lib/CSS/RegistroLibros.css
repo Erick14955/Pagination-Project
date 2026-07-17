@@ -1985,3 +1985,83 @@ html[data-theme="dark glass"] .books-page .book-date-without-work-status {
                 font-size: 9.5px;
             }
 }
+
+.books-page .btn-template-xlsx {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid rgba(14, 116, 144, 0.28);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0891b2, #2563eb);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.22s ease, opacity 0.18s ease;
+}
+
+    .books-page .btn-template-xlsx:hover:not(:disabled) {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+        box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .books-page .btn-template-xlsx:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .books-page .btn-template-xlsx:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18), 0 12px 26px rgba(37, 99, 235, 0.22);
+    }
+
+    .books-page .btn-template-xlsx:disabled {
+        cursor: not-allowed;
+        opacity: 0.62;
+        transform: none;
+        filter: none;
+    }
+
+html.dark .books-page .btn-template-xlsx,
+body.dark .books-page .btn-template-xlsx,
+html[data-theme="dark"] .books-page .btn-template-xlsx {
+    border-color: rgba(56, 189, 248, 0.28);
+    background: linear-gradient(135deg, #0e7490, #1d4ed8);
+    color: #ffffff;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+html[data-theme="dark glass"] .books-page .btn-template-xlsx {
+    border-color: rgba(125, 211, 252, 0.28);
+    background: linear-gradient( 135deg, rgba(8, 145, 178, 0.84), rgba(37, 99, 235, 0.84) );
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+}
+
+html[data-theme="liquid glass"] .books-page .btn-template-xlsx {
+    border-color: rgba(255, 255, 255, 0.68);
+    background: linear-gradient( 135deg, rgba(8, 145, 178, 0.78), rgba(37, 99, 235, 0.78) );
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.34);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+@media (max-width: 768px) {
+    .books-page .header-actions {
+        width: 100%;
+    }
+
+    .books-page .btn-template-xlsx {
+        width: 100%;
+        min-height: 44px;
+    }
+}

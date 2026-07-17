@@ -5,12 +5,14 @@
 @using Microsoft.EntityFrameworkCore
 @using Pagination_Project.Data
 @using Pagination_Project.Models
+@using Pagination_Project.Services
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IUserDataScopeService UserDataScopeService
 
 <PageTitle>Finish Assignments</PageTitle>
 
@@ -142,6 +144,10 @@
                         <tr>
                             <th class="check-col"></th>
                             <th>Employee</th>
+                            @if (Scope.ViewAllEmployeeTypes)
+                            {
+                                <th>Department</th>
+                            }
                             <th>Book</th>
                             <th>KGEN</th>
                             <th>LSA</th>
@@ -170,6 +176,11 @@
                                         <strong>@item.EmployeeName</strong>
                                     </div>
                                 </td>
+
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <td><span class="code-pill">@item.EmployeeTypeCode</span></td>
+                                }
 
                                 <td>
                                     <div class="book-cell">
@@ -227,6 +238,7 @@
     private string Mensaje = string.Empty;
     private bool MensajeEsError = false;
 
+    private UserDataScope Scope { get; set; } = new();
     private bool FiltroEmpleadoBloqueado = false;
 
     private readonly DateOnly Hoy = DateOnly.FromDateTime(DateTime.Today);
@@ -241,14 +253,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await DetectarEmpleadoDelUsuarioAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        Scope = await UserDataScopeService.GetScopeAsync(authState.User);
+        await DetectarEmpleadoDelUsuarioAsync(authState.User);
         await CargarDatosAsync();
     }
 
-    private async Task DetectarEmpleadoDelUsuarioAsync()
+    private Task DetectarEmpleadoDelUsuarioAsync(System.Security.Claims.ClaimsPrincipal user)
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        if (Scope.ViewAllEmployeeTypes)
+            return Task.CompletedTask;
 
         var employeeClaim =
             user.FindFirst("EmployeeId")?.Value ??
@@ -261,6 +275,8 @@
             EmpleadoFiltro = employeeId.ToString();
             FiltroEmpleadoBloqueado = true;
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task CargarDatosAsync()
@@ -277,6 +293,7 @@
 
             Empleados = await db.Empleados
                 .AsNoTracking()
+                .ApplyScope(Scope)
                 .OrderBy(e => e.Nombre)
                 .ToListAsync();
 
@@ -284,6 +301,7 @@
                 from a in db.Asignaciones.AsNoTracking()
                 join l in db.Libros.AsNoTracking() on a.IdLibro equals l.Id
                 join e in db.Empleados.AsNoTracking() on a.IdEmpleado equals e.Id
+                join et in db.EmployeeTypes.AsNoTracking() on l.EmployeeTypeId equals et.Id
 
                 join bpJoin in db.Bind_Plants.AsNoTracking()
                     on l.BindPlantId equals bpJoin.Id into bindPlantGroup
@@ -291,7 +309,8 @@
 
                 where !a.Finalizado &&
                       !l.Finalizado &&
-                      l.DirxionDate >= Hoy
+                      l.DirxionDate >= Hoy &&
+                      (Scope.ViewAllEmployeeTypes || l.EmployeeTypeId == Scope.EmployeeTypeId)
 
                 select new RawAssignmentVm
                 {
@@ -300,6 +319,8 @@
                     BookId = l.Id,
 
                     EmployeeName = e.Nombre ?? string.Empty,
+                    EmployeeTypeId = l.EmployeeTypeId,
+                    EmployeeTypeCode = et.Code,
                     KgenCode = l.KGENCode ?? string.Empty,
                     LsaCode = l.LSACode ?? string.Empty,
                     BookName = l.BookName ?? string.Empty,
@@ -365,6 +386,8 @@
                     BookId = item.BookId,
 
                     EmployeeName = empleadoResponsableNombre,
+                    EmployeeTypeId = item.EmployeeTypeId,
+                    EmployeeTypeCode = item.EmployeeTypeCode,
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
@@ -490,9 +513,10 @@
         return result;
     }
 
-    private static async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db, DateOnly today)
+    private async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db, DateOnly today)
     {
         var librosParaFinalizar = await db.Libros
+            .ApplyScope(Scope)
             .Include(l => l.Asignaciones)
                 .ThenInclude(a => a.Evaluaciones)
             .Where(l =>
@@ -643,6 +667,16 @@
                 .Distinct()
                 .ToList();
 
+            var accessibleAssignmentIds = await db.Asignaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+                .Where(x => asignacionIds.Contains(x.Id))
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            if (accessibleAssignmentIds.Count != asignacionIds.Count)
+                throw new UnauthorizedAccessException("One or more assignments are outside your employee type scope.");
+
             var registrosExistentes = await db.AsignacionesTrabajadas
                 .Where(x => asignacionIds.Contains(x.IdAsignacion) &&
                             x.FechaTrabajo == Hoy)
@@ -732,6 +766,8 @@
         public Guid BookId { get; set; }
 
         public string EmployeeName { get; set; } = string.Empty;
+        public short EmployeeTypeId { get; set; }
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public string KgenCode { get; set; } = string.Empty;
         public string LsaCode { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
@@ -752,6 +788,8 @@
         public Guid BookId { get; set; }
 
         public string EmployeeName { get; set; } = string.Empty;
+        public short EmployeeTypeId { get; set; }
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public string KgenCode { get; set; } = string.Empty;
         public string LsaCode { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;

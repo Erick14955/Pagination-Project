@@ -5,6 +5,7 @@
 @using System.Globalization
 @using System.Text
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.JSInterop
 @using Pagination_Project.Data
@@ -17,6 +18,8 @@
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IDashboardService DashboardService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserDataScopeService UserDataScopeService
 @inject IJSRuntime JS
 
 <PageTitle>Finished Reports</PageTitle>
@@ -150,6 +153,10 @@
                         <thead>
                             <tr>
                                 <th>Book Name</th>
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <th>Department</th>
+                                }
                                 <th>KGEN</th>
                                 <th>LSA</th>
                                 <th>State</th>
@@ -171,6 +178,10 @@
                             {
                                 <tr>
                                     <td class="strong-cell">@item.BookName</td>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                    }
                                     <td>@item.Kgen</td>
                                     <td>@item.Lsa</td>
                                     <td>@item.State</td>
@@ -200,6 +211,10 @@
                         <thead>
                             <tr>
                                 <th>Employee</th>
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <th>Department</th>
+                                }
                                 <th>Book Name</th>
                                 <th>KGEN</th>
                                 <th>Pub Date</th>
@@ -216,6 +231,10 @@
                             {
                                 <tr>
                                     <td class="strong-cell">@item.EmployeeName</td>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                    }
                                     <td>@item.BookName</td>
                                     <td>@item.Kgen</td>
                                     <td>@FormatDate(item.PubDate)</td>
@@ -240,6 +259,10 @@
                         <thead>
                             <tr>
                                 <th>Employee</th>
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <th>Department</th>
+                                }
                                 <th>Book Name</th>
                                 <th>KGEN</th>
                                 <th>LSA</th>
@@ -259,6 +282,10 @@
                             {
                                 <tr>
                                     <td class="strong-cell">@item.EmployeeName</td>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                    }
                                     <td>@item.BookName</td>
                                     <td>
                                         <span class="kgen-pill">@item.Kgen</span>
@@ -288,6 +315,10 @@
                         <thead>
                             <tr>
                                 <th>Employee</th>
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <th>Department</th>
+                                }
                                 <th>KGEN Code</th>
                                 <th>LSA Code</th>
                                 <th>Book</th>
@@ -301,15 +332,19 @@
                             @foreach (var item in AsignacionesDiaSiguienteReporte)
                             {
                                 <tr>
-                                    <td class="strong-cell">@item.EmployeeName</td>
-                                    <td>
+                                    <td class="strong-cell" data-label="Employee">@item.EmployeeName</td>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                    }
+                                    <td data-label="KGEN Code">
                                         <span class="kgen-pill">@item.KgenCode</span>
                                     </td>
-                                    <td>
+                                    <td data-label="LSA Code">
                                         <span class="kgen-pill secondary">@item.LsaCode</span>
                                     </td>
-                                    <td>@item.BookName</td>
-                                    <td>
+                                    <td data-label="Book">@item.BookName</td>
+                                    <td data-label="Database">
                                         @{
                                             var databaseCode = GetDatabaseCode(item.Database);
                                             var databaseFullName = GetDatabaseFullName(item.Database);
@@ -321,12 +356,12 @@
                                             @databaseCode
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Stage">
                                         <span class="report-stage-pill @GetReportStageClass(item.StageKey)">
                                             @item.Stage
                                         </span>
                                     </td>
-                                    <td>@FormatDate(item.StageDate)</td>
+                                    <td data-label="Stage Date">@FormatDate(item.StageDate)</td>
                                 </tr>
                             }
                         </tbody>
@@ -341,6 +376,10 @@
                         <thead>
                             <tr>
                                 <th>Employee</th>
+                                @if (Scope.ViewAllEmployeeTypes)
+                                {
+                                    <th>Department</th>
+                                }
                                 <th>Book Name</th>
                                 <th>KGEN</th>
                                 <th>LSA</th>
@@ -359,6 +398,10 @@
                             {
                                 <tr>
                                     <td class="strong-cell">@item.EmployeeName</td>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                    }
                                     <td>@item.BookName</td>
                                     <td>
                                         <span class="kgen-pill">@item.Kgen</span>
@@ -399,6 +442,7 @@
     private Guid? EmpleadoIdSeleccionado { get; set; }
 
     private bool Cargando { get; set; }
+    private UserDataScope Scope { get; set; } = new();
 
     private List<EmpleadoFiltroDto> EmpleadosFiltro { get; set; } = new();
 
@@ -476,6 +520,9 @@
         FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
             DateOnly.FromDateTime(DateTime.Today));
 
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Scope = await UserDataScopeService.GetScopeAsync(authState.User);
+
         await CargarCatalogosAsync();
         await CargarEmpleadosAsync();
         await CargarReporteAsync();
@@ -529,6 +576,7 @@
 
         EmpleadosFiltro = await db.Empleados
             .AsNoTracking()
+            .ApplyScope(Scope)
             .OrderBy(e => e.Nombre)
             .Select(e => new EmpleadoFiltroDto
             {
@@ -664,7 +712,8 @@
             DateOnly.FromDateTime(DateTime.Today));
 
         var asignaciones = await DashboardService.GetAssignedBooksForDateAsync(
-            FechaAsignacionesDiaSiguiente);
+            FechaAsignacionesDiaSiguiente,
+            Scope);
 
         if (EmpleadoIdSeleccionado.HasValue)
         {
@@ -738,10 +787,13 @@
                 .ThenInclude(a => a!.Empleado)
             .Include(x => x.Assignment)
                 .ThenInclude(a => a!.Libro)
+                    .ThenInclude(l => l!.EmployeeType)
             .Where(x =>
                 x.Assignment != null &&
                 x.Assignment.Libro != null &&
-                x.Assignment.Libro.Finalizado == true);
+                x.Assignment.Libro.Finalizado == true &&
+                (Scope.ViewAllEmployeeTypes ||
+                 x.Assignment.Libro.EmployeeTypeId == Scope.EmployeeTypeId));
 
         if (EmpleadoIdSeleccionado.HasValue)
         {
@@ -777,6 +829,11 @@
                     : DateOnly.MinValue)
             .Select(x => new LateWorkReporteDto
             {
+                EmployeeTypeCode =
+                    x.Assignment != null && x.Assignment.Libro != null && x.Assignment.Libro.EmployeeType != null
+                        ? x.Assignment.Libro.EmployeeType.Code
+                        : "",
+
                 EmployeeName =
                     x.Assignment != null && x.Assignment.Empleado != null
                         ? x.Assignment.Empleado.Nombre
@@ -816,29 +873,31 @@
         var worksheet = workbook.Worksheets.Add("Next Day Assignments");
 
         worksheet.Cell(1, 1).Value = "Employee";
-        worksheet.Cell(1, 2).Value = "KGEN Code";
-        worksheet.Cell(1, 3).Value = "LSA Code";
-        worksheet.Cell(1, 4).Value = "Book";
-        worksheet.Cell(1, 5).Value = "Database";
-        worksheet.Cell(1, 6).Value = "Stage";
-        worksheet.Cell(1, 7).Value = "Stage Date";
+        worksheet.Cell(1, 2).Value = "Department";
+        worksheet.Cell(1, 3).Value = "KGEN Code";
+        worksheet.Cell(1, 4).Value = "LSA Code";
+        worksheet.Cell(1, 5).Value = "Book";
+        worksheet.Cell(1, 6).Value = "Database";
+        worksheet.Cell(1, 7).Value = "Stage";
+        worksheet.Cell(1, 8).Value = "Stage Date";
 
         var row = 2;
 
         foreach (var item in AsignacionesDiaSiguienteReporte)
         {
             worksheet.Cell(row, 1).Value = item.EmployeeName;
-            worksheet.Cell(row, 2).Value = item.KgenCode;
-            worksheet.Cell(row, 3).Value = item.LsaCode;
-            worksheet.Cell(row, 4).Value = item.BookName;
-            worksheet.Cell(row, 5).Value = item.Database;
-            worksheet.Cell(row, 6).Value = item.Stage;
-            EscribirFechaExcel(worksheet.Cell(row, 7), item.StageDate);
+            worksheet.Cell(row, 2).Value = item.EmployeeTypeCode;
+            worksheet.Cell(row, 3).Value = item.KgenCode;
+            worksheet.Cell(row, 4).Value = item.LsaCode;
+            worksheet.Cell(row, 5).Value = item.BookName;
+            worksheet.Cell(row, 6).Value = item.Database;
+            worksheet.Cell(row, 7).Value = item.Stage;
+            EscribirFechaExcel(worksheet.Cell(row, 8), item.StageDate);
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 7);
+        AplicarEstiloExcel(worksheet, row - 1, 8);
     }
 
     private void GenerarHojaLateWork(XLWorkbook workbook)
@@ -856,6 +915,7 @@
         worksheet.Cell(1, 9).Value = "Completed";
         worksheet.Cell(1, 10).Value = "Completed At";
         worksheet.Cell(1, 11).Value = "Status";
+        worksheet.Cell(1, 12).Value = "Department";
 
         var row = 2;
 
@@ -893,11 +953,12 @@
             }
 
             worksheet.Cell(row, 11).Value = "Finished Book";
+            worksheet.Cell(row, 12).Value = item.EmployeeTypeCode;
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 11);
+        AplicarEstiloExcel(worksheet, row - 1, 12);
     }
 
     private void GenerarHojaLibros(XLWorkbook workbook)
@@ -917,6 +978,7 @@
         worksheet.Cell(1, 11).Value = "Shipping";
         worksheet.Cell(1, 12).Value = "Dirxion";
         worksheet.Cell(1, 13).Value = "Pub Date";
+        worksheet.Cell(1, 14).Value = "Department";
 
         var row = 2;
 
@@ -936,11 +998,12 @@
             EscribirFechaExcel(worksheet.Cell(row, 11), item.ShippingDate);
             EscribirFechaExcel(worksheet.Cell(row, 12), item.DirxionDate);
             EscribirFechaExcel(worksheet.Cell(row, 13), item.PubDate);
+            worksheet.Cell(row, 14).Value = item.EmployeeTypeCode;
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 13);
+        AplicarEstiloExcel(worksheet, row - 1, 14);
     }
 
     private void GenerarHojaAsignaciones(XLWorkbook workbook)
@@ -955,6 +1018,7 @@
         worksheet.Cell(1, 6).Value = "Proof";
         worksheet.Cell(1, 7).Value = "Final";
         worksheet.Cell(1, 8).Value = "Memo";
+        worksheet.Cell(1, 9).Value = "Department";
 
         var row = 2;
 
@@ -969,11 +1033,12 @@
             EscribirFechaExcel(worksheet.Cell(row, 6), item.ProofDate);
             EscribirFechaExcel(worksheet.Cell(row, 7), item.FinalDate);
             EscribirFechaExcel(worksheet.Cell(row, 8), item.MemoDate);
+            worksheet.Cell(row, 9).Value = item.EmployeeTypeCode;
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 8);
+        AplicarEstiloExcel(worksheet, row - 1, 9);
     }
 
     private void GenerarHojaEvaluaciones(XLWorkbook workbook)
@@ -991,6 +1056,7 @@
         worksheet.Cell(1, 9).Value = "Shipping Folder";
         worksheet.Cell(1, 10).Value = "Task Memo";
         worksheet.Cell(1, 11).Value = "Total %";
+        worksheet.Cell(1, 12).Value = "Department";
 
         var row = 2;
 
@@ -1009,11 +1075,12 @@
             EscribirPorcentajeExcel(worksheet.Cell(row, 9), item.ProductShippingFolder);
             EscribirPorcentajeExcel(worksheet.Cell(row, 10), item.TaskMemo);
             EscribirPorcentajeExcel(worksheet.Cell(row, 11), item.TotalPorcentaje);
+            worksheet.Cell(row, 12).Value = item.EmployeeTypeCode;
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 11);
+        AplicarEstiloExcel(worksheet, row - 1, 12);
     }
 
     private static void EscribirFechaExcel(IXLCell cell, DateOnly? fecha)
@@ -1099,6 +1166,7 @@
         var hoy = DateOnly.FromDateTime(DateTime.Today);
 
         var librosPendientes = await db.Libros
+            .ApplyScope(Scope)
             .Where(l => !l.Finalizado && l.DirxionDate < hoy)
             .ToListAsync();
 
@@ -1109,6 +1177,7 @@
 
         var asignacionesPendientes = await db.Asignaciones
             .Include(a => a.Libro)
+            .ApplyScope(Scope)
             .Where(a => a.Finalizado == false)
             .ToListAsync();
 
@@ -1120,6 +1189,8 @@
 
         var evaluacionesPendientes = await db.Evaluaciones
             .Include(e => e.Asignacion)
+                .ThenInclude(a => a!.Libro)
+            .ApplyScope(Scope)
             .Where(e => e.Finalizado == false)
             .ToListAsync();
 
@@ -1136,6 +1207,8 @@
     {
         var query = db.Libros
             .AsNoTracking()
+            .Include(l => l.EmployeeType)
+            .ApplyScope(Scope)
             .Where(l => l.Finalizado == true);
 
         if (FechaDesde.HasValue)
@@ -1161,6 +1234,7 @@
         LibrosReporte = librosDb
             .Select(l => new LibroReporteDto
             {
+                EmployeeTypeCode = l.EmployeeType != null ? l.EmployeeType.Code : "",
                 BookName = l.BookName,
                 Kgen = l.KGENCode,
                 Lsa = l.LSACode,
@@ -1186,6 +1260,8 @@
             .AsNoTracking()
             .Include(a => a.Empleado)
             .Include(a => a.Libro)
+                .ThenInclude(l => l!.EmployeeType)
+            .ApplyScope(Scope)
             .Where(a => a.Finalizado == true);
 
         if (EmpleadoIdSeleccionado.HasValue)
@@ -1228,6 +1304,9 @@
             .Select(g => g.First())
             .Select(a => new AsignacionReporteDto
             {
+                EmployeeTypeCode = a.Libro != null && a.Libro.EmployeeType != null
+                    ? a.Libro.EmployeeType.Code
+                    : "",
                 EmployeeName = a.Empleado != null ? a.Empleado.Nombre : "",
                 BookName = a.Libro != null ? a.Libro.BookName : "",
                 Kgen = a.Libro != null ? a.Libro.KGENCode : "",
@@ -1249,6 +1328,8 @@
                 .ThenInclude(a => a.Empleado)
             .Include(e => e.Asignacion)
                 .ThenInclude(a => a.Libro)
+                    .ThenInclude(l => l!.EmployeeType)
+            .ApplyScope(Scope)
             .Where(e => e.Finalizado == true);
 
         if (EmpleadoIdSeleccionado.HasValue)
@@ -1286,6 +1367,10 @@
                     : DateOnly.MinValue)
             .Select(e => new EvaluacionReporteDto
             {
+                EmployeeTypeCode = e.Asignacion != null && e.Asignacion.Libro != null && e.Asignacion.Libro.EmployeeType != null
+                    ? e.Asignacion.Libro.EmployeeType.Code
+                    : "",
+
                 EmployeeName = e.Asignacion != null && e.Asignacion.Empleado != null
                     ? e.Asignacion.Empleado.Nombre
                     : "",
@@ -1358,7 +1443,7 @@
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine("Employee,Book Name,KGEN,Pub Date,Dirxion Date,Proof,Final,Memo,Status");
+        sb.AppendLine("Book Name,KGEN,LSA,State,Database,Legacy,Proof,Final,Memo,Final PO,Shipping,Dirxion,Pub Date,Department,Status");
 
         foreach (var item in LibrosReporte)
         {
@@ -1376,6 +1461,7 @@
                 Csv(FormatDate(item.ShippingDate)),
                 Csv(FormatDate(item.DirxionDate)),
                 Csv(FormatDate(item.PubDate)),
+                Csv(item.EmployeeTypeCode),
                 Csv("Finished")
             ));
         }
@@ -1387,7 +1473,7 @@
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine("Employee,Book Name,KGEN,Assignment Date,Direction Date,Proof,Final,Memo,Pub Date,Status");
+        sb.AppendLine("Employee,Book Name,KGEN,Pub Date,Direction Date,Proof,Final,Memo,Department,Status");
 
         foreach (var item in AsignacionesReporte)
         {
@@ -1400,6 +1486,7 @@
                 Csv(FormatDate(item.ProofDate)),
                 Csv(FormatDate(item.FinalDate)),
                 Csv(FormatDate(item.MemoDate)),
+                Csv(item.EmployeeTypeCode),
                 Csv("Finished")
             ));
         }
@@ -1411,7 +1498,7 @@
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine("Employee,Book Name,KGEN,LSA,Pub Date,Motif YP,Motif WP,Inventory Report,Shipping Folder,Task Memo,Total %,Status");
+        sb.AppendLine("Employee,Book Name,KGEN,LSA,Pub Date,Motif YP,Motif WP,Inventory Report,Shipping Folder,Task Memo,Total %,Department,Status");
 
         foreach (var item in EvaluacionesReporte)
         {
@@ -1427,6 +1514,7 @@
                 Csv(FormatPercent(item.ProductShippingFolder)),
                 Csv(FormatPercent(item.TaskMemo)),
                 Csv(FormatPercent(item.TotalPorcentaje)),
+                Csv(item.EmployeeTypeCode),
                 Csv("Finished")
             ));
         }
@@ -1463,6 +1551,7 @@
 
     private sealed class LibroReporteDto
     {
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
         public string Kgen { get; set; } = string.Empty;
         public string Lsa { get; set; } = string.Empty;
@@ -1480,6 +1569,7 @@
 
     private sealed class AsignacionReporteDto
     {
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public string EmployeeName { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
         public string Kgen { get; set; } = string.Empty;
@@ -1517,6 +1607,7 @@
 
     private sealed class EvaluacionReporteDto
     {
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public string EmployeeName { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
         public string Kgen { get; set; } = string.Empty;
@@ -1535,6 +1626,7 @@
 
     private sealed class LateWorkReporteDto
     {
+        public string EmployeeTypeCode { get; set; } = string.Empty;
         public string EmployeeName { get; set; } = string.Empty;
 
         public string BookName { get; set; } = string.Empty;

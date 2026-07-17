@@ -10,6 +10,8 @@
         public Guid? DatabaseId { get; set; }
         public Guid? TrimSizeId { get; set; }
         public Guid? BindPlantId { get; set; }
+        public short EmployeeTypeId { get; set; }
+        public EmployeeType? EmployeeType { get; set; }
 
         public string LSACode { get; set; } = string.Empty;
         public string KGENCode { get; set; } = string.Empty;
