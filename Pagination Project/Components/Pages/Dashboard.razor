@@ -298,7 +298,24 @@ else
                                 <th>LSA Code</th>
                                 <th>Book</th>
                                 <th>Database</th>
-                                <th>Stage</th>
+                                <th>
+                                    <button type="button"
+                                            class="thryv-sort-header-btn"
+                                            title="Sort assigned books by stage"
+                                            aria-label="Sort assigned books by stage"
+                                            @onclick="SortAssignedBooksByStage">
+
+                                        <span>Stage</span>
+
+                                        <span class="thryv-sort-indicator">
+                                            @(AssignedStageSortEnabled
+                                                                                ? AssignedStageSortDescending
+                                                                                ? "▼"
+                                                                                : "▲"
+                                                                                : "↕")
+                                        </span>
+                                    </button>
+                                </th>
                                 <th>Stage Date</th>
                                 <th>Checklist</th>
                             </tr>
@@ -835,6 +852,8 @@ else
 
     private string SelectedCompletedEmployeeFilter { get; set; } = string.Empty;
     private string SelectedCompletedStageFilter { get; set; } = string.Empty;
+    private bool AssignedStageSortEnabled { get; set; }
+    private bool AssignedStageSortDescending { get; set; } = true;
 
     private string SelectedWeeklyEmployeeFilter { get; set; } = string.Empty;
     private string WeeklySearch { get; set; } = string.Empty;
@@ -898,8 +917,81 @@ else
                     StringComparison.OrdinalIgnoreCase));
             }
 
+            if (AssignedStageSortEnabled)
+            {
+                if (AssignedStageSortDescending)
+                {
+                    query = query
+                        .OrderBy(x => GetAssignedStageSortOrder(x) == 0 ? 1 : 0)
+                        .ThenByDescending(GetAssignedStageSortOrder)
+                        .ThenBy(x => x.EmployeeName)
+                        .ThenBy(x => x.BookName);
+                }
+                else
+                {
+                    query = query
+                        .OrderBy(x => GetAssignedStageSortOrder(x) == 0 ? 1 : 0)
+                        .ThenBy(GetAssignedStageSortOrder)
+                        .ThenBy(x => x.EmployeeName)
+                        .ThenBy(x => x.BookName);
+                }
+            }
+
             return query.ToList();
         }
+    }
+
+    private void SortAssignedBooksByStage()
+    {
+        if (!AssignedStageSortEnabled)
+        {
+            AssignedStageSortEnabled = true;
+            AssignedStageSortDescending = true;
+            return;
+        }
+
+        AssignedStageSortDescending = !AssignedStageSortDescending;
+    }
+
+    private static int GetAssignedStageSortOrder(
+        AssignedBookDashboardDto item)
+    {
+        var stage = !string.IsNullOrWhiteSpace(item.StageKey)
+            ? item.StageKey
+            : item.Stage;
+
+        var normalizedStage = (stage ?? string.Empty)
+            .Trim()
+            .Replace(" ", string.Empty)
+            .Replace("-", string.Empty)
+            .Replace("_", string.Empty)
+            .ToLowerInvariant();
+
+        return normalizedStage switch
+        {
+            "proof" or
+            "proofextract" or
+            "proofextractdate" => 1,
+
+            "final" or
+            "finalextract" or
+            "finalextractdate" => 2,
+
+            "memo" or
+            "memoextract" or
+            "memoextractdate" => 3,
+
+            "finalpo" or
+            "finalpodate" => 4,
+
+            "shipping" or
+            "shippingdate" => 5,
+
+            "dirxion" or
+            "dirxiondate" => 6,
+
+            _ => 0
+        };
     }
 
     private async Task DownloadChecklistDirectAsync(AssignedBookDashboardDto item)

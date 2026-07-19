@@ -2505,3 +2505,45 @@ html[data-theme="dark glass"]
         animation: none;
     }
 }
+
+.thryv-sort-header-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.45rem;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+    .thryv-sort-header-btn:hover {
+        opacity: 0.8;
+    }
+
+    .thryv-sort-header-btn:active {
+        transform: translateY(1px);
+    }
+
+    .thryv-sort-header-btn:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+
+.thryv-sort-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 14px;
+    font-size: 0.7rem;
+    line-height: 1;
+    opacity: 0.8;
+}
