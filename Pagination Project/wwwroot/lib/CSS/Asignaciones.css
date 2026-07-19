@@ -2796,7 +2796,7 @@ html[data-theme="dark glass"] .temporary-modal .temporary-assignment-card-fixed 
         max-width: 100%;
         max-height: min(650px, 68vh);
         overflow: auto;
-        scrollbar-gutter: stable both-edges;
+        scrollbar-gutter: stable;
         border: 1px solid #e2e8f0;
         border-radius: 18px;
         background: #ffffff;
@@ -3224,6 +3224,7 @@ html[data-theme="liquid glass"] .status-books-modal-content p {
         font-size: 14px;
     }
 }
+
 .assignments-page .btn-template-xlsx {
     display: inline-flex;
     align-items: center;
@@ -3302,4 +3303,638 @@ html[data-theme="liquid glass"] .assignments-page .btn-template-xlsx {
         width: 100%;
         min-height: 44px;
     }
+}
+
+/* ==========================================================================
+   ASSIGNMENTS SKELETON LOADER
+   ========================================================================== */
+
+.assignments-skeleton-page {
+    pointer-events: none;
+    user-select: none;
+}
+
+.assignments-skeleton-block {
+    --assignments-skeleton-base: #e2e8f0;
+    --assignments-skeleton-highlight: rgba(255, 255, 255, 0.86);
+    position: relative;
+    overflow: hidden;
+    background: var(--assignments-skeleton-base);
+    border-radius: 10px;
+}
+
+    .assignments-skeleton-block::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-110%);
+        background: linear-gradient( 90deg, transparent 0%, var(--assignments-skeleton-highlight) 50%, transparent 100% );
+        animation: assignments-skeleton-shimmer 1.35s ease-in-out infinite;
+    }
+
+.assignments-skeleton-hero {
+    align-items: stretch;
+}
+
+.assignments-skeleton-hero-copy {
+    display: flex;
+    flex: 1;
+    min-width: 260px;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.assignments-skeleton-hero-title {
+    width: min(330px, 78%);
+    height: 38px;
+    border-radius: 12px;
+}
+
+.assignments-skeleton-hero-text {
+    width: min(560px, 92%);
+    height: 15px;
+    margin-top: 18px;
+    border-radius: 999px;
+}
+
+    .assignments-skeleton-hero-text.short {
+        width: min(390px, 68%);
+        margin-top: 10px;
+    }
+
+.assignments-skeleton-stats {
+    align-items: stretch;
+}
+
+.assignments-skeleton-stat-card {
+    display: flex;
+    min-width: 150px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+}
+
+.assignments-skeleton-stat-label {
+    width: 72%;
+    height: 12px;
+    border-radius: 999px;
+}
+
+.assignments-skeleton-stat-value {
+    width: 48%;
+    height: 29px;
+    border-radius: 10px;
+}
+
+.assignments-skeleton-card {
+    overflow: hidden;
+}
+
+.assignments-skeleton-section-header {
+    align-items: flex-start;
+}
+
+.assignments-skeleton-header-copy {
+    flex: 1;
+    min-width: 220px;
+}
+
+.assignments-skeleton-section-title {
+    width: 270px;
+    max-width: 74%;
+    height: 24px;
+}
+
+    .assignments-skeleton-section-title.list-title {
+        width: 210px;
+    }
+
+.assignments-skeleton-section-description {
+    width: 470px;
+    max-width: 92%;
+    height: 13px;
+    margin-top: 11px;
+    border-radius: 999px;
+}
+
+    .assignments-skeleton-section-description.list-description {
+        width: 350px;
+    }
+
+.assignments-skeleton-header-actions,
+.assignments-skeleton-filters {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.assignments-skeleton-action {
+    width: 142px;
+    height: 42px;
+    border-radius: 14px;
+}
+
+.assignments-skeleton-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.assignments-skeleton-field {
+    min-width: 0;
+}
+
+.assignments-skeleton-label {
+    width: 96px;
+    height: 12px;
+    margin: 0 0 8px 2px;
+    border-radius: 999px;
+}
+
+.assignments-skeleton-input {
+    width: 100%;
+    height: 46px;
+    border-radius: 14px;
+}
+
+.assignments-skeleton-button-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.assignments-skeleton-button {
+    width: 105px;
+    height: 42px;
+    border-radius: 14px;
+}
+
+    .assignments-skeleton-button.primary {
+        width: 165px;
+    }
+
+.assignments-skeleton-filters {
+    max-width: 980px;
+}
+
+.assignments-skeleton-filter {
+    width: 176px;
+    height: 46px;
+    border-radius: 14px;
+}
+
+    .assignments-skeleton-filter:nth-child(5) {
+        width: 330px;
+    }
+
+    .assignments-skeleton-filter:nth-child(6),
+    .assignments-skeleton-filter:nth-child(7) {
+        width: 145px;
+    }
+
+.assignments-skeleton-table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.assignments-skeleton-table-head,
+.assignments-skeleton-table-row {
+    display: grid;
+    grid-template-columns: minmax(190px, 1.5fr) repeat(11, minmax(80px, 1fr));
+    gap: 18px;
+    align-items: center;
+    min-width: 1450px;
+}
+
+.assignments-skeleton-table-head {
+    min-height: 54px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.assignments-skeleton-table-row {
+    min-height: 76px;
+    padding: 15px 16px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+    .assignments-skeleton-table-row:last-child {
+        border-bottom: 0;
+    }
+
+.assignments-skeleton-column {
+    width: 72%;
+    height: 11px;
+    border-radius: 999px;
+}
+
+.assignments-skeleton-person-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.assignments-skeleton-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 15px;
+}
+
+.assignments-skeleton-person-copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.assignments-skeleton-person-name {
+    width: 78%;
+    height: 13px;
+    border-radius: 999px;
+}
+
+.assignments-skeleton-person-meta {
+    width: 56%;
+    height: 10px;
+    border-radius: 999px;
+}
+
+.assignments-skeleton-cell {
+    height: 13px;
+    border-radius: 999px;
+}
+
+    .assignments-skeleton-cell.short {
+        width: 48%;
+    }
+
+    .assignments-skeleton-cell.medium {
+        width: 68%;
+    }
+
+    .assignments-skeleton-cell.long {
+        width: 88%;
+    }
+
+.assignments-skeleton-hero .assignments-skeleton-block {
+    --assignments-skeleton-base: rgba(148, 163, 184, 0.24);
+    --assignments-skeleton-highlight: rgba(255, 255, 255, 0.56);
+}
+
+html[data-theme="dark"] .assignments-skeleton-block {
+    --assignments-skeleton-base: rgba(148, 163, 184, 0.18);
+    --assignments-skeleton-highlight: rgba(255, 255, 255, 0.09);
+}
+
+html[data-theme="dark"] .assignments-skeleton-table-container {
+    background: #111827;
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="dark"] .assignments-skeleton-table-head {
+    background: #020617;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .assignments-skeleton-table-row {
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+html[data-theme="liquid glass"] .assignments-skeleton-block {
+    --assignments-skeleton-base: rgba(148, 163, 184, 0.25);
+    --assignments-skeleton-highlight: rgba(255, 255, 255, 0.62);
+}
+
+html[data-theme="liquid glass"] .assignments-skeleton-table-container {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+}
+
+html[data-theme="liquid glass"] .assignments-skeleton-table-head {
+    background: rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(255, 255, 255, 0.42);
+}
+
+html[data-theme="liquid glass"] .assignments-skeleton-table-row {
+    border-bottom-color: rgba(255, 255, 255, 0.34);
+}
+
+html[data-theme="dark glass"] .assignments-skeleton-block {
+    --assignments-skeleton-base: rgba(148, 163, 184, 0.20);
+    --assignments-skeleton-highlight: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="dark glass"] .assignments-skeleton-table-container {
+    background: rgba(15, 23, 42, 0.50);
+    border-color: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+}
+
+html[data-theme="dark glass"] .assignments-skeleton-table-head {
+    background: rgba(2, 6, 23, 0.70);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark glass"] .assignments-skeleton-table-row {
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+@media (max-width: 1100px) {
+    .assignments-skeleton-section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .assignments-skeleton-header-actions,
+    .assignments-skeleton-filters {
+        display: grid;
+        width: 100%;
+        max-width: none;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .assignments-skeleton-action,
+    .assignments-skeleton-filter,
+    .assignments-skeleton-filter:nth-child(5),
+    .assignments-skeleton-filter:nth-child(6),
+    .assignments-skeleton-filter:nth-child(7) {
+        width: 100%;
+    }
+
+    .assignments-skeleton-filters .assignments-skeleton-filter:nth-child(5) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .assignments-skeleton-hero {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .assignments-skeleton-hero-title {
+        width: 72%;
+        height: 29px;
+    }
+
+    .assignments-skeleton-hero-text {
+        width: 92%;
+        height: 13px;
+    }
+
+        .assignments-skeleton-hero-text.short {
+            width: 68%;
+        }
+
+    .assignments-skeleton-stats {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .assignments-skeleton-stat-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .assignments-skeleton-header-actions,
+    .assignments-skeleton-filters,
+    .assignments-skeleton-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+        .assignments-skeleton-filters .assignments-skeleton-filter:nth-child(5) {
+            grid-column: auto;
+        }
+
+    .assignments-skeleton-button-row {
+        flex-direction: column;
+    }
+
+    .assignments-skeleton-button,
+    .assignments-skeleton-button.primary {
+        width: 100%;
+        height: 46px;
+    }
+
+    .assignments-skeleton-table-container {
+        overflow: visible;
+        border: 0;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .assignments-skeleton-table-head {
+        display: none;
+    }
+
+    .assignments-skeleton-table-row {
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        margin-bottom: 16px;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .assignments-skeleton-person-cell {
+        width: 100%;
+    }
+
+    .assignments-skeleton-cell,
+    .assignments-skeleton-cell.short,
+    .assignments-skeleton-cell.medium,
+    .assignments-skeleton-cell.long {
+        width: 100%;
+        height: 12px;
+    }
+
+        .assignments-skeleton-cell.short {
+            width: 42%;
+        }
+
+        .assignments-skeleton-cell.medium {
+            width: 68%;
+        }
+
+        .assignments-skeleton-cell.long {
+            width: 88%;
+        }
+
+    html[data-theme="dark"] .assignments-skeleton-table-row {
+        background: #111827;
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.30);
+    }
+
+    html[data-theme="liquid glass"] .assignments-skeleton-table-row {
+        background: rgba(255, 255, 255, 0.48);
+        border-color: rgba(255, 255, 255, 0.64);
+    }
+
+    html[data-theme="dark glass"] .assignments-skeleton-table-row {
+        background: rgba(15, 23, 42, 0.86);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.30);
+    }
+}
+
+@media (max-width: 520px) {
+    .assignments-skeleton-section-title {
+        width: 68%;
+        height: 20px;
+    }
+
+    .assignments-skeleton-section-description {
+        width: 88%;
+        height: 11px;
+    }
+
+    .assignments-skeleton-table-row {
+        padding: 14px;
+        border-radius: 16px;
+    }
+}
+
+@keyframes assignments-skeleton-shimmer {
+    100% {
+        transform: translateX(110%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .assignments-skeleton-block::after {
+        animation: none;
+    }
+}
+
+
+
+/* ========================================================================== 
+   ASSIGNMENTS TABLE SCROLL FIX
+   Removes the artificial left gutter and adapts the scrollbars to each theme.
+   ========================================================================== */
+
+@media (min-width: 769px) {
+    .assignments-page .table-container {
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        scrollbar-gutter: stable !important;
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+        background-clip: padding-box;
+        isolation: isolate;
+    }
+
+    .assignments-page .assignments-table {
+        margin: 0 !important;
+    }
+
+        .assignments-page .assignments-table thead {
+            position: relative;
+            z-index: 6;
+        }
+
+        .assignments-page .assignments-table th {
+            box-shadow: 0 1px 0 rgba(148, 163, 184, 0.22);
+        }
+
+    .assignments-page .table-container::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .assignments-page .table-container::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .assignments-page .table-container::-webkit-scrollbar-thumb {
+        min-height: 42px;
+        border: 2px solid #e2e8f0;
+        border-radius: 999px;
+        background: #94a3b8;
+    }
+
+        .assignments-page .table-container::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+    .assignments-page .table-container::-webkit-scrollbar-corner {
+        background: #e2e8f0;
+    }
+
+    html[data-theme="dark"] .assignments-page .table-container {
+        scrollbar-color: #475569 #0f172a;
+    }
+
+        html[data-theme="dark"] .assignments-page .table-container::-webkit-scrollbar-track,
+        html[data-theme="dark"] .assignments-page .table-container::-webkit-scrollbar-corner {
+            background: #0f172a;
+        }
+
+        html[data-theme="dark"] .assignments-page .table-container::-webkit-scrollbar-thumb {
+            border-color: #0f172a;
+            background: #475569;
+        }
+
+            html[data-theme="dark"] .assignments-page .table-container::-webkit-scrollbar-thumb:hover {
+                background: #64748b;
+            }
+
+    html[data-theme="liquid glass"] .assignments-page .table-container {
+        scrollbar-color: rgba(71, 85, 105, 0.70) rgba(255, 255, 255, 0.30);
+    }
+
+        html[data-theme="liquid glass"] .assignments-page .table-container::-webkit-scrollbar-track,
+        html[data-theme="liquid glass"] .assignments-page .table-container::-webkit-scrollbar-corner {
+            background: rgba(255, 255, 255, 0.30);
+        }
+
+        html[data-theme="liquid glass"] .assignments-page .table-container::-webkit-scrollbar-thumb {
+            border-color: rgba(255, 255, 255, 0.30);
+            background: rgba(71, 85, 105, 0.70);
+        }
+
+            html[data-theme="liquid glass"] .assignments-page .table-container::-webkit-scrollbar-thumb:hover {
+                background: rgba(51, 65, 85, 0.82);
+            }
+
+    html[data-theme="dark glass"] .assignments-page .table-container {
+        scrollbar-color: rgba(148, 163, 184, 0.72) rgba(2, 6, 23, 0.50);
+    }
+
+        html[data-theme="dark glass"] .assignments-page .table-container::-webkit-scrollbar-track,
+        html[data-theme="dark glass"] .assignments-page .table-container::-webkit-scrollbar-corner {
+            background: rgba(2, 6, 23, 0.50);
+        }
+
+        html[data-theme="dark glass"] .assignments-page .table-container::-webkit-scrollbar-thumb {
+            border-color: rgba(2, 6, 23, 0.50);
+            background: rgba(148, 163, 184, 0.72);
+        }
+
+            html[data-theme="dark glass"] .assignments-page .table-container::-webkit-scrollbar-thumb:hover {
+                background: rgba(203, 213, 225, 0.82);
+            }
 }

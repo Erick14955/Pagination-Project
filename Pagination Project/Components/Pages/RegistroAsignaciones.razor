@@ -27,370 +27,472 @@
 
 <PageTitle>Assignments</PageTitle>
 
-<div class="assignments-page">
+@if (CargandoInicial)
+{
+    <div class="assignments-page assignments-skeleton-page"
+         aria-busy="true"
+         aria-label="Loading assignments">
 
-    <section class="page-hero">
-        <div>
-            <h1>Book Assignments</h1>
-            <p>
-                Assign books to employees manually or import assignments using an XLSX file.
-            </p>
-        </div>
-
-        <div class="hero-stats">
-            <div class="stat-card">
-                <span>Total Assignments</span>
-                <strong>@AsignacionesListado.Count</strong>
+        <section class="page-hero assignments-skeleton-hero">
+            <div class="assignments-skeleton-hero-copy">
+                <div class="assignments-skeleton-block assignments-skeleton-hero-title"></div>
+                <div class="assignments-skeleton-block assignments-skeleton-hero-text"></div>
+                <div class="assignments-skeleton-block assignments-skeleton-hero-text short"></div>
             </div>
 
-            <div class="stat-card">
-                <span>Filtered</span>
-                <strong>@AsignacionesFiltradas.Count()</strong>
-            </div>
-        </div>
-    </section>
-
-    @if (!string.IsNullOrWhiteSpace(Mensaje))
-    {
-        <div class="alert-box @TipoMensaje">
-            @Mensaje
-        </div>
-    }
-
-    @if (CreateAssignations)
-    {
-        <section class="form-card">
-            <div class="section-header">
-                <div>
-                    <h2>Assign Book to Employee</h2>
-                    <p>Select an employee and search the book by Book Name, KGEN Code or LSA Code.</p>
-                </div>
-
-                <div class="header-actions">
-                    @if (PuedeDescargarPlantilla)
-                    {
-                        <button type="button"
-                                class="btn-template-xlsx"
-                                disabled="@DescargandoPlantillaXlsx"
-                                @onclick="DownloadAssignmentsTemplateAsync">
-                            @(DescargandoPlantillaXlsx ? "Downloading..." : "📄 Download Template")
-                        </button>
-                    }
-
-                    <InputFile @key="XlsxInputKey"
-                               id="xlsxAssignmentsUpload"
-                               class="file-input-hidden"
-                               OnChange="ImportAssignmentsFromXlsxAsync"
-                               accept=".xlsx" />
-
-                    <label for="xlsxAssignmentsUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
-                        @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
-                    </label>
-
-                    <InputFile @key="XlsxBooksUpdateInputKey"
-                               id="xlsxBooksUpdateUpload"
-                               class="file-input-hidden"
-                               OnChange="UpdateBooksFromXlsxAsync"
-                               accept=".xlsx" />
-
-                    <label for="xlsxBooksUpdateUpload" class="btn-update-xlsx @(ActualizandoLibrosXlsx ? "disabled" : "")">
-                        @(ActualizandoLibrosXlsx ? "Updating..." : "🔄 Update Books XLSX")
-                    </label>
-
-                    <button type="button"
-                            class="btn-light"
-                            @onclick="AbrirFormularioAsignacionTemporal">
-                        🔁 Temporary Assignment
-                    </button>
-
-                    <button type="button" class="btn-light" @onclick="LimpiarFormulario">
-                        ✨ New
-                    </button>
-                </div>
-            </div>
-
-            <form @onsubmit="GuardarAsignacionAsync" @onsubmit:preventDefault>
-                <div class="form-grid">
-
-                    <div class="form-group large">
-                        <label>Employee</label>
-
-                        <input class="form-control"
-                               list="employeesList"
-                               placeholder="Search employee by name or employee ID"
-                               @bind="EmpleadoTexto"
-                               @bind:event="oninput"
-                               required />
-
-                        <datalist id="employeesList">
-                            @foreach (var empleado in EmpleadosFiltrados)
-                            {
-                                <option value="@GetEmpleadoDisplay(empleado)"></option>
-                            }
-                        </datalist>
-                    </div>
-
-                    <div class="form-group large">
-                        <label>Book</label>
-
-                        <input class="form-control"
-                               list="booksList"
-                               placeholder="Search by Book Name, KGEN Code or LSA Code"
-                               @bind="LibroTexto"
-                               @bind:event="oninput"
-                               required />
-
-                        <datalist id="booksList">
-                            @foreach (var libro in LibrosFiltradosParaCombo)
-                            {
-                                <option value="@GetLibroDisplay(libro)"></option>
-                            }
-                        </datalist>
-                    </div>
-
-                </div>
-
-                @if (EmpleadoSeleccionado is not null || LibroSeleccionado is not null)
+            <div class="hero-stats assignments-skeleton-stats">
+                @for (var statIndex = 0; statIndex < 2; statIndex++)
                 {
-                    <div class="preview-grid">
-                        <div class="preview-card">
-                            <span>Selected Employee</span>
-                            <strong>@(EmpleadoSeleccionado?.Nombre ?? "-")</strong>
-                            <small>@(EmpleadoSeleccionado is null ? "No valid employee selected" : $"Employee ID: {EmpleadoSeleccionado.IdEmpleado}")</small>
+                    <div class="stat-card assignments-skeleton-stat-card">
+                        <div class="assignments-skeleton-block assignments-skeleton-stat-label"></div>
+                        <div class="assignments-skeleton-block assignments-skeleton-stat-value"></div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="form-card assignments-skeleton-card">
+            <div class="section-header assignments-skeleton-section-header">
+                <div class="assignments-skeleton-header-copy">
+                    <div class="assignments-skeleton-block assignments-skeleton-section-title"></div>
+                    <div class="assignments-skeleton-block assignments-skeleton-section-description"></div>
+                </div>
+
+                <div class="assignments-skeleton-header-actions">
+                    @for (var actionIndex = 0; actionIndex < 5; actionIndex++)
+                    {
+                        <div class="assignments-skeleton-block assignments-skeleton-action"></div>
+                    }
+                </div>
+            </div>
+
+            <div class="assignments-skeleton-form-grid">
+                @for (var fieldIndex = 0; fieldIndex < 2; fieldIndex++)
+                {
+                    <div class="assignments-skeleton-field">
+                        <div class="assignments-skeleton-block assignments-skeleton-label"></div>
+                        <div class="assignments-skeleton-block assignments-skeleton-input"></div>
+                    </div>
+                }
+            </div>
+
+            <div class="assignments-skeleton-button-row">
+                <div class="assignments-skeleton-block assignments-skeleton-button primary"></div>
+                <div class="assignments-skeleton-block assignments-skeleton-button"></div>
+            </div>
+        </section>
+
+        <section class="list-card assignments-skeleton-card assignments-skeleton-list-card">
+            <div class="section-header table-header assignments-skeleton-section-header">
+                <div class="assignments-skeleton-header-copy">
+                    <div class="assignments-skeleton-block assignments-skeleton-section-title list-title"></div>
+                    <div class="assignments-skeleton-block assignments-skeleton-section-description list-description"></div>
+                </div>
+
+                <div class="assignments-skeleton-filters">
+                    @for (var filterIndex = 0; filterIndex < 7; filterIndex++)
+                    {
+                        <div class="assignments-skeleton-block assignments-skeleton-filter"></div>
+                    }
+                </div>
+            </div>
+
+            <div class="assignments-skeleton-table-container">
+                <div class="assignments-skeleton-table-head">
+                    @for (var columnIndex = 0; columnIndex < 12; columnIndex++)
+                    {
+                        <div class="assignments-skeleton-block assignments-skeleton-column"></div>
+                    }
+                </div>
+
+                @for (var rowIndex = 0; rowIndex < 5; rowIndex++)
+                {
+                    <div class="assignments-skeleton-table-row">
+                        <div class="assignments-skeleton-person-cell">
+                            <div class="assignments-skeleton-block assignments-skeleton-avatar"></div>
+                            <div class="assignments-skeleton-person-copy">
+                                <div class="assignments-skeleton-block assignments-skeleton-person-name"></div>
+                                <div class="assignments-skeleton-block assignments-skeleton-person-meta"></div>
+                            </div>
                         </div>
 
-                        <div class="preview-card">
-                            <span>Selected Book</span>
-                            <strong>@(LibroSeleccionado?.BookName ?? "-")</strong>
-                            <small>
-                                @(LibroSeleccionado is null
-                                                        ? "No valid book selected"
-                                                        : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
+                        @for (var cellIndex = 0; cellIndex < 11; cellIndex++)
+                        {
+                            <div class="assignments-skeleton-block assignments-skeleton-cell @(cellIndex % 3 == 0 ? "short" : cellIndex % 3 == 1 ? "medium" : "long")"></div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+}
+else
+{
+    <div class="assignments-page">
+
+        <section class="page-hero">
+            <div>
+                <h1>Book Assignments</h1>
+                <p>
+                    Assign books to employees manually or import assignments using an XLSX file.
+                </p>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span>Total Assignments</span>
+                    <strong>@AsignacionesListado.Count</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Filtered</span>
+                    <strong>@AsignacionesFiltradas.Count()</strong>
+                </div>
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Mensaje))
+        {
+            <div class="alert-box @TipoMensaje">
+                @Mensaje
+            </div>
+        }
+
+        @if (CreateAssignations)
+        {
+            <section class="form-card">
+                <div class="section-header">
+                    <div>
+                        <h2>Assign Book to Employee</h2>
+                        <p>Select an employee and search the book by Book Name, KGEN Code or LSA Code.</p>
+                    </div>
+
+                    <div class="header-actions">
+                        @if (PuedeDescargarPlantilla)
+                        {
+                            <button type="button"
+                                    class="btn-template-xlsx"
+                                    disabled="@DescargandoPlantillaXlsx"
+                                    @onclick="DownloadAssignmentsTemplateAsync">
+                                @(DescargandoPlantillaXlsx ? "Downloading..." : "📄 Download Template")
+                            </button>
+                        }
+
+                        <InputFile @key="XlsxInputKey"
+                                   id="xlsxAssignmentsUpload"
+                                   class="file-input-hidden"
+                                   OnChange="ImportAssignmentsFromXlsxAsync"
+                                   accept=".xlsx" />
+
+                        <label for="xlsxAssignmentsUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
+                            @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
+                        </label>
+
+                        <InputFile @key="XlsxBooksUpdateInputKey"
+                                   id="xlsxBooksUpdateUpload"
+                                   class="file-input-hidden"
+                                   OnChange="UpdateBooksFromXlsxAsync"
+                                   accept=".xlsx" />
+
+                        <label for="xlsxBooksUpdateUpload" class="btn-update-xlsx @(ActualizandoLibrosXlsx ? "disabled" : "")">
+                            @(ActualizandoLibrosXlsx ? "Updating..." : "🔄 Update Books XLSX")
+                        </label>
+
+                        <button type="button"
+                                class="btn-light"
+                                @onclick="AbrirFormularioAsignacionTemporal">
+                            🔁 Temporary Assignment
+                        </button>
+
+                        <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                            ✨ New
+                        </button>
+                    </div>
+                </div>
+
+                <form @onsubmit="GuardarAsignacionAsync" @onsubmit:preventDefault>
+                    <div class="form-grid">
+
+                        <div class="form-group large">
+                            <label>Employee</label>
+
+                            <input class="form-control"
+                                   list="employeesList"
+                                   placeholder="Search employee by name or employee ID"
+                                   @bind="EmpleadoTexto"
+                                   @bind:event="oninput"
+                                   required />
+
+                            <datalist id="employeesList">
+                                @foreach (var empleado in EmpleadosFiltrados)
+                                {
+                                    <option value="@GetEmpleadoDisplay(empleado)"></option>
+                                }
+                            </datalist>
+                        </div>
+
+                        <div class="form-group large">
+                            <label>Book</label>
+
+                            <input class="form-control"
+                                   list="booksList"
+                                   placeholder="Search by Book Name, KGEN Code or LSA Code"
+                                   @bind="LibroTexto"
+                                   @bind:event="oninput"
+                                   required />
+
+                            <datalist id="booksList">
+                                @foreach (var libro in LibrosFiltradosParaCombo)
+                                {
+                                    <option value="@GetLibroDisplay(libro)"></option>
+                                }
+                            </datalist>
+                        </div>
+
+                    </div>
+
+                    @if (EmpleadoSeleccionado is not null || LibroSeleccionado is not null)
+                    {
+                        <div class="preview-grid">
+                            <div class="preview-card">
+                                <span>Selected Employee</span>
+                                <strong>@(EmpleadoSeleccionado?.Nombre ?? "-")</strong>
+                                <small>@(EmpleadoSeleccionado is null ? "No valid employee selected" : $"Employee ID: {EmpleadoSeleccionado.IdEmpleado}")</small>
+                            </div>
+
+                            <div class="preview-card">
+                                <span>Selected Book</span>
+                                <strong>@(LibroSeleccionado?.BookName ?? "-")</strong>
+                                <small>
+                                    @(LibroSeleccionado is null
+                                                            ? "No valid book selected"
+                                                            : $"KGEN: {LibroSeleccionado.KGENCode} | LSA: {LibroSeleccionado.LSACode}")
                     </small>
                 </div>
             </div>
                         }
 
-                <div class="button-row">
-                    <button type="submit" class="btn-primary" disabled="@Guardando">
-                        @(Guardando ? "Saving..." : "Save Assignment")
+                    <div class="button-row">
+                        <button type="submit" class="btn-primary" disabled="@Guardando">
+                            @(Guardando ? "Saving..." : "Save Assignment")
+                        </button>
+
+                        <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                            Clear
+                        </button>
+                    </div>
+                </form>
+            </section>
+        }
+
+        <section class="list-card">
+            <div class="section-header table-header">
+                <div>
+                    <h2>Assignment List</h2>
+                    <p>View and manage all employee-book assignments.</p>
+                </div>
+
+                <div class="list-filters">
+
+                    <select class="employee-filter-select"
+                            value="@EmpleadoFiltroId"
+                            @onchange="OnEmpleadoFiltroChanged">
+
+                        <option value="">All Employees</option>
+
+                        @foreach (var empleado in EmpleadosParaFiltro)
+                        {
+                            <option value="@empleado.EmpleadoId">
+                                @empleado.EmpleadoNombre
+                            </option>
+                        }
+                    </select>
+
+                    <div class="month-filter">
+                        <label>Pub Date Month</label>
+                        <select class="form-control filter-select" @bind="SelectedPubMonth">
+                            <option value="">All Pub Dates</option>
+
+                            @foreach (var month in PubDateMonths)
+                            {
+                                <option value="@month.Value">@month.Label (@month.Count)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="month-filter">
+                        <label>From</label>
+                        <InputDate class="form-control filter-select"
+                                   @bind-Value="FechaDesdeFiltro" />
+                    </div>
+
+                    <div class="month-filter">
+                        <label>To</label>
+                        <InputDate class="form-control filter-select"
+                                   @bind-Value="FechaHastaFiltro" />
+                    </div>
+
+                    <div class="search-box">
+                        <span>🔎</span>
+                        <input placeholder="Search by employee, book, KGEN, LSA, state, database..."
+                               @bind="Busqueda"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <button type="button"
+                            class="btn-export-xlsx"
+                            @onclick="ExportarAsignacionesXlsxAsync">
+                        📤 Export XLSX
                     </button>
 
-                    <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                    <button type="button"
+                            class="btn-status-books"
+                            disabled="@GenerandoStatusBooks"
+                            @onclick="ExportarStatusOfBooksXlsxAsync">
+                        @(GenerandoStatusBooks ? "Generating..." : "📊 Status of Books")
+                    </button>
+
+                    <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
                         Clear
                     </button>
                 </div>
-            </form>
-        </section>
-    }
-
-    <section class="list-card">
-        <div class="section-header table-header">
-            <div>
-                <h2>Assignment List</h2>
-                <p>View and manage all employee-book assignments.</p>
             </div>
 
-            <div class="list-filters">
-
-                <select class="employee-filter-select"
-                        value="@EmpleadoFiltroId"
-                        @onchange="OnEmpleadoFiltroChanged">
-
-                    <option value="">All Employees</option>
-
-                    @foreach (var empleado in EmpleadosParaFiltro)
-                    {
-                        <option value="@empleado.EmpleadoId">
-                            @empleado.EmpleadoNombre
-                        </option>
-                    }
-                </select>
-
-                <div class="month-filter">
-                    <label>Pub Date Month</label>
-                    <select class="form-control filter-select" @bind="SelectedPubMonth">
-                        <option value="">All Pub Dates</option>
-
-                        @foreach (var month in PubDateMonths)
-                        {
-                            <option value="@month.Value">@month.Label (@month.Count)</option>
-                        }
-                    </select>
+            @if (Cargando)
+            {
+                <div class="loading-state">
+                    Loading assignments...
                 </div>
-
-                <div class="month-filter">
-                    <label>From</label>
-                    <InputDate class="form-control filter-select"
-                               @bind-Value="FechaDesdeFiltro" />
+            }
+            else if (!AsignacionesFiltradas.Any())
+            {
+                <div class="empty-state">
+                    <strong>No assignments to display.</strong>
+                    <span>Create a new assignment or change the search filter.</span>
                 </div>
-
-                <div class="month-filter">
-                    <label>To</label>
-                    <InputDate class="form-control filter-select"
-                               @bind-Value="FechaHastaFiltro" />
-                </div>
-
-                <div class="search-box">
-                    <span>🔎</span>
-                    <input placeholder="Search by employee, book, KGEN, LSA, state, database..."
-                           @bind="Busqueda"
-                           @bind:event="oninput" />
-                </div>
-
-                <button type="button"
-                        class="btn-export-xlsx"
-                        @onclick="ExportarAsignacionesXlsxAsync">
-                    📤 Export XLSX
-                </button>
-
-                <button type="button"
-                        class="btn-status-books"
-                        disabled="@GenerandoStatusBooks"
-                        @onclick="ExportarStatusOfBooksXlsxAsync">
-                    @(GenerandoStatusBooks ? "Generating..." : "📊 Status of Books")
-                </button>
-
-                <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
-                    Clear
-                </button>
-            </div>
-        </div>
-
-        @if (Cargando)
-        {
-            <div class="loading-state">
-                Loading assignments...
-            </div>
-        }
-        else if (!AsignacionesFiltradas.Any())
-        {
-            <div class="empty-state">
-                <strong>No assignments to display.</strong>
-                <span>Create a new assignment or change the search filter.</span>
-            </div>
-        }
-        else
-        {
-            <div class="table-container">
-                <table class="assignments-table">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            @if (Scope.ViewAllEmployeeTypes)
-                            {
-                                <th>Department</th>
-                            }
-                            <th>Temporary Assignment</th>
-                            <th>Book Name</th>
-                            <th>KGEN</th>
-                            <th>LSA</th>
-                            <th>State</th>
-                            <th>Database</th>
-                            <th>Legacy Code</th>
-                            <th>Print Foot</th>
-                            <th>Trim Size</th>
-                            <th>Bind Plant</th>
-                            <th>Pub Date</th>
-                            <th>Last Stage Worked</th>
-                            <th>Next Stage</th>
-                            @if (CreateAssignations)
-                            {
-                                <th></th>
-                            }
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var item in AsignacionesFiltradas)
-                        {
+            }
+            else
+            {
+                <div class="table-container">
+                    <table class="assignments-table">
+                        <thead>
                             <tr>
-                                <td data-label="Employee">
-                                    <div class="employee-title">
-                                        <strong>@item.EmpleadoNombre</strong>
-                                        <span>@item.EmpleadoEmail</span>
-                                    </div>
-                                </td>
-
+                                <th>Employee</th>
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <td data-label="Department"><span class="pill">@item.EmployeeTypeCode</span></td>
+                                    <th>Department</th>
                                 }
-
-                                <td data-label="Temporary">
-                                    @if (item.TieneAsignacionTemporal)
-                                    {
-                                        <div class="employee-title">
-                                            <strong>@item.EmpleadoTemporalNombre</strong>
-                                            <span>Covering: @item.EtapasTemporales</span>
-                                            <span>Original: @item.EmpleadoOriginalNombre</span>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <span class="pill">No temporary assignment</span>
-                                    }
-                                </td>
-
-                                <td data-label="Book">
-                                    <div class="book-title">
-                                        <strong>@item.BookName</strong>
-                                        <span>@item.ProductIssue</span>
-                                    </div>
-                                </td>
-
-                                <td data-label="KGEN">@item.KGENCode</td>
-                                <td data-label="LSA">@item.LSACode</td>
-
-                                <td data-label="State">
-                                    <span class="pill">@item.StateName</span>
-                                </td>
-
-                                <td data-label="Database">@item.DatabaseName</td>
-                                <td data-label="Legacy">@item.LegacyCodeName</td>
-                                <td data-label="Print Foot">@item.PrintFootName</td>
-                                <td data-label="Trim Size">@item.TrimSizeName</td>
-                                <td data-label="Bind Plant">@item.BindPlantName</td>
-                                <td data-label="Pub Date">@FormatoFecha(item.PubDate)</td>
-
-                                <td data-label="Last Stage Worked">
-                                    <div class="stage-status-cell">
-                                        <span class="@GetLastStageChipClass(item)">
-                                            @item.LastStageWorked
-                                        </span>
-
-                                        @if (item.LastStageWorkedDate.HasValue)
-                                        {
-                                            <small>Worked: @FormatoFecha(item.LastStageWorkedDate.Value)</small>
-                                        }
-                                    </div>
-                                </td>
-
-                                <td data-label="Next Stage">
-                                    <span class="@GetNextStageChipClass(item.NextStage)">
-                                        @item.NextStage
-                                    </span>
-                                </td>
-
+                                <th>Temporary Assignment</th>
+                                <th>Book Name</th>
+                                <th>KGEN</th>
+                                <th>LSA</th>
+                                <th>State</th>
+                                <th>Database</th>
+                                <th>Legacy Code</th>
+                                <th>Print Foot</th>
+                                <th>Trim Size</th>
+                                <th>Bind Plant</th>
+                                <th>Pub Date</th>
+                                <th>Last Stage Worked</th>
+                                <th>Next Stage</th>
                                 @if (CreateAssignations)
                                 {
-                                    <td data-label="Actions" class="actions-cell">
-                                        <button type="button"
-                                                class="icon-btn danger"
-                                                title="Delete"
-                                                @onclick="() => EliminarAsignacionAsync(item.Id)">
-                                            🗑️
-                                        </button>
-                                    </td>
+                                    <th></th>
                                 }
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </section>
-</div>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in AsignacionesFiltradas)
+                            {
+                                <tr>
+                                    <td data-label="Employee">
+                                        <div class="employee-title">
+                                            <strong>@item.EmpleadoNombre</strong>
+                                            <span>@item.EmpleadoEmail</span>
+                                        </div>
+                                    </td>
+
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td data-label="Department"><span class="pill">@item.EmployeeTypeCode</span></td>
+                                    }
+
+                                    <td data-label="Temporary">
+                                        @if (item.TieneAsignacionTemporal)
+                                        {
+                                            <div class="employee-title">
+                                                <strong>@item.EmpleadoTemporalNombre</strong>
+                                                <span>Covering: @item.EtapasTemporales</span>
+                                                <span>Original: @item.EmpleadoOriginalNombre</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="pill">No temporary assignment</span>
+                                        }
+                                    </td>
+
+                                    <td data-label="Book">
+                                        <div class="book-title">
+                                            <strong>@item.BookName</strong>
+                                            <span>@item.ProductIssue</span>
+                                        </div>
+                                    </td>
+
+                                    <td data-label="KGEN">@item.KGENCode</td>
+                                    <td data-label="LSA">@item.LSACode</td>
+
+                                    <td data-label="State">
+                                        <span class="pill">@item.StateName</span>
+                                    </td>
+
+                                    <td data-label="Database">@item.DatabaseName</td>
+                                    <td data-label="Legacy">@item.LegacyCodeName</td>
+                                    <td data-label="Print Foot">@item.PrintFootName</td>
+                                    <td data-label="Trim Size">@item.TrimSizeName</td>
+                                    <td data-label="Bind Plant">@item.BindPlantName</td>
+                                    <td data-label="Pub Date">@FormatoFecha(item.PubDate)</td>
+
+                                    <td data-label="Last Stage Worked">
+                                        <div class="stage-status-cell">
+                                            <span class="@GetLastStageChipClass(item)">
+                                                @item.LastStageWorked
+                                            </span>
+
+                                            @if (item.LastStageWorkedDate.HasValue)
+                                            {
+                                                <small>Worked: @FormatoFecha(item.LastStageWorkedDate.Value)</small>
+                                            }
+                                        </div>
+                                    </td>
+
+                                    <td data-label="Next Stage">
+                                        <span class="@GetNextStageChipClass(item.NextStage)">
+                                            @item.NextStage
+                                        </span>
+                                    </td>
+
+                                    @if (CreateAssignations)
+                                    {
+                                        <td data-label="Actions" class="actions-cell">
+                                            <button type="button"
+                                                    class="icon-btn danger"
+                                                    title="Delete"
+                                                    @onclick="() => EliminarAsignacionAsync(item.Id)">
+                                                🗑️
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+}
 
 @if (MostrarModalEmpleadoRequerido)
 {
@@ -629,6 +731,9 @@
     // ADMIN, ADMINISTRATOR y SUPERVISOR.
     private bool PuedeDescargarPlantilla => Scope.ViewAllEmployeeTypes;
 
+    private bool CargandoInicial { get; set; } = true;
+    private bool _cargaInicialIniciada;
+
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
@@ -689,17 +794,6 @@
 
     private HashSet<Guid> EmpleadosPermitidosAsignacionesIds { get; set; } = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-        UsuarioActual = authState.User;
-        Scope = await UserDataScopeService.GetScopeAsync(UsuarioActual);
-        CreateAssignations = HasPermission(UsuarioActual, "CreateAssignations");
-
-        await CargarCatalogosAsync();
-        await CargarDatosAsync();
-    }
 
     private bool EtapaSeleccionada(string etapa)
     {
@@ -868,6 +962,13 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender && !_cargaInicialIniciada)
+        {
+            _cargaInicialIniciada = true;
+            await CargarPaginaInicialAsync();
+            return;
+        }
+
         if (AbrirTemporalPortalPendiente && MostrarFormularioTemporal)
         {
             AbrirTemporalPortalPendiente = false;
@@ -875,6 +976,49 @@
             await JS.InvokeVoidAsync(
                 "thryvModalPortal.open",
                 TemporaryAssignmentModalId);
+        }
+    }
+
+    private async Task CargarPaginaInicialAsync()
+    {
+        CargandoInicial = true;
+        Cargando = true;
+
+        try
+        {
+            await Task.Yield();
+
+            var authState =
+                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            UsuarioActual = authState.User;
+
+            if (UsuarioActual.Identity?.IsAuthenticated != true)
+            {
+                return;
+            }
+
+            Scope =
+                await UserDataScopeService.GetScopeAsync(UsuarioActual);
+
+            CreateAssignations =
+                HasPermission(UsuarioActual, "CreateAssignations");
+
+            await CargarCatalogosAsync();
+            await CargarDatosAsync();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(
+                $"Error loading assignments: {ex.Message}",
+                "error");
+        }
+        finally
+        {
+            Cargando = false;
+            CargandoInicial = false;
+
+            await InvokeAsync(StateHasChanged);
         }
     }
 

@@ -16,6 +16,7 @@
 
 @attribute [Authorize]
 @layout Pagination_Project.Components.Layout.DashboardLayout
+@rendermode InteractiveServer
 
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject IJSRuntime JS
@@ -24,677 +25,814 @@
 
 <PageTitle>Books - BibliotecaApp</PageTitle>
 
-<div class="books-page">
 
-    <section class="page-hero">
-        <div>
-            <h1>Book Management</h1>
-            <p>
-                Create, update, and manage books.
-            </p>
-        </div>
+@if (CargandoInicial)
+{
+    <div class="books-page books-page-skeleton"
+         aria-busy="true"
+         aria-label="Loading book management">
 
-        <div class="hero-stats">
-            <div class="stat-card">
-                <span>Total</span>
-                <strong>@Libros.Count</strong>
+        <section class="page-hero books-skeleton-hero">
+            <div class="books-skeleton-hero-copy">
+                <div class="books-skeleton-block books-skeleton-page-title"></div>
+                <div class="books-skeleton-block books-skeleton-page-subtitle"></div>
             </div>
 
-            <div class="stat-card">
-                <span>Filtered</span>
-                <strong>@LibrosFiltrados.Count()</strong>
-            </div>
-        </div>
-    </section>
-
-    @if (!string.IsNullOrWhiteSpace(Mensaje))
-    {
-        <div class="alert-box @TipoMensaje">
-            @Mensaje
-        </div>
-    }
-
-    @if (MostrarModalActualizacionXlsx && ResultadoActualizacionModal is not null)
-    {
-        <div class="xlsx-modal-backdrop">
-            <div class="xlsx-modal-card @(TipoModalActualizacionXlsx == "error" ? "xlsx-modal-error" : "xlsx-modal-success")">
-
-                <div class="xlsx-modal-header">
-                    <div>
-                        <h2>@TituloModalActualizacionXlsx</h2>
-                        <p>
-                            The XLSX update process has finished.
-                        </p>
-                    </div>
-
-                    <button type="button"
-                            class="xlsx-modal-close"
-                            @onclick="CerrarModalActualizacionXlsx">
-                        ✕
-                    </button>
-                </div>
-
-                <div class="xlsx-modal-stats">
-                    <div>
-                        <span>Updated</span>
-                        <strong>@ResultadoActualizacionModal.LibrosActualizados</strong>
-                    </div>
-
-                    <div>
-                        <span>Not Found</span>
-                        <strong>@ResultadoActualizacionModal.LibrosNoEncontrados</strong>
-                    </div>
-
-                    <div>
-                        <span>Skipped Rows</span>
-                        <strong>@ResultadoActualizacionModal.FilasOmitidas</strong>
-                    </div>
-                </div>
-
-                @if (ResultadoActualizacionModal.Advertencias.Any())
+            <div class="hero-stats">
+                @for (var statIndex = 0; statIndex < 2; statIndex++)
                 {
-                    <div class="xlsx-modal-section warning">
-                        <h3>Warnings</h3>
-
-                        <ul>
-                            @foreach (var warning in ResultadoActualizacionModal.Advertencias.Take(20))
-                            {
-                                <li>@warning</li>
-                            }
-                        </ul>
-
-                        @if (ResultadoActualizacionModal.Advertencias.Count > 20)
-                        {
-                            <p class="xlsx-modal-more">
-                                And @(ResultadoActualizacionModal.Advertencias.Count - 20) more warnings.
-                            </p>
-                        }
+                    <div class="stat-card books-skeleton-stat-card">
+                        <div class="books-skeleton-block books-skeleton-stat-label"></div>
+                        <div class="books-skeleton-block books-skeleton-stat-value"></div>
                     </div>
                 }
-
-                @if (ResultadoActualizacionModal.Errores.Any())
-                {
-                    <div class="xlsx-modal-section error">
-                        <h3>Errors</h3>
-
-                        <ul>
-                            @foreach (var error in ResultadoActualizacionModal.Errores.Take(20))
-                            {
-                                <li>@error</li>
-                            }
-                        </ul>
-
-                        @if (ResultadoActualizacionModal.Errores.Count > 20)
-                        {
-                            <p class="xlsx-modal-more">
-                                And @(ResultadoActualizacionModal.Errores.Count - 20) more errors.
-                            </p>
-                        }
-                    </div>
-                }
-
-                @if (!ResultadoActualizacionModal.Advertencias.Any() &&
-                            !ResultadoActualizacionModal.Errores.Any())
-                {
-                    <div class="xlsx-modal-section clean">
-                        <h3>Update completed successfully</h3>
-                        <p>No warnings or errors were found during the update.</p>
-                    </div>
-                }
-
-                <div class="xlsx-modal-actions">
-                    <button type="button"
-                            class="xlsx-modal-ok"
-                            @onclick="CerrarModalActualizacionXlsx">
-                        OK
-                    </button>
-                </div>
             </div>
-        </div>
-    }
-
-    @if (PuedeVerFormularioLibro)
-    {
-        <section class="form-card">
-            <div class="section-header">
-                <div>
-                    <h2>@(LibroSeleccionadoId is null ? "Add New Book" : "Edit Selected Book")</h2>
-                    <p>Complete the book information, codes and extract dates</p>
-                </div>
-
-                <div class="header-actions">
-                    @if (PuedeDescargarPlantilla)
-                    {
-                        <button type="button"
-                                class="btn-template-xlsx"
-                                disabled="@DescargandoPlantillaXlsx"
-                                @onclick="DownloadBooksTemplateAsync">
-                            @(DescargandoPlantillaXlsx ? "Downloading..." : "📄 Download Template")
-                        </button>
-                    }
-                    @if (CreateBook || EditBook)
-                    {
-                        <InputFile @key="XlsxInputKey"
-                                   id="xlsxUpload"
-                                   class="file-input-hidden"
-                                   OnChange="ImportBooksFromXlsxAsync"
-                                   accept=".xlsx" />
-
-                        <label for="xlsxUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
-                            @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
-                        </label>
-
-                        <InputFile @key="XlsxUpdateInputKey"
-                                   id="xlsxBooksUpdateUpload"
-                                   class="file-input-hidden"
-                                   OnChange="UpdateBooksFromXlsxAsync"
-                                   accept=".xlsx" />
-
-                        <label for="xlsxBooksUpdateUpload" class="btn-update-xlsx @(ActualizandoLibrosXlsx ? "disabled" : "")">
-                            @(ActualizandoLibrosXlsx ? "Updating..." : "🔄 Update with XLSX")
-                        </label>
-                    }
-
-                    @if (CreateBook || EditBook)
-                    {
-                        <button type="button" class="btn-light" @onclick="LimpiarFormulario">
-                            ✨ New
-                        </button>
-                    }
-                </div>
-            </div>
-
-            <form @onsubmit="GuardarLibroAsync" @onsubmit:preventDefault>
-                <div class="form-grid">
-
-                    <div class="form-group">
-                        <label>Employee Type</label>
-                        <select class="form-control"
-                                @bind="Formulario.EmployeeTypeId"
-                                disabled="@(!Scope.ViewAllEmployeeTypes)">
-                            <option value="0">Select employee type</option>
-                            @foreach (var item in EmployeeTypes)
-                            {
-                                <option value="@item.Id">@item.Code</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group large">
-                        <label>Book Name</label>
-                        <input class="form-control"
-                               @bind="Formulario.BookName"
-                               placeholder="Book name"
-                               required />
-                    </div>
-
-                    <div class="form-group">
-                        <label>KGEN Code</label>
-                        <input class="form-control"
-                               @bind="Formulario.KGENCode"
-                               placeholder="KGEN Code"
-                               required />
-                    </div>
-
-                    <div class="form-group">
-                        <label>LSA Code</label>
-                        <input class="form-control"
-                               @bind="Formulario.LSACode"
-                               placeholder="LSA Code" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Legacy Code</label>
-                        <select class="form-control" @bind="Formulario.LegacyCodeId">
-                            <option value="">Select legacy code</option>
-                            @foreach (var item in LegacyCodes)
-                            {
-                                <option value="@item.Id">@item.Legacy_Code_Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>State</label>
-                        <select class="form-control" @bind="Formulario.StateId">
-                            <option value="">Select state</option>
-                            @foreach (var item in States)
-                            {
-                                <option value="@item.Id">@item.State_Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Database</label>
-                        <select class="form-control" @bind="Formulario.DatabaseId">
-                            <option value="">Select database</option>
-                            @foreach (var item in Databases)
-                            {
-                                <option value="@item.Id">@item.Database_Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Product Issue</label>
-                        <input class="form-control"
-                               @bind="Formulario.ProductIssue"
-                               placeholder="Product Issue" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Trim Size</label>
-                        <select class="form-control" @bind="Formulario.TrimSizeId">
-                            <option value="">Select trim size</option>
-                            @foreach (var item in TrimSizes)
-                            {
-                                <option value="@item.Id">@item.Trim_Size_Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Bind Plant</label>
-                        <select class="form-control" @bind="Formulario.BindPlantId">
-                            <option value="">Select bind plant</option>
-                            @foreach (var item in BindPlants)
-                            {
-                                <option value="@item.Id">@item.Bind_Plant_Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group large">
-                        <label>Print Foot</label>
-                        <select class="form-control" @bind="Formulario.PrintFootId">
-                            <option value="">Select print foot</option>
-                            @foreach (var item in PrintFeet)
-                            {
-                                <option value="@item.Id">@item.Print_Foot_Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-
-                <div class="subsection-title">
-                    <span>Book Dates</span>
-                </div>
-
-                <div class="form-grid dates-grid">
-
-                    <div class="form-group">
-                        <label>Proof Extract</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.ProofExtract)"
-                               @onchange="e => Formulario.ProofExtract = ParseDate(e.Value)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Final Extract</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.FinalExtract)"
-                               @onchange="e => Formulario.FinalExtract = ParseDate(e.Value)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Memo Extract</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.MemoExtract)"
-                               @onchange="e => Formulario.MemoExtract = ParseDate(e.Value)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Final PO Date</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.FinalPODate)"
-                               @onchange="e => Formulario.FinalPODate = ParseDate(e.Value)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Shipping Date</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.ShippingDate)"
-                               @onchange="e => Formulario.ShippingDate = ParseDate(e.Value)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Dirxion Date</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.DirxionDate)"
-                               @onchange="e => Formulario.DirxionDate = ParseDate(e.Value)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Pub Date</label>
-                        <input type="date"
-                               class="form-control"
-                               value="@ToInputDate(Formulario.PubDate)"
-                               @onchange="e => Formulario.PubDate = ParseDate(e.Value)" />
-                    </div>
-                </div>
-
-                <div class="switch-row">
-                    <label class="switch-card">
-                        <input type="checkbox" @bind="Formulario.SRLSuppression" />
-                        <span>
-                            <strong>SRL Suppression</strong>
-                            <small>Enable this option if SRL suppression applies.</small>
-                        </span>
-                    </label>
-
-                    <label class="switch-card">
-                        <input type="checkbox" @bind="Formulario.NWP" />
-                        <span>
-                            <strong>NWP</strong>
-                            <small>Enable this option if the book applies to NWP.</small>
-                        </span>
-                    </label>
-                </div>
-
-                <div class="button-row">
-                    @if (PuedeCrearOEditarLibro)
-                    {
-                        <button type="submit" class="btn-primary" disabled="@Guardando">
-                            @(Guardando ? "Saving..." : LibroSeleccionadoId is null ? "Save Book" : "Save Changes")
-                        </button>
-                    }
-
-                    @if (CreateBook || EditBook)
-                    {
-                        <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
-                            Clear
-                        </button>
-                    }
-
-                    @if (DeleteBook)
-                    {
-                        <button type="button"
-                                class="btn-danger"
-                                disabled="@(LibroSeleccionadoId is null || Guardando)"
-                                @onclick="EliminarLibroAsync">
-                            Delete
-                        </button>
-                    }
-                </div>
-            </form>
         </section>
-    }
 
-    <section class="list-card">
-        <div class="section-header table-header">
-            <div>
-                <h2>Book List</h2>
-                <p>Double-click a row to load it into the form.</p>
-            </div>
-
-            <div class="list-filters">
-                <div class="search-box">
-                    <span>🔎</span>
-                    <input placeholder="Search by book, KGEN, LSA, state, database, legacy code, print foot..."
-                           @bind="Busqueda"
-                           @bind:event="oninput" />
+        <section class="form-card books-skeleton-form-card">
+            <div class="section-header">
+                <div class="books-skeleton-header-copy">
+                    <div class="books-skeleton-block books-skeleton-section-title"></div>
+                    <div class="books-skeleton-block books-skeleton-section-description"></div>
                 </div>
 
-                <div class="month-filter">
-                    <label>Pub Date Month</label>
-                    <select class="form-control filter-select" @bind="SelectedPubMonth">
-                        <option value="">All Pub Dates</option>
-                        @foreach (var month in PubDateMonths)
+                <div class="header-actions books-skeleton-header-actions">
+                    @for (var actionIndex = 0; actionIndex < 4; actionIndex++)
+                    {
+                        <div class="books-skeleton-block books-skeleton-action"></div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-grid books-skeleton-form-grid">
+                @for (var fieldIndex = 0; fieldIndex < 11; fieldIndex++)
+                {
+                    <div class="books-skeleton-field @(fieldIndex == 1 || fieldIndex == 10 ? "large" : string.Empty)">
+                        <div class="books-skeleton-block books-skeleton-label"></div>
+                        <div class="books-skeleton-block books-skeleton-input"></div>
+                    </div>
+                }
+            </div>
+
+            <div class="books-skeleton-subsection">
+                <div class="books-skeleton-block books-skeleton-subsection-title"></div>
+                <div class="books-skeleton-subsection-line"></div>
+            </div>
+
+            <div class="form-grid dates-grid books-skeleton-date-grid">
+                @for (var dateIndex = 0; dateIndex < 7; dateIndex++)
+                {
+                    <div class="books-skeleton-field">
+                        <div class="books-skeleton-block books-skeleton-label"></div>
+                        <div class="books-skeleton-block books-skeleton-input"></div>
+                    </div>
+                }
+            </div>
+
+            <div class="switch-row books-skeleton-switch-row">
+                @for (var switchIndex = 0; switchIndex < 2; switchIndex++)
+                {
+                    <div class="books-skeleton-switch-card">
+                        <div class="books-skeleton-block books-skeleton-checkbox"></div>
+
+                        <div class="books-skeleton-switch-copy">
+                            <div class="books-skeleton-block books-skeleton-switch-title"></div>
+                            <div class="books-skeleton-block books-skeleton-switch-description"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="button-row books-skeleton-button-row">
+                <div class="books-skeleton-block books-skeleton-main-button"></div>
+                <div class="books-skeleton-block books-skeleton-secondary-button"></div>
+                <div class="books-skeleton-block books-skeleton-danger-button"></div>
+            </div>
+        </section>
+
+        <section class="list-card books-skeleton-list-card">
+            <div class="section-header table-header">
+                <div class="books-skeleton-header-copy">
+                    <div class="books-skeleton-block books-skeleton-section-title"></div>
+                    <div class="books-skeleton-block books-skeleton-section-description short"></div>
+                </div>
+
+                <div class="list-filters books-skeleton-filters">
+                    <div class="books-skeleton-block books-skeleton-search"></div>
+
+                    @for (var filterIndex = 0; filterIndex < 3; filterIndex++)
+                    {
+                        <div class="books-skeleton-filter">
+                            <div class="books-skeleton-block books-skeleton-filter-label"></div>
+                            <div class="books-skeleton-block books-skeleton-filter-input"></div>
+                        </div>
+                    }
+
+                    <div class="books-skeleton-block books-skeleton-filter-button"></div>
+                    <div class="books-skeleton-block books-skeleton-export-button"></div>
+                </div>
+            </div>
+
+            <div class="books-skeleton-table-container">
+                <div class="books-skeleton-table-header">
+                    @for (var columnIndex = 0; columnIndex < 10; columnIndex++)
+                    {
+                        <div class="books-skeleton-block books-skeleton-column"></div>
+                    }
+                </div>
+
+                @for (var rowIndex = 0; rowIndex < 6; rowIndex++)
+                {
+                    <div class="books-skeleton-table-row">
+                        <div class="books-skeleton-book-cell">
+                            <div class="books-skeleton-block books-skeleton-book-name"></div>
+                            <div class="books-skeleton-block books-skeleton-book-detail"></div>
+                        </div>
+
+                        @for (var cellIndex = 0; cellIndex < 9; cellIndex++)
                         {
-                            <option value="@month.Value">@month.Label (@month.Count)</option>
+                            <div class="books-skeleton-block books-skeleton-cell @(cellIndex % 3 == 0 ? "short" : string.Empty)"></div>
                         }
-                    </select>
-                </div>
-
-                <div class="month-filter">
-                    <label>From</label>
-                    <InputDate class="form-control filter-select"
-                               @bind-Value="FechaDesdeFiltro" />
-                </div>
-
-                <div class="month-filter">
-                    <label>To</label>
-                    <InputDate class="form-control filter-select"
-                               @bind-Value="FechaHastaFiltro" />
-                </div>
-
-                <button type="button" class="btn-filter-clear" @onclick="ClearListFilters">
-                    Clear
-                </button>
-
-                <button type="button"
-                        class="btn-export-xlsx"
-                        disabled="@(ExportandoXlsx || !LibrosFiltrados.Any())"
-                        @onclick="ExportBooksToXlsxAsync">
-                    @(ExportandoXlsx ? "Exporting..." : "📤 Export XLSX")
-                </button>
+                    </div>
+                }
             </div>
-        </div>
+        </section>
+    </div>
+}
+else
+{
+    <div class="books-page">
 
-        @if (Cargando)
-        {
-            <div class="loading-state">
-                Loading books...
+        <section class="page-hero">
+            <div>
+                <h1>Book Management</h1>
+                <p>
+                    Create, update, and manage books.
+                </p>
             </div>
-        }
-        else if (!LibrosFiltrados.Any())
+
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span>Total</span>
+                    <strong>@Libros.Count</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Filtered</span>
+                    <strong>@LibrosFiltrados.Count()</strong>
+                </div>
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Mensaje))
         {
-            <div class="empty-state">
-                <strong>No books to display.</strong>
-                <span>Add a new book or change the search filter.</span>
+            <div class="alert-box @TipoMensaje">
+                @Mensaje
             </div>
         }
-        else
+
+        @if (MostrarModalActualizacionXlsx && ResultadoActualizacionModal is not null)
         {
-            <div class="table-container">
-                <table class="books-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("BookName")'>
-                                    Book Name <span>@GetSortIcon("BookName")</span>
-                                </button>
-                            </th>
+            <div class="xlsx-modal-backdrop">
+                <div class="xlsx-modal-card @(TipoModalActualizacionXlsx == "error" ? "xlsx-modal-error" : "xlsx-modal-success")">
 
-                            @if (Scope.ViewAllEmployeeTypes)
+                    <div class="xlsx-modal-header">
+                        <div>
+                            <h2>@TituloModalActualizacionXlsx</h2>
+                            <p>
+                                The XLSX update process has finished.
+                            </p>
+                        </div>
+
+                        <button type="button"
+                                class="xlsx-modal-close"
+                                @onclick="CerrarModalActualizacionXlsx">
+                            ✕
+                        </button>
+                    </div>
+
+                    <div class="xlsx-modal-stats">
+                        <div>
+                            <span>Updated</span>
+                            <strong>@ResultadoActualizacionModal.LibrosActualizados</strong>
+                        </div>
+
+                        <div>
+                            <span>Not Found</span>
+                            <strong>@ResultadoActualizacionModal.LibrosNoEncontrados</strong>
+                        </div>
+
+                        <div>
+                            <span>Skipped Rows</span>
+                            <strong>@ResultadoActualizacionModal.FilasOmitidas</strong>
+                        </div>
+                    </div>
+
+                    @if (ResultadoActualizacionModal.Advertencias.Any())
+                    {
+                        <div class="xlsx-modal-section warning">
+                            <h3>Warnings</h3>
+
+                            <ul>
+                                @foreach (var warning in ResultadoActualizacionModal.Advertencias.Take(20))
+                                {
+                                    <li>@warning</li>
+                                }
+                            </ul>
+
+                            @if (ResultadoActualizacionModal.Advertencias.Count > 20)
                             {
-                                <th>Department</th>
+                                <p class="xlsx-modal-more">
+                                    And @(ResultadoActualizacionModal.Advertencias.Count - 20) more warnings.
+                                </p>
                             }
+                        </div>
+                    }
 
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("KGEN")'>
-                                    KGEN <span>@GetSortIcon("KGEN")</span>
-                                </button>
-                            </th>
+                    @if (ResultadoActualizacionModal.Errores.Any())
+                    {
+                        <div class="xlsx-modal-section error">
+                            <h3>Errors</h3>
 
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("LSA")'>
-                                    LSA <span>@GetSortIcon("LSA")</span>
-                                </button>
-                            </th>
+                            <ul>
+                                @foreach (var error in ResultadoActualizacionModal.Errores.Take(20))
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
 
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("State")'>
-                                    State <span>@GetSortIcon("State")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Database")'>
-                                    Database <span>@GetSortIcon("Database")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Legacy")'>
-                                    Legacy Code <span>@GetSortIcon("Legacy")</span>
-                                </button>
-                            </th>
-
-                            <th>Print Foot</th>
-                            <th>Trim Size</th>
-                            <th>Bind Plant</th>
-                            <th>Product Issue</th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Proof")'>
-                                    Proof <span>@GetSortIcon("Proof")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Final")'>
-                                    Final <span>@GetSortIcon("Final")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Memo")'>
-                                    Memo <span>@GetSortIcon("Memo")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("FinalPO")'>
-                                    Final PO <span>@GetSortIcon("FinalPO")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Shipping")'>
-                                    Shipping <span>@GetSortIcon("Shipping")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("Dirxion")'>
-                                    Dirxion <span>@GetSortIcon("Dirxion")</span>
-                                </button>
-                            </th>
-
-                            <th>
-                                <button type="button" class="sortable-header" @onclick='() => SortBy("PubDate")'>
-                                    Pub Date <span>@GetSortIcon("PubDate")</span>
-                                </button>
-                            </th>
-
-                            <th>SRL</th>
-                            <th>NWP</th>
-                            @if (EditBook)
+                            @if (ResultadoActualizacionModal.Errores.Count > 20)
                             {
-                                <th></th>
+                                <p class="xlsx-modal-more">
+                                    And @(ResultadoActualizacionModal.Errores.Count - 20) more errors.
+                                </p>
                             }
-                        </tr>
-                    </thead>
+                        </div>
+                    }
 
-                    <tbody>
-                        @foreach (var libro in LibrosOrdenados)
+                    @if (!ResultadoActualizacionModal.Advertencias.Any() &&
+                                !ResultadoActualizacionModal.Errores.Any())
+                    {
+                        <div class="xlsx-modal-section clean">
+                            <h3>Update completed successfully</h3>
+                            <p>No warnings or errors were found during the update.</p>
+                        </div>
+                    }
+
+                    <div class="xlsx-modal-actions">
+                        <button type="button"
+                                class="xlsx-modal-ok"
+                                @onclick="CerrarModalActualizacionXlsx">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (PuedeVerFormularioLibro)
+        {
+            <section class="form-card">
+                <div class="section-header">
+                    <div>
+                        <h2>@(LibroSeleccionadoId is null ? "Add New Book" : "Edit Selected Book")</h2>
+                        <p>Complete the book information, codes and extract dates</p>
+                    </div>
+
+                    <div class="header-actions">
+                        @if (PuedeDescargarPlantilla)
                         {
-                            <tr class="@(LibroSeleccionadoId == libro.Id ? "selected-row" : "")"
-                                @ondblclick="() => OnDobleClickLibro(libro)">
+                            <button type="button"
+                                    class="btn-template-xlsx"
+                                    disabled="@DescargandoPlantillaXlsx"
+                                    @onclick="DownloadBooksTemplateAsync">
+                                @(DescargandoPlantillaXlsx ? "Downloading..." : "📄 Download Template")
+                            </button>
+                        }
+                        @if (CreateBook || EditBook)
+                        {
+                            <InputFile @key="XlsxInputKey"
+                                       id="xlsxUpload"
+                                       class="file-input-hidden"
+                                       OnChange="ImportBooksFromXlsxAsync"
+                                       accept=".xlsx" />
 
-                                <td>
-                                    <div class="book-title">
-                                        <strong>@libro.BookName</strong>
-                                        <span>@GetPrintFootName(libro.PrintFootId)</span>
-                                    </div>
-                                </td>
+                            <label for="xlsxUpload" class="btn-xlsx @(ImportandoXlsx ? "disabled" : "")">
+                                @(ImportandoXlsx ? "Uploading..." : "📥 Add with XLSX")
+                            </label>
+
+                            <InputFile @key="XlsxUpdateInputKey"
+                                       id="xlsxBooksUpdateUpload"
+                                       class="file-input-hidden"
+                                       OnChange="UpdateBooksFromXlsxAsync"
+                                       accept=".xlsx" />
+
+                            <label for="xlsxBooksUpdateUpload" class="btn-update-xlsx @(ActualizandoLibrosXlsx ? "disabled" : "")">
+                                @(ActualizandoLibrosXlsx ? "Updating..." : "🔄 Update with XLSX")
+                            </label>
+                        }
+
+                        @if (CreateBook || EditBook)
+                        {
+                            <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                                ✨ New
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <form @onsubmit="GuardarLibroAsync" @onsubmit:preventDefault>
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label>Employee Type</label>
+                            <select class="form-control"
+                                    @bind="Formulario.EmployeeTypeId"
+                                    disabled="@(!Scope.ViewAllEmployeeTypes)">
+                                <option value="0">Select employee type</option>
+                                @foreach (var item in EmployeeTypes)
+                                {
+                                    <option value="@item.Id">@item.Code</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group large">
+                            <label>Book Name</label>
+                            <input class="form-control"
+                                   @bind="Formulario.BookName"
+                                   placeholder="Book name"
+                                   required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>KGEN Code</label>
+                            <input class="form-control"
+                                   @bind="Formulario.KGENCode"
+                                   placeholder="KGEN Code"
+                                   required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>LSA Code</label>
+                            <input class="form-control"
+                                   @bind="Formulario.LSACode"
+                                   placeholder="LSA Code" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Legacy Code</label>
+                            <select class="form-control" @bind="Formulario.LegacyCodeId">
+                                <option value="">Select legacy code</option>
+                                @foreach (var item in LegacyCodes)
+                                {
+                                    <option value="@item.Id">@item.Legacy_Code_Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>State</label>
+                            <select class="form-control" @bind="Formulario.StateId">
+                                <option value="">Select state</option>
+                                @foreach (var item in States)
+                                {
+                                    <option value="@item.Id">@item.State_Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Database</label>
+                            <select class="form-control" @bind="Formulario.DatabaseId">
+                                <option value="">Select database</option>
+                                @foreach (var item in Databases)
+                                {
+                                    <option value="@item.Id">@item.Database_Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Product Issue</label>
+                            <input class="form-control"
+                                   @bind="Formulario.ProductIssue"
+                                   placeholder="Product Issue" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Trim Size</label>
+                            <select class="form-control" @bind="Formulario.TrimSizeId">
+                                <option value="">Select trim size</option>
+                                @foreach (var item in TrimSizes)
+                                {
+                                    <option value="@item.Id">@item.Trim_Size_Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Bind Plant</label>
+                            <select class="form-control" @bind="Formulario.BindPlantId">
+                                <option value="">Select bind plant</option>
+                                @foreach (var item in BindPlants)
+                                {
+                                    <option value="@item.Id">@item.Bind_Plant_Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group large">
+                            <label>Print Foot</label>
+                            <select class="form-control" @bind="Formulario.PrintFootId">
+                                <option value="">Select print foot</option>
+                                @foreach (var item in PrintFeet)
+                                {
+                                    <option value="@item.Id">@item.Print_Foot_Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="subsection-title">
+                        <span>Book Dates</span>
+                    </div>
+
+                    <div class="form-grid dates-grid">
+
+                        <div class="form-group">
+                            <label>Proof Extract</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.ProofExtract)"
+                                   @onchange="e => Formulario.ProofExtract = ParseDate(e.Value)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Final Extract</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.FinalExtract)"
+                                   @onchange="e => Formulario.FinalExtract = ParseDate(e.Value)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Memo Extract</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.MemoExtract)"
+                                   @onchange="e => Formulario.MemoExtract = ParseDate(e.Value)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Final PO Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.FinalPODate)"
+                                   @onchange="e => Formulario.FinalPODate = ParseDate(e.Value)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Shipping Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.ShippingDate)"
+                                   @onchange="e => Formulario.ShippingDate = ParseDate(e.Value)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dirxion Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.DirxionDate)"
+                                   @onchange="e => Formulario.DirxionDate = ParseDate(e.Value)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Pub Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   value="@ToInputDate(Formulario.PubDate)"
+                                   @onchange="e => Formulario.PubDate = ParseDate(e.Value)" />
+                        </div>
+                    </div>
+
+                    <div class="switch-row">
+                        <label class="switch-card">
+                            <input type="checkbox" @bind="Formulario.SRLSuppression" />
+                            <span>
+                                <strong>SRL Suppression</strong>
+                                <small>Enable this option if SRL suppression applies.</small>
+                            </span>
+                        </label>
+
+                        <label class="switch-card">
+                            <input type="checkbox" @bind="Formulario.NWP" />
+                            <span>
+                                <strong>NWP</strong>
+                                <small>Enable this option if the book applies to NWP.</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="button-row">
+                        @if (PuedeCrearOEditarLibro)
+                        {
+                            <button type="submit" class="btn-primary" disabled="@Guardando">
+                                @(Guardando ? "Saving..." : LibroSeleccionadoId is null ? "Save Book" : "Save Changes")
+                            </button>
+                        }
+
+                        @if (CreateBook || EditBook)
+                        {
+                            <button type="button" class="btn-secondary" @onclick="LimpiarFormulario">
+                                Clear
+                            </button>
+                        }
+
+                        @if (DeleteBook)
+                        {
+                            <button type="button"
+                                    class="btn-danger"
+                                    disabled="@(LibroSeleccionadoId is null || Guardando)"
+                                    @onclick="EliminarLibroAsync">
+                                Delete
+                            </button>
+                        }
+                    </div>
+                </form>
+            </section>
+        }
+
+        <section class="list-card">
+            <div class="section-header table-header">
+                <div>
+                    <h2>Book List</h2>
+                    <p>Double-click a row to load it into the form.</p>
+                </div>
+
+                <div class="list-filters">
+                    <div class="search-box">
+                        <span>🔎</span>
+                        <input placeholder="Search by book, KGEN, LSA, state, database, legacy code, print foot..."
+                               @bind="Busqueda"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <div class="month-filter">
+                        <label>Pub Date Month</label>
+                        <select class="form-control filter-select" @bind="SelectedPubMonth">
+                            <option value="">All Pub Dates</option>
+                            @foreach (var month in PubDateMonths)
+                            {
+                                <option value="@month.Value">@month.Label (@month.Count)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="month-filter">
+                        <label>From</label>
+                        <InputDate class="form-control filter-select"
+                                   @bind-Value="FechaDesdeFiltro" />
+                    </div>
+
+                    <div class="month-filter">
+                        <label>To</label>
+                        <InputDate class="form-control filter-select"
+                                   @bind-Value="FechaHastaFiltro" />
+                    </div>
+
+                    <button type="button" class="btn-filter-clear" @onclick="ClearListFilters">
+                        Clear
+                    </button>
+
+                    <button type="button"
+                            class="btn-export-xlsx"
+                            disabled="@(ExportandoXlsx || !LibrosFiltrados.Any())"
+                            @onclick="ExportBooksToXlsxAsync">
+                        @(ExportandoXlsx ? "Exporting..." : "📤 Export XLSX")
+                    </button>
+                </div>
+            </div>
+
+            @if (Cargando)
+            {
+                <div class="loading-state">
+                    Loading books...
+                </div>
+            }
+            else if (!LibrosFiltrados.Any())
+            {
+                <div class="empty-state">
+                    <strong>No books to display.</strong>
+                    <span>Add a new book or change the search filter.</span>
+                </div>
+            }
+            else
+            {
+                <div class="table-container">
+                    <table class="books-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("BookName")'>
+                                        Book Name <span>@GetSortIcon("BookName")</span>
+                                    </button>
+                                </th>
 
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <td><span class="pill">@GetEmployeeTypeCode(libro.EmployeeTypeId)</span></td>
+                                    <th>Department</th>
                                 }
 
-                                <td>@libro.KGENCode</td>
-                                <td>@libro.LSACode</td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("KGEN")'>
+                                        KGEN <span>@GetSortIcon("KGEN")</span>
+                                    </button>
+                                </th>
 
-                                <td>
-                                    <span class="pill">@GetStateName(libro.StateId)</span>
-                                </td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("LSA")'>
+                                        LSA <span>@GetSortIcon("LSA")</span>
+                                    </button>
+                                </th>
 
-                                <td>@GetDatabaseName(libro.DatabaseId)</td>
-                                <td>@GetLegacyCodeName(libro.LegacyCodeId)</td>
-                                <td>@GetPrintFootName(libro.PrintFootId)</td>
-                                <td>@GetTrimSizeName(libro.TrimSizeId)</td>
-                                <td>@GetBindPlantName(libro.BindPlantId)</td>
-                                <td>@libro.ProductIssue</td>
-                                <td>
-                                    <span class='@GetDateTextClass(libro.Id, "ProofExtract", libro.ProofExtract)'
-                                          title='@GetDateTextTitle(libro.Id, "ProofExtract", libro.ProofExtract)'>
-                                        @FormatoFecha(libro.ProofExtract)
-                                    </span>
-                                </td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("State")'>
+                                        State <span>@GetSortIcon("State")</span>
+                                    </button>
+                                </th>
 
-                                <td>
-                                    <span class='@GetDateTextClass(libro.Id, "FinalExtract", libro.FinalExtract)'
-                                          title='@GetDateTextTitle(libro.Id, "FinalExtract", libro.FinalExtract)'>
-                                        @FormatoFecha(libro.FinalExtract)
-                                    </span>
-                                </td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Database")'>
+                                        Database <span>@GetSortIcon("Database")</span>
+                                    </button>
+                                </th>
 
-                                <td>
-                                    <span class='@GetDateTextClass(libro.Id, "MemoExtract", libro.MemoExtract)'
-                                          title='@GetDateTextTitle(libro.Id, "MemoExtract", libro.MemoExtract)'>
-                                        @FormatoFecha(libro.MemoExtract)
-                                    </span>
-                                </td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Legacy")'>
+                                        Legacy Code <span>@GetSortIcon("Legacy")</span>
+                                    </button>
+                                </th>
 
-                                <td>
-                                    <span class='@GetDateTextClass(libro.Id, "FinalPO", libro.FinalPODate)'
-                                          title='@GetDateTextTitle(libro.Id, "FinalPO", libro.FinalPODate)'>
-                                        @FormatoFecha(libro.FinalPODate)
-                                    </span>
-                                </td>
+                                <th>Print Foot</th>
+                                <th>Trim Size</th>
+                                <th>Bind Plant</th>
+                                <th>Product Issue</th>
 
-                                <td>
-                                    <span class='@GetDateTextClass(libro.Id, "Shipping", libro.ShippingDate)'
-                                          title='@GetDateTextTitle(libro.Id, "Shipping", libro.ShippingDate)'>
-                                        @FormatoFecha(libro.ShippingDate)
-                                    </span>
-                                </td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Proof")'>
+                                        Proof <span>@GetSortIcon("Proof")</span>
+                                    </button>
+                                </th>
 
-                                <td>
-                                    <span class='@GetDateTextClass(libro.Id, "Dirxion", libro.DirxionDate)'
-                                          title='@GetDateTextTitle(libro.Id, "Dirxion", libro.DirxionDate)'>
-                                        @FormatoFecha(libro.DirxionDate)
-                                    </span>
-                                </td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Final")'>
+                                        Final <span>@GetSortIcon("Final")</span>
+                                    </button>
+                                </th>
 
-                                <td>
-                                    <span class="book-date-text book-date-without-work-status"
-                                          title="Pub Date does not have a worked flag in Assignments_Worked.">
-                                        @FormatoFecha(libro.PubDate)
-                                    </span>
-                                </td>
-                                <td>@(libro.SRLSuppression ? "Yes" : "No")</td>
-                                <td>@(libro.NWP ? "Yes" : "No")</td>
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Memo")'>
+                                        Memo <span>@GetSortIcon("Memo")</span>
+                                    </button>
+                                </th>
 
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("FinalPO")'>
+                                        Final PO <span>@GetSortIcon("FinalPO")</span>
+                                    </button>
+                                </th>
+
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Shipping")'>
+                                        Shipping <span>@GetSortIcon("Shipping")</span>
+                                    </button>
+                                </th>
+
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("Dirxion")'>
+                                        Dirxion <span>@GetSortIcon("Dirxion")</span>
+                                    </button>
+                                </th>
+
+                                <th>
+                                    <button type="button" class="sortable-header" @onclick='() => SortBy("PubDate")'>
+                                        Pub Date <span>@GetSortIcon("PubDate")</span>
+                                    </button>
+                                </th>
+
+                                <th>SRL</th>
+                                <th>NWP</th>
                                 @if (EditBook)
                                 {
-                                    <td class="actions-cell">
-                                        <button type="button"
-                                                class="icon-btn"
-                                                title="Edit"
-                                                @onclick="() => SeleccionarLibro(libro)">
-                                            ✏️
-                                        </button>
-                                    </td>
+                                    <th></th>
                                 }
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </section>
-</div>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var libro in LibrosOrdenados)
+                            {
+                                <tr class="@(LibroSeleccionadoId == libro.Id ? "selected-row" : "")"
+                                    @ondblclick="() => OnDobleClickLibro(libro)">
+
+                                    <td>
+                                        <div class="book-title">
+                                            <strong>@libro.BookName</strong>
+                                            <span>@GetPrintFootName(libro.PrintFootId)</span>
+                                        </div>
+                                    </td>
+
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <td><span class="pill">@GetEmployeeTypeCode(libro.EmployeeTypeId)</span></td>
+                                    }
+
+                                    <td>@libro.KGENCode</td>
+                                    <td>@libro.LSACode</td>
+
+                                    <td>
+                                        <span class="pill">@GetStateName(libro.StateId)</span>
+                                    </td>
+
+                                    <td>@GetDatabaseName(libro.DatabaseId)</td>
+                                    <td>@GetLegacyCodeName(libro.LegacyCodeId)</td>
+                                    <td>@GetPrintFootName(libro.PrintFootId)</td>
+                                    <td>@GetTrimSizeName(libro.TrimSizeId)</td>
+                                    <td>@GetBindPlantName(libro.BindPlantId)</td>
+                                    <td>@libro.ProductIssue</td>
+                                    <td>
+                                        <span class='@GetDateTextClass(libro.Id, "ProofExtract", libro.ProofExtract)'
+                                              title='@GetDateTextTitle(libro.Id, "ProofExtract", libro.ProofExtract)'>
+                                            @FormatoFecha(libro.ProofExtract)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class='@GetDateTextClass(libro.Id, "FinalExtract", libro.FinalExtract)'
+                                              title='@GetDateTextTitle(libro.Id, "FinalExtract", libro.FinalExtract)'>
+                                            @FormatoFecha(libro.FinalExtract)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class='@GetDateTextClass(libro.Id, "MemoExtract", libro.MemoExtract)'
+                                              title='@GetDateTextTitle(libro.Id, "MemoExtract", libro.MemoExtract)'>
+                                            @FormatoFecha(libro.MemoExtract)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class='@GetDateTextClass(libro.Id, "FinalPO", libro.FinalPODate)'
+                                              title='@GetDateTextTitle(libro.Id, "FinalPO", libro.FinalPODate)'>
+                                            @FormatoFecha(libro.FinalPODate)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class='@GetDateTextClass(libro.Id, "Shipping", libro.ShippingDate)'
+                                              title='@GetDateTextTitle(libro.Id, "Shipping", libro.ShippingDate)'>
+                                            @FormatoFecha(libro.ShippingDate)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class='@GetDateTextClass(libro.Id, "Dirxion", libro.DirxionDate)'
+                                              title='@GetDateTextTitle(libro.Id, "Dirxion", libro.DirxionDate)'>
+                                            @FormatoFecha(libro.DirxionDate)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="book-date-text book-date-without-work-status"
+                                              title="Pub Date does not have a worked flag in Assignments_Worked.">
+                                            @FormatoFecha(libro.PubDate)
+                                        </span>
+                                    </td>
+                                    <td>@(libro.SRLSuppression ? "Yes" : "No")</td>
+                                    <td>@(libro.NWP ? "Yes" : "No")</td>
+
+                                    @if (EditBook)
+                                    {
+                                        <td class="actions-cell">
+                                            <button type="button"
+                                                    class="icon-btn"
+                                                    title="Edit"
+                                                    @onclick="() => SeleccionarLibro(libro)">
+                                                ✏️
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+}
 
 @code {
     private List<Libros> Libros { get; set; } = new();
@@ -735,6 +873,8 @@
     private bool DescargandoPlantillaXlsx { get; set; } = false;
 
     private bool Cargando { get; set; } = true;
+    private bool CargandoInicial { get; set; } = true;
+    private bool _cargaInicialIniciada;
     private bool Guardando { get; set; } = false;
     private bool ImportandoXlsx { get; set; } = false;
 
@@ -2041,20 +2181,64 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        _user = authState.User;
-        Scope = await UserDataScopeService.GetScopeAsync(_user);
+        if (!firstRender || _cargaInicialIniciada)
+            return;
 
-        CreateBook = HasPermission(_user, "CreateBook");
-        EditBook = HasPermission(_user, "EditBook");
-        DeleteBook = HasPermission(_user, "DeleteBook");
-        BooksView = HasPermission(_user, "BooksView");
+        _cargaInicialIniciada = true;
 
-        await CargarCatalogosAsync();
-        Formulario = CrearNuevoLibro();
-        await CargarLibrosAsync();
+        await CargarPaginaInicialAsync();
+    }
+
+    private async Task CargarPaginaInicialAsync()
+    {
+        CargandoInicial = true;
+        Cargando = true;
+
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            _user = authState.User;
+
+            if (_user.Identity?.IsAuthenticated != true)
+            {
+                Libros = new List<Libros>();
+                EtapasTrabajadasPorLibro = new Dictionary<Guid, BookWorkedStages>();
+                Formulario = new Libros();
+                return;
+            }
+
+            Scope = await UserDataScopeService.GetScopeAsync(_user);
+
+            CreateBook = HasPermission(_user, "CreateBook");
+            EditBook = HasPermission(_user, "EditBook");
+            DeleteBook = HasPermission(_user, "DeleteBook");
+            BooksView = HasPermission(_user, "BooksView");
+
+            await CargarCatalogosAsync();
+
+            Formulario = CrearNuevoLibro();
+
+            await CargarLibrosAsync();
+        }
+        catch (Exception ex)
+        {
+            Libros = new List<Libros>();
+            EtapasTrabajadasPorLibro = new Dictionary<Guid, BookWorkedStages>();
+            Formulario = new Libros();
+
+            MostrarMensaje(
+                $"Error loading book management: {ex.Message}",
+                "error");
+        }
+        finally
+        {
+            Cargando = false;
+            CargandoInicial = false;
+
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private static bool HasPermission(ClaimsPrincipal? user, string claimType)

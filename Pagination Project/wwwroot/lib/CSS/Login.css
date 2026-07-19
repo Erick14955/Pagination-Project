@@ -290,11 +290,11 @@ html.thryv-dark-glass .thryv-modal-card,
         font-weight: 900 !important;
     }
 
-    body.thryv-dark-glass .thryv-modal-card p,
-    html.thryv-dark-glass .thryv-modal-card p,
-    .thryv-dark-glass .thryv-modal-card p {
-        color: #dbeafe;
-    }
+body.thryv-dark-glass .thryv-modal-card p,
+html.thryv-dark-glass .thryv-modal-card p,
+.thryv-dark-glass .thryv-modal-card p {
+    color: #dbeafe;
+}
 
 .thryv-error {
     margin: 8px 0 20px;
@@ -1136,3 +1136,275 @@ html[data-theme="liquid glass"] .thryv-remember-option {
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
     }
+
+/* =========================================================
+   LOGIN SKELETON - CSS ONLY
+   ========================================================= */
+
+.thryv-login-stage {
+    width: 100%;
+    display: grid;
+    place-items: center;
+}
+
+    .thryv-login-stage > .thryv-login-card {
+        grid-area: 1 / 1;
+    }
+
+.thryv-skeleton-card {
+    position: relative;
+    z-index: 2;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: none;
+    user-select: none;
+    animation: thryv-login-hide-skeleton 0.20s ease 0.38s forwards;
+}
+
+.thryv-login-content {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(5px);
+    animation: thryv-login-show-content 0.26s ease 0.38s forwards;
+}
+
+.thryv-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--skeleton-base, #e2e8f0);
+    border-radius: 8px;
+}
+
+    .thryv-skeleton::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-110%);
+        background: linear-gradient( 90deg, transparent 0%, var(--skeleton-highlight, rgba(255, 255, 255, 0.58)) 50%, transparent 100% );
+        animation: thryv-skeleton-shimmer 1.25s linear infinite;
+    }
+
+.thryv-skeleton-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+}
+
+.thryv-skeleton-logo-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeleton-logo {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 12px;
+}
+
+.skeleton-logo-title {
+    width: 135px;
+    height: 17px;
+}
+
+.skeleton-logo-subtitle {
+    width: 190px;
+    max-width: 78%;
+    height: 11px;
+}
+
+.skeleton-main-title {
+    width: 190px;
+    max-width: 62%;
+    height: 31px;
+    margin-bottom: 14px;
+}
+
+.skeleton-description {
+    width: 270px;
+    max-width: 85%;
+    height: 14px;
+    margin-bottom: 32px;
+}
+
+.thryv-skeleton-form-group {
+    margin-bottom: 20px;
+}
+
+.skeleton-label {
+    width: 75px;
+    height: 13px;
+    margin-bottom: 9px;
+}
+
+.skeleton-input {
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+}
+
+.skeleton-checkbox {
+    width: 125px;
+    height: 15px;
+    margin: 4px 0 25px;
+}
+
+.skeleton-button {
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+}
+
+.skeleton-footer {
+    width: 235px;
+    max-width: 80%;
+    height: 12px;
+    margin: 30px auto 0;
+}
+
+@keyframes thryv-login-hide-skeleton {
+    from {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@keyframes thryv-login-show-content {
+    from {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+@keyframes thryv-skeleton-shimmer {
+    to {
+        transform: translateX(110%);
+    }
+}
+
+/* =========================================================
+   LOGIN BUTTON LOADER
+   ========================================================= */
+
+.thryv-login-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thryv-login-button-loader {
+    display: none;
+    width: 21px;
+    height: 21px;
+    border: 3px solid rgba(255, 255, 255, 0.38);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: thryv-login-spin 0.7s linear infinite;
+}
+
+.thryv-login-button.is-loading {
+    cursor: wait;
+    opacity: 0.88;
+    pointer-events: none;
+}
+
+    .thryv-login-button.is-loading .thryv-login-button-text {
+        display: none;
+    }
+
+    .thryv-login-button.is-loading .thryv-login-button-loader {
+        display: inline-block;
+    }
+
+form.is-submitting {
+    pointer-events: none;
+}
+
+@keyframes thryv-login-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =========================================================
+   SKELETON THEMES
+   ========================================================= */
+
+html[data-theme="dark"] .thryv-skeleton,
+html[data-theme="dark glass"] .thryv-skeleton {
+    --skeleton-base: rgba(148, 163, 184, 0.20);
+    --skeleton-highlight: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="liquid glass"] .thryv-skeleton {
+    --skeleton-base: rgba(100, 116, 139, 0.24);
+    --skeleton-highlight: rgba(255, 255, 255, 0.52);
+}
+
+html[data-theme="light"] .thryv-skeleton,
+html:not([data-theme]) .thryv-skeleton {
+    --skeleton-base: #e2e8f0;
+    --skeleton-highlight: rgba(255, 255, 255, 0.68);
+}
+
+@media (max-width: 520px) {
+    .thryv-skeleton-logo-row {
+        margin-bottom: 28px;
+    }
+
+    .skeleton-logo {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+    }
+
+    .skeleton-main-title {
+        height: 27px;
+    }
+
+    .skeleton-input,
+    .skeleton-button {
+        height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .thryv-skeleton-card {
+        display: none !important;
+        animation: none !important;
+    }
+
+    .thryv-login-content {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        animation: none !important;
+    }
+
+    .thryv-skeleton::after,
+    .thryv-login-button-loader {
+        animation: none !important;
+    }
+}

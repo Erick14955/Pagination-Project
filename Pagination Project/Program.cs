@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Pagination_Project.Components;
 using Pagination_Project.Data;
 using Pagination_Project.Services;
@@ -23,6 +24,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseNpgsql(
@@ -99,24 +101,83 @@ builder.Services
         {
             OnValidatePrincipal = async context =>
             {
-                var userIdClaim = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                /*
+                 * Blazor y los recursos internos pueden realizar varias solicitudes
+                 * mientras establecen o recuperan un circuito. Esas solicitudes no
+                 * necesitan consultar la base de datos para validar al usuario.
+                 */
+                if (EsRutaTecnicaAutenticacion(context.Request.Path))
+                {
+                    return;
+                }
+
+                var userIdClaim = context.Principal?
+                    .FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (!Guid.TryParse(userIdClaim, out var usuarioId))
                 {
                     context.RejectPrincipal();
-                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await context.HttpContext.SignOutAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme);
+
                     return;
                 }
 
-                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                var cache = context.HttpContext.RequestServices
+                    .GetRequiredService<IMemoryCache>();
 
-                var usuarioValido = await authService.UsuarioSigueActivoAsync(usuarioId);
+                var cacheKey = ObtenerClaveCacheUsuario(usuarioId);
+
+                if (!cache.TryGetValue<bool>(cacheKey, out var usuarioValido))
+                {
+                    var authService = context.HttpContext.RequestServices
+                        .GetRequiredService<IAuthService>();
+
+                    usuarioValido = await authService
+                        .UsuarioSigueActivoAsync(usuarioId);
+
+                    cache.Set(
+                        cacheKey,
+                        usuarioValido,
+                        new MemoryCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+                        });
+                }
 
                 if (!usuarioValido)
                 {
+                    cache.Remove(cacheKey);
                     context.RejectPrincipal();
-                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await context.HttpContext.SignOutAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme);
                 }
+            },
+
+            OnRedirectToLogin = context =>
+            {
+                if (EsRutaTecnicaAutenticacion(context.Request.Path))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+                return Task.CompletedTask;
+            },
+
+            OnRedirectToAccessDenied = context =>
+            {
+                if (EsRutaTecnicaAutenticacion(context.Request.Path))
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+                return Task.CompletedTask;
             }
         };
     });
@@ -222,24 +283,67 @@ app.Use(async (context, next) =>
 
 app.UseCookiePolicy();
 
+/*
+ * Los archivos estáticos se sirven antes de autenticación para evitar que
+ * cada CSS, JavaScript o imagen ejecute la validación de la cookie.
+ */
 app.UseStaticFiles();
 
 app.UseAuthentication();
-app.UseAuthorization();
-app.UseRateLimiter();
-app.UseAntiforgery();
 
+/*
+ * Si todavía existe una cookie válida y el usuario intenta abrir el login,
+ * se envía directamente al dashboard. Esto evita mostrar el login encima de
+ * una sesión activa.
+ */
 app.Use(async (context, next) =>
 {
-    var path = context.Request.Path.Value?.ToLower() ?? string.Empty;
+    var path = context.Request.Path;
 
-    var estaAutenticado = context.User?.Identity?.IsAuthenticated == true;
+    var estaAutenticado =
+        context.User?.Identity?.IsAuthenticated == true;
 
-    var requiereCambioPassword =
-        string.Equals(
+    var esSolicitudGet =
+        HttpMethods.IsGet(context.Request.Method);
+
+    var esPaginaLogin =
+        path == "/" ||
+        path.StartsWithSegments("/login");
+
+    if (esSolicitudGet && estaAutenticado && esPaginaLogin)
+    {
+        var requiereCambioPassword = string.Equals(
             context.User?.FindFirst("RequirePasswordChange")?.Value,
             "True",
             StringComparison.OrdinalIgnoreCase);
+
+        context.Response.Redirect(
+            requiereCambioPassword
+                ? "/cambiar-password"
+                : "/dashboard");
+
+        return;
+    }
+
+    await next();
+});
+
+/*
+ * Obliga a completar el cambio de contraseña antes de utilizar el resto del
+ * sistema, sin bloquear recursos internos, archivos estáticos o endpoints de
+ * autenticación.
+ */
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
+
+    var estaAutenticado =
+        context.User?.Identity?.IsAuthenticated == true;
+
+    var requiereCambioPassword = string.Equals(
+        context.User?.FindFirst("RequirePasswordChange")?.Value,
+        "True",
+        StringComparison.OrdinalIgnoreCase);
 
     var esRutaPermitida =
         path.StartsWith("/cambiar-password") ||
@@ -271,6 +375,10 @@ app.Use(async (context, next) =>
 
     await next();
 });
+
+app.UseAuthorization();
+app.UseRateLimiter();
+app.UseAntiforgery();
 
 app.MapPost("/account/login", async (
     HttpContext httpContext,
@@ -452,9 +560,21 @@ app.MapPost("/account/change-password", async (
 .RequireAuthorization()
 .AddEndpointFilter(ValidarAntiforgeryEndpoint);
 
-app.MapPost("/account/logout", async (HttpContext httpContext) =>
+app.MapPost("/account/logout", async (
+    HttpContext httpContext,
+    IMemoryCache cache) =>
 {
-    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    var userIdClaim = httpContext.User
+        .FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (Guid.TryParse(userIdClaim, out var usuarioId))
+    {
+        cache.Remove(ObtenerClaveCacheUsuario(usuarioId));
+    }
+
+    await httpContext.SignOutAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme);
+
     return Results.Redirect("/login");
 })
 .RequireAuthorization()
@@ -576,6 +696,27 @@ static async ValueTask<object?> ValidarAntiforgeryEndpoint(
     }
 
     return await next(context);
+}
+
+static bool EsRutaTecnicaAutenticacion(PathString path)
+{
+    return
+        path.StartsWithSegments("/_framework") ||
+        path.StartsWithSegments("/_blazor") ||
+        path.StartsWithSegments("/_content") ||
+        path.StartsWithSegments("/css") ||
+        path.StartsWithSegments("/js") ||
+        path.StartsWithSegments("/style") ||
+        path.StartsWithSegments("/lib") ||
+        path.StartsWithSegments("/images") ||
+        path.StartsWithSegments("/favicon") ||
+        path.StartsWithSegments("/robots.txt") ||
+        path.StartsWithSegments("/.well-known");
+}
+
+static string ObtenerClaveCacheUsuario(Guid usuarioId)
+{
+    return $"pagination-auth-user-valid-{usuarioId:N}";
 }
 
 app.Run();

@@ -24,411 +24,522 @@
 
 <PageTitle>Finished Reports</PageTitle>
 
-<div class="reports-page">
+@if (CargandoInicial)
+{
+    <div class="reports-page reports-skeleton-page"
+         aria-busy="true"
+         aria-label="Loading finished reports">
 
-    <section class="page-hero">
-        <div>
-            <h1>Finished Reports</h1>
-            <p>
-                Review and download all finalized books, assignments and evaluations.
-            </p>
-        </div>
-
-        <div class="hero-stats">
-            <div class="stat-card">
-                <span>Books</span>
-                <strong>@LibrosReporte.Count</strong>
+        <section class="page-hero reports-skeleton-hero">
+            <div class="reports-skeleton-hero-copy">
+                <div class="reports-skeleton-block reports-skeleton-main-title"></div>
+                <div class="reports-skeleton-block reports-skeleton-description"></div>
+                <div class="reports-skeleton-block reports-skeleton-description short"></div>
             </div>
 
-            <div class="stat-card">
-                <span>Assignments</span>
-                <strong>@AsignacionesReporte.Count</strong>
+            <div class="hero-stats">
+                @for (var statIndex = 0; statIndex < 4; statIndex++)
+                {
+                    <div class="stat-card reports-skeleton-stat-card">
+                        <div class="reports-skeleton-block reports-skeleton-stat-label"></div>
+                        <div class="reports-skeleton-block reports-skeleton-stat-value"></div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="report-card reports-skeleton-filter-card">
+            <div class="section-header">
+                <div class="reports-skeleton-section-copy">
+                    <div class="reports-skeleton-block reports-skeleton-section-title"></div>
+                    <div class="reports-skeleton-block reports-skeleton-section-description"></div>
+                </div>
             </div>
 
-            <div class="stat-card">
-                <span>Evaluations</span>
-                <strong>@EvaluacionesReporte.Count</strong>
+            <div class="reports-skeleton-filter-grid">
+                @for (var fieldIndex = 0; fieldIndex < 4; fieldIndex++)
+                {
+                    <div class="reports-skeleton-field">
+                        <div class="reports-skeleton-block reports-skeleton-label"></div>
+                        <div class="reports-skeleton-block reports-skeleton-input"></div>
+                    </div>
+                }
+
+                <div class="reports-skeleton-actions">
+                    <div class="reports-skeleton-block reports-skeleton-button"></div>
+                    <div class="reports-skeleton-block reports-skeleton-button"></div>
+                    <div class="reports-skeleton-block reports-skeleton-button download"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="report-list-card reports-skeleton-list-card">
+            <div class="list-header">
+                <div class="reports-skeleton-section-copy">
+                    <div class="reports-skeleton-block reports-skeleton-list-title"></div>
+                    <div class="reports-skeleton-block reports-skeleton-list-description"></div>
+                </div>
+
+                <div class="reports-skeleton-block reports-skeleton-total-pill"></div>
             </div>
 
-            <div class="stat-card">
-                <span>Late Work</span>
-                <strong>@LateWorksReporte.Count</strong>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="report-card">
-
-        <div class="section-header">
-            <div>
-                <h2>Report Filters</h2>
-                <p>Select the report type and apply filters before downloading.</p>
-            </div>
-        </div>
-
-        <div class="filters-grid">
-
-            <div class="field">
-                <label>Report Type</label>
-                <select @bind="TipoReporteSeleccionado" @bind:after="OnTipoReporteChanged">
-                    <option value="Libros">Finished Books</option>
-                    <option value="Asignaciones">Finished Assignments</option>
-                    <option value="Evaluaciones">Finished Evaluations</option>
-                    <option value="LateWork">Finished Late Work</option>
-                    <option value="NextDayAssignments">Next Day Assignments</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Date From</label>
-                <input type="date" @bind="FechaDesde" disabled="@(!PermiteFiltroFechas)" />
-            </div>
-
-            <div class="field">
-                <label>Date To</label>
-                <input type="date" @bind="FechaHasta" disabled="@(!PermiteFiltroFechas)" />
-            </div>
-
-            <div class="field">
-                <label>Employee</label>
-                <select @bind="EmpleadoIdSeleccionado" disabled="@(!PermiteFiltroEmpleado)">
-                    <option value="">All employees</option>
-                    @foreach (var empleado in EmpleadosFiltro)
+            <div class="reports-inline-skeleton reports-initial-table-skeleton">
+                <div class="reports-skeleton-table-head">
+                    @for (var columnIndex = 0; columnIndex < 9; columnIndex++)
                     {
-                        <option value="@empleado.Id">@empleado.Nombre</option>
+                        <div class="reports-skeleton-block reports-skeleton-column"></div>
                     }
-                </select>
+                </div>
+
+                @for (var rowIndex = 0; rowIndex < 7; rowIndex++)
+                {
+                    <div class="reports-skeleton-table-row">
+                        <div class="reports-skeleton-block reports-skeleton-cell wide"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell small"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell small"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell small"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                        <div class="reports-skeleton-block reports-skeleton-cell status"></div>
+                    </div>
+                }
             </div>
+        </section>
+    </div>
+}
+else
+{
+    <div class="reports-page">
 
-            <div class="actions-row">
-                <button class="btn-primary" @onclick="CargarReporteAsync">
-                    Search
-                </button>
-
-                <button class="btn-secondary" @onclick="LimpiarFiltrosAsync">
-                    Clear
-                </button>
-
-                <button class="btn-download" @onclick="DescargarReporteXlsxAsync" disabled="@(!TieneDatos)">
-                    Download XLSX
-                </button>
-            </div>
-
-        </div>
-
-    </section>
-
-    <section class="report-list-card">
-
-        <div class="list-header">
+        <section class="page-hero">
             <div>
-                <h2>@TituloListado</h2>
-                <p>@SubtituloListado</p>
+                <h1>Finished Reports</h1>
+                <p>
+                    Review and download all finalized books, assignments and evaluations.
+                </p>
             </div>
 
-            <div class="total-pill">
-                @TotalActual records
-            </div>
-        </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span>Books</span>
+                    <strong>@LibrosReporte.Count</strong>
+                </div>
 
-        @if (Cargando)
-        {
-            <div class="loading-box">
-                Loading report...
+                <div class="stat-card">
+                    <span>Assignments</span>
+                    <strong>@AsignacionesReporte.Count</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Evaluations</span>
+                    <strong>@EvaluacionesReporte.Count</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Late Work</span>
+                    <strong>@LateWorksReporte.Count</strong>
+                </div>
+
             </div>
-        }
-        else if (!TieneDatos)
-        {
-            <div class="empty-box">
-                @MensajeSinDatos
+        </section>
+
+        <section class="report-card">
+
+            <div class="section-header">
+                <div>
+                    <h2>Report Filters</h2>
+                    <p>Select the report type and apply filters before downloading.</p>
+                </div>
             </div>
-        }
-        else
-        {
-            @if (TipoReporteSeleccionado == "Libros")
+
+            <div class="filters-grid">
+
+                <div class="field">
+                    <label>Report Type</label>
+                    <select @bind="TipoReporteSeleccionado" @bind:after="OnTipoReporteChanged">
+                        <option value="Libros">Finished Books</option>
+                        <option value="Asignaciones">Finished Assignments</option>
+                        <option value="Evaluaciones">Finished Evaluations</option>
+                        <option value="LateWork">Finished Late Work</option>
+                        <option value="NextDayAssignments">Next Day Assignments</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Date From</label>
+                    <input type="date" @bind="FechaDesde" disabled="@(!PermiteFiltroFechas)" />
+                </div>
+
+                <div class="field">
+                    <label>Date To</label>
+                    <input type="date" @bind="FechaHasta" disabled="@(!PermiteFiltroFechas)" />
+                </div>
+
+                <div class="field">
+                    <label>Employee</label>
+                    <select @bind="EmpleadoIdSeleccionado" disabled="@(!PermiteFiltroEmpleado)">
+                        <option value="">All employees</option>
+                        @foreach (var empleado in EmpleadosFiltro)
+                        {
+                            <option value="@empleado.Id">@empleado.Nombre</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="actions-row">
+                    <button class="btn-primary" @onclick="CargarReporteAsync">
+                        Search
+                    </button>
+
+                    <button class="btn-secondary" @onclick="LimpiarFiltrosAsync">
+                        Clear
+                    </button>
+
+                    <button class="btn-download" @onclick="DescargarReporteXlsxAsync" disabled="@(!TieneDatos)">
+                        Download XLSX
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="report-list-card">
+
+            <div class="list-header">
+                <div>
+                    <h2>@TituloListado</h2>
+                    <p>@SubtituloListado</p>
+                </div>
+
+                <div class="total-pill">
+                    @TotalActual records
+                </div>
+            </div>
+
+            @if (Cargando)
             {
-                <div class="table-shell">
-                    <table class="reports-table reports-table-books">
-                        <thead>
-                            <tr>
-                                <th>Book Name</th>
-                                @if (Scope.ViewAllEmployeeTypes)
-                                {
-                                    <th>Department</th>
-                                }
-                                <th>KGEN</th>
-                                <th>LSA</th>
-                                <th>State</th>
-                                <th>Database</th>
-                                <th>Legacy</th>
-                                <th>Proof</th>
-                                <th>Final</th>
-                                <th>Memo</th>
-                                <th>Final PO</th>
-                                <th>Shipping</th>
-                                <th>Dirxion</th>
-                                <th>Pub Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                <div class="reports-inline-skeleton"
+                     aria-busy="true"
+                     aria-label="Loading report">
 
-                        <tbody>
-                            @foreach (var item in LibrosReporte)
-                            {
-                                <tr>
-                                    <td class="strong-cell">@item.BookName</td>
-                                    @if (Scope.ViewAllEmployeeTypes)
-                                    {
-                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
-                                    }
-                                    <td>@item.Kgen</td>
-                                    <td>@item.Lsa</td>
-                                    <td>@item.State</td>
-                                    <td>@item.Database</td>
-                                    <td>@item.Legacy</td>
-                                    <td>@FormatDate(item.ProofDate)</td>
-                                    <td>@FormatDate(item.FinalDate)</td>
-                                    <td>@FormatDate(item.MemoDate)</td>
-                                    <td>@FormatDate(item.FinalPoDate)</td>
-                                    <td>@FormatDate(item.ShippingDate)</td>
-                                    <td>@FormatDate(item.DirxionDate)</td>
-                                    <td>@FormatDate(item.PubDate)</td>
-                                    <td>
-                                        <span class="status-pill">Finished</span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <div class="reports-skeleton-table-head">
+                        @for (var columnIndex = 0; columnIndex < 9; columnIndex++)
+                        {
+                            <div class="reports-skeleton-block reports-skeleton-column"></div>
+                        }
+                    </div>
+
+                    @for (var rowIndex = 0; rowIndex < 6; rowIndex++)
+                    {
+                        <div class="reports-skeleton-table-row">
+                            <div class="reports-skeleton-block reports-skeleton-cell wide"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell small"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell small"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell small"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell medium"></div>
+                            <div class="reports-skeleton-block reports-skeleton-cell status"></div>
+                        </div>
+                    }
                 </div>
             }
-
-            @if (TipoReporteSeleccionado == "Asignaciones")
+            else if (!TieneDatos)
             {
-                <div class="table-shell">
-                    <table class="reports-table reports-table-assignments">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                @if (Scope.ViewAllEmployeeTypes)
-                                {
-                                    <th>Department</th>
-                                }
-                                <th>Book Name</th>
-                                <th>KGEN</th>
-                                <th>Pub Date</th>
-                                <th>Dirxion Date</th>
-                                <th>Proof</th>
-                                <th>Final</th>
-                                <th>Memo</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach (var item in AsignacionesReporte)
-                            {
-                                <tr>
-                                    <td class="strong-cell">@item.EmployeeName</td>
-                                    @if (Scope.ViewAllEmployeeTypes)
-                                    {
-                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
-                                    }
-                                    <td>@item.BookName</td>
-                                    <td>@item.Kgen</td>
-                                    <td>@FormatDate(item.PubDate)</td>
-                                    <td>@FormatDate(item.DirectionDate)</td>
-                                    <td>@FormatDate(item.ProofDate)</td>
-                                    <td>@FormatDate(item.FinalDate)</td>
-                                    <td>@FormatDate(item.MemoDate)</td>
-                                    <td>
-                                        <span class="status-pill">Finished</span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="empty-box">
+                    @MensajeSinDatos
                 </div>
             }
-
-            @if (TipoReporteSeleccionado == "Evaluaciones")
+            else
             {
-                <div class="table-shell">
-                    <table class="reports-table reports-table-evaluations">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                @if (Scope.ViewAllEmployeeTypes)
-                                {
-                                    <th>Department</th>
-                                }
-                                <th>Book Name</th>
-                                <th>KGEN</th>
-                                <th>LSA</th>
-                                <th>Pub Date</th>
-                                <th>Motif YP</th>
-                                <th>Motif WP</th>
-                                <th>Inventory Report</th>
-                                <th>Shipping Folder</th>
-                                <th>Task Memo</th>
-                                <th>Total %</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach (var item in EvaluacionesReporte)
-                            {
+                @if (TipoReporteSeleccionado == "Libros")
+                {
+                    <div class="table-shell">
+                        <table class="reports-table reports-table-books">
+                            <thead>
                                 <tr>
-                                    <td class="strong-cell">@item.EmployeeName</td>
+                                    <th>Book Name</th>
                                     @if (Scope.ViewAllEmployeeTypes)
                                     {
-                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                        <th>Department</th>
                                     }
-                                    <td>@item.BookName</td>
-                                    <td>
-                                        <span class="kgen-pill">@item.Kgen</span>
-                                    </td>
-                                    <td>@item.Lsa</td>
-                                    <td>@FormatDate(item.PubDate)</td>
-                                    <td>@FormatPercent(item.MotifYp)</td>
-                                    <td>@FormatPercent(item.MotifWp)</td>
-                                    <td>@FormatPercent(item.InventoryReport)</td>
-                                    <td>@FormatPercent(item.ProductShippingFolder)</td>
-                                    <td>@FormatPercent(item.TaskMemo)</td>
-                                    <td class="total-percent">@FormatPercent(item.TotalPorcentaje)</td>
-                                    <td>
-                                        <span class="status-pill">Finished</span>
-                                    </td>
+                                    <th>KGEN</th>
+                                    <th>LSA</th>
+                                    <th>State</th>
+                                    <th>Database</th>
+                                    <th>Legacy</th>
+                                    <th>Proof</th>
+                                    <th>Final</th>
+                                    <th>Memo</th>
+                                    <th>Final PO</th>
+                                    <th>Shipping</th>
+                                    <th>Dirxion</th>
+                                    <th>Pub Date</th>
+                                    <th>Status</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+                            </thead>
 
-            @if (TipoReporteSeleccionado == "NextDayAssignments")
-            {
-                <div class="table-shell">
-                    <table class="reports-table reports-table-next-day">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                @if (Scope.ViewAllEmployeeTypes)
+                            <tbody>
+                                @foreach (var item in LibrosReporte)
                                 {
-                                    <th>Department</th>
-                                }
-                                <th>KGEN Code</th>
-                                <th>LSA Code</th>
-                                <th>Book</th>
-                                <th>Database</th>
-                                <th>Stage</th>
-                                <th>Stage Date</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach (var item in AsignacionesDiaSiguienteReporte)
-                            {
-                                <tr>
-                                    <td class="strong-cell" data-label="Employee">@item.EmployeeName</td>
-                                    @if (Scope.ViewAllEmployeeTypes)
-                                    {
-                                        <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
-                                    }
-                                    <td data-label="KGEN Code">
-                                        <span class="kgen-pill">@item.KgenCode</span>
-                                    </td>
-                                    <td data-label="LSA Code">
-                                        <span class="kgen-pill secondary">@item.LsaCode</span>
-                                    </td>
-                                    <td data-label="Book">@item.BookName</td>
-                                    <td data-label="Database">
-                                        @{
-                                            var databaseCode = GetDatabaseCode(item.Database);
-                                            var databaseFullName = GetDatabaseFullName(item.Database);
+                                    <tr>
+                                        <td class="strong-cell">@item.BookName</td>
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
                                         }
-
-                                        <span class="report-database-pill"
-                                              title="@databaseFullName"
-                                              aria-label="@databaseFullName">
-                                            @databaseCode
-                                        </span>
-                                    </td>
-                                    <td data-label="Stage">
-                                        <span class="report-stage-pill @GetReportStageClass(item.StageKey)">
-                                            @item.Stage
-                                        </span>
-                                    </td>
-                                    <td data-label="Stage Date">@FormatDate(item.StageDate)</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-
-            @if (TipoReporteSeleccionado == "LateWork")
-            {
-                <div class="table-shell">
-                    <table class="reports-table reports-table-latework">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                @if (Scope.ViewAllEmployeeTypes)
-                                {
-                                    <th>Department</th>
+                                        <td>@item.Kgen</td>
+                                        <td>@item.Lsa</td>
+                                        <td>@item.State</td>
+                                        <td>@item.Database</td>
+                                        <td>@item.Legacy</td>
+                                        <td>@FormatDate(item.ProofDate)</td>
+                                        <td>@FormatDate(item.FinalDate)</td>
+                                        <td>@FormatDate(item.MemoDate)</td>
+                                        <td>@FormatDate(item.FinalPoDate)</td>
+                                        <td>@FormatDate(item.ShippingDate)</td>
+                                        <td>@FormatDate(item.DirxionDate)</td>
+                                        <td>@FormatDate(item.PubDate)</td>
+                                        <td>
+                                            <span class="status-pill">Finished</span>
+                                        </td>
+                                    </tr>
                                 }
-                                <th>Book Name</th>
-                                <th>KGEN</th>
-                                <th>LSA</th>
-                                <th>Late Work ID</th>
-                                <th>Client ID</th>
-                                <th>Dirxion Date</th>
-                                <th>Created At</th>
-                                <th>Completed</th>
-                                <th>Completed At</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                            </tbody>
+                        </table>
+                    </div>
+                }
 
-                        <tbody>
-                            @foreach (var item in LateWorksReporte)
-                            {
+                @if (TipoReporteSeleccionado == "Asignaciones")
+                {
+                    <div class="table-shell">
+                        <table class="reports-table reports-table-assignments">
+                            <thead>
                                 <tr>
-                                    <td class="strong-cell">@item.EmployeeName</td>
+                                    <th>Employee</th>
                                     @if (Scope.ViewAllEmployeeTypes)
                                     {
-                                        <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                        <th>Department</th>
                                     }
-                                    <td>@item.BookName</td>
-                                    <td>
-                                        <span class="kgen-pill">@item.Kgen</span>
-                                    </td>
-                                    <td>@item.Lsa</td>
-                                    <td>@item.LateWorkId</td>
-                                    <td>@item.ClientId</td>
-                                    <td>@FormatDate(item.DirxionDate)</td>
-                                    <td>@FormatDateTime(item.CreatedAt)</td>
-                                    <td>
-                                        @(item.Completed ? "Yes" : "No")
-                                    </td>
-                                    <td>@FormatDateTime(item.CompletedAt)</td>
-                                    <td>
-                                        <span class="status-pill">Finished Book</span>
-                                    </td>
+                                    <th>Book Name</th>
+                                    <th>KGEN</th>
+                                    <th>Pub Date</th>
+                                    <th>Dirxion Date</th>
+                                    <th>Proof</th>
+                                    <th>Final</th>
+                                    <th>Memo</th>
+                                    <th>Status</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in AsignacionesReporte)
+                                {
+                                    <tr>
+                                        <td class="strong-cell">@item.EmployeeName</td>
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                        }
+                                        <td>@item.BookName</td>
+                                        <td>@item.Kgen</td>
+                                        <td>@FormatDate(item.PubDate)</td>
+                                        <td>@FormatDate(item.DirectionDate)</td>
+                                        <td>@FormatDate(item.ProofDate)</td>
+                                        <td>@FormatDate(item.FinalDate)</td>
+                                        <td>@FormatDate(item.MemoDate)</td>
+                                        <td>
+                                            <span class="status-pill">Finished</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                @if (TipoReporteSeleccionado == "Evaluaciones")
+                {
+                    <div class="table-shell">
+                        <table class="reports-table reports-table-evaluations">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <th>Department</th>
+                                    }
+                                    <th>Book Name</th>
+                                    <th>KGEN</th>
+                                    <th>LSA</th>
+                                    <th>Pub Date</th>
+                                    <th>Motif YP</th>
+                                    <th>Motif WP</th>
+                                    <th>Inventory Report</th>
+                                    <th>Shipping Folder</th>
+                                    <th>Task Memo</th>
+                                    <th>Total %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in EvaluacionesReporte)
+                                {
+                                    <tr>
+                                        <td class="strong-cell">@item.EmployeeName</td>
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                        }
+                                        <td>@item.BookName</td>
+                                        <td>
+                                            <span class="kgen-pill">@item.Kgen</span>
+                                        </td>
+                                        <td>@item.Lsa</td>
+                                        <td>@FormatDate(item.PubDate)</td>
+                                        <td>@FormatPercent(item.MotifYp)</td>
+                                        <td>@FormatPercent(item.MotifWp)</td>
+                                        <td>@FormatPercent(item.InventoryReport)</td>
+                                        <td>@FormatPercent(item.ProductShippingFolder)</td>
+                                        <td>@FormatPercent(item.TaskMemo)</td>
+                                        <td class="total-percent">@FormatPercent(item.TotalPorcentaje)</td>
+                                        <td>
+                                            <span class="status-pill">Finished</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                @if (TipoReporteSeleccionado == "NextDayAssignments")
+                {
+                    <div class="table-shell">
+                        <table class="reports-table reports-table-next-day">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <th>Department</th>
+                                    }
+                                    <th>KGEN Code</th>
+                                    <th>LSA Code</th>
+                                    <th>Book</th>
+                                    <th>Database</th>
+                                    <th>Stage</th>
+                                    <th>Stage Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in AsignacionesDiaSiguienteReporte)
+                                {
+                                    <tr>
+                                        <td class="strong-cell" data-label="Employee">@item.EmployeeName</td>
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                        }
+                                        <td data-label="KGEN Code">
+                                            <span class="kgen-pill">@item.KgenCode</span>
+                                        </td>
+                                        <td data-label="LSA Code">
+                                            <span class="kgen-pill secondary">@item.LsaCode</span>
+                                        </td>
+                                        <td data-label="Book">@item.BookName</td>
+                                        <td data-label="Database">
+                                            @{
+                                                var databaseCode = GetDatabaseCode(item.Database);
+                                                var databaseFullName = GetDatabaseFullName(item.Database);
+                                            }
+
+                                            <span class="report-database-pill"
+                                                  title="@databaseFullName"
+                                                  aria-label="@databaseFullName">
+                                                @databaseCode
+                                            </span>
+                                        </td>
+                                        <td data-label="Stage">
+                                            <span class="report-stage-pill @GetReportStageClass(item.StageKey)">
+                                                @item.Stage
+                                            </span>
+                                        </td>
+                                        <td data-label="Stage Date">@FormatDate(item.StageDate)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                @if (TipoReporteSeleccionado == "LateWork")
+                {
+                    <div class="table-shell">
+                        <table class="reports-table reports-table-latework">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    @if (Scope.ViewAllEmployeeTypes)
+                                    {
+                                        <th>Department</th>
+                                    }
+                                    <th>Book Name</th>
+                                    <th>KGEN</th>
+                                    <th>LSA</th>
+                                    <th>Late Work ID</th>
+                                    <th>Client ID</th>
+                                    <th>Dirxion Date</th>
+                                    <th>Created At</th>
+                                    <th>Completed</th>
+                                    <th>Completed At</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in LateWorksReporte)
+                                {
+                                    <tr>
+                                        <td class="strong-cell">@item.EmployeeName</td>
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                        }
+                                        <td>@item.BookName</td>
+                                        <td>
+                                            <span class="kgen-pill">@item.Kgen</span>
+                                        </td>
+                                        <td>@item.Lsa</td>
+                                        <td>@item.LateWorkId</td>
+                                        <td>@item.ClientId</td>
+                                        <td>@FormatDate(item.DirxionDate)</td>
+                                        <td>@FormatDateTime(item.CreatedAt)</td>
+                                        <td>
+                                            @(item.Completed ? "Yes" : "No")
+                                        </td>
+                                        <td>@FormatDateTime(item.CompletedAt)</td>
+                                        <td>
+                                            <span class="status-pill">Finished Book</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             }
-        }
 
-    </section>
+        </section>
 
-</div>
+    </div>
+}
 
 @code {
 
@@ -441,6 +552,8 @@
 
     private Guid? EmpleadoIdSeleccionado { get; set; }
 
+    private bool CargandoInicial { get; set; } = true;
+    private bool _cargaInicialIniciada;
     private bool Cargando { get; set; }
     private UserDataScope Scope { get; set; } = new();
 
@@ -513,19 +626,59 @@
             ? $"No assignments found for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}."
             : "No finalized records found with the selected filters.";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         FechaDesde = DateTime.Today.AddMonths(-1);
         FechaHasta = DateTime.Today;
         FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
             DateOnly.FromDateTime(DateTime.Today));
+    }
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        Scope = await UserDataScopeService.GetScopeAsync(authState.User);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _cargaInicialIniciada)
+            return;
 
-        await CargarCatalogosAsync();
-        await CargarEmpleadosAsync();
-        await CargarReporteAsync();
+        _cargaInicialIniciada = true;
+        await CargarPaginaInicialAsync();
+    }
+
+    private async Task CargarPaginaInicialAsync()
+    {
+        CargandoInicial = true;
+        Cargando = true;
+
+        try
+        {
+            var authState =
+                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            Scope =
+                await UserDataScopeService.GetScopeAsync(authState.User);
+
+            await Task.WhenAll(
+                CargarCatalogosAsync(),
+                CargarEmpleadosAsync());
+
+            await CargarReporteAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading finished reports: {ex}");
+
+            LibrosReporte = new List<LibroReporteDto>();
+            AsignacionesReporte = new List<AsignacionReporteDto>();
+            EvaluacionesReporte = new List<EvaluacionReporteDto>();
+            LateWorksReporte = new List<LateWorkReporteDto>();
+            AsignacionesDiaSiguienteReporte = new List<AssignedBookDashboardDto>();
+        }
+        finally
+        {
+            Cargando = false;
+            CargandoInicial = false;
+
+            await InvokeAsync(StateHasChanged);
+        }
     }
     private string GetStateName(Guid? id)
     {
