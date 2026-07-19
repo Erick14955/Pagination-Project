@@ -564,6 +564,7 @@ else
     private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } = new();
     private List<LateWorkReporteDto> LateWorksReporte { get; set; } = new();
     private List<AssignedBookDashboardDto> AsignacionesDiaSiguienteReporte { get; set; } = new();
+    private List<AssignedBookDashboardDto>? _asignacionesDiaSiguienteBase;
     private List<Database> Databases { get; set; } = new();
     private List<Legacy_Code> LegacyCodes { get; set; } = new();
     private List<State> States { get; set; } = new();
@@ -656,21 +657,18 @@ else
             Scope =
                 await UserDataScopeService.GetScopeAsync(authState.User);
 
-            await Task.WhenAll(
-                CargarCatalogosAsync(),
-                CargarEmpleadosAsync());
+            await CargarCatalogosAsync();
 
-            await CargarReporteAsync();
+            EmpleadosFiltro.Clear();
+            EmpleadoIdSeleccionado = null;
+
+            await CargarReporteDatosAsync();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading finished reports: {ex}");
 
-            LibrosReporte = new List<LibroReporteDto>();
-            AsignacionesReporte = new List<AsignacionReporteDto>();
-            EvaluacionesReporte = new List<EvaluacionReporteDto>();
-            LateWorksReporte = new List<LateWorkReporteDto>();
-            AsignacionesDiaSiguienteReporte = new List<AssignedBookDashboardDto>();
+            LimpiarDatosReporte();
         }
         finally
         {
@@ -723,28 +721,136 @@ else
             : "";
     }
 
-    private async Task CargarEmpleadosAsync()
+    private async Task CargarEmpleadosFiltroAsync()
     {
+        EmpleadosFiltro.Clear();
+
+        if (!PermiteFiltroEmpleado)
+        {
+            EmpleadoIdSeleccionado = null;
+            return;
+        }
+
+        if (TipoReporteSeleccionado == "NextDayAssignments")
+        {
+            FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
+                DateOnly.FromDateTime(DateTime.Today));
+
+            _asignacionesDiaSiguienteBase =
+                await DashboardService.GetAssignedBooksForDateAsync(
+                    FechaAsignacionesDiaSiguiente,
+                    Scope);
+
+            EmpleadosFiltro = _asignacionesDiaSiguienteBase
+                .Where(x =>
+                    x.EmployeeId != Guid.Empty &&
+                    !string.IsNullOrWhiteSpace(x.EmployeeName))
+                .GroupBy(x => x.EmployeeId)
+                .Select(g => new EmpleadoFiltroDto
+                {
+                    Id = g.Key,
+                    Nombre = g
+                        .Select(x => x.EmployeeName)
+                        .FirstOrDefault(n => !string.IsNullOrWhiteSpace(n))
+                        ?? string.Empty
+                })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Nombre))
+                .OrderBy(x => x.Nombre)
+                .ToList();
+
+            ValidarEmpleadoSeleccionado();
+            return;
+        }
+
         await using var db = await DbFactory.CreateDbContextAsync();
 
-        EmpleadosFiltro = await db.Empleados
-            .AsNoTracking()
-            .ApplyScope(Scope)
-            .OrderBy(e => e.Nombre)
-            .Select(e => new EmpleadoFiltroDto
-            {
-                Id = e.Id,
-                Nombre = e.Nombre
-            })
-            .ToListAsync();
+        if (TipoReporteSeleccionado == "Asignaciones")
+        {
+            var empleados = await db.Asignaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+                .Where(a =>
+                    a.Finalizado == true &&
+                    a.Empleado != null)
+                .Select(a => new
+                {
+                    Id = a.IdEmpleado,
+                    Nombre = a.Empleado!.Nombre
+                })
+                .Distinct()
+                .OrderBy(x => x.Nombre)
+                .ToListAsync();
+
+            EmpleadosFiltro = empleados
+                .Select(x => new EmpleadoFiltroDto
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre
+                })
+                .ToList();
+        }
+        else if (TipoReporteSeleccionado == "Evaluaciones")
+        {
+            var empleados = await db.Evaluaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+                .Where(e =>
+                    e.Finalizado == true &&
+                    e.Asignacion != null &&
+                    e.Asignacion.Empleado != null)
+                .Select(e => new
+                {
+                    Id = e.Asignacion!.IdEmpleado,
+                    Nombre = e.Asignacion.Empleado!.Nombre
+                })
+                .Distinct()
+                .OrderBy(x => x.Nombre)
+                .ToListAsync();
+
+            EmpleadosFiltro = empleados
+                .Select(x => new EmpleadoFiltroDto
+                {
+                    Id = x.Id,
+                    Nombre = x.Nombre
+                })
+                .ToList();
+        }
+        else if (TipoReporteSeleccionado == "LateWork")
+        {
+            EmpleadosFiltro = await db.Empleados
+                .AsNoTracking()
+                .ApplyScope(Scope)
+                .OrderBy(e => e.Nombre)
+                .Select(e => new EmpleadoFiltroDto
+                {
+                    Id = e.Id,
+                    Nombre = e.Nombre
+                })
+                .ToListAsync();
+        }
+
+        ValidarEmpleadoSeleccionado();
+    }
+
+    private void ValidarEmpleadoSeleccionado()
+    {
+        if (!EmpleadoIdSeleccionado.HasValue)
+            return;
+
+        var existe = EmpleadosFiltro.Any(
+            x => x.Id == EmpleadoIdSeleccionado.Value);
+
+        if (!existe)
+            EmpleadoIdSeleccionado = null;
     }
 
     private async Task OnTipoReporteChanged()
     {
-        if (!PermiteFiltroEmpleado)
-            EmpleadoIdSeleccionado = null;
+        EmpleadoIdSeleccionado = null;
+        _asignacionesDiaSiguienteBase = null;
 
-        await CargarReporteAsync();
+        await EjecutarCargaReporteAsync(
+            recargarEmpleados: true);
     }
 
     private async Task LimpiarFiltrosAsync()
@@ -753,51 +859,89 @@ else
         FechaHasta = DateTime.Today;
         EmpleadoIdSeleccionado = null;
 
-        await CargarReporteAsync();
+        await EjecutarCargaReporteAsync(
+            recargarEmpleados: false);
     }
 
     private async Task CargarReporteAsync()
     {
-        Cargando = true;
+        await EjecutarCargaReporteAsync(
+            recargarEmpleados: false);
+    }
 
+    private async Task EjecutarCargaReporteAsync(
+        bool recargarEmpleados)
+    {
+        Cargando = true;
+        LimpiarDatosReporte();
+
+        /*
+         * Fuerza un render antes de iniciar las consultas.
+         * De esta forma el skeleton aparece inmediatamente.
+         */
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            if (recargarEmpleados)
+            {
+                await CargarEmpleadosFiltroAsync();
+            }
+
+            await CargarReporteDatosAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Error loading selected report: {ex}");
+
+            LimpiarDatosReporte();
+        }
+        finally
+        {
+            Cargando = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void LimpiarDatosReporte()
+    {
         LibrosReporte.Clear();
         AsignacionesReporte.Clear();
         EvaluacionesReporte.Clear();
         LateWorksReporte.Clear();
         AsignacionesDiaSiguienteReporte.Clear();
+    }
 
-        try
+    private async Task CargarReporteDatosAsync()
+    {
+        if (TipoReporteSeleccionado == "NextDayAssignments")
         {
-            if (TipoReporteSeleccionado == "NextDayAssignments")
-            {
-                await CargarAsignacionesDiaSiguienteAsync();
-                return;
-            }
-
-            await using var db = await DbFactory.CreateDbContextAsync();
-
-            await MarcarFinalizadosAutomaticamenteAsync(db);
-
-            if (TipoReporteSeleccionado == "Libros")
-            {
-                await CargarLibrosFinalizadosAsync(db);
-            }
-            else if (TipoReporteSeleccionado == "Asignaciones")
-            {
-                await CargarAsignacionesFinalizadasAsync(db);
-            }
-            else if (TipoReporteSeleccionado == "Evaluaciones")
-            {
-                await CargarEvaluacionesFinalizadasAsync(db);
-            }
-            else if (TipoReporteSeleccionado == "LateWork")
-            {
-                await CargarLateWorkFinalizadosAsync(db);
-            }
+            await CargarAsignacionesDiaSiguienteAsync();
+            return;
         }
-        finally
+
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
+        await MarcarFinalizadosAutomaticamenteAsync(db);
+
+        if (TipoReporteSeleccionado == "Libros")
         {
-            Cargando = false;
+            await CargarLibrosFinalizadosAsync(db);
+        }
+        else if (TipoReporteSeleccionado == "Asignaciones")
+        {
+            await CargarAsignacionesFinalizadasAsync(db);
+        }
+        else if (TipoReporteSeleccionado == "Evaluaciones")
+        {
+            await CargarEvaluacionesFinalizadasAsync(db);
+        }
+        else if (TipoReporteSeleccionado == "LateWork")
+        {
+            await CargarLateWorkFinalizadosAsync(db);
         }
     }
 
@@ -864,15 +1008,21 @@ else
         FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
             DateOnly.FromDateTime(DateTime.Today));
 
-        var asignaciones = await DashboardService.GetAssignedBooksForDateAsync(
-            FechaAsignacionesDiaSiguiente,
-            Scope);
+        if (_asignacionesDiaSiguienteBase is null)
+        {
+            _asignacionesDiaSiguienteBase =
+                await DashboardService.GetAssignedBooksForDateAsync(
+                    FechaAsignacionesDiaSiguiente,
+                    Scope);
+        }
+
+        IEnumerable<AssignedBookDashboardDto> asignaciones =
+            _asignacionesDiaSiguienteBase;
 
         if (EmpleadoIdSeleccionado.HasValue)
         {
-            asignaciones = asignaciones
-                .Where(x => x.EmployeeId == EmpleadoIdSeleccionado.Value)
-                .ToList();
+            asignaciones = asignaciones.Where(
+                x => x.EmployeeId == EmpleadoIdSeleccionado.Value);
         }
 
         AsignacionesDiaSiguienteReporte = asignaciones
