@@ -77,6 +77,16 @@
                         <span class="thryv-menu-text">Finish Assignments</span>
                     </NavLink>
 
+                    @if (PuedeVerTimeTracker(auth.User))
+                    {
+                        <NavLink href="/time-tracker"
+                                 Match="NavLinkMatch.Prefix"
+                                 class="thryv-menu-link">
+                            <span class="thryv-menu-icon">⏱️</span>
+                            <span class="thryv-menu-text">Time Tracker</span>
+                        </NavLink>
+                    }
+
                     @if (PuedeVerReportes(auth.User))
                     {
                         <NavLink href="/reportes-finalizados" class="thryv-menu-link">
@@ -225,6 +235,21 @@
     private void CloseSidebar()
     {
         sidebarOpen = false;
+    }
+
+    private static bool PuedeVerTimeTracker(ClaimsPrincipal user)
+    {
+        var lvlId = user.FindFirst("LvlId")?.Value;
+
+        var role =
+            user.FindFirst(ClaimTypes.Role)?.Value ??
+            user.FindFirst("Role")?.Value ??
+            user.FindFirst("RoleName")?.Value ??
+            user.FindFirst("PermissionLevel")?.Value ??
+            string.Empty;
+
+        return lvlId == "4" ||
+               role.Equals("Employee", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CloseSidebarOnCompactAsync()

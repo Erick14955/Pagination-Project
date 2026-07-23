@@ -1,0 +1,1868 @@
+﻿@page "/time-tracker"
+
+@using System.Security.Claims
+@using System.Security.Cryptography
+@using System.Text
+@using System.Text.Json
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@using Pagination_Project.Data
+@using Pagination_Project.Models
+@using Pagination_Project.Services
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+@implements IAsyncDisposable
+
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IUserDataScopeService UserDataScopeService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>Time Tracker</PageTitle>
+
+<div class="time-tracker-page">
+
+    <section class="tracker-hero">
+        <div class="tracker-hero-content">
+            <span class="tracker-kicker">Daily Productivity</span>
+
+            <h1>Time Tracker</h1>
+
+            <p>
+                Track the time spent working on each of today’s assignments.
+                Your time is stored locally for the current day.
+            </p>
+
+            <div class="tracker-user-info">
+                <span class="tracker-user-dot"></span>
+
+                <div>
+                    <small>Tracking for</small>
+                    <strong>@NombreUsuarioActual</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="tracker-stats">
+            <article class="tracker-stat-card">
+                <span>Today’s Assignments</span>
+                <strong>@AsignacionesDia.Count</strong>
+                <small>@FechaTrabajo.ToString("dd MMM yyyy")</small>
+            </article>
+
+            <article class="tracker-stat-card">
+                <span>Active Timer</span>
+
+                @if (AsignacionActiva is not null)
+                {
+                    <strong class="active-stat">Running</strong>
+                    <small>@AsignacionActiva.BookName</small>
+                }
+                else
+                {
+                    <strong>None</strong>
+                    <small>No active assignment</small>
+                }
+            </article>
+
+            <article class="tracker-stat-card">
+                <span>Total Time</span>
+                <strong>@FormatoDuracion(TotalSegundosDelDia)</strong>
+                <small>@FormatoHorasDecimales(TotalSegundosDelDia) hours</small>
+            </article>
+
+            <article class="tracker-stat-card">
+                <span>Completed</span>
+                <strong>@TotalCompletadas</strong>
+                <small>Marked today</small>
+            </article>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Mensaje))
+    {
+        <div class="tracker-alert @(MensajeEsError ? "tracker-alert-error" : "tracker-alert-success")">
+            <span class="tracker-alert-icon">
+                @(MensajeEsError ? "!" : "✓")
+            </span>
+
+            <span>@Mensaje</span>
+        </div>
+    }
+
+    @if (CacheCargado && !CacheDisponible)
+    {
+        <div class="tracker-alert tracker-alert-warning tracker-storage-warning">
+            <span class="tracker-alert-icon">!</span>
+
+            <div class="tracker-alert-content">
+                <strong>Local backup unavailable</strong>
+
+                <span>
+                    Your timer will continue working while this page remains open,
+                    but it may not be restored after signing out or closing the browser.
+                </span>
+            </div>
+        </div>
+    }
+
+    <section class="tracker-panel">
+
+        <div class="tracker-toolbar">
+            <div class="tracker-filter tracker-search-filter">
+                <label for="tracker-search">Search</label>
+
+                <div class="tracker-input-wrapper">
+                    <span class="tracker-search-icon">⌕</span>
+
+                    <input id="tracker-search"
+                           class="tracker-input tracker-search-input"
+                           placeholder="Search by book, KGEN, LSA or stage..."
+                           value="@Busqueda"
+                           @oninput="OnBusquedaChanged" />
+                </div>
+            </div>
+
+            <div class="tracker-filter">
+                <label for="tracker-stage">Stage</label>
+
+                <select id="tracker-stage"
+                        class="tracker-input"
+                        value="@EtapaFiltro"
+                        @onchange="OnEtapaChanged">
+
+                    <option value="">All Stages</option>
+                    <option value="ProofExtract">Proof Extract</option>
+                    <option value="FinalExtract">Final Extract</option>
+                    <option value="MemoExtract">Memo Extract</option>
+                    <option value="FinalPO">Final PO Date</option>
+                    <option value="Shipping">Shipping Date</option>
+                    <option value="Dirxion">Dirxion Date</option>
+                </select>
+            </div>
+
+            <div class="tracker-cache-status">
+                <span class="cache-status-dot @(CacheDisponible ? "cache-online" : "cache-offline")"></span>
+
+                <div>
+                    <strong>
+                        @(CacheDisponible
+                                                ? "Saved in this browser"
+                                                : "Memory only")
+                    </strong>
+
+                    <small>
+                        @(CacheDisponible
+                                                ? "Restored after signing in"
+                                                : "Available during this session")
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        @if (Cargando || !CacheCargado)
+        {
+            <div class="tracker-empty-state">
+                <div class="tracker-loader"></div>
+
+                <h3>Loading today’s assignments...</h3>
+
+                <p>
+                    Restoring your assignments and locally tracked time.
+                </p>
+            </div>
+        }
+        else if (!CurrentEmployeeId.HasValue)
+        {
+            <div class="tracker-empty-state tracker-empty-error">
+                <div class="tracker-empty-icon">!</div>
+
+                <h3>No employee profile linked</h3>
+
+                <p>
+                    Your user account must be linked to an employee before
+                    you can use the Time Tracker.
+                </p>
+            </div>
+        }
+        else if (!AsignacionesFiltradas.Any())
+        {
+            <div class="tracker-empty-state">
+                <div class="tracker-empty-icon">✓</div>
+
+                <h3>No assignments found</h3>
+
+                <p>
+                    You do not have pending assignments matching the selected
+                    filters for today.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="tracker-assignment-grid">
+
+                @foreach (var item in AsignacionesFiltradas)
+                {
+                    var rowKey = GetRowKey(item);
+                    var estaGuardando = GuardandoRowKey == rowKey;
+                    var segundos = ObtenerSegundosTranscurridos(item);
+
+                    <article class="tracker-assignment-card
+                                            @(item.IsRunning ? "tracker-card-running" : string.Empty)
+                                            @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
+
+                        <div class="tracker-card-top">
+                            <div class="tracker-book-information">
+                                <div class="tracker-stage-row">
+                                    <span class="tracker-stage-badge stage-@item.StageKey.ToLowerInvariant()">
+                                        @item.StageName
+                                    </span>
+
+                                    <span class="tracker-status-badge @ObtenerClaseEstado(item)">
+                                        @ObtenerNombreEstado(item)
+                                    </span>
+                                </div>
+
+                                <h2>@item.BookName</h2>
+
+                                <div class="tracker-book-codes">
+                                    <span>
+                                        <small>KGEN</small>
+                                        <strong>@ValorOPlaceholder(item.KgenCode)</strong>
+                                    </span>
+
+                                    <span>
+                                        <small>LSA</small>
+                                        <strong>@ValorOPlaceholder(item.LsaCode)</strong>
+                                    </span>
+
+                                    <span>
+                                        <small>Department</small>
+                                        <strong>@ValorOPlaceholder(item.EmployeeTypeCode)</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="tracker-stage-date">
+                                <small>Work date</small>
+                                <strong>@item.StageDate.ToString("dd/MM/yyyy")</strong>
+                            </div>
+                        </div>
+
+                        <div class="tracker-clock-section">
+                            <div class="tracker-clock @(item.IsRunning ? "clock-running" : string.Empty)">
+                                <span class="tracker-clock-label">
+                                    @(item.IsRunning ? "Currently tracking" : "Tracked time")
+                                </span>
+
+                                <strong>@FormatoDuracion(segundos)</strong>
+
+                                <span class="tracker-clock-decimal">
+                                    @FormatoHorasDecimales(segundos) hours
+                                </span>
+                            </div>
+
+                            <div class="tracker-time-details">
+                                <div>
+                                    <span>Minutes</span>
+                                    <strong>@FormatoMinutos(segundos)</strong>
+                                </div>
+
+                                <div>
+                                    <span>Started</span>
+                                    <strong>@FormatoHoraInicio(item)</strong>
+                                </div>
+
+                                <div>
+                                    <span>Finished</span>
+                                    <strong>@FormatoHoraFinalizacion(item)</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tracker-card-actions">
+
+                            @if (item.YaCompletada)
+                            {
+                                <div class="tracker-completed-message">
+                                    <span>✓</span>
+
+                                    <div>
+                                        <strong>Assignment completed</strong>
+                                        <small>
+                                            The stage has already been marked as completed.
+                                        </small>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="tracker-button tracker-button-start"
+                                        disabled="@(item.IsRunning || GuardandoRowKey is not null)"
+                                        @onclick="() => IniciarAsync(item)">
+
+                                    <span class="button-icon">▶</span>
+
+                                    @(item.AccumulatedSeconds > 0
+                                                            ? "Resume"
+                                                            : "Start")
+                    </button>
+
+                                <button type="button"
+                                        class="tracker-button tracker-button-pause"
+                                        disabled="@(!item.IsRunning || GuardandoRowKey is not null)"
+                                        @onclick="() => PausarAsync(item)">
+
+                                    <span class="button-icon">Ⅱ</span>
+                                    Pause
+                                </button>
+
+                                <button type="button"
+                                        class="tracker-button tracker-button-finish"
+                                        disabled="@(GuardandoRowKey is not null)"
+                                        @onclick="() => FinalizarAsync(item)">
+
+                        @if (estaGuardando)
+                                    {
+                                        <span class="button-spinner"></span>
+                                        <span>Saving...</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="button-icon">✓</span>
+                                        <span>Finish &amp; Complete</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </article>
+                }
+
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions =
+        new(JsonSerializerDefaults.Web)
+        {
+            WriteIndented = false
+        };
+
+    private bool Cargando = true;
+    private bool CacheCargado;
+    private bool CacheDisponible;
+
+    private string Busqueda = string.Empty;
+    private string EtapaFiltro = string.Empty;
+
+    private string Mensaje = string.Empty;
+    private bool MensajeEsError;
+
+    private string? GuardandoRowKey;
+
+    private string NombreUsuarioActual = "Current user";
+    private string CurrentUserStorageKey = string.Empty;
+
+    private Guid? CurrentEmployeeId;
+
+    private UserDataScope Scope { get; set; } = new();
+
+    private DateOnly FechaTrabajo =
+        DateOnly.FromDateTime(DateTime.Today);
+
+    private List<AsignacionTrackerVm> AsignacionesDia = new();
+    private List<AsignacionTrackerVm> AsignacionesFiltradas = new();
+
+    private CancellationTokenSource? ClockCancellation;
+    private Task? ClockTask;
+
+    private string StorageKey =>
+        $"pagination-project:time-tracker:{CurrentUserStorageKey}";
+
+    private AsignacionTrackerVm? AsignacionActiva =>
+        AsignacionesDia.FirstOrDefault(x => x.IsRunning);
+
+    private int TotalCompletadas =>
+        AsignacionesDia.Count(x => x.YaCompletada);
+
+    private long TotalSegundosDelDia =>
+        AsignacionesDia.Sum(ObtenerSegundosTranscurridos);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        if (!PuedeAccederAlTimeTracker(user))
+        {
+            Navigation.NavigateTo(
+                "/dashboard",
+                replace: true);
+
+            return;
+        }
+
+        Scope =
+            await UserDataScopeService.GetScopeAsync(user);
+
+        ResolverUsuarioActual(user);
+
+        await CargarDatosAsync();
+    }
+
+    private static bool PuedeAccederAlTimeTracker(
+    ClaimsPrincipal user)
+    {
+        var lvlId =
+            user.FindFirst("LvlId")?.Value;
+
+        var role =
+            user.FindFirst(ClaimTypes.Role)?.Value ??
+            user.FindFirst("Role")?.Value ??
+            user.FindFirst("RoleName")?.Value ??
+            user.FindFirst("PermissionLevel")?.Value ??
+            string.Empty;
+
+        return lvlId == "4" ||
+               role.Equals(
+                   "Employee",
+                   StringComparison.OrdinalIgnoreCase);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            CacheDisponible = await VerificarLocalStorageAsync();
+
+            if (CacheDisponible)
+            {
+                await CargarCacheAsync();
+            }
+        }
+        finally
+        {
+            CacheCargado = true;
+
+            if (AsignacionesDia.Any(x => x.IsRunning))
+            {
+                AsegurarRelojActivo();
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task<bool> VerificarLocalStorageAsync()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentUserStorageKey))
+            return false;
+
+        var testKey = $"{StorageKey}:availability-test";
+
+        for (var intento = 1; intento <= 3; intento++)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync(
+                    "localStorage.setItem",
+                    testKey,
+                    "available");
+
+                var resultado = await JS.InvokeAsync<string?>(
+                    "localStorage.getItem",
+                    testKey);
+
+                await JS.InvokeVoidAsync(
+                    "localStorage.removeItem",
+                    testKey);
+
+                if (resultado == "available")
+                    return true;
+            }
+            catch
+            {
+                if (intento == 3)
+                    return false;
+
+                await Task.Delay(200 * intento);
+            }
+        }
+
+        return false;
+    }
+
+    private void ResolverUsuarioActual(ClaimsPrincipal user)
+    {
+        NombreUsuarioActual =
+            user.Identity?.Name ??
+            user.FindFirst(ClaimTypes.Name)?.Value ??
+            "Current user";
+
+        CurrentEmployeeId = Scope.EmployeeId;
+
+        if (!CurrentEmployeeId.HasValue ||
+            CurrentEmployeeId.Value == Guid.Empty)
+        {
+            var employeeClaim =
+                user.FindFirst("EmployeeId")?.Value ??
+                user.FindFirst("Employee_Id")?.Value ??
+                user.FindFirst("EmpleadoId")?.Value ??
+                user.FindFirst("IdEmpleado")?.Value;
+
+            if (Guid.TryParse(employeeClaim, out var employeeId) &&
+                employeeId != Guid.Empty)
+            {
+                CurrentEmployeeId = employeeId;
+            }
+        }
+
+        var rawUserId =
+            Scope.UserId != Guid.Empty
+                ? Scope.UserId.ToString()
+                : user.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                  user.FindFirst("sub")?.Value ??
+                  user.FindFirst("UserId")?.Value ??
+                  user.FindFirst("User_Id")?.Value ??
+                  user.Identity?.Name ??
+                  string.Empty;
+
+        if (string.IsNullOrWhiteSpace(rawUserId))
+        {
+            CacheDisponible = false;
+            CurrentUserStorageKey = string.Empty;
+            return;
+        }
+
+        CurrentUserStorageKey = CrearHashUsuario(rawUserId);
+    }
+
+    private static string CrearHashUsuario(string value)
+    {
+        var bytes = Encoding.UTF8.GetBytes(value);
+        var hash = SHA256.HashData(bytes);
+
+        return Convert
+            .ToHexString(hash)
+            .ToLowerInvariant();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        Cargando = true;
+        Mensaje = string.Empty;
+
+        try
+        {
+            AsignacionesDia.Clear();
+
+            if (!CurrentEmployeeId.HasValue ||
+                CurrentEmployeeId.Value == Guid.Empty)
+            {
+                AplicarFiltros();
+                return;
+            }
+
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
+
+            await ActualizarFinalizadosPorDirxionAsync(
+                db,
+                FechaTrabajo);
+
+            var data = await (
+                from a in db.Asignaciones.AsNoTracking()
+                join l in db.Libros.AsNoTracking()
+                    on a.IdLibro equals l.Id
+                join e in db.Empleados.AsNoTracking()
+                    on a.IdEmpleado equals e.Id
+                join et in db.EmployeeTypes.AsNoTracking()
+                    on l.EmployeeTypeId equals et.Id
+
+                join bpJoin in db.Bind_Plants.AsNoTracking()
+                    on l.BindPlantId equals bpJoin.Id
+                    into bindPlantGroup
+
+                from bp in bindPlantGroup.DefaultIfEmpty()
+
+                where !a.Finalizado &&
+                      !l.Finalizado &&
+                      l.DirxionDate >= FechaTrabajo &&
+                      (
+                          Scope.ViewAllEmployeeTypes ||
+                          l.EmployeeTypeId == Scope.EmployeeTypeId
+                      )
+
+                select new RawAssignmentVm
+                {
+                    AssignmentId = a.Id,
+                    EmployeeId = e.Id,
+                    BookId = l.Id,
+
+                    EmployeeName = e.Nombre ?? string.Empty,
+                    EmployeeTypeId = l.EmployeeTypeId,
+                    EmployeeTypeCode = et.Code ?? string.Empty,
+
+                    KgenCode = l.KGENCode ?? string.Empty,
+                    LsaCode = l.LSACode ?? string.Empty,
+                    BookName = l.BookName ?? string.Empty,
+
+                    ProofExtract = l.ProofExtract,
+                    FinalExtract = l.FinalExtract,
+                    MemoExtract = l.MemoExtract,
+                    DirxionDate = l.DirxionDate,
+                    FinalPODate = l.FinalPODate,
+                    ShippingDate = l.ShippingDate,
+
+                    BindPlantName =
+                        bp != null
+                            ? bp.Bind_Plant_Name ?? string.Empty
+                            : string.Empty
+                }
+            ).ToListAsync();
+
+            var assignmentIds = data
+                .Select(x => x.AssignmentId)
+                .Distinct()
+                .ToList();
+
+            var temporalesActivas = assignmentIds.Count == 0
+                ? new List<TemporaryAssignment>()
+                : await db.TemporaryAssignments
+                    .AsNoTracking()
+                    .Include(x => x.TemporaryEmployee)
+                    .Where(x =>
+                        x.Active &&
+                        assignmentIds.Contains(x.AssignmentId))
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToListAsync();
+
+            var trabajadasHoy = assignmentIds.Count == 0
+                ? new List<AsignacionTrabajada>()
+                : await db.AsignacionesTrabajadas
+                    .AsNoTracking()
+                    .Where(x =>
+                        assignmentIds.Contains(x.IdAsignacion) &&
+                        x.FechaTrabajo == FechaTrabajo)
+                    .ToListAsync();
+
+            foreach (var item in data)
+            {
+                var etapa = ObtenerEtapaDelDia(item);
+
+                if (etapa is null)
+                    continue;
+
+                var temporalAplicable = temporalesActivas
+                    .FirstOrDefault(x =>
+                        x.AssignmentId == item.AssignmentId &&
+                        AsignacionTemporalAplicaEtapa(
+                            x,
+                            etapa.Key));
+
+                var empleadoResponsableId =
+                    temporalAplicable?.TemporaryEmployeeId ??
+                    item.EmployeeId;
+
+                if (empleadoResponsableId !=
+                    CurrentEmployeeId.Value)
+                {
+                    continue;
+                }
+
+                var empleadoResponsableNombre =
+                    temporalAplicable?
+                        .TemporaryEmployee?
+                        .Nombre;
+
+                if (string.IsNullOrWhiteSpace(
+                    empleadoResponsableNombre))
+                {
+                    empleadoResponsableNombre =
+                        item.EmployeeName;
+                }
+
+                var registroTrabajado = trabajadasHoy
+                    .FirstOrDefault(x =>
+                        x.IdAsignacion ==
+                        item.AssignmentId);
+
+                AsignacionesDia.Add(
+                    new AsignacionTrackerVm
+                    {
+                        AssignmentId =
+                            item.AssignmentId,
+
+                        EmployeeId =
+                            empleadoResponsableId,
+
+                        BookId =
+                            item.BookId,
+
+                        EmployeeName =
+                            empleadoResponsableNombre ??
+                            string.Empty,
+
+                        EmployeeTypeId =
+                            item.EmployeeTypeId,
+
+                        EmployeeTypeCode =
+                            item.EmployeeTypeCode,
+
+                        KgenCode =
+                            item.KgenCode,
+
+                        LsaCode =
+                            item.LsaCode,
+
+                        BookName =
+                            item.BookName,
+
+                        StageKey =
+                            etapa.Key,
+
+                        StageName =
+                            etapa.Name,
+
+                        StageDate =
+                            etapa.Date,
+
+                        YaCompletada =
+                            EstaEtapaCompletada(
+                                registroTrabajado,
+                                etapa.Key)
+                    });
+            }
+
+            AplicarFiltros();
+        }
+        catch (Exception ex)
+        {
+            MensajeEsError = true;
+            Mensaje =
+                $"Assignments could not be loaded. Details: {ex.Message}";
+        }
+        finally
+        {
+            Cargando = false;
+        }
+    }
+
+    private async Task CargarCacheAsync()
+    {
+        if (string.IsNullOrWhiteSpace(
+            CurrentUserStorageKey))
+        {
+            CacheDisponible = false;
+            return;
+        }
+
+        try
+        {
+            var json = await JS.InvokeAsync<string?>(
+                "localStorage.getItem",
+                StorageKey);
+
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                CacheDisponible = true;
+                return;
+            }
+
+            var estado = JsonSerializer.Deserialize<TrackerCacheState>(
+                json,
+                JsonOptions);
+
+            var fechaEsperada =
+                FechaTrabajo.ToString("yyyy-MM-dd");
+
+            if (estado is null ||
+                !string.Equals(
+                    estado.UserKey,
+                    CurrentUserStorageKey,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    estado.WorkDate,
+                    fechaEsperada,
+                    StringComparison.Ordinal))
+            {
+                await EliminarCacheAsync();
+                return;
+            }
+
+            var cacheFueNormalizado = false;
+
+            foreach (var item in AsignacionesDia)
+            {
+                var rowKey = GetRowKey(item);
+
+                var guardado = estado.Items
+                    .FirstOrDefault(x =>
+                        x.RowKey == rowKey);
+
+                if (guardado is null)
+                    continue;
+
+                item.AccumulatedSeconds =
+                    Math.Max(
+                        0,
+                        guardado.AccumulatedSeconds);
+
+                item.IsRunning =
+                    guardado.IsRunning;
+
+                item.StartedAtUtc =
+                    guardado.StartedAtUtc;
+
+                item.FinishedAtUtc =
+                    guardado.FinishedAtUtc;
+
+                if (item.IsRunning &&
+                    !item.StartedAtUtc.HasValue)
+                {
+                    item.IsRunning = false;
+                    cacheFueNormalizado = true;
+                }
+
+                if (item.YaCompletada &&
+                    item.IsRunning)
+                {
+                    PausarInternamente(
+                        item,
+                        DateTimeOffset.UtcNow);
+
+                    cacheFueNormalizado = true;
+                }
+            }
+
+            var cronometrosActivos = AsignacionesDia
+                .Where(x => x.IsRunning)
+                .OrderByDescending(x => x.StartedAtUtc)
+                .ToList();
+
+            if (cronometrosActivos.Count > 1)
+            {
+                var ahora =
+                    DateTimeOffset.UtcNow;
+
+                foreach (var extra in cronometrosActivos.Skip(1))
+                {
+                    PausarInternamente(extra, ahora);
+                }
+
+                cacheFueNormalizado = true;
+            }
+
+            if (cacheFueNormalizado)
+            {
+                await GuardarCacheAsync();
+            }
+
+            CacheDisponible = true;
+        }
+        catch (JSDisconnectedException)
+        {
+            CacheDisponible = false;
+        }
+        catch (InvalidOperationException)
+        {
+            CacheDisponible = false;
+        }
+        catch
+        {
+            CacheDisponible = false;
+        }
+    }
+
+    private async Task GuardarCacheAsync()
+    {
+        if (string.IsNullOrWhiteSpace(
+            CurrentUserStorageKey))
+        {
+            return;
+        }
+
+        var estado = new TrackerCacheState
+        {
+            UserKey =
+                CurrentUserStorageKey,
+
+            WorkDate =
+                FechaTrabajo.ToString("yyyy-MM-dd"),
+
+            Items = AsignacionesDia
+                .Select(item =>
+                    new TrackerCacheItem
+                    {
+                        RowKey =
+                            GetRowKey(item),
+
+                        AccumulatedSeconds =
+                            item.AccumulatedSeconds,
+
+                        IsRunning =
+                            item.IsRunning,
+
+                        StartedAtUtc =
+                            item.StartedAtUtc,
+
+                        FinishedAtUtc =
+                            item.FinishedAtUtc
+                    })
+                .ToList()
+        };
+
+        var json = JsonSerializer.Serialize(
+            estado,
+            JsonOptions);
+
+        await JS.InvokeVoidAsync(
+            "localStorage.setItem",
+            StorageKey,
+            json);
+    }
+
+    private async Task PersistirCacheSeguroAsync()
+    {
+        if (!CacheDisponible)
+            return;
+
+        for (var intento = 1; intento <= 2; intento++)
+        {
+            try
+            {
+                await GuardarCacheAsync();
+                CacheDisponible = true;
+                return;
+            }
+            catch
+            {
+                if (intento == 2)
+                {
+                    CacheDisponible = false;
+                    await InvokeAsync(StateHasChanged);
+                    return;
+                }
+
+                await Task.Delay(150);
+            }
+        }
+    }
+
+    private async Task EliminarCacheAsync()
+    {
+        if (string.IsNullOrWhiteSpace(
+            CurrentUserStorageKey))
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "localStorage.removeItem",
+                StorageKey);
+        }
+        catch
+        {
+            CacheDisponible = false;
+        }
+    }
+
+    private async Task IniciarAsync(
+        AsignacionTrackerVm item)
+    {
+        if (item.YaCompletada ||
+            item.IsRunning ||
+            GuardandoRowKey is not null)
+        {
+            return;
+        }
+
+        Mensaje = string.Empty;
+
+        var ahora =
+            DateTimeOffset.UtcNow;
+
+        foreach (var activa in AsignacionesDia
+            .Where(x =>
+                x.IsRunning &&
+                x != item))
+        {
+            PausarInternamente(
+                activa,
+                ahora);
+        }
+
+        item.StartedAtUtc =
+            ahora;
+
+        item.FinishedAtUtc =
+            null;
+
+        item.IsRunning =
+            true;
+
+        await PersistirCacheSeguroAsync();
+
+        AsegurarRelojActivo();
+    }
+
+    private async Task PausarAsync(
+        AsignacionTrackerVm item)
+    {
+        if (!item.IsRunning ||
+            GuardandoRowKey is not null)
+        {
+            return;
+        }
+
+        PausarInternamente(
+            item,
+            DateTimeOffset.UtcNow);
+
+        await PersistirCacheSeguroAsync();
+
+        DetenerRelojSiNoEsNecesario();
+    }
+
+    private void PausarInternamente(
+        AsignacionTrackerVm item,
+        DateTimeOffset momento)
+    {
+        if (!item.IsRunning)
+            return;
+
+        if (item.StartedAtUtc.HasValue)
+        {
+            var diferencia =
+                momento -
+                item.StartedAtUtc.Value;
+
+            if (diferencia.TotalSeconds > 0)
+            {
+                item.AccumulatedSeconds +=
+                    (long)Math.Floor(
+                        diferencia.TotalSeconds);
+            }
+        }
+
+        item.IsRunning =
+            false;
+
+        item.StartedAtUtc =
+            null;
+    }
+
+    private async Task FinalizarAsync(
+        AsignacionTrackerVm item)
+    {
+        if (item.YaCompletada ||
+            GuardandoRowKey is not null)
+        {
+            return;
+        }
+
+        var rowKey =
+            GetRowKey(item);
+
+        GuardandoRowKey =
+            rowKey;
+
+        Mensaje =
+            string.Empty;
+
+        try
+        {
+            var ahora =
+                DateTimeOffset.UtcNow;
+
+            if (item.IsRunning)
+            {
+                PausarInternamente(
+                    item,
+                    ahora);
+            }
+
+            await PersistirCacheSeguroAsync();
+
+            await MarcarEtapaCompletadaAsync(item);
+
+            item.YaCompletada =
+                true;
+
+            item.FinishedAtUtc =
+                ahora;
+
+            await PersistirCacheSeguroAsync();
+
+            MensajeEsError =
+                false;
+
+            Mensaje =
+                $"{item.BookName} was completed successfully. " +
+                $"Total tracked time: " +
+                $"{FormatoDuracion(ObtenerSegundosTranscurridos(item))} " +
+                $"({FormatoHorasDecimales(ObtenerSegundosTranscurridos(item))} hours).";
+        }
+        catch (Exception ex)
+        {
+            MensajeEsError =
+                true;
+
+            Mensaje =
+                $"The assignment could not be completed. Details: {ex.Message}";
+        }
+        finally
+        {
+            GuardandoRowKey =
+                null;
+
+            DetenerRelojSiNoEsNecesario();
+        }
+    }
+
+    private async Task MarcarEtapaCompletadaAsync(
+        AsignacionTrackerVm item)
+    {
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
+        var tieneAcceso = await db.Asignaciones
+            .AsNoTracking()
+            .ApplyScope(Scope)
+            .AnyAsync(x =>
+                x.Id == item.AssignmentId);
+
+        if (!tieneAcceso)
+        {
+            throw new UnauthorizedAccessException(
+                "The assignment is outside your employee type scope.");
+        }
+
+        var registro = await db.AsignacionesTrabajadas
+            .FirstOrDefaultAsync(x =>
+                x.IdAsignacion == item.AssignmentId &&
+                x.FechaTrabajo == FechaTrabajo);
+
+        if (registro is null)
+        {
+            registro = new AsignacionTrabajada
+            {
+                Id =
+                    Guid.NewGuid(),
+
+                IdAsignacion =
+                    item.AssignmentId,
+
+                FechaTrabajo =
+                    FechaTrabajo
+            };
+
+            db.AsignacionesTrabajadas.Add(
+                registro);
+        }
+
+        MarcarEtapa(
+            registro,
+            item.StageKey);
+
+        await db.SaveChangesAsync();
+    }
+
+    private static void MarcarEtapa(
+        AsignacionTrabajada registro,
+        string etapaKey)
+    {
+        switch (etapaKey)
+        {
+            case "ProofExtract":
+                registro.ProofExtractWorked = true;
+                break;
+
+            case "FinalExtract":
+                registro.FinalExtractWorked = true;
+                break;
+
+            case "MemoExtract":
+                registro.MemoExtractWorked = true;
+                break;
+
+            case "FinalPO":
+                registro.FinalPOWorked = true;
+                break;
+
+            case "Shipping":
+                registro.ShippingWorked = true;
+                break;
+
+            case "Dirxion":
+                registro.DirxionWorked = true;
+                break;
+        }
+    }
+
+    private long ObtenerSegundosTranscurridos(
+        AsignacionTrackerVm item)
+    {
+        var total =
+            item.AccumulatedSeconds;
+
+        if (item.IsRunning &&
+            item.StartedAtUtc.HasValue)
+        {
+            var diferencia =
+                DateTimeOffset.UtcNow -
+                item.StartedAtUtc.Value;
+
+            if (diferencia.TotalSeconds > 0)
+            {
+                total +=
+                    (long)Math.Floor(
+                        diferencia.TotalSeconds);
+            }
+        }
+
+        return Math.Max(0, total);
+    }
+
+    private static string FormatoDuracion(long seconds)
+    {
+        var totalSeconds =
+            Math.Max(0, seconds);
+
+        var horas =
+            totalSeconds / 3600;
+
+        var minutos =
+            totalSeconds % 3600 / 60;
+
+        var segundos =
+            totalSeconds % 60;
+
+        return $"{horas:00}:{minutos:00}:{segundos:00}";
+    }
+
+    private static string FormatoHorasDecimales(
+        long seconds)
+    {
+        var horas =
+            Math.Max(0, seconds) /
+            3600d;
+
+        return horas.ToString("0.##");
+    }
+
+    private static string FormatoMinutos(
+        long seconds)
+    {
+        var minutos =
+            Math.Max(0, seconds) /
+            60d;
+
+        return minutos.ToString("0.#");
+    }
+
+    private static string FormatoHoraInicio(
+        AsignacionTrackerVm item)
+    {
+        if (item.IsRunning &&
+            item.StartedAtUtc.HasValue)
+        {
+            return item.StartedAtUtc
+                .Value
+                .ToLocalTime()
+                .ToString("hh:mm tt");
+        }
+
+        return "—";
+    }
+
+    private static string FormatoHoraFinalizacion(
+        AsignacionTrackerVm item)
+    {
+        if (!item.FinishedAtUtc.HasValue)
+            return "—";
+
+        return item.FinishedAtUtc
+            .Value
+            .ToLocalTime()
+            .ToString("hh:mm tt");
+    }
+
+    private static string ValorOPlaceholder(
+        string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "—"
+            : value;
+    }
+
+    private static string ObtenerNombreEstado(
+        AsignacionTrackerVm item)
+    {
+        if (item.YaCompletada)
+            return "Completed";
+
+        if (item.IsRunning)
+            return "Running";
+
+        if (item.AccumulatedSeconds > 0)
+            return "Paused";
+
+        return "Ready";
+    }
+
+    private static string ObtenerClaseEstado(
+        AsignacionTrackerVm item)
+    {
+        if (item.YaCompletada)
+            return "tracker-status-completed";
+
+        if (item.IsRunning)
+            return "tracker-status-running";
+
+        if (item.AccumulatedSeconds > 0)
+            return "tracker-status-paused";
+
+        return "tracker-status-ready";
+    }
+
+    private void AplicarFiltros()
+    {
+        var query =
+            AsignacionesDia.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(
+            EtapaFiltro))
+        {
+            query = query.Where(x =>
+                x.StageKey == EtapaFiltro);
+        }
+
+        if (!string.IsNullOrWhiteSpace(
+            Busqueda))
+        {
+            var term =
+                Busqueda
+                    .Trim()
+                    .ToLowerInvariant();
+
+            query = query.Where(x =>
+                x.BookName
+                    .ToLowerInvariant()
+                    .Contains(term) ||
+
+                x.KgenCode
+                    .ToLowerInvariant()
+                    .Contains(term) ||
+
+                x.LsaCode
+                    .ToLowerInvariant()
+                    .Contains(term) ||
+
+                x.StageName
+                    .ToLowerInvariant()
+                    .Contains(term) ||
+
+                x.EmployeeTypeCode
+                    .ToLowerInvariant()
+                    .Contains(term));
+        }
+
+        AsignacionesFiltradas = query
+            .OrderBy(x => x.YaCompletada)
+            .ThenByDescending(x => x.IsRunning)
+            .ThenBy(x => x.StageDate)
+            .ThenBy(x => x.BookName)
+            .ToList();
+    }
+
+    private void OnBusquedaChanged(
+        ChangeEventArgs e)
+    {
+        Busqueda =
+            e.Value?.ToString() ??
+            string.Empty;
+
+        AplicarFiltros();
+    }
+
+    private void OnEtapaChanged(
+        ChangeEventArgs e)
+    {
+        EtapaFiltro =
+            e.Value?.ToString() ??
+            string.Empty;
+
+        AplicarFiltros();
+    }
+
+    private static bool AsignacionTemporalAplicaEtapa(
+        TemporaryAssignment temporal,
+        string etapaKey)
+    {
+        return etapaKey switch
+        {
+            "ProofExtract" => temporal.Proof,
+            "FinalExtract" => temporal.Final,
+            "MemoExtract" => temporal.Memo,
+            "FinalPO" => temporal.FinalPO,
+            "Shipping" => temporal.Shipping,
+            "Dirxion" => temporal.Dirxion,
+            _ => false
+        };
+    }
+
+    private EtapaDia? ObtenerEtapaDelDia(
+        RawAssignmentVm item)
+    {
+        var bindPlantName =
+            (item.BindPlantName ?? string.Empty)
+            .Trim()
+            .ToUpperInvariant();
+
+        var esIveau =
+            bindPlantName == "IVEAU" ||
+            bindPlantName == "WSTR";
+
+        var excluirMemoPorBindPlant =
+            bindPlantName == "PREM" ||
+            bindPlantName == "DIRX" ||
+            bindPlantName == "WSTR" ||
+            bindPlantName == "IVEAU";
+
+        var proofDisplayDate =
+            GetNextBusinessDay(
+                item.ProofExtract);
+
+        var finalDisplayDate =
+            GetNextBusinessDay(
+                item.FinalExtract);
+
+        var memoDisplayDate =
+            GetNextBusinessDay(
+                item.MemoExtract);
+
+        var finalPODisplayDate =
+            esIveau
+                ? GetPreviousWorkDate(
+                    item.FinalPODate,
+                    3)
+                : item.FinalPODate;
+
+        var shippingDisplayDate =
+            esIveau
+                ? GetPreviousWorkDate(
+                    item.ShippingDate,
+                    1)
+                : item.ShippingDate;
+
+        if (proofDisplayDate == FechaTrabajo)
+        {
+            return new EtapaDia(
+                "ProofExtract",
+                "Proof Extract",
+                proofDisplayDate);
+        }
+
+        if (finalDisplayDate == FechaTrabajo)
+        {
+            return new EtapaDia(
+                "FinalExtract",
+                "Final Extract",
+                finalDisplayDate);
+        }
+
+        if (memoDisplayDate == FechaTrabajo &&
+            !excluirMemoPorBindPlant)
+        {
+            return new EtapaDia(
+                "MemoExtract",
+                "Memo Extract",
+                memoDisplayDate);
+        }
+
+        if (finalPODisplayDate == FechaTrabajo)
+        {
+            return new EtapaDia(
+                "FinalPO",
+                "Final PO Date",
+                finalPODisplayDate);
+        }
+
+        if (shippingDisplayDate == FechaTrabajo)
+        {
+            return new EtapaDia(
+                "Shipping",
+                "Shipping Date",
+                shippingDisplayDate);
+        }
+
+        if (item.DirxionDate == FechaTrabajo)
+        {
+            return new EtapaDia(
+                "Dirxion",
+                "Dirxion Date",
+                item.DirxionDate);
+        }
+
+        return null;
+    }
+
+    private static DateOnly GetNextBusinessDay(
+        DateOnly sourceDate)
+    {
+        if (sourceDate == default)
+            return default;
+
+        var result =
+            sourceDate.AddDays(1);
+
+        while (result.DayOfWeek is
+               DayOfWeek.Saturday or
+               DayOfWeek.Sunday)
+        {
+            result =
+                result.AddDays(1);
+        }
+
+        return result;
+    }
+
+    private static DateOnly GetPreviousWorkDate(
+        DateOnly sourceDate,
+        int daysBefore)
+    {
+        if (sourceDate == default)
+            return default;
+
+        var result =
+            sourceDate.AddDays(-daysBefore);
+
+        while (result.DayOfWeek is
+               DayOfWeek.Saturday or
+               DayOfWeek.Sunday)
+        {
+            result =
+                result.AddDays(-1);
+        }
+
+        return result;
+    }
+
+    private static bool EstaEtapaCompletada(
+        AsignacionTrabajada? registro,
+        string etapaKey)
+    {
+        if (registro is null)
+            return false;
+
+        return etapaKey switch
+        {
+            "ProofExtract" =>
+                registro.ProofExtractWorked,
+
+            "FinalExtract" =>
+                registro.FinalExtractWorked,
+
+            "MemoExtract" =>
+                registro.MemoExtractWorked,
+
+            "FinalPO" =>
+                registro.FinalPOWorked,
+
+            "Shipping" =>
+                registro.ShippingWorked,
+
+            "Dirxion" =>
+                registro.DirxionWorked,
+
+            _ => false
+        };
+    }
+
+    private async Task ActualizarFinalizadosPorDirxionAsync(
+        AppDbContext db,
+        DateOnly today)
+    {
+        var librosParaFinalizar = await db.Libros
+            .ApplyScope(Scope)
+            .Include(l => l.Asignaciones)
+                .ThenInclude(a => a.Evaluaciones)
+            .Where(l =>
+                !l.Finalizado &&
+                l.DirxionDate < today)
+            .ToListAsync();
+
+        if (!librosParaFinalizar.Any())
+            return;
+
+        foreach (var libro in librosParaFinalizar)
+        {
+            libro.Finalizado = true;
+
+            foreach (var asignacion in libro.Asignaciones)
+            {
+                asignacion.Finalizado = true;
+
+                foreach (var evaluacion in asignacion.Evaluaciones)
+                {
+                    evaluacion.Finalizado = true;
+                }
+            }
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private string GetRowKey(
+        AsignacionTrackerVm item)
+    {
+        return
+            $"{item.AssignmentId}-" +
+            $"{item.StageKey}-" +
+            $"{item.StageDate:yyyyMMdd}";
+    }
+
+    private void AsegurarRelojActivo()
+    {
+        if (ClockTask is
+            { IsCompleted: false })
+        {
+            return;
+        }
+
+        ClockCancellation?.Dispose();
+
+        ClockCancellation =
+            new CancellationTokenSource();
+
+        ClockTask =
+            EjecutarRelojAsync(
+                ClockCancellation.Token);
+    }
+
+    private async Task EjecutarRelojAsync(
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var timer =
+                new PeriodicTimer(
+                    TimeSpan.FromSeconds(1));
+
+            while (await timer.WaitForNextTickAsync(
+                cancellationToken))
+            {
+                var fechaActual =
+                    DateOnly.FromDateTime(
+                        DateTime.Today);
+
+                if (fechaActual != FechaTrabajo)
+                {
+                    await InvokeAsync(
+                        () => CambiarDiaAsync(
+                            fechaActual));
+
+                    return;
+                }
+
+                await InvokeAsync(
+                    StateHasChanged);
+
+                if (!AsignacionesDia.Any(
+                    x => x.IsRunning))
+                {
+                    return;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when leaving the page.
+        }
+    }
+
+    private void DetenerRelojSiNoEsNecesario()
+    {
+        if (AsignacionesDia.Any(x => x.IsRunning))
+            return;
+
+        ClockCancellation?.Cancel();
+    }
+
+    private async Task CambiarDiaAsync(
+        DateOnly nuevaFecha)
+    {
+        ClockCancellation?.Cancel();
+
+        await EliminarCacheAsync();
+
+        FechaTrabajo =
+            nuevaFecha;
+
+        Busqueda =
+            string.Empty;
+
+        EtapaFiltro =
+            string.Empty;
+
+        AsignacionesDia.Clear();
+        AsignacionesFiltradas.Clear();
+
+        await CargarDatosAsync();
+
+        MensajeEsError =
+            false;
+
+        Mensaje =
+            "A new workday has started. The previous local timer history was cleared.";
+
+        await PersistirCacheSeguroAsync();
+
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (ClockCancellation is not null)
+        {
+            ClockCancellation.Cancel();
+        }
+
+        if (ClockTask is not null)
+        {
+            try
+            {
+                await ClockTask;
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected during component disposal.
+            }
+        }
+
+        ClockCancellation?.Dispose();
+    }
+
+    private sealed record EtapaDia(
+        string Key,
+        string Name,
+        DateOnly Date);
+
+    private sealed class RawAssignmentVm
+    {
+        public Guid AssignmentId { get; set; }
+        public Guid EmployeeId { get; set; }
+        public Guid BookId { get; set; }
+
+        public string EmployeeName { get; set; } =
+            string.Empty;
+
+        public short EmployeeTypeId { get; set; }
+
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public string KgenCode { get; set; } =
+            string.Empty;
+
+        public string LsaCode { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string BindPlantName { get; set; } =
+            string.Empty;
+
+        public DateOnly ProofExtract { get; set; }
+        public DateOnly FinalExtract { get; set; }
+        public DateOnly MemoExtract { get; set; }
+        public DateOnly DirxionDate { get; set; }
+        public DateOnly FinalPODate { get; set; }
+        public DateOnly ShippingDate { get; set; }
+    }
+
+    private sealed class AsignacionTrackerVm
+    {
+        public Guid AssignmentId { get; set; }
+        public Guid EmployeeId { get; set; }
+        public Guid BookId { get; set; }
+
+        public string EmployeeName { get; set; } =
+            string.Empty;
+
+        public short EmployeeTypeId { get; set; }
+
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public string KgenCode { get; set; } =
+            string.Empty;
+
+        public string LsaCode { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string StageKey { get; set; } =
+            string.Empty;
+
+        public string StageName { get; set; } =
+            string.Empty;
+
+        public DateOnly StageDate { get; set; }
+
+        public bool YaCompletada { get; set; }
+
+        public long AccumulatedSeconds { get; set; }
+
+        public bool IsRunning { get; set; }
+
+        public DateTimeOffset? StartedAtUtc { get; set; }
+
+        public DateTimeOffset? FinishedAtUtc { get; set; }
+    }
+
+    private sealed class TrackerCacheState
+    {
+        public string UserKey { get; set; } =
+            string.Empty;
+
+        public string WorkDate { get; set; } =
+            string.Empty;
+
+        public List<TrackerCacheItem> Items { get; set; } =
+            new();
+    }
+
+    private sealed class TrackerCacheItem
+    {
+        public string RowKey { get; set; } =
+            string.Empty;
+
+        public long AccumulatedSeconds { get; set; }
+
+        public bool IsRunning { get; set; }
+
+        public DateTimeOffset? StartedAtUtc { get; set; }
+
+        public DateTimeOffset? FinishedAtUtc { get; set; }
+    }
+}
