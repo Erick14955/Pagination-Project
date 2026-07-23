@@ -436,6 +436,10 @@
         return lvlId == "4" ||
                role.Equals(
                    "Employee",
+                   StringComparison.OrdinalIgnoreCase) || 
+                   lvlId == "4" ||
+                   role.Equals(
+                   "Assistant",
                    StringComparison.OrdinalIgnoreCase);
     }
 
@@ -1693,7 +1697,6 @@
         }
         catch (OperationCanceledException)
         {
-            // Expected when leaving the page.
         }
     }
 
@@ -1752,7 +1755,6 @@
             }
             catch (OperationCanceledException)
             {
-                // Expected during component disposal.
             }
         }
 

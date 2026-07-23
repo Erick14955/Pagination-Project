@@ -249,7 +249,13 @@
             string.Empty;
 
         return lvlId == "4" ||
-               role.Equals("Employee", StringComparison.OrdinalIgnoreCase);
+               role.Equals(
+                   "Employee",
+                   StringComparison.OrdinalIgnoreCase) ||
+                   lvlId == "4" ||
+                   role.Equals(
+                   "Assistant",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task CloseSidebarOnCompactAsync()
