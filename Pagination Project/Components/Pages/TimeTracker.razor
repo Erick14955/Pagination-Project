@@ -83,17 +83,6 @@
         </div>
     </section>
 
-    @if (!string.IsNullOrWhiteSpace(Mensaje))
-    {
-        <div class="tracker-alert @(MensajeEsError ? "tracker-alert-error" : "tracker-alert-success")">
-            <span class="tracker-alert-icon">
-                @(MensajeEsError ? "!" : "✓")
-            </span>
-
-            <span>@Mensaje</span>
-        </div>
-    }
-
     @if (CacheCargado && !CacheDisponible)
     {
         <div class="tracker-alert tracker-alert-warning tracker-storage-warning">
@@ -213,8 +202,8 @@
                     var segundos = ObtenerSegundosTranscurridos(item);
 
                     <article class="tracker-assignment-card
-                                            @(item.IsRunning ? "tracker-card-running" : string.Empty)
-                                            @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
+                                                    @(item.IsRunning ? "tracker-card-running" : string.Empty)
+                                                    @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
 
                         <div class="tracker-card-top">
                             <div class="tracker-book-information">
@@ -326,7 +315,7 @@
                                 <button type="button"
                                         class="tracker-button tracker-button-finish"
                                         disabled="@(GuardandoRowKey is not null)"
-                                        @onclick="() => FinalizarAsync(item)">
+                                        @onclick="() => PrepararFinalizacion(item)">
 
                         @if (estaGuardando)
                                     {
@@ -349,12 +338,272 @@
     </section>
 </div>
 
+
+@if (MostrarModalConfirmacionFinalizacion &&
+     AsignacionPendienteFinalizar is not null)
+{
+    <div class="tracker-modal-backdrop"
+         role="presentation"
+         @onclick="CancelarFinalizacion">
+
+        <section class="tracker-modal tracker-confirm-modal"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="tracker-confirm-title"
+                 @onclick:stopPropagation="true">
+
+            <div class="tracker-modal-icon tracker-modal-icon-warning"
+                 aria-hidden="true">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                    <path d="M10.3 2.9 1.8 17.2A2 2 0 0 0 3.5 20h17a2 2 0 0 0 1.7-2.8L13.7 2.9a2 2 0 0 0-3.4 0Z"></path>
+                </svg>
+            </div>
+
+            <div class="tracker-modal-copy">
+                <span class="tracker-modal-kicker">Finish assignment</span>
+
+                <h2 id="tracker-confirm-title">
+                    Complete this stage?
+                </h2>
+
+                <p>
+                    This action will stop the timer and mark the current stage
+                    as worked for today.
+                </p>
+            </div>
+
+            <div class="tracker-modal-summary">
+                <div>
+                    <span>Book</span>
+                    <strong>@AsignacionPendienteFinalizar.BookName</strong>
+                </div>
+
+                <div>
+                    <span>Stage</span>
+                    <strong>@AsignacionPendienteFinalizar.StageName</strong>
+                </div>
+
+                <div>
+                    <span>Tracked time</span>
+                    <strong>
+                        @FormatoDuracion(
+                        ObtenerSegundosTranscurridos(
+                        AsignacionPendienteFinalizar))
+                </strong>
+            </div>
+
+            <div>
+                <span>Decimal hours</span>
+                <strong>
+                    @FormatoHorasDecimales(
+                                        ObtenerSegundosTranscurridos(
+                                        AsignacionPendienteFinalizar))
+                </strong>
+            </div>
+        </div>
+
+        <div class="tracker-modal-warning">
+            After completion, this stage cannot be started again from
+            the Time Tracker.
+        </div>
+
+        <div class="tracker-modal-actions">
+            <button type="button"
+                    class="tracker-modal-button tracker-modal-button-secondary"
+                    disabled="@(GuardandoRowKey is not null)"
+                    @onclick="CancelarFinalizacion">
+                Cancel
+            </button>
+
+            <button type="button"
+                    class="tracker-modal-button tracker-modal-button-primary"
+                    disabled="@(GuardandoRowKey is not null)"
+                    @onclick="ConfirmarFinalizacionAsync">
+
+                @if (GuardandoRowKey is not null)
+                    {
+                        <span class="button-spinner"></span>
+                        <span>Completing...</span>
+                    }
+                    else
+                    {
+                        <span>Finish &amp; Complete</span>
+                    }
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
+@if (MostrarModalResultado)
+{
+    <div class="tracker-modal-backdrop tracker-result-backdrop"
+         role="presentation"
+         @onclick="CerrarModalResultado">
+
+        <section class="tracker-modal tracker-result-modal @TipoModalResultado"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="tracker-result-title"
+                 @onclick:stopPropagation="true">
+
+            <div class="tracker-modal-icon @ClaseIconoModalResultado"
+                 aria-hidden="true">
+
+                @if (TipoModalResultado == "success")
+                {
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="m5 12 4 4L19 6"></path>
+                    </svg>
+                }
+                else if (TipoModalResultado == "warning")
+                {
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="M12 9v4"></path>
+                        <path d="M12 17h.01"></path>
+                        <path d="M10.3 2.9 1.8 17.2A2 2 0 0 0 3.5 20h17a2 2 0 0 0 1.7-2.8L13.7 2.9a2 2 0 0 0-3.4 0Z"></path>
+                    </svg>
+                }
+                else
+                {
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                }
+            </div>
+
+            <div class="tracker-modal-copy">
+                <span class="tracker-modal-kicker">
+                    @EtiquetaModalResultado
+                </span>
+
+                <h2 id="tracker-result-title">
+                    @TituloModalResultado
+                </h2>
+
+                <p>@MensajeModalResultado</p>
+            </div>
+
+            @if (UltimoResultadoAsignacion is not null &&
+                    TipoModalResultado == "success")
+            {
+                <div class="tracker-modal-summary">
+                    <div>
+                        <span>Book</span>
+                        <strong>@UltimoResultadoAsignacion.BookName</strong>
+                    </div>
+
+                    <div>
+                        <span>Stage</span>
+                        <strong>@UltimoResultadoAsignacion.StageName</strong>
+                    </div>
+
+                    <div>
+                        <span>Total time</span>
+                        <strong>
+                            @FormatoDuracion(
+                            ObtenerSegundosTranscurridos(
+                            UltimoResultadoAsignacion))
+                </strong>
+            </div>
+
+            <div>
+                <span>Decimal hours</span>
+                <strong>
+                    @FormatoHorasDecimales(
+                                        ObtenerSegundosTranscurridos(
+                                        UltimoResultadoAsignacion))
+                </strong>
+            </div>
+        </div>
+                }
+
+            <div class="tracker-modal-actions tracker-result-actions">
+                <button type="button"
+                        class="tracker-modal-button tracker-modal-button-primary"
+                        @onclick="CerrarModalResultado">
+                    Continue
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
 @code {
     private static readonly JsonSerializerOptions JsonOptions =
         new(JsonSerializerDefaults.Web)
         {
             WriteIndented = false
         };
+
+    private static readonly TimeZoneInfo ZonaHorariaRepublicaDominicana =
+        ObtenerZonaHorariaRepublicaDominicana();
+
+    private static TimeZoneInfo ObtenerZonaHorariaRepublicaDominicana()
+    {
+        var timezoneIds = new[]
+        {
+        "America/Santo_Domingo",
+
+        "SA Western Standard Time"
+    };
+
+        foreach (var timezoneId in timezoneIds)
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return TimeZoneInfo.CreateCustomTimeZone(
+            id: "Dominican Republic Standard Time",
+            baseUtcOffset: TimeSpan.FromHours(-4),
+            displayName: "Dominican Republic Time",
+            standardDisplayName: "Dominican Republic Time");
+    }
+
+    private static DateTimeOffset ObtenerAhoraRepublicaDominicana()
+    {
+        return TimeZoneInfo.ConvertTime(
+            DateTimeOffset.UtcNow,
+            ZonaHorariaRepublicaDominicana);
+    }
+
+    private static DateOnly ObtenerFechaRepublicaDominicana()
+    {
+        return DateOnly.FromDateTime(
+            ObtenerAhoraRepublicaDominicana().DateTime);
+    }
 
     private bool Cargando = true;
     private bool CacheCargado;
@@ -366,6 +615,16 @@
     private string Mensaje = string.Empty;
     private bool MensajeEsError;
 
+    private bool MostrarModalConfirmacionFinalizacion;
+    private bool MostrarModalResultado;
+
+    private string TituloModalResultado = string.Empty;
+    private string MensajeModalResultado = string.Empty;
+    private string TipoModalResultado = "success";
+
+    private AsignacionTrackerVm? AsignacionPendienteFinalizar;
+    private AsignacionTrackerVm? UltimoResultadoAsignacion;
+
     private string? GuardandoRowKey;
 
     private string NombreUsuarioActual = "Current user";
@@ -376,7 +635,7 @@
     private UserDataScope Scope { get; set; } = new();
 
     private DateOnly FechaTrabajo =
-        DateOnly.FromDateTime(DateTime.Today);
+        ObtenerFechaRepublicaDominicana();
 
     private List<AsignacionTrackerVm> AsignacionesDia = new();
     private List<AsignacionTrackerVm> AsignacionesFiltradas = new();
@@ -436,9 +695,8 @@
         return lvlId == "4" ||
                role.Equals(
                    "Employee",
-                   StringComparison.OrdinalIgnoreCase) || 
-                   lvlId == "4" ||
-                   role.Equals(
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
                    "Assistant",
                    StringComparison.OrdinalIgnoreCase);
     }
@@ -755,9 +1013,16 @@
         }
         catch (Exception ex)
         {
-            MensajeEsError = true;
+            MensajeEsError =
+                true;
+
             Mensaje =
-                $"Assignments could not be loaded. Details: {ex.Message}";
+                string.Empty;
+
+            MostrarResultadoTracker(
+                "Assignments could not be loaded",
+                $"Details: {ex.Message}",
+                "error");
         }
         finally
         {
@@ -1071,6 +1336,54 @@
             null;
     }
 
+    private void PrepararFinalizacion(
+        AsignacionTrackerVm item)
+    {
+        if (item.YaCompletada ||
+            GuardandoRowKey is not null)
+        {
+            return;
+        }
+
+        AsignacionPendienteFinalizar =
+            item;
+
+        MostrarModalConfirmacionFinalizacion =
+            true;
+    }
+
+    private void CancelarFinalizacion()
+    {
+        if (GuardandoRowKey is not null)
+            return;
+
+        MostrarModalConfirmacionFinalizacion =
+            false;
+
+        AsignacionPendienteFinalizar =
+            null;
+    }
+
+    private async Task ConfirmarFinalizacionAsync()
+    {
+        var item =
+            AsignacionPendienteFinalizar;
+
+        if (item is null ||
+            GuardandoRowKey is not null)
+        {
+            return;
+        }
+
+        MostrarModalConfirmacionFinalizacion =
+            false;
+
+        AsignacionPendienteFinalizar =
+            null;
+
+        await FinalizarAsync(item);
+    }
+
     private async Task FinalizarAsync(
         AsignacionTrackerVm item)
     {
@@ -1117,10 +1430,15 @@
                 false;
 
             Mensaje =
-                $"{item.BookName} was completed successfully. " +
-                $"Total tracked time: " +
-                $"{FormatoDuracion(ObtenerSegundosTranscurridos(item))} " +
-                $"({FormatoHorasDecimales(ObtenerSegundosTranscurridos(item))} hours).";
+                string.Empty;
+
+            UltimoResultadoAsignacion =
+                item;
+
+            MostrarResultadoTracker(
+                "Assignment completed",
+                $"{item.BookName} was completed successfully.",
+                "success");
         }
         catch (Exception ex)
         {
@@ -1128,7 +1446,15 @@
                 true;
 
             Mensaje =
-                $"The assignment could not be completed. Details: {ex.Message}";
+                string.Empty;
+
+            UltimoResultadoAsignacion =
+                null;
+
+            MostrarResultadoTracker(
+                "Assignment could not be completed",
+                $"Details: {ex.Message}",
+                "error");
         }
         finally
         {
@@ -1138,6 +1464,58 @@
             DetenerRelojSiNoEsNecesario();
         }
     }
+
+    private void MostrarResultadoTracker(
+        string titulo,
+        string mensaje,
+        string tipo)
+    {
+        TituloModalResultado =
+            titulo;
+
+        MensajeModalResultado =
+            mensaje;
+
+        TipoModalResultado =
+            tipo;
+
+        MostrarModalResultado =
+            true;
+    }
+
+    private void CerrarModalResultado()
+    {
+        MostrarModalResultado =
+            false;
+
+        TituloModalResultado =
+            string.Empty;
+
+        MensajeModalResultado =
+            string.Empty;
+
+        TipoModalResultado =
+            "success";
+
+        UltimoResultadoAsignacion =
+            null;
+    }
+
+    private string ClaseIconoModalResultado =>
+        TipoModalResultado switch
+        {
+            "success" => "tracker-modal-icon-success",
+            "warning" => "tracker-modal-icon-warning",
+            _ => "tracker-modal-icon-error"
+        };
+
+    private string EtiquetaModalResultado =>
+        TipoModalResultado switch
+        {
+            "success" => "Completed",
+            "warning" => "Attention",
+            _ => "Error"
+        };
 
     private async Task MarcarEtapaCompletadaAsync(
         AsignacionTrackerVm item)
@@ -1283,16 +1661,16 @@
     private static string FormatoHoraInicio(
         AsignacionTrackerVm item)
     {
-        if (item.IsRunning &&
-            item.StartedAtUtc.HasValue)
-        {
-            return item.StartedAtUtc
-                .Value
-                .ToLocalTime()
-                .ToString("hh:mm tt");
-        }
+        if (!item.StartedAtUtc.HasValue)
+            return "—";
 
-        return "—";
+        var horaRepublicaDominicana =
+            TimeZoneInfo.ConvertTime(
+                item.StartedAtUtc.Value,
+                ZonaHorariaRepublicaDominicana);
+
+        return horaRepublicaDominicana
+            .ToString("hh:mm tt");
     }
 
     private static string FormatoHoraFinalizacion(
@@ -1301,9 +1679,12 @@
         if (!item.FinishedAtUtc.HasValue)
             return "—";
 
-        return item.FinishedAtUtc
-            .Value
-            .ToLocalTime()
+        var horaRepublicaDominicana =
+            TimeZoneInfo.ConvertTime(
+                item.FinishedAtUtc.Value,
+                ZonaHorariaRepublicaDominicana);
+
+        return horaRepublicaDominicana
             .ToString("hh:mm tt");
     }
 
@@ -1673,8 +2054,7 @@
                 cancellationToken))
             {
                 var fechaActual =
-                    DateOnly.FromDateTime(
-                        DateTime.Today);
+                    ObtenerFechaRepublicaDominicana();
 
                 if (fechaActual != FechaTrabajo)
                 {
@@ -1733,7 +2113,12 @@
             false;
 
         Mensaje =
-            "A new workday has started. The previous local timer history was cleared.";
+            string.Empty;
+
+        MostrarResultadoTracker(
+            "New workday started",
+            "The previous local timer history was cleared and today’s assignments were loaded.",
+            "warning");
 
         await PersistirCacheSeguroAsync();
 

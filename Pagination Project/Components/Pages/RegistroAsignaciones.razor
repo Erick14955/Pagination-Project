@@ -479,7 +479,7 @@ else
                                             <button type="button"
                                                     class="icon-btn danger"
                                                     title="Delete"
-                                                    @onclick="() => EliminarAsignacionAsync(item.Id)">
+                                                    @onclick="() => AbrirModalEliminarAsignacion(item)">
                                                 🗑️
                                             </button>
                                         </td>
@@ -700,6 +700,102 @@ else
     </div>
 }
 
+
+@if (MostrarModalEliminarAsignacion && AsignacionPendienteEliminar is not null)
+{
+    <div class="assignment-action-modal-backdrop"
+         role="presentation"
+         @onclick="CerrarModalEliminarAsignacion">
+
+        <div class="assignment-action-modal assignment-delete-confirm-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="assignmentDeleteTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="assignment-action-modal-icon danger">!</div>
+
+            <div class="assignment-action-modal-content">
+                <h2 id="assignmentDeleteTitle">Confirm delete</h2>
+                <p>Are you sure you want to delete this assignment?</p>
+
+                <div class="assignment-action-summary">
+                    <div>
+                        <span>Employee</span>
+                        <strong>@AsignacionPendienteEliminar.EmpleadoNombre</strong>
+                    </div>
+
+                    <div>
+                        <span>Book</span>
+                        <strong>@AsignacionPendienteEliminar.BookName</strong>
+                        <small>KGEN: @AsignacionPendienteEliminar.KGENCode</small>
+                    </div>
+                </div>
+
+                <p class="assignment-action-warning">
+                    This action cannot be undone.
+                </p>
+            </div>
+
+            <div class="assignment-action-modal-actions">
+                <button type="button"
+                        class="assignment-action-secondary"
+                        disabled="@EliminandoAsignacion"
+                        @onclick="CerrarModalEliminarAsignacion">
+                    No, go back
+                </button>
+
+                <button type="button"
+                        class="assignment-action-danger"
+                        disabled="@EliminandoAsignacion"
+                        @onclick="ConfirmarEliminarAsignacionAsync">
+                    @(EliminandoAsignacion ? "Deleting..." : "Yes, delete")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarModalResultado)
+{
+    <div class="assignment-action-modal-backdrop"
+         role="presentation"
+         @onclick="CerrarModalResultado">
+
+        <div class="assignment-action-modal assignment-result-modal @TipoModalResultado"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="assignmentResultTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="assignment-action-modal-icon @TipoModalResultado">
+                @(TipoModalResultado == "error" ? "!" : "✓")
+            </div>
+
+            <div class="assignment-action-modal-content">
+                <h2 id="assignmentResultTitle">@TituloModalResultado</h2>
+                <p>@MensajeModalResultado</p>
+
+                @if (!string.IsNullOrWhiteSpace(DetalleModalResultado))
+                {
+                    <div class="assignment-result-detail">
+                        @DetalleModalResultado
+                    </div>
+                }
+            </div>
+
+            <div class="assignment-action-modal-actions single">
+                <button type="button"
+                        class="assignment-action-primary"
+                        @onclick="CerrarModalResultado">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
     private UserDataScope Scope { get; set; } = new();
     private List<EmployeeType> EmployeeTypes { get; set; } = new();
@@ -721,14 +817,23 @@ else
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
 
+
+    private bool MostrarModalResultado { get; set; }
+    private string TituloModalResultado { get; set; } = string.Empty;
+    private string MensajeModalResultado { get; set; } = string.Empty;
+    private string DetalleModalResultado { get; set; } = string.Empty;
+    private string TipoModalResultado { get; set; } = "success";
+
+    private bool MostrarModalEliminarAsignacion { get; set; }
+    private bool EliminandoAsignacion { get; set; }
+    private AsignacionViewModel? AsignacionPendienteEliminar { get; set; }
+
     private bool MostrarModalEmpleadoRequerido { get; set; }
     private bool GenerandoStatusBooks { get; set; }
 
     private ClaimsPrincipal? UsuarioActual { get; set; }
     private bool CreateAssignations { get; set; } = false;
 
-    // En este proyecto ViewAllEmployeeTypes está reservado para
-    // ADMIN, ADMINISTRATOR y SUPERVISOR.
     private bool PuedeDescargarPlantilla => Scope.ViewAllEmployeeTypes;
 
     private bool CargandoInicial { get; set; } = true;
@@ -740,12 +845,6 @@ else
     private bool DescargandoPlantillaXlsx { get; set; } = false;
     private bool ActualizandoLibrosXlsx { get; set; } = false;
     private Guid XlsxBooksUpdateInputKey { get; set; } = Guid.NewGuid();
-    //private DotNetObjectReference<Asignaciones>? _dotNetRef;
-
-    // private bool MostrarModalImportacion { get; set; } = false;
-    // private string TituloModalImportacion { get; set; } = string.Empty;
-    // private string ResumenModalImportacion { get; set; } = string.Empty;
-    // private string TipoModalImportacion { get; set; } = "success";
 
     private Guid XlsxInputKey { get; set; } = Guid.NewGuid();
     private const long MaxXlsxSize = 20 * 1024 * 1024;
@@ -1055,13 +1154,6 @@ else
         MotivoTemporal = string.Empty;
     }
 
-    // [JSInvokable]
-    // public async Task OnAssignmentImportModalClosed()
-    // {
-    //     await CargarDatosAsync();
-    //     await InvokeAsync(StateHasChanged);
-    // }
-
     private static bool HasPermission(ClaimsPrincipal? user, string claimType)
     {
         if (user is null)
@@ -1218,7 +1310,14 @@ else
 
             await db.SaveChangesAsync();
 
-            MostrarMensaje("Temporary assignment saved successfully.", "success");
+            var temporaryEmployeeName = empleadoTemporal?.Nombre ?? "Temporary employee";
+            var temporaryBookName = asignacion.Libro?.BookName ?? "Selected book";
+
+            MostrarResultado(
+                "Temporary assignment saved",
+                "The temporary assignment was saved successfully.",
+                $"{temporaryEmployeeName} will cover {temporaryBookName}.",
+                "success");
 
             await CerrarFormularioAsignacionTemporal();
 
@@ -1813,7 +1912,6 @@ else
             "Final"
         };
 
-        // Memo is only part of the workflow for Vivial books.
         if (AplicaEtapaMemo(bindPlantName))
             stageKeys.Add("Memo");
 
@@ -2158,7 +2256,11 @@ else
             db.Asignaciones.Add(asignacion);
             await db.SaveChangesAsync();
 
-            MostrarMensaje("Assignment saved successfully.", "success");
+            MostrarResultado(
+                "Assignment created",
+                "The assignment was created successfully.",
+                $"{empleado.Nombre} was assigned to {libro.BookName} (KGEN: {libro.KGENCode}).",
+                "success");
 
             LimpiarFormulario();
             await CargarDatosAsync();
@@ -2173,7 +2275,7 @@ else
         }
     }
 
-    private async Task EliminarAsignacionAsync(Guid id)
+    private void AbrirModalEliminarAsignacion(AsignacionViewModel item)
     {
         if (!CreateAssignations)
         {
@@ -2181,12 +2283,38 @@ else
             return;
         }
 
-        var confirmar = await JS.InvokeAsync<bool>(
-            "confirm",
-            "Are you sure you want to delete this assignment?");
+        AsignacionPendienteEliminar = item;
+        MostrarModalEliminarAsignacion = true;
+    }
 
-        if (!confirmar)
+    private void CerrarModalEliminarAsignacion()
+    {
+        if (EliminandoAsignacion)
             return;
+
+        MostrarModalEliminarAsignacion = false;
+        AsignacionPendienteEliminar = null;
+    }
+
+    private async Task ConfirmarEliminarAsignacionAsync()
+    {
+        if (!CreateAssignations)
+        {
+            MostrarModalEliminarAsignacion = false;
+            AsignacionPendienteEliminar = null;
+            MostrarMensaje("You do not have permission to delete assignments.", "error");
+            return;
+        }
+
+        if (AsignacionPendienteEliminar is null)
+            return;
+
+        EliminandoAsignacion = true;
+
+        var assignmentId = AsignacionPendienteEliminar.Id;
+        var employeeName = AsignacionPendienteEliminar.EmpleadoNombre;
+        var bookName = AsignacionPendienteEliminar.BookName;
+        var kgenCode = AsignacionPendienteEliminar.KGENCode;
 
         try
         {
@@ -2197,10 +2325,12 @@ else
 
             var asignacion = await db.Asignaciones
                 .ApplyScope(Scope)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == assignmentId);
 
             if (asignacion is null)
             {
+                MostrarModalEliminarAsignacion = false;
+                AsignacionPendienteEliminar = null;
                 MostrarMensaje("The selected assignment was not found.", "error");
                 return;
             }
@@ -2208,13 +2338,26 @@ else
             db.Asignaciones.Remove(asignacion);
             await db.SaveChangesAsync();
 
-            MostrarMensaje("Assignment deleted successfully.", "success");
+            MostrarModalEliminarAsignacion = false;
+            AsignacionPendienteEliminar = null;
 
             await CargarDatosAsync();
+
+            MostrarResultado(
+                "Assignment deleted",
+                "The assignment was deleted successfully.",
+                $"{employeeName} — {bookName} (KGEN: {kgenCode}).",
+                "success");
         }
         catch (Exception ex)
         {
+            MostrarModalEliminarAsignacion = false;
+            AsignacionPendienteEliminar = null;
             MostrarMensaje($"Error deleting assignment: {ex.Message}", "error");
+        }
+        finally
+        {
+            EliminandoAsignacion = false;
         }
     }
 
@@ -2297,10 +2440,6 @@ else
 
             using var workbook = new XLWorkbook();
 
-            // =========================================================
-            // FIRST WORKSHEET: THE IMPORTER READS THE FIRST SHEET.
-            // KEEP THE HEADER IN ROW 1 WITH NO TITLE ABOVE IT.
-            // =========================================================
             var worksheet = workbook.Worksheets.Add("Assignments Upload");
 
             var headers = new[]
@@ -2353,14 +2492,12 @@ else
             headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
-            // Fully required columns.
             foreach (var requiredColumn in new[] { 1, 4, 5 })
             {
                 worksheet.Cell(headerRow, requiredColumn)
                     .Style.Fill.BackgroundColor = XLColor.FromHtml("#EA580C");
             }
 
-            // Employee ID or Employee Name: at least one must be completed.
             foreach (var conditionalColumn in new[] { 2, 3 })
             {
                 worksheet.Cell(headerRow, conditionalColumn)
@@ -2387,27 +2524,27 @@ else
 
             var widths = new double[]
             {
-                18, // employee_type
-                16, // Employee ID
-                30, // Employee
-                34, // Product Name
-                22, // KGen Product Code
-                18, // LSA Code
-                20, // Product Issue
-                20, // Foot Print
-                18, // Legacy Co
-                18, // State
-                22, // Graphics Database
-                18, // Trim Size
-                18, // Bind Plant
-                19, // First Due Printer
-                18, // Proof Extract
-                18, // Extract - Final
-                18, // Memo Extract
-                18, // Dirxion
-                18, // Pub Date
-                22, // SRL Suppression Flag
-                12  // NWP
+                18, 
+                16, 
+                30, 
+                34, 
+                22, 
+                18, 
+                20, 
+                20, 
+                18, 
+                18, 
+                22, 
+                18, 
+                18, 
+                19, 
+                18, 
+                18, 
+                18, 
+                18, 
+                18, 
+                22, 
+                12  
             };
 
             for (var column = 1; column <= widths.Length; column++)
@@ -2415,9 +2552,6 @@ else
                 worksheet.Column(column).Width = widths[column - 1];
             }
 
-            // =========================================================
-            // INSTRUCTIONS
-            // =========================================================
             var instructionsSheet = workbook.Worksheets.Add("Instructions");
 
             instructionsSheet.Cell(1, 1).Value = "Assignments Upload Template";
@@ -2654,9 +2788,6 @@ else
             instructionsSheet.Row(4).Height = 48;
             instructionsSheet.SheetView.FreezeRows(6);
 
-            // =========================================================
-            // EMPLOYEES
-            // =========================================================
             var employeesSheet = workbook.Worksheets.Add("Employees");
 
             employeesSheet.Cell(1, 1).Value = "employee_type";
@@ -2705,9 +2836,6 @@ else
             employeesSheet.Column(3).Width = 32;
             employeesSheet.Column(4).Width = 34;
 
-            // =========================================================
-            // AVAILABLE BOOKS
-            // =========================================================
             var booksSheet = workbook.Worksheets.Add("Available Books");
 
             booksSheet.Cell(1, 1).Value = "employee_type";
@@ -2756,9 +2884,6 @@ else
             booksSheet.Column(3).Width = 22;
             booksSheet.Column(4).Width = 18;
 
-            // =========================================================
-            // ALLOWED VALUES
-            // =========================================================
             var allowedValuesSheet = workbook.Worksheets.Add("Allowed Values");
 
             var allowedLists = new List<(string Header, IEnumerable<string> Values)>
@@ -4307,6 +4432,42 @@ else
     {
         Mensaje = mensaje;
         TipoMensaje = tipo;
+
+        if (string.Equals(tipo, "error", StringComparison.OrdinalIgnoreCase))
+        {
+            MostrarResultado(
+                "Unable to complete the action",
+                mensaje,
+                string.Empty,
+                "error");
+        }
+    }
+
+    private void MostrarResultado(
+        string titulo,
+        string mensaje,
+        string detalle = "",
+        string tipo = "success")
+    {
+        TituloModalResultado = titulo;
+        MensajeModalResultado = mensaje;
+        DetalleModalResultado = detalle;
+        TipoModalResultado = string.Equals(tipo, "error", StringComparison.OrdinalIgnoreCase)
+            ? "error"
+            : "success";
+        MostrarModalResultado = true;
+    }
+
+    private void CerrarModalResultado()
+    {
+        MostrarModalResultado = false;
+        TituloModalResultado = string.Empty;
+        MensajeModalResultado = string.Empty;
+        DetalleModalResultado = string.Empty;
+        TipoModalResultado = "success";
+
+        if (string.Equals(TipoMensaje, "error", StringComparison.OrdinalIgnoreCase))
+            LimpiarMensaje();
     }
 
     private void LimpiarMensaje()

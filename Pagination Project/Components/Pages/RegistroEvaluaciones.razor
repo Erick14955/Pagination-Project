@@ -50,6 +50,55 @@
         </div>
     }
 
+    @if (MostrarModalResultadoEvaluacion)
+    {
+        <div class="evaluation-result-modal-overlay"
+             role="presentation"
+             @onclick="CerrarModalResultadoEvaluacion">
+            <div class="evaluation-result-modal-card @TipoModalResultadoEvaluacion"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="evaluationResultModalTitle"
+                 @onclick:stopPropagation="true">
+
+                <div class="evaluation-result-modal-accent"></div>
+
+                <div class="evaluation-result-modal-content">
+                    <div class="evaluation-result-modal-icon" aria-hidden="true">
+                        @if (TipoModalResultadoEvaluacion == "success")
+                        {
+                            <svg viewBox="0 0 24 24">
+                                <path d="M20 6 9 17l-5-5"></path>
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <path d="M12 7v6"></path>
+                                <path d="M12 17h.01"></path>
+                            </svg>
+                        }
+                    </div>
+
+                    <div class="evaluation-result-modal-copy">
+                        <span class="evaluation-result-modal-eyebrow">Evaluation Management</span>
+                        <h3 id="evaluationResultModalTitle">@TituloModalResultadoEvaluacion</h3>
+                        <p>@MensajeModalResultadoEvaluacion</p>
+                    </div>
+                </div>
+
+                <div class="evaluation-result-modal-actions">
+                    <button type="button"
+                            class="evaluation-result-modal-ok"
+                            @onclick="CerrarModalResultadoEvaluacion">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
     <section class="form-card">
         <div class="section-header">
             <div>
@@ -553,8 +602,9 @@
                     <tbody>
                         @foreach (var item in HistorialFiltrado)
                         {
-                            <tr @ondblclick="() => SeleccionarEvaluacionAsync(item.Id)">
-                                <td>
+                            <tr class="@(Evaluacion.Id == item.Id ? "selected" : string.Empty)"
+                                @ondblclick="() => SeleccionarEvaluacionAsync(item.Id)">
+                                <td data-label="Employee">
                                     <div class="employee-title">
                                         <strong>@item.EmpleadoNombre</strong>
                                     </div>
@@ -562,20 +612,22 @@
 
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                    <td data-label="Department">
+                                        <span class="kgen-pill">@item.EmployeeTypeCode</span>
+                                    </td>
                                 }
 
-                                <td>
+                                <td data-label="KGEN">
                                     <span class="kgen-pill">@item.KGENCode</span>
                                 </td>
 
-                                <td>@MostrarPorcentaje(item.MotifYp)</td>
-                                <td>@MostrarPorcentaje(item.MotifWp)</td>
-                                <td>@MostrarPorcentaje(item.InventoryReport)</td>
-                                <td>@MostrarPorcentaje(item.ProductShippingFolder)</td>
-                                <td>@MostrarPorcentaje(item.TaskMemo)</td>
+                                <td data-label="Motif YP">@MostrarPorcentaje(item.MotifYp)</td>
+                                <td data-label="Motif WP">@MostrarPorcentaje(item.MotifWp)</td>
+                                <td data-label="Inventory">@MostrarPorcentaje(item.InventoryReport)</td>
+                                <td data-label="Shipping">@MostrarPorcentaje(item.ProductShippingFolder)</td>
+                                <td data-label="Task Memo">@MostrarPorcentaje(item.TaskMemo)</td>
 
-                                <td>
+                                <td data-label="Total %">
                                     <strong class="total-percent">
                                         @MostrarPorcentaje(item.PorcentajeGeneral)
                                     </strong>
@@ -621,6 +673,11 @@
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
     private bool ModoEdicion { get; set; } = false;
+
+    private bool MostrarModalResultadoEvaluacion { get; set; } = false;
+    private string TituloModalResultadoEvaluacion { get; set; } = string.Empty;
+    private string MensajeModalResultadoEvaluacion { get; set; } = string.Empty;
+    private string TipoModalResultadoEvaluacion { get; set; } = "success";
 
     protected override async Task OnInitializedAsync()
     {
@@ -905,9 +962,22 @@
 
             if (Evaluacion.AssignationId == Guid.Empty)
             {
-                MostrarMensaje("Select a valid assignment.", "error");
+                MostrarResultadoEvaluacion(
+                    "Unable to save evaluation",
+                    "Select a valid assignment before saving the evaluation.",
+                    "error");
                 return;
             }
+
+            var editando = Evaluacion.Id != Guid.Empty;
+            var empleadoNombre = AsignacionSeleccionada?.EmpleadoNombre ?? "Selected employee";
+            var kgenCode = AsignacionSeleccionada?.KGENCode;
+
+            if (string.IsNullOrWhiteSpace(kgenCode))
+                kgenCode = TextoBusquedaAsignacion?.Trim();
+
+            if (string.IsNullOrWhiteSpace(kgenCode))
+                kgenCode = "-";
 
             Evaluacion.MotifYp = PorcentajeMotifYpVista;
             Evaluacion.MotifWp = PorcentajeMotifWpVista;
@@ -917,14 +987,17 @@
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            if (Evaluacion.Id == Guid.Empty)
+            if (!editando)
             {
                 var existe = await db.Evaluaciones
                     .AnyAsync(e => e.AssignationId == Evaluacion.AssignationId);
 
                 if (existe)
                 {
-                    MostrarMensaje("This assignment already has an evaluation. Open it from the history to edit it.", "error");
+                    MostrarResultadoEvaluacion(
+                        "Evaluation already exists",
+                        "This assignment already has an evaluation. Open it from the history to edit it.",
+                        "error");
                     return;
                 }
 
@@ -940,7 +1013,10 @@
 
                 if (existente is null)
                 {
-                    MostrarMensaje("The selected evaluation was not found.", "error");
+                    MostrarResultadoEvaluacion(
+                        "Evaluation not found",
+                        "The selected evaluation was not found.",
+                        "error");
                     return;
                 }
 
@@ -977,6 +1053,12 @@
                 existente.PendingCorrections = Evaluacion.PendingCorrections;
                 existente.TaskMemoWrongComment = Evaluacion.TaskMemoWrongComment;
 
+                existente.MotifYp = Evaluacion.MotifYp;
+                existente.MotifWp = Evaluacion.MotifWp;
+                existente.InventoryReport = Evaluacion.InventoryReport;
+                existente.ProductShippingFolder = Evaluacion.ProductShippingFolder;
+                existente.TaskMemo = Evaluacion.TaskMemo;
+
                 existente.Finalizado = Evaluacion.Finalizado;
             }
 
@@ -987,11 +1069,19 @@
             await CargarAsignacionesAsync(db);
             await CargarHistorialAsync(db);
 
-            MostrarMensaje("Evaluation saved successfully.", "success");
+            MostrarResultadoEvaluacion(
+                editando ? "Evaluation updated" : "Evaluation created",
+                editando
+                    ? $"The evaluation for {empleadoNombre}, KGEN {kgenCode}, was updated successfully."
+                    : $"The evaluation for {empleadoNombre}, KGEN {kgenCode}, was saved successfully.",
+                "success");
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error saving evaluation: {ex.Message}", "error");
+            MostrarResultadoEvaluacion(
+                "Error saving evaluation",
+                $"The evaluation could not be saved. {ex.Message}",
+                "error");
         }
         finally
         {
@@ -1013,6 +1103,7 @@
                     .ThenInclude(a => a.Empleado)
                 .Include(e => e.Asignacion)
                     .ThenInclude(a => a.Libro)
+                        .ThenInclude(l => l!.EmployeeType)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (item is null)
@@ -1043,7 +1134,8 @@
                     EmpleadoNombre = empleadoNombre,
                     BookName = item.Asignacion?.Libro?.BookName ?? "-",
                     KGENCode = item.Asignacion?.Libro?.KGENCode ?? "-",
-                    LSACode = item.Asignacion?.Libro?.LSACode ?? "-"
+                    LSACode = item.Asignacion?.Libro?.LSACode ?? "-",
+                    EmployeeTypeCode = item.Asignacion?.Libro?.EmployeeType?.Code ?? string.Empty
                 };
             }
             else
@@ -1061,11 +1153,20 @@
     private async Task EliminarEvaluacionAsync()
     {
         if (!ModoEdicion || Evaluacion.Id == Guid.Empty)
+        {
+            MostrarResultadoEvaluacion(
+                "Evaluation not selected",
+                "Open an evaluation from the history before deleting it.",
+                "error");
             return;
+        }
+
+        var empleadoNombre = AsignacionSeleccionada?.EmpleadoNombre ?? "Selected employee";
+        var kgenCode = AsignacionSeleccionada?.KGENCode ?? "-";
 
         var confirmar = await JS.InvokeAsync<bool>(
             "confirm",
-            "Are you sure you want to delete this evaluation?");
+            $"Are you sure you want to delete the evaluation for {empleadoNombre}, KGEN {kgenCode}?");
 
         if (!confirmar)
             return;
@@ -1082,7 +1183,10 @@
 
             if (item is null)
             {
-                MostrarMensaje("The selected evaluation was not found.", "error");
+                MostrarResultadoEvaluacion(
+                    "Evaluation not found",
+                    "The selected evaluation was not found.",
+                    "error");
                 return;
             }
 
@@ -1094,11 +1198,17 @@
             await CargarAsignacionesAsync(db);
             await CargarHistorialAsync(db);
 
-            MostrarMensaje("Evaluation deleted successfully.", "success");
+            MostrarResultadoEvaluacion(
+                "Evaluation deleted",
+                $"The evaluation for {empleadoNombre}, KGEN {kgenCode}, was deleted successfully.",
+                "success");
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error deleting evaluation: {ex.Message}", "error");
+            MostrarResultadoEvaluacion(
+                "Error deleting evaluation",
+                $"The evaluation could not be deleted. {ex.Message}",
+                "error");
         }
         finally
         {
@@ -1159,6 +1269,28 @@
     {
         Busqueda = string.Empty;
         EmpleadoFiltroNombre = string.Empty;
+    }
+
+    private void MostrarResultadoEvaluacion(string titulo, string mensaje, string tipo)
+    {
+        TituloModalResultadoEvaluacion = titulo;
+        MensajeModalResultadoEvaluacion = mensaje;
+        TipoModalResultadoEvaluacion = string.Equals(
+            tipo,
+            "error",
+            StringComparison.OrdinalIgnoreCase)
+                ? "error"
+                : "success";
+
+        MostrarModalResultadoEvaluacion = true;
+    }
+
+    private void CerrarModalResultadoEvaluacion()
+    {
+        MostrarModalResultadoEvaluacion = false;
+        TituloModalResultadoEvaluacion = string.Empty;
+        MensajeModalResultadoEvaluacion = string.Empty;
+        TipoModalResultadoEvaluacion = "success";
     }
 
     private void MostrarMensaje(string mensaje, string tipo)

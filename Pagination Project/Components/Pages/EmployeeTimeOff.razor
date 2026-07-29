@@ -8,7 +8,6 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.JSInterop
 @using Pagination_Project.Data
 @using Pagination_Project.Models
 @using Pagination_Project.Services
@@ -19,7 +18,6 @@
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserDataScopeService UserDataScopeService
-@inject IJSRuntime JS
 
 <PageTitle>Employee Time Off</PageTitle>
 
@@ -139,7 +137,7 @@
             }
 
             <div class="button-row">
-                <button type="submit" class="btn-primary" disabled="@Saving">
+                <button type="submit" class="btn-primary" disabled="@(Saving || ProcessingAction)">
                     @(Saving ? "Saving..." : EditingId is null ? "Save Time Off" : "Update Time Off")
                 </button>
 
@@ -232,8 +230,8 @@
                     <tbody>
                         @foreach (var item in FilteredTimeOff)
                         {
-                            <tr>
-                                <td>
+                            <tr class="@(EditingId == item.Id ? "selected-row" : "")">
+                                <td data-label="Employee">
                                     <div class="employee-title">
                                         <strong>@item.EmployeeName</strong>
                                         <span>ID: @item.EmployeeCode</span>
@@ -242,25 +240,25 @@
 
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <td><span class="pill type">@item.EmployeeTypeCode</span></td>
+                                    <td data-label="Department"><span class="pill type">@item.EmployeeTypeCode</span></td>
                                 }
 
-                                <td>
+                                <td data-label="Type">
                                     <span class="pill type">@item.LeaveType</span>
                                 </td>
 
-                                <td>
+                                <td data-label="Date Range">
                                     <div class="date-title">
                                         <strong>@FormatDate(item.StartDate) - @FormatDate(item.EndDate)</strong>
                                         <span>Created: @item.CreatedAt.ToString("MM/dd/yyyy hh:mm tt", CultureInfo.InvariantCulture)</span>
                                     </div>
                                 </td>
 
-                                <td>
+                                <td data-label="Days">
                                     <strong>@item.TotalDays</strong>
                                 </td>
 
-                                <td>
+                                <td data-label="Auto Assignment">
                                     @if (item.AutomaticCoverage)
                                     {
                                         <span class="pill success">Enabled</span>
@@ -271,7 +269,7 @@
                                     }
                                 </td>
 
-                                <td>
+                                <td data-label="Coverage Details">
                                     @if (!item.Details.Any())
                                     {
                                         <span class="pill muted">No temporary assignments</span>
@@ -293,7 +291,7 @@
                                     }
                                 </td>
 
-                                <td>
+                                <td data-label="Status">
                                     @if (item.Active)
                                     {
                                         <span class="pill success">Active</span>
@@ -304,10 +302,11 @@
                                     }
                                 </td>
 
-                                <td class="actions-cell">
+                                <td class="actions-cell" data-label="Actions">
                                     <button type="button"
                                             class="icon-btn"
                                             title="Edit"
+                                            disabled="@(Saving || ProcessingAction)"
                                             @onclick="() => Edit(item.Id)">
                                         ✏️
                                     </button>
@@ -317,7 +316,8 @@
                                         <button type="button"
                                                 class="icon-btn warning"
                                                 title="Close"
-                                                @onclick="() => CloseAsync(item.Id)">
+                                                disabled="@(Saving || ProcessingAction)"
+                                                @onclick="() => OpenCloseConfirmation(item)">
                                             🔒
                                         </button>
                                     }
@@ -325,7 +325,8 @@
                                     <button type="button"
                                             class="icon-btn danger"
                                             title="Delete"
-                                            @onclick="() => DeleteAsync(item.Id)">
+                                            disabled="@(Saving || ProcessingAction)"
+                                            @onclick="() => OpenDeleteConfirmation(item)">
                                         🗑️
                                     </button>
                                 </td>
@@ -338,6 +339,118 @@
     </section>
 </div>
 
+
+@if (ShowConfirmationModal && PendingRecord is not null)
+{
+    <div class="timeoff-modal-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="timeoffConfirmationTitle">
+
+        <div class="timeoff-modal timeoff-confirmation-modal @ConfirmationStyle">
+            <div class="timeoff-modal-icon">
+                @(PendingAction == "delete" ? "!" : "↻")
+            </div>
+
+            <div class="timeoff-modal-copy">
+                <span class="timeoff-modal-kicker">
+                    @(PendingAction == "delete" ? "Permanent action" : "Coverage update")
+                </span>
+
+                <h2 id="timeoffConfirmationTitle">
+                    @(PendingAction == "delete" ? "Delete time off record?" : "Close time off record?")
+                </h2>
+
+                <p>
+                    @(PendingAction == "delete"
+                                    ? "This record will be removed and all temporary assignments created by it will be closed."
+                                    : "This record will be marked as closed and its active temporary assignments will be deactivated.")
+                                                                                                                                   </p>
+                                                                                                                               </div>
+
+            <div class="timeoff-confirmation-summary">
+                <div>
+                    <span>Employee</span>
+                    <strong>@PendingRecord.EmployeeName</strong>
+                </div>
+
+                <div>
+                    <span>Leave Type</span>
+                    <strong>@PendingRecord.LeaveType</strong>
+                </div>
+
+                <div>
+                    <span>Date Range</span>
+                    <strong>@FormatDate(PendingRecord.StartDate) - @FormatDate(PendingRecord.EndDate)</strong>
+                </div>
+
+                <div>
+                    <span>Temporary Coverages</span>
+                    <strong>@PendingRecord.Details.Count</strong>
+                </div>
+            </div>
+
+            <div class="timeoff-modal-actions">
+                <button type="button"
+                        class="timeoff-modal-secondary"
+                        disabled="@ProcessingAction"
+                        @onclick="CloseConfirmationModal">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        class="@(PendingAction == "delete" ? "timeoff-modal-danger" : "timeoff-modal-primary")"
+                        disabled="@ProcessingAction"
+                        @onclick="ConfirmPendingActionAsync">
+                    @(ProcessingAction
+                                    ? "Processing..."
+                                    : PendingAction == "delete"
+                                    ? "Yes, delete"
+                                    : "Yes, close")
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+@if (ShowResultModal)
+{
+    <div class="timeoff-modal-backdrop timeoff-result-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="timeoffResultTitle">
+
+        <div class="timeoff-modal timeoff-result-modal @ResultType">
+            <div class="timeoff-modal-icon">
+                @(ResultType == "success" ? "✓" : ResultType == "warning" ? "!" : "×")
+            </div>
+
+            <div class="timeoff-modal-copy">
+                <span class="timeoff-modal-kicker">
+                    @(ResultType == "success" ? "Completed" : ResultType == "warning" ? "Attention" : "Unable to complete")
+                </span>
+
+                <h2 id="timeoffResultTitle">@ResultTitle</h2>
+                <p>@ResultMessage</p>
+
+                @if (!string.IsNullOrWhiteSpace(ResultDetail))
+                {
+                    <div class="timeoff-result-detail">@ResultDetail</div>
+                }
+            </div>
+
+            <div class="timeoff-modal-actions">
+                <button type="button"
+                        class="timeoff-modal-primary"
+                        @onclick="CloseResultModal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
     private List<Empleados> Employees { get; set; } = new();
     private List<Bind_Plant> BindPlants { get; set; } = new();
@@ -348,6 +461,20 @@
 
     private bool Loading { get; set; } = true;
     private bool Saving { get; set; }
+    private bool ProcessingAction { get; set; }
+
+    private bool ShowResultModal { get; set; }
+    private string ResultTitle { get; set; } = string.Empty;
+    private string ResultMessage { get; set; } = string.Empty;
+    private string ResultDetail { get; set; } = string.Empty;
+    private string ResultType { get; set; } = "success";
+
+    private bool ShowConfirmationModal { get; set; }
+    private string PendingAction { get; set; } = string.Empty;
+    private TimeOffViewModel? PendingRecord { get; set; }
+
+    private string ConfirmationStyle =>
+        PendingAction == "delete" ? "danger" : "warning";
 
     private Guid? EditingId { get; set; }
 
@@ -566,6 +693,12 @@
             return;
         }
 
+        var wasEditing = EditingId.HasValue;
+        var selectedLeaveType = FormModel.LeaveType;
+        var selectedStartDate = FormModel.StartDate;
+        var selectedEndDate = FormModel.EndDate;
+        var automaticCoverage = FormModel.AutomaticCoverage;
+
         try
         {
             Saving = true;
@@ -583,7 +716,7 @@
 
             EmployeeLeaveCoverage record;
 
-            if (EditingId is null)
+            if (!wasEditing)
             {
                 record = new EmployeeLeaveCoverage
                 {
@@ -605,7 +738,7 @@
             {
                 record = await ScopedCoverageQuery(db)
                     .Include(x => x.Details)
-                    .FirstOrDefaultAsync(x => x.Id == EditingId.Value)
+                    .FirstOrDefaultAsync(x => x.Id == EditingId!.Value)
                     ?? throw new InvalidOperationException("The selected record was not found.");
 
                 await CloseTemporaryAssignmentsFromRecordAsync(db, record.Id);
@@ -634,19 +767,26 @@
                 await db.SaveChangesAsync();
             }
 
-            if (record.AutomaticCoverage)
-            {
-                ShowMessage(
-                    $"Time off saved successfully. Temporary assignments created: {autoResult.Created}. Skipped books: {autoResult.Skipped}.",
-                    autoResult.Created > 0 ? "success" : "warning");
-            }
-            else
-            {
-                ShowMessage("Time off saved successfully.", "success");
-            }
-
             ClearForm();
             await LoadDataAsync();
+
+            var title = wasEditing
+                ? "Time off updated"
+                : "Time off registered";
+
+            var message = wasEditing
+                ? $"The time off record for {employee.Nombre} was updated successfully."
+                : $"The time off record for {employee.Nombre} was registered successfully.";
+
+            var detail = automaticCoverage
+                ? $"{selectedLeaveType} · {FormatDate(selectedStartDate)} - {FormatDate(selectedEndDate)} · Temporary assignments created: {autoResult.Created} · Skipped books: {autoResult.Skipped}."
+                : $"{selectedLeaveType} · {FormatDate(selectedStartDate)} - {FormatDate(selectedEndDate)} · Automatic coverage was not requested.";
+
+            ShowResult(
+                title,
+                message,
+                automaticCoverage && autoResult.Created == 0 ? "warning" : "success",
+                detail);
         }
         catch (Exception ex)
         {
@@ -1064,21 +1204,77 @@
         }
     }
 
-    private async Task CloseAsync(Guid id)
+    private void OpenCloseConfirmation(TimeOffViewModel item)
     {
-        var confirm = await JS.InvokeAsync<bool>(
-            "confirm",
-            "Are you sure you want to close this time off record and its temporary assignments?");
-
-        if (!confirm)
+        if (!item.Active || ProcessingAction)
             return;
 
+        PendingRecord = item;
+        PendingAction = "close";
+        ShowConfirmationModal = true;
+        ClearMessage();
+    }
+
+    private void OpenDeleteConfirmation(TimeOffViewModel item)
+    {
+        if (ProcessingAction)
+            return;
+
+        PendingRecord = item;
+        PendingAction = "delete";
+        ShowConfirmationModal = true;
+        ClearMessage();
+    }
+
+    private void CloseConfirmationModal()
+    {
+        if (ProcessingAction)
+            return;
+
+        ShowConfirmationModal = false;
+        PendingAction = string.Empty;
+        PendingRecord = null;
+    }
+
+    private async Task ConfirmPendingActionAsync()
+    {
+        if (PendingRecord is null || ProcessingAction)
+            return;
+
+        var record = PendingRecord;
+        var action = PendingAction;
+
+        ShowConfirmationModal = false;
+        ProcessingAction = true;
+        ClearMessage();
+
+        try
+        {
+            if (action == "delete")
+            {
+                await DeleteConfirmedAsync(record);
+            }
+            else
+            {
+                await CloseConfirmedAsync(record);
+            }
+        }
+        finally
+        {
+            ProcessingAction = false;
+            PendingAction = string.Empty;
+            PendingRecord = null;
+        }
+    }
+
+    private async Task CloseConfirmedAsync(TimeOffViewModel selectedRecord)
+    {
         try
         {
             await using var db = await DbFactory.CreateDbContextAsync();
 
             var record = await ScopedCoverageQuery(db)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == selectedRecord.Id);
 
             if (record is null)
             {
@@ -1086,17 +1282,20 @@
                 return;
             }
 
-            await CloseTemporaryAssignmentsFromRecordAsync(db, id);
+            await CloseTemporaryAssignmentsFromRecordAsync(db, selectedRecord.Id);
 
             record.Active = false;
             record.ClosedAt = DateTime.UtcNow;
             record.UpdatedAt = DateTime.UtcNow;
 
             await db.SaveChangesAsync();
-
-            ShowMessage("Time off record closed successfully.", "success");
-
             await LoadDataAsync();
+
+            ShowResult(
+                "Time off closed",
+                $"The time off record for {selectedRecord.EmployeeName} was closed successfully.",
+                "success",
+                $"{selectedRecord.LeaveType} · {FormatDate(selectedRecord.StartDate)} - {FormatDate(selectedRecord.EndDate)} · {selectedRecord.Details.Count} temporary coverage record(s) were closed.");
         }
         catch (Exception ex)
         {
@@ -1104,22 +1303,15 @@
         }
     }
 
-    private async Task DeleteAsync(Guid id)
+    private async Task DeleteConfirmedAsync(TimeOffViewModel selectedRecord)
     {
-        var confirm = await JS.InvokeAsync<bool>(
-            "confirm",
-            "Are you sure you want to delete this record? Temporary assignments created by this record will be closed.");
-
-        if (!confirm)
-            return;
-
         try
         {
             await using var db = await DbFactory.CreateDbContextAsync();
 
             var record = await ScopedCoverageQuery(db)
                 .Include(x => x.Details)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == selectedRecord.Id);
 
             if (record is null)
             {
@@ -1127,14 +1319,21 @@
                 return;
             }
 
-            await CloseTemporaryAssignmentsFromRecordAsync(db, id);
+            await CloseTemporaryAssignmentsFromRecordAsync(db, selectedRecord.Id);
 
             db.EmployeeLeaveCoverages.Remove(record);
             await db.SaveChangesAsync();
 
-            ShowMessage("Time off record deleted successfully.", "success");
+            if (EditingId == selectedRecord.Id)
+                ClearForm();
 
             await LoadDataAsync();
+
+            ShowResult(
+                "Time off deleted",
+                $"The time off record for {selectedRecord.EmployeeName} was deleted successfully.",
+                "success",
+                $"{selectedRecord.LeaveType} · {FormatDate(selectedRecord.StartDate)} - {FormatDate(selectedRecord.EndDate)} · Temporary assignments created by this record were closed.");
         }
         catch (Exception ex)
         {
@@ -1241,6 +1440,37 @@
     {
         Message = message;
         MessageType = type;
+
+        ShowResult(
+            type == "warning" ? "Time off requires attention" : "Time off operation failed",
+            message,
+            type,
+            string.Empty);
+    }
+
+    private void ShowResult(
+        string title,
+        string message,
+        string type,
+        string detail = "")
+    {
+        ResultTitle = title;
+        ResultMessage = message;
+        ResultType = type;
+        ResultDetail = detail;
+        ShowResultModal = true;
+
+        Message = message;
+        MessageType = type;
+    }
+
+    private void CloseResultModal()
+    {
+        ShowResultModal = false;
+        ResultTitle = string.Empty;
+        ResultMessage = string.Empty;
+        ResultDetail = string.Empty;
+        ResultType = "success";
     }
 
     private void ClearMessage()

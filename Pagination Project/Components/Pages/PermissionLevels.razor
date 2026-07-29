@@ -4,7 +4,6 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.JSInterop
 @using Pagination_Project.Data
 @using Pagination_Project.Models
 @using Microsoft.AspNetCore.Components.Authorization
@@ -14,7 +13,6 @@
 @layout Pagination_Project.Components.Layout.DashboardLayout
 
 @inject IDbContextFactory<AppDbContext> DbFactory
-@inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Permission Levels</PageTitle>
@@ -474,7 +472,7 @@
                 <button type="button"
                         class="btn-danger"
                         disabled="@(PermisoActual.Id == 0 || Guardando)"
-                        @onclick="EliminarPermisoAsync">
+                        @onclick="SolicitarEliminarPermiso">
                     Delete
                 </button>
             </div>
@@ -539,25 +537,25 @@
                         {
                             <tr class="@(PermisoActual.Id == item.Id ? "selected-row" : "")"
                                 @ondblclick="() => SeleccionarPermisoAsync(item.Id)">
-                                <td>
+                                <td data-label="ID">
                                     <span class="id-pill">@item.Id</span>
                                 </td>
 
-                                <td>
+                                <td data-label="Permission Name">
                                     <div class="permission-title">
                                         <strong>@item.Name</strong>
                                     </div>
                                 </td>
 
-                                <td>@ContarGrupoUsers(item)</td>
-                                <td>@ContarGrupoBooks(item)</td>
-                                <td>@ContarGrupoAssignments(item)</td>
-                                <td>@ContarGrupoEvaluations(item)</td>
-                                <td>@ContarGrupoEmployees(item)</td>
-                                <td>@ContarGrupoLateWork(item)</td>
-                                <td>@ContarGrupoSystem(item)</td>
+                                <td data-label="Users">@ContarGrupoUsers(item)</td>
+                                <td data-label="Books">@ContarGrupoBooks(item)</td>
+                                <td data-label="Assignments">@ContarGrupoAssignments(item)</td>
+                                <td data-label="Evaluations">@ContarGrupoEvaluations(item)</td>
+                                <td data-label="Employees">@ContarGrupoEmployees(item)</td>
+                                <td data-label="Late Work">@ContarGrupoLateWork(item)</td>
+                                <td data-label="System">@ContarGrupoSystem(item)</td>
 
-                                <td>
+                                <td data-label="Total">
                                     <strong class="total-permissions">
                                         @ContarTotalPermisos(item)
                                     </strong>
@@ -572,6 +570,121 @@
 
 </div>
 
+@if (MostrarModalResultadoPermiso)
+{
+    <div class="permission-result-modal-overlay"
+         role="presentation"
+         @onclick="CerrarModalResultadoPermiso">
+
+        <div class="permission-result-modal-card @TipoModalResultadoPermiso"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="permissionResultModalTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="permission-result-modal-accent"></div>
+
+            <div class="permission-result-modal-content">
+                <div class="permission-result-modal-icon" aria-hidden="true">
+                    @if (TipoModalResultadoPermiso == "success")
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 6 9 17l-5-5"></path>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v6"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    }
+                </div>
+
+                <div class="permission-result-modal-copy">
+                    <span class="permission-result-modal-eyebrow">Permission Levels</span>
+                    <h3 id="permissionResultModalTitle">@TituloModalResultadoPermiso</h3>
+                    <p>@MensajeModalResultadoPermiso</p>
+                </div>
+            </div>
+
+            <div class="permission-result-modal-actions">
+                <button type="button"
+                        class="permission-result-modal-ok"
+                        @onclick="CerrarModalResultadoPermiso">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarConfirmacionEliminar)
+{
+    <div class="permission-delete-modal-overlay"
+         role="presentation"
+         @onclick="CancelarEliminacion">
+
+        <div class="permission-delete-modal-card"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="permissionDeleteModalTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="permission-delete-modal-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 7h16"></path>
+                    <path d="M9 7V4h6v3"></path>
+                    <path d="M7 7l1 13h8l1-13"></path>
+                    <path d="M10 11v5"></path>
+                    <path d="M14 11v5"></path>
+                </svg>
+            </div>
+
+            <div class="permission-delete-modal-copy">
+                <span>Delete permission level</span>
+                <h3 id="permissionDeleteModalTitle">Delete “@PermisoActual.Name”?</h3>
+                <p>
+                    This action permanently removes the permission level. It cannot be undone.
+                </p>
+            </div>
+
+            <div class="permission-delete-summary">
+                <div>
+                    <span>Permission level</span>
+                    <strong>@PermisoActual.Name</strong>
+                </div>
+
+                <div>
+                    <span>Enabled permissions</span>
+                    <strong>@ContarTotalPermisos(PermisoActual)</strong>
+                </div>
+            </div>
+
+            <div class="permission-delete-warning">
+                The level cannot be deleted while it is assigned to one or more users.
+            </div>
+
+            <div class="permission-delete-modal-actions">
+                <button type="button"
+                        class="permission-delete-cancel"
+                        disabled="@Guardando"
+                        @onclick="CancelarEliminacion">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        class="permission-delete-confirm"
+                        disabled="@Guardando"
+                        @onclick="ConfirmarEliminarPermisoAsync">
+                    @(Guardando ? "Deleting..." : "Delete Permission Level")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Permisos> PermisosLista { get; set; } = new();
     private Permisos PermisoActual { get; set; } = new();
@@ -582,6 +695,13 @@
 
     private bool Cargando { get; set; } = true;
     private bool Guardando { get; set; } = false;
+
+    private bool MostrarModalResultadoPermiso { get; set; }
+    private string TituloModalResultadoPermiso { get; set; } = string.Empty;
+    private string MensajeModalResultadoPermiso { get; set; } = string.Empty;
+    private string TipoModalResultadoPermiso { get; set; } = "success";
+
+    private bool MostrarConfirmacionEliminar { get; set; }
 
     private ClaimsPrincipal? _user;
 
@@ -724,7 +844,7 @@
 
                 NuevoPermiso();
 
-                MostrarMensaje("Permission level updated successfully.", "success");
+                MostrarMensaje("Permission level created successfully.", "success");
             }
             else
             {
@@ -794,18 +914,29 @@
         }
     }
 
-    private async Task EliminarPermisoAsync()
+    private void SolicitarEliminarPermiso()
     {
-        if (PermisoActual.Id == 0)
+        if (PermisoActual.Id == 0 || Guardando)
             return;
 
-        var confirmar = await JS.InvokeAsync<bool>(
-            "confirm",
-            $"Are you sure you want to delete the permission level '{PermisoActual.Name}'?"
-        );
+        LimpiarMensaje();
+        MostrarConfirmacionEliminar = true;
+    }
 
-        if (!confirmar)
+    private void CancelarEliminacion()
+    {
+        if (Guardando)
             return;
+
+        MostrarConfirmacionEliminar = false;
+    }
+
+    private async Task ConfirmarEliminarPermisoAsync()
+    {
+        if (PermisoActual.Id == 0 || Guardando)
+            return;
+
+        MostrarConfirmacionEliminar = false;
 
         try
         {
@@ -826,7 +957,9 @@
 
             if (permisoDb.Usuarios.Any())
             {
-                MostrarMensaje("This permission level cannot be deleted because it is assigned to one or more users.", "error");
+                MostrarMensaje(
+                    "This permission level cannot be deleted because it is assigned to one or more users.",
+                    "error");
                 return;
             }
 
@@ -927,6 +1060,61 @@
     {
         Mensaje = mensaje;
         TipoMensaje = tipo;
+
+        MostrarResultadoPermiso(
+            ObtenerTituloResultado(mensaje, tipo),
+            mensaje,
+            tipo);
+    }
+
+    private static string ObtenerTituloResultado(string mensaje, string tipo)
+    {
+        if (string.Equals(tipo, "error", StringComparison.OrdinalIgnoreCase))
+        {
+            if (mensaje.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                return "Permission level not found";
+
+            if (mensaje.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+                return "Duplicate permission level";
+
+            if (mensaje.Contains("assigned to one or more users", StringComparison.OrdinalIgnoreCase))
+                return "Permission level in use";
+
+            return "Unable to complete action";
+        }
+
+        if (mensaje.Contains("created", StringComparison.OrdinalIgnoreCase))
+            return "Permission level created";
+
+        if (mensaje.Contains("updated", StringComparison.OrdinalIgnoreCase))
+            return "Permission level updated";
+
+        if (mensaje.Contains("deleted", StringComparison.OrdinalIgnoreCase))
+            return "Permission level deleted";
+
+        return "Permission Levels";
+    }
+
+    private void MostrarResultadoPermiso(string titulo, string mensaje, string tipo)
+    {
+        TituloModalResultadoPermiso = titulo;
+        MensajeModalResultadoPermiso = mensaje;
+        TipoModalResultadoPermiso = string.Equals(
+            tipo,
+            "error",
+            StringComparison.OrdinalIgnoreCase)
+                ? "error"
+                : "success";
+
+        MostrarModalResultadoPermiso = true;
+    }
+
+    private void CerrarModalResultadoPermiso()
+    {
+        MostrarModalResultadoPermiso = false;
+        TituloModalResultadoPermiso = string.Empty;
+        MensajeModalResultadoPermiso = string.Empty;
+        TipoModalResultadoPermiso = "success";
     }
 
     private void LimpiarMensaje()

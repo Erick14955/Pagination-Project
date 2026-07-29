@@ -213,15 +213,12 @@
         {
             var isCompact = await JS.InvokeAsync<bool>("thryvLayout.isCompact");
 
-            // Desktop: abierto.
-            // Celular/tablet: cerrado.
             sidebarOpen = !isCompact;
 
             await InvokeAsync(StateHasChanged);
         }
         catch
         {
-            // Si JS no está disponible en el primer momento, lo dejamos cerrado.
             sidebarOpen = false;
             await InvokeAsync(StateHasChanged);
         }
@@ -272,7 +269,6 @@
         }
         catch
         {
-            // No hacemos nada si JS falla temporalmente.
         }
     }
 
@@ -301,11 +297,31 @@
 
     private static bool PuedeVerReportes(ClaimsPrincipal user)
     {
-        var rol = ObtenerRol(user);
+        var lvlId = user.FindFirst("LvlId")?.Value;
 
-        return rol == "Administrator" ||
-               rol == "Supervisor" ||
-               rol == "Assistant";
+        var role =
+            user.FindFirst(ClaimTypes.Role)?.Value ??
+            user.FindFirst("Role")?.Value ??
+            user.FindFirst("RoleName")?.Value ??
+            user.FindFirst("PermissionLevel")?.Value ??
+            string.Empty;
+
+        return lvlId is "1" or "2" or "3" or "4" ||
+               role.Equals(
+                   "Administrator",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "Supervisor",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "Assistant",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "Employee",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "User",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task AplicarTemaLayoutAsync()
@@ -377,7 +393,7 @@
             "1" => "Administrator",
             "2" => "Supervisor",
             "3" => "Assistant",
-            "4" => "User",
+            "4" => "Employee",
             _ => "Usuario autenticado"
         };
     }

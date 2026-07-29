@@ -29,15 +29,15 @@
 
             <div class="thryv-dashboard-hero-content">
                 <div class="thryv-dashboard-skeleton-block
-                                thryv-dashboard-skeleton-title">
+                                    thryv-dashboard-skeleton-title">
                 </div>
 
                 <div class="thryv-dashboard-skeleton-block
-                                thryv-dashboard-skeleton-subtitle">
+                                    thryv-dashboard-skeleton-subtitle">
                 </div>
 
                 <div class="thryv-dashboard-skeleton-block
-                                thryv-dashboard-skeleton-subtitle short">
+                                    thryv-dashboard-skeleton-subtitle short">
                 </div>
             </div>
 
@@ -46,14 +46,14 @@
                 @for (var statIndex = 0; statIndex < 6; statIndex++)
                 {
                     <div class="thryv-hero-stat-card
-                                        thryv-dashboard-skeleton-stat-card">
+                                                thryv-dashboard-skeleton-stat-card">
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-stat-label">
+                                                    thryv-dashboard-skeleton-stat-label">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-stat-value">
+                                                    thryv-dashboard-skeleton-stat-value">
                         </div>
                     </div>
                 }
@@ -64,31 +64,31 @@
         @for (var sectionIndex = 0; sectionIndex < 3; sectionIndex++)
         {
             <div class="thryv-section-card
-                                thryv-dashboard-skeleton-section">
+                                        thryv-dashboard-skeleton-section">
 
                 <div class="thryv-section-header">
 
                     <div class="thryv-dashboard-skeleton-section-copy">
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-section-title">
+                                                    thryv-dashboard-skeleton-section-title">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-section-description">
+                                                    thryv-dashboard-skeleton-section-description">
                         </div>
                     </div>
 
                     <div class="thryv-dashboard-skeleton-actions">
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-filter">
+                                                    thryv-dashboard-skeleton-filter">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-filter">
+                                                    thryv-dashboard-skeleton-filter">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-badge">
+                                                    thryv-dashboard-skeleton-badge">
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                         @for (var columnIndex = 0; columnIndex < 7; columnIndex++)
                         {
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-column-title">
+                                                                thryv-dashboard-skeleton-column-title">
                             </div>
                         }
                     </div>
@@ -110,36 +110,36 @@
 
                             <div class="thryv-dashboard-skeleton-employee">
                                 <div class="thryv-dashboard-skeleton-block
-                                                        thryv-dashboard-skeleton-avatar">
+                                                                    thryv-dashboard-skeleton-avatar">
                                 </div>
 
                                 <div class="thryv-dashboard-skeleton-block
-                                                        thryv-dashboard-skeleton-name">
+                                                                    thryv-dashboard-skeleton-name">
                                 </div>
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell medium">
+                                                                thryv-dashboard-skeleton-cell medium">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell small">
+                                                                thryv-dashboard-skeleton-cell small">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell large">
+                                                                thryv-dashboard-skeleton-cell large">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell small">
+                                                                thryv-dashboard-skeleton-cell small">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell medium">
+                                                                thryv-dashboard-skeleton-cell medium">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell action">
+                                                                thryv-dashboard-skeleton-cell action">
                             </div>
                         </div>
                     }
@@ -292,30 +292,39 @@ else
                                 {
                                     <th>Department</th>
                                 }
-                                <th>KGEN Code</th>
-                                <th>LSA Code</th>
-                                <th>Book</th>
-                                <th>Database</th>
-                                <th>
-                                    <button type="button"
-                                            class="thryv-sort-header-btn"
-                                            title="Sort assigned books by stage"
-                                            aria-label="Sort assigned books by stage"
-                                            @onclick="SortAssignedBooksByStage">
+                            <th>KGEN Code</th>
+                            <th>LSA Code</th>
+                            <th>Book</th>
+                            <th>Database</th>
+                            <th>
+                                <button type="button"
+                                        class="thryv-sort-header-btn"
+                                        title="Sort assigned books by stage"
+                                        aria-label="Sort assigned books by stage"
+                                        @onclick="SortAssignedBooksByStage">
 
-                                        <span>Stage</span>
+                                    <span>Stage</span>
 
-                                        <span class="thryv-sort-indicator">
-                                            @(AssignedStageSortEnabled
-                                                                                ? AssignedStageSortDescending
-                                                                                ? "▼"
-                                                                                : "▲"
-                                                                                : "↕")
-                                        </span>
-                                    </button>
-                                </th>
-                                <th>Stage Date</th>
-                                <th>Checklist</th>
+                                    <span class="thryv-sort-indicator">
+                                        @(AssignedStageSortEnabled
+                                                                            ? AssignedStageSortDescending
+                                                                            ? "▼"
+                                                                            : "▲"
+                                                                            : "↕")
+                                </span>
+                            </button>
+                        </th>
+                        <th>Stage Date</th>
+
+                        @if (ShowReadyToShipColumn)
+                                {
+                                    <th>Ready to Ship</th>
+                                }
+
+                                @if (ShowChecklistColumn)
+                                {
+                                    <th>Checklist</th>
+                                }
                             </tr>
                         </thead>
 
@@ -323,7 +332,7 @@ else
                             @if (loading)
                             {
                                 <tr>
-                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 9 : 8)" class="thryv-empty-row">
+                                    <td colspan="@AssignedBooksColumnCount" class="thryv-empty-row">
                                         Loading statistics...
                                     </td>
                                 </tr>
@@ -331,7 +340,7 @@ else
                             else if (AssignedBooksFiltered.Count == 0)
                             {
                                 <tr>
-                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 9 : 8)" class="thryv-empty-row">
+                                    <td colspan="@AssignedBooksColumnCount" class="thryv-empty-row">
                                         No pending assignments for today.
                                     </td>
                                 </tr>
@@ -388,21 +397,57 @@ else
 
                                         <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
 
-                                        <td>
-                                            @if (string.Equals(item.StageKey, "ProofExtract", StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                <button type="button"
-                                                        class="thryv-download-checklist-btn"
-                                                        disabled="@(DownloadingChecklistAssignmentId == item.AssignmentId)"
-                                                        @onclick="() => DownloadChecklistDirectAsync(item)">
-                                                    @(DownloadingChecklistAssignmentId == item.AssignmentId ? "..." : "⬇ Download")
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <span class="thryv-muted-cell">-</span>
-                                            }
-                                        </td>
+                                        @if (ShowReadyToShipColumn)
+                                        {
+                                            <td class="thryv-ready-to-ship-cell">
+                                                @if (string.Equals(
+                                                                            item.StageKey,
+                                                                            "Shipping",
+                                                                            StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    @if (item.BookReadyToShip)
+                                                    {
+                                                        <span class="thryv-ready-to-ship-badge ready">
+                                                            <span aria-hidden="true">✓</span>
+                                                            Ready
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="thryv-ready-to-ship-badge pending">
+                                                            <span aria-hidden="true">!</span>
+                                                            Verification pending
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="thryv-muted-cell">-</span>
+                                                }
+                                            </td>
+                                        }
+
+                                        @if (ShowChecklistColumn)
+                                        {
+                                            <td>
+                                                @if (string.Equals(
+                                                                            item.StageKey,
+                                                                            "ProofExtract",
+                                                                            StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    <button type="button"
+                                                            class="thryv-download-checklist-btn"
+                                                            disabled="@(DownloadingChecklistAssignmentId == item.AssignmentId)"
+                                                            @onclick="() => DownloadChecklistDirectAsync(item)">
+                                                        @(DownloadingChecklistAssignmentId == item.AssignmentId ? "..." : "⬇ Download")
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="thryv-muted-cell">-</span>
+                                                }
+                                            </td>
+                                        }
                                     </tr>
                                 }
                             }
@@ -872,6 +917,26 @@ else
     private bool PuedeVerLibros { get; set; }
     private bool PuedeVerEvaluaciones { get; set; }
     private bool PuedeVerAsignaciones { get; set; }
+
+    private bool ShowChecklistColumn =>
+        assignedBooks.Any(x =>
+            string.Equals(
+                x.StageKey,
+                "ProofExtract",
+                StringComparison.OrdinalIgnoreCase));
+
+    private bool ShowReadyToShipColumn =>
+        assignedBooks.Any(x =>
+            string.Equals(
+                x.StageKey,
+                "Shipping",
+                StringComparison.OrdinalIgnoreCase));
+
+    private int AssignedBooksColumnCount =>
+        7 +
+        (Scope.ViewAllEmployeeTypes ? 1 : 0) +
+        (ShowReadyToShipColumn ? 1 : 0) +
+        (ShowChecklistColumn ? 1 : 0);
 
     private static readonly List<StageFilterOption> StageFilterOptions = new()
     {

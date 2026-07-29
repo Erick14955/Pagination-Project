@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Pagination_Project.Models;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
@@ -282,13 +281,37 @@ namespace Pagination_Project.Data
                     .HasColumnName("Dirxion_Worked")
                     .HasDefaultValue(false);
 
+                entity.Property(e => e.ClosingCorrectionsVerified)
+                    .HasColumnName("Closing_Corrections_Verified")
+                    .HasDefaultValue(false)
+                    .IsRequired();
+
+                entity.Property(e => e.LateWorkVerified)
+                    .HasColumnName("Late_Work_Verified")
+                    .HasDefaultValue(false)
+                    .IsRequired();
+
+                entity.Property(e => e.FinalPOVerifiedAt)
+                    .HasColumnName("Final_PO_Verified_At")
+                    .HasColumnType("timestamp with time zone");
+
+                entity.Property(e => e.FinalPOVerifiedByUserId)
+                    .HasColumnName("Final_PO_Verified_By_User_Id")
+                    .HasColumnType("uuid");
+
                 entity.HasIndex(e => new { e.IdAsignacion, e.FechaTrabajo })
-                    .IsUnique();
+                    .IsUnique()
+                    .HasDatabaseName("UQ_Assignments_Worked_Assignment_Date");
 
                 entity.HasOne(e => e.Asignacion)
                     .WithMany()
                     .HasForeignKey(e => e.IdAsignacion)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.FinalPOVerifiedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.FinalPOVerifiedByUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<LateWorkActivity>(entity =>

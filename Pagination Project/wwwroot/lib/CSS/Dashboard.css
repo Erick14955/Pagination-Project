@@ -1301,6 +1301,7 @@ html[data-theme="dark glass"] .thryv-code-pill {
                     }
 
                     .thryv-custom-table tbody td::before {
+                        content: attr(data-label);
                         position: absolute;
                         left: 10px;
                         top: 50%;
@@ -1326,86 +1327,6 @@ html[data-theme="dark glass"] .thryv-code-pill {
                             display: none;
                             content: none;
                         }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(1)::before {
-        content: "Employee";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(2)::before {
-        content: "KGEN Code";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(3)::before {
-        content: "LSA Code";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(4)::before {
-        content: "Book";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(5)::before {
-        content: "Database";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(6)::before {
-        content: "Stage";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(7)::before {
-        content: "Stage Date";
-    }
-
-    .thryv-dashboard-page > .thryv-section-card:not(.completed-section-card):not(.weekly-evaluations-section-card) .thryv-custom-table tbody td:nth-child(8)::before {
-        content: "Checklist";
-    }
-
-    .completed-section-card .thryv-custom-table tbody td:nth-child(1)::before {
-        content: "Employee";
-    }
-
-    .completed-section-card .thryv-custom-table tbody td:nth-child(2)::before {
-        content: "KGEN Code";
-    }
-
-    .completed-section-card .thryv-custom-table tbody td:nth-child(3)::before {
-        content: "LSA Code";
-    }
-
-    .completed-section-card .thryv-custom-table tbody td:nth-child(4)::before {
-        content: "Book";
-    }
-
-    .completed-section-card .thryv-custom-table tbody td:nth-child(5)::before {
-        content: "Completion Status";
-    }
-
-    .completed-section-card .thryv-custom-table tbody td:nth-child(6)::before {
-        content: "Stage Date";
-    }
-
-    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(1)::before {
-        content: "Employee";
-    }
-
-    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(2)::before {
-        content: "KGEN Code";
-    }
-
-    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(3)::before {
-        content: "Book";
-    }
-
-    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(4)::before {
-        content: "Shipping Date";
-    }
-
-    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(5)::before {
-        content: "Total Accuracy";
-    }
-
-    .weekly-evaluations-section-card .thryv-custom-table tbody td:nth-child(6)::before {
-        content: "Details";
-    }
 
     .thryv-employee-cell {
         width: 100%;
@@ -2126,10 +2047,6 @@ html[data-theme="dark glass"] .thryv-database-pill::after {
     filter: drop-shadow(0 1px 0 rgba(94, 234, 212, 0.62));
 }
 
-/* =========================================================
-   DASHBOARD SKELETON LOADER
-   ========================================================= */
-
 .thryv-dashboard-skeleton {
     pointer-events: none;
     user-select: none;
@@ -2546,4 +2463,112 @@ html[data-theme="dark glass"]
     font-size: 0.7rem;
     line-height: 1;
     opacity: 0.8;
+}
+
+.thryv-ready-to-ship-cell {
+    min-width: 150px;
+}
+
+.thryv-ready-to-ship-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 31px;
+    padding: 6px 11px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 900;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+    .thryv-ready-to-ship-badge > span {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 950;
+    }
+
+    .thryv-ready-to-ship-badge.ready {
+        border-color: #86efac;
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+        .thryv-ready-to-ship-badge.ready > span {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+    .thryv-ready-to-ship-badge.pending {
+        border-color: #fde68a;
+        background: #fef9c3;
+        color: #a16207;
+    }
+
+        .thryv-ready-to-ship-badge.pending > span {
+            background: #ca8a04;
+            color: #ffffff;
+        }
+
+html[data-theme="dark"] .thryv-ready-to-ship-badge.ready {
+    border-color: rgba(74, 222, 128, 0.34);
+    background: rgba(22, 163, 74, 0.16);
+    color: #86efac;
+}
+
+html[data-theme="dark"] .thryv-ready-to-ship-badge.pending {
+    border-color: rgba(250, 204, 21, 0.30);
+    background: rgba(202, 138, 4, 0.15);
+    color: #fde68a;
+}
+
+html[data-theme="liquid glass"] .thryv-ready-to-ship-badge.ready {
+    border-color: rgba(34, 197, 94, 0.34);
+    background: rgba(220, 252, 231, 0.66);
+    color: #15803d;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+html[data-theme="liquid glass"] .thryv-ready-to-ship-badge.pending {
+    border-color: rgba(202, 138, 4, 0.30);
+    background: rgba(254, 249, 195, 0.68);
+    color: #854d0e;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+html[data-theme="dark glass"] .thryv-ready-to-ship-badge.ready {
+    border-color: rgba(74, 222, 128, 0.34);
+    background: rgba(22, 163, 74, 0.18);
+    color: #bbf7d0;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+html[data-theme="dark glass"] .thryv-ready-to-ship-badge.pending {
+    border-color: rgba(250, 204, 21, 0.28);
+    background: rgba(202, 138, 4, 0.17);
+    color: #fef08a;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+@media (max-width: 768px) {
+    .thryv-ready-to-ship-cell {
+        min-width: 0;
+    }
+
+    .thryv-ready-to-ship-badge {
+        max-width: 100%;
+        white-space: normal;
+        text-align: center;
+    }
 }

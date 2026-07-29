@@ -110,7 +110,7 @@
             <button type="button"
                     class="btn-primary"
                     disabled="@(Seleccionadas.Count == 0 || Guardando)"
-                    @onclick="GuardarSeleccionadasAsync">
+                    @onclick="PrepararGuardadoAsync">
 
                 @(Guardando ? "Saving..." : "Mark as Completed")
             </button>
@@ -161,15 +161,15 @@
                             var rowKey = GetRowKey(item);
                             var checkedValue = Seleccionadas.Contains(rowKey);
 
-                            <tr class="@(item.YaCompletada ? "row-completed" : "")">
-                                <td class="check-col">
+                            <tr class="@GetRowClass(item, checkedValue)">
+                                <td class="check-col" data-label="Select">
                                     <input type="checkbox"
                                            checked="@checkedValue"
                                            disabled="@item.YaCompletada"
                                            @onchange="e => ToggleSeleccion(item, e)" />
                                 </td>
 
-                                <td>
+                                <td data-label="Employee">
                                     <div class="employee-cell">
                                         <strong>@item.EmployeeName</strong>
                                     </div>
@@ -177,35 +177,35 @@
 
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <td><span class="code-pill">@item.EmployeeTypeCode</span></td>
+                                    <td data-label="Department"><span class="code-pill">@item.EmployeeTypeCode</span></td>
                                 }
 
-                                <td>
+                                <td data-label="Book">
                                     <div class="book-cell">
                                         <strong>@item.BookName</strong>
                                         <span>Assignment ID: @item.AssignmentId</span>
                                     </div>
                                 </td>
 
-                                <td>
+                                <td data-label="KGEN">
                                     <span class="code-pill">@item.KgenCode</span>
                                 </td>
 
-                                <td>
+                                <td data-label="LSA">
                                     <span class="code-muted">@item.LsaCode</span>
                                 </td>
 
-                                <td>
+                                <td data-label="Stage">
                                     <span class="stage-pill stage-@item.StageKey.ToLower()">
                                         @item.StageName
                                     </span>
                                 </td>
 
-                                <td>
+                                <td data-label="Date">
                                     @item.StageDate.ToString("dd/MM/yyyy")
                                 </td>
 
-                                <td>
+                                <td data-label="Status">
                                     @if (item.YaCompletada)
                                     {
                                         <span class="status-badge status-done">Completed</span>
@@ -225,9 +225,161 @@
     </section>
 </div>
 
+@if (MostrarModalResultadoFinalizacion)
+{
+    <div class="finish-result-modal-overlay"
+         role="presentation"
+         @onclick="CerrarModalResultadoFinalizacion">
+
+        <div class="finish-result-modal-card @TipoModalResultadoFinalizacion"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="finishResultModalTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="finish-result-modal-accent"></div>
+
+            <div class="finish-result-modal-content">
+                <div class="finish-result-modal-icon" aria-hidden="true">
+                    @if (TipoModalResultadoFinalizacion == "success")
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 6 9 17l-5-5"></path>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v6"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    }
+                </div>
+
+                <div class="finish-result-modal-copy">
+                    <span class="finish-result-modal-eyebrow">Finish Assignments</span>
+                    <h3 id="finishResultModalTitle">@TituloModalResultadoFinalizacion</h3>
+                    <p>@MensajeModalResultadoFinalizacion</p>
+                </div>
+            </div>
+
+            <div class="finish-result-modal-actions">
+                <button type="button"
+                        class="finish-result-modal-ok"
+                        @onclick="CerrarModalResultadoFinalizacion">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarModalVerificacionFinalPO)
+{
+    <div class="finish-verification-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="finalPoVerificationTitle">
+
+        <div class="finish-verification-modal">
+            <div class="finish-verification-header">
+                <div class="finish-verification-icon">✓</div>
+
+                <div>
+                    <span class="finish-verification-kicker">Required verification</span>
+                    <h2 id="finalPoVerificationTitle">Final PO completion</h2>
+                    <p>
+                        Complete both confirmations before these Final PO assignments can be marked as completed.
+                    </p>
+                </div>
+            </div>
+
+            <div class="finish-verification-books">
+                @foreach (var item in AsignacionesFinalPOPendientesVerificacion)
+                {
+                    <div class="finish-verification-book">
+                        <div>
+                            <strong>@item.BookName</strong>
+                            <span>@item.KgenCode · @item.EmployeeName</span>
+                        </div>
+
+                        <span class="finish-verification-plant">@item.BindPlantName</span>
+                    </div>
+                }
+            </div>
+
+            <div class="finish-verification-checks">
+                <label class="finish-verification-check">
+                    <input type="checkbox"
+                           @bind="ClosingCorrectionsConfirmed" />
+
+                    <span class="finish-verification-check-box"></span>
+
+                    <span>
+                        <strong>Closing corrections verified</strong>
+                        <small>
+                            I confirm that closing corrections were reviewed and,
+                            when received, were completed.
+                        </small>
+                    </span>
+                </label>
+
+                <label class="finish-verification-check">
+                    <input type="checkbox"
+                           @bind="LateWorkConfirmed" />
+
+                    <span class="finish-verification-check-box"></span>
+
+                    <span>
+                        <strong>All late work completed</strong>
+                        <small>
+                            I confirm that all late work associated with these books
+                            has been completed.
+                        </small>
+                    </span>
+                </label>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(MensajeVerificacionFinalPO))
+            {
+                <div class="finish-verification-error">
+                    @MensajeVerificacionFinalPO
+                </div>
+            }
+
+            <div class="finish-verification-actions">
+                <button type="button"
+                        class="btn-soft"
+                        disabled="@Guardando"
+                        @onclick="CancelarVerificacionFinalPO">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        class="btn-primary"
+                        disabled="@(!ClosingCorrectionsConfirmed || !LateWorkConfirmed || Guardando)"
+                        @onclick="ConfirmarVerificacionesFinalPOAsync">
+                    @(Guardando ? "Saving..." : "Confirm and complete")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private bool Cargando = true;
     private bool Guardando = false;
+
+    private bool MostrarModalResultadoFinalizacion { get; set; } = false;
+    private string TituloModalResultadoFinalizacion { get; set; } = string.Empty;
+    private string MensajeModalResultadoFinalizacion { get; set; } = string.Empty;
+    private string TipoModalResultadoFinalizacion { get; set; } = "success";
+
+    private bool MostrarModalVerificacionFinalPO = false;
+    private bool ClosingCorrectionsConfirmed = false;
+    private bool LateWorkConfirmed = false;
+    private string MensajeVerificacionFinalPO = string.Empty;
 
     private string Busqueda = string.Empty;
     private string EtapaFiltro = string.Empty;
@@ -244,6 +396,7 @@
     private List<Empleados> Empleados = new();
     private List<AsignacionDiaVm> AsignacionesDia = new();
     private List<AsignacionDiaVm> AsignacionesFiltradas = new();
+    private List<AsignacionDiaVm> AsignacionesFinalPOPendientesVerificacion = new();
 
     private HashSet<string> Seleccionadas = new();
 
@@ -389,6 +542,7 @@
                     KgenCode = item.KgenCode,
                     LsaCode = item.LsaCode,
                     BookName = item.BookName,
+                    BindPlantName = item.BindPlantName,
 
                     StageKey = etapa.Key,
                     StageName = etapa.Name,
@@ -403,7 +557,12 @@
         catch (Exception ex)
         {
             MensajeEsError = true;
-            Mensaje = $"Assignments could not be loaded. Details: {ex.Message}";
+            Mensaje = string.Empty;
+
+            MostrarResultadoFinalizacion(
+                "Unable to load assignments",
+                $"Assignments could not be loaded. Details: {ex.Message}",
+                "error");
         }
         finally
         {
@@ -433,23 +592,33 @@
             .Trim()
             .ToUpperInvariant();
 
-        var esIveau = bindPlantName == "IVEAU" || bindPlantName == "WSTR";
+        var esIveauOWstr = EsBindPlant(
+            bindPlantName,
+            "IVEAU",
+            "WSTR");
+
+        var esNzShipping = EsBindPlant(
+            bindPlantName,
+            "WSTR",
+            "NZ");
 
         var excluirMemoPorBindPlant =
-            bindPlantName == "PREM" ||
-            bindPlantName == "DIRX" ||
-            bindPlantName == "WSTR" ||
-            bindPlantName == "IVEAU";
+            EsBindPlant(
+                bindPlantName,
+                "PREM",
+                "DIRX",
+                "WSTR",
+                "IVEAU");
 
         var proofDisplayDate = GetNextBusinessDay(item.ProofExtract);
         var finalDisplayDate = GetNextBusinessDay(item.FinalExtract);
         var memoDisplayDate = GetNextBusinessDay(item.MemoExtract);
 
-        var finalPODisplayDate = esIveau
+        var finalPODisplayDate = esIveauOWstr
             ? GetPreviousWorkDate(item.FinalPODate, 3)
             : item.FinalPODate;
 
-        var shippingDisplayDate = esIveau
+        var shippingDisplayDate = esNzShipping
             ? GetPreviousWorkDate(item.ShippingDate, 1)
             : item.ShippingDate;
 
@@ -637,24 +806,109 @@
         Seleccionadas.Clear();
     }
 
-    private async Task GuardarSeleccionadasAsync()
+    private async Task PrepararGuardadoAsync()
     {
-        if (!Seleccionadas.Any())
+        if (!Seleccionadas.Any() || Guardando)
+            return;
+
+        Mensaje = string.Empty;
+        MensajeVerificacionFinalPO = string.Empty;
+
+        var seleccion = ObtenerSeleccionPendiente();
+
+        if (!seleccion.Any())
+        {
+            MostrarResultadoFinalizacion(
+                "No pending assignments",
+                "There are no pending assignments selected.",
+                "error");
+            return;
+        }
+
+        AsignacionesFinalPOPendientesVerificacion = seleccion
+            .Where(x => RequiereVerificacionFinalPO(x))
+            .OrderBy(x => x.EmployeeName)
+            .ThenBy(x => x.BookName)
+            .ToList();
+
+        if (AsignacionesFinalPOPendientesVerificacion.Any())
+        {
+            ClosingCorrectionsConfirmed = false;
+            LateWorkConfirmed = false;
+            MostrarModalVerificacionFinalPO = true;
+            return;
+        }
+
+        await GuardarSeleccionadasAsync(
+            verificacionesFinalPOConfirmadas: false);
+    }
+
+    private async Task ConfirmarVerificacionesFinalPOAsync()
+    {
+        MensajeVerificacionFinalPO = string.Empty;
+
+        if (!ClosingCorrectionsConfirmed || !LateWorkConfirmed)
+        {
+            MensajeVerificacionFinalPO =
+                "Both confirmations are required before completing the Final PO assignments.";
+            return;
+        }
+
+        await GuardarSeleccionadasAsync(
+            verificacionesFinalPOConfirmadas: true);
+    }
+
+    private List<AsignacionDiaVm> ObtenerSeleccionPendiente()
+    {
+        return AsignacionesDia
+            .Where(x =>
+                Seleccionadas.Contains(GetRowKey(x)) &&
+                !x.YaCompletada)
+            .ToList();
+    }
+
+    private async Task GuardarSeleccionadasAsync(
+        bool verificacionesFinalPOConfirmadas)
+    {
+        if (!Seleccionadas.Any() || Guardando)
             return;
 
         Guardando = true;
         Mensaje = string.Empty;
+        MensajeVerificacionFinalPO = string.Empty;
 
         try
         {
-            var seleccion = AsignacionesDia
-                .Where(x => Seleccionadas.Contains(GetRowKey(x)) && !x.YaCompletada)
-                .ToList();
+            var seleccion = ObtenerSeleccionPendiente();
 
             if (!seleccion.Any())
             {
-                MensajeEsError = true;
-                Mensaje = "There are no pending assignments selected.";
+                MostrarResultadoFinalizacion(
+                    "No pending assignments",
+                    "There are no pending assignments selected.",
+                    "error");
+                return;
+            }
+
+            var totalSeleccionadas = seleccion.Count;
+
+            var finalPOQueRequiereVerificacion = seleccion
+                .Where(x => RequiereVerificacionFinalPO(x))
+                .ToList();
+
+            if (finalPOQueRequiereVerificacion.Any() &&
+                (!verificacionesFinalPOConfirmadas ||
+                 !ClosingCorrectionsConfirmed ||
+                 !LateWorkConfirmed))
+            {
+                AsignacionesFinalPOPendientesVerificacion =
+                    finalPOQueRequiereVerificacion;
+
+                MostrarModalVerificacionFinalPO = true;
+
+                MensajeVerificacionFinalPO =
+                    "Both confirmations are required before completing the Final PO assignments.";
+
                 return;
             }
 
@@ -673,18 +927,25 @@
                 .ToListAsync();
 
             if (accessibleAssignmentIds.Count != asignacionIds.Count)
-                throw new UnauthorizedAccessException("One or more assignments are outside your employee type scope.");
+            {
+                throw new UnauthorizedAccessException(
+                    "One or more assignments are outside your employee type scope.");
+            }
 
             var registrosExistentes = await db.AsignacionesTrabajadas
-                .Where(x => asignacionIds.Contains(x.IdAsignacion) &&
-                            x.FechaTrabajo == Hoy)
+                .Where(x =>
+                    asignacionIds.Contains(x.IdAsignacion) &&
+                    x.FechaTrabajo == Hoy)
                 .ToListAsync();
+
+            var verifiedAt = DateTime.UtcNow;
 
             foreach (var item in seleccion)
             {
                 var registro = registrosExistentes
-                    .FirstOrDefault(x => x.IdAsignacion == item.AssignmentId &&
-                                         x.FechaTrabajo == Hoy);
+                    .FirstOrDefault(x =>
+                        x.IdAsignacion == item.AssignmentId &&
+                        x.FechaTrabajo == Hoy);
 
                 if (registro is null)
                 {
@@ -699,25 +960,167 @@
                     registrosExistentes.Add(registro);
                 }
 
+                if (RequiereVerificacionFinalPO(item))
+                {
+                    registro.ClosingCorrectionsVerified = true;
+                    registro.LateWorkVerified = true;
+                    registro.FinalPOVerifiedAt = verifiedAt;
+                    registro.FinalPOVerifiedByUserId = Scope.UserId;
+                }
+
                 MarcarEtapa(registro, item.StageKey);
             }
 
             await db.SaveChangesAsync();
 
-            MensajeEsError = false;
-            Mensaje = "The selected assignments were marked as completed successfully.";
-
+            ResetearModalVerificacionFinalPO();
             await CargarDatosAsync();
+
+            MensajeEsError = false;
+            Mensaje = string.Empty;
+
+            MostrarResultadoFinalizacion(
+                totalSeleccionadas == 1
+                    ? "Assignment completed"
+                    : "Assignments completed",
+                totalSeleccionadas == 1
+                    ? "The selected assignment was marked as completed successfully."
+                    : $"{totalSeleccionadas} selected assignments were marked as completed successfully.",
+                "success");
         }
         catch (Exception ex)
         {
             MensajeEsError = true;
-            Mensaje = $"The information could not be saved. Details: {ex.Message}";
+            Mensaje = string.Empty;
+
+            if (MostrarModalVerificacionFinalPO)
+            {
+                MensajeVerificacionFinalPO = ex.Message;
+            }
+            else
+            {
+                MostrarResultadoFinalizacion(
+                    "Unable to complete assignments",
+                    $"The information could not be saved. Details: {ex.Message}",
+                    "error");
+            }
         }
         finally
         {
             Guardando = false;
         }
+    }
+
+    private bool RequiereVerificacionFinalPO(
+        AsignacionDiaVm item)
+    {
+        return string.Equals(
+                   item.StageKey,
+                   "FinalPO",
+                   StringComparison.OrdinalIgnoreCase) &&
+               !EsBindPlant(
+                   item.BindPlantName,
+                   "IVEAU");
+    }
+
+    private static bool EsBindPlant(
+        string? bindPlantName,
+        params string[] codigos)
+    {
+        if (string.IsNullOrWhiteSpace(bindPlantName))
+            return false;
+
+        var normalizado = bindPlantName
+            .Trim()
+            .ToUpperInvariant();
+
+        if (codigos.Any(codigo =>
+                normalizado ==
+                codigo.Trim().ToUpperInvariant()))
+        {
+            return true;
+        }
+
+        var partes = normalizado.Split(
+            new[]
+            {
+                ' ',
+                '-',
+                '_',
+                '/',
+                '\\',
+                ',',
+                ';',
+                '.',
+                '|',
+                '(',
+                ')',
+                '[',
+                ']'
+            },
+            StringSplitOptions.RemoveEmptyEntries);
+
+        return partes.Any(parte =>
+            codigos.Any(codigo =>
+                parte ==
+                codigo.Trim().ToUpperInvariant()));
+    }
+
+    private void CancelarVerificacionFinalPO()
+    {
+        if (Guardando)
+            return;
+
+        ResetearModalVerificacionFinalPO();
+    }
+
+    private void MostrarResultadoFinalizacion(
+        string titulo,
+        string mensaje,
+        string tipo)
+    {
+        TituloModalResultadoFinalizacion = titulo;
+        MensajeModalResultadoFinalizacion = mensaje;
+        TipoModalResultadoFinalizacion = string.Equals(
+            tipo,
+            "error",
+            StringComparison.OrdinalIgnoreCase)
+                ? "error"
+                : "success";
+
+        MostrarModalResultadoFinalizacion = true;
+    }
+
+    private void CerrarModalResultadoFinalizacion()
+    {
+        MostrarModalResultadoFinalizacion = false;
+        TituloModalResultadoFinalizacion = string.Empty;
+        MensajeModalResultadoFinalizacion = string.Empty;
+        TipoModalResultadoFinalizacion = "success";
+    }
+
+    private static string GetRowClass(
+        AsignacionDiaVm item,
+        bool selected)
+    {
+        var classes = new List<string>();
+
+        if (item.YaCompletada)
+            classes.Add("row-completed");
+
+        if (selected && !item.YaCompletada)
+            classes.Add("row-selected");
+
+        return string.Join(" ", classes);
+    }
+
+    private void ResetearModalVerificacionFinalPO()
+    {
+        MostrarModalVerificacionFinalPO = false;
+        ClosingCorrectionsConfirmed = false;
+        LateWorkConfirmed = false;
+        MensajeVerificacionFinalPO = string.Empty;
+        AsignacionesFinalPOPendientesVerificacion.Clear();
     }
 
     private void MarcarEtapa(AsignacionTrabajada registro, string etapaKey)
@@ -755,7 +1158,19 @@
         return $"{item.AssignmentId}-{item.StageKey}-{item.StageDate:yyyyMMdd}";
     }
 
-    private record EtapaDia(string Key, string Name, DateOnly Date);
+    private sealed class EtapaDia
+    {
+        public EtapaDia(string key, string name, DateOnly date)
+        {
+            Key = key;
+            Name = name;
+            Date = date;
+        }
+
+        public string Key { get; }
+        public string Name { get; }
+        public DateOnly Date { get; }
+    }
 
     private class RawAssignmentVm
     {
@@ -791,6 +1206,7 @@
         public string KgenCode { get; set; } = string.Empty;
         public string LsaCode { get; set; } = string.Empty;
         public string BookName { get; set; } = string.Empty;
+        public string BindPlantName { get; set; } = string.Empty;
 
         public string StageKey { get; set; } = string.Empty;
         public string StageName { get; set; } = string.Empty;

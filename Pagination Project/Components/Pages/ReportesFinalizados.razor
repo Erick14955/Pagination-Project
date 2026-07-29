@@ -3,6 +3,7 @@
 @page "/reportes"
 
 @using System.Globalization
+@using System.Security.Claims
 @using System.Text
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -22,7 +23,7 @@
 @inject IUserDataScopeService UserDataScopeService
 @inject IJSRuntime JS
 
-<PageTitle>Finished Reports</PageTitle>
+<PageTitle>Reports</PageTitle>
 
 @if (CargandoInicial)
 {
@@ -115,33 +116,59 @@ else
 
         <section class="page-hero">
             <div>
-                <h1>Finished Reports</h1>
+                <h1>@(EsEmpleado ? "Assignment Reports" : "Finished Reports")</h1>
                 <p>
-                    Review and download all finalized books, assignments and evaluations.
-                </p>
-            </div>
+                    @(EsEmpleado
+                                    ? "Review and download assignments scheduled for the next business day or for a specific date."
+                                    : "Review and download finalized records and scheduled assignments.")
+            </p>
+        </div>
 
             <div class="hero-stats">
-                <div class="stat-card">
-                    <span>Books</span>
-                    <strong>@LibrosReporte.Count</strong>
-                </div>
+            @if (EsEmpleado)
+                {
+                    <div class="stat-card">
+                        <span>Report</span>
+                        <strong>@(TipoReporteSeleccionado == "AssignmentsByDate" ? "By Date" : "Next Day")</strong>
+                    </div>
 
-                <div class="stat-card">
-                    <span>Assignments</span>
-                    <strong>@AsignacionesReporte.Count</strong>
-                </div>
+                    <div class="stat-card">
+                        <span>Work Date</span>
+                        <strong>@FechaAsignacionesProgramadasActual.ToString("MM/dd")</strong>
+                    </div>
 
-                <div class="stat-card">
-                    <span>Evaluations</span>
-                    <strong>@EvaluacionesReporte.Count</strong>
-                </div>
+                    <div class="stat-card">
+                        <span>Assignments</span>
+                        <strong>@AsignacionesDiaSiguienteReporte.Count</strong>
+                    </div>
 
-                <div class="stat-card">
-                    <span>Late Work</span>
-                    <strong>@LateWorksReporte.Count</strong>
-                </div>
+                    <div class="stat-card">
+                        <span>Employees</span>
+                        <strong>@CantidadEmpleadosProgramados</strong>
+                    </div>
+                }
+                else
+                {
+                    <div class="stat-card">
+                        <span>Books</span>
+                        <strong>@LibrosReporte.Count</strong>
+                    </div>
 
+                    <div class="stat-card">
+                        <span>Assignments</span>
+                        <strong>@AsignacionesReporte.Count</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Evaluations</span>
+                        <strong>@EvaluacionesReporte.Count</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Late Work</span>
+                        <strong>@LateWorksReporte.Count</strong>
+                    </div>
+                }
             </div>
         </section>
 
@@ -158,24 +185,40 @@ else
 
                 <div class="field">
                     <label>Report Type</label>
-                    <select @bind="TipoReporteSeleccionado" @bind:after="OnTipoReporteChanged">
-                        <option value="Libros">Finished Books</option>
-                        <option value="Asignaciones">Finished Assignments</option>
-                        <option value="Evaluaciones">Finished Evaluations</option>
-                        <option value="LateWork">Finished Late Work</option>
+                    <select @bind="TipoReporteSeleccionado"
+                            @bind:after="OnTipoReporteChanged">
+                        @if (!EsEmpleado)
+                        {
+                            <option value="Libros">Finished Books</option>
+                            <option value="Asignaciones">Finished Assignments</option>
+                            <option value="Evaluaciones">Finished Evaluations</option>
+                            <option value="LateWork">Finished Late Work</option>
+                        }
+
                         <option value="NextDayAssignments">Next Day Assignments</option>
+                        <option value="AssignmentsByDate">Assignments by Date</option>
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Date From</label>
-                    <input type="date" @bind="FechaDesde" disabled="@(!PermiteFiltroFechas)" />
-                </div>
+                @if (TipoReporteSeleccionado == "AssignmentsByDate")
+                {
+                    <div class="field">
+                        <label>Report Date</label>
+                        <input type="date" @bind="FechaReporteSeleccionada" />
+                    </div>
+                }
+                else if (!EsReporteAsignacionesProgramadas)
+                {
+                    <div class="field">
+                        <label>Date From</label>
+                        <input type="date" @bind="FechaDesde" />
+                    </div>
 
-                <div class="field">
-                    <label>Date To</label>
-                    <input type="date" @bind="FechaHasta" disabled="@(!PermiteFiltroFechas)" />
-                </div>
+                    <div class="field">
+                        <label>Date To</label>
+                        <input type="date" @bind="FechaHasta" />
+                    </div>
+                }
 
                 <div class="field">
                     <label>Employee</label>
@@ -189,7 +232,9 @@ else
                 </div>
 
                 <div class="actions-row">
-                    <button class="btn-primary" @onclick="CargarReporteAsync">
+                    <button class="btn-primary"
+                            @onclick="CargarReporteAsync"
+                            disabled="@(!PuedeBuscar)">
                         Search
                     </button>
 
@@ -197,8 +242,10 @@ else
                         Clear
                     </button>
 
-                    <button class="btn-download" @onclick="DescargarReporteXlsxAsync" disabled="@(!TieneDatos)">
-                        Download XLSX
+                    <button class="btn-download"
+                            @onclick="DescargarReporteXlsxAsync"
+                            disabled="@(!TieneDatos || DescargandoReporte)">
+                        @(DescargandoReporte ? "Downloading..." : "Download XLSX")
                     </button>
                 </div>
 
@@ -287,24 +334,24 @@ else
                                 @foreach (var item in LibrosReporte)
                                 {
                                     <tr>
-                                        <td class="strong-cell">@item.BookName</td>
+                                        <td class="strong-cell" data-label="Book">@item.BookName</td>
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                            <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
                                         }
-                                        <td>@item.Kgen</td>
-                                        <td>@item.Lsa</td>
-                                        <td>@item.State</td>
-                                        <td>@item.Database</td>
-                                        <td>@item.Legacy</td>
-                                        <td>@FormatDate(item.ProofDate)</td>
-                                        <td>@FormatDate(item.FinalDate)</td>
-                                        <td>@FormatDate(item.MemoDate)</td>
-                                        <td>@FormatDate(item.FinalPoDate)</td>
-                                        <td>@FormatDate(item.ShippingDate)</td>
-                                        <td>@FormatDate(item.DirxionDate)</td>
-                                        <td>@FormatDate(item.PubDate)</td>
-                                        <td>
+                                        <td data-label="KGEN">@item.Kgen</td>
+                                        <td data-label="LSA">@item.Lsa</td>
+                                        <td data-label="State">@item.State</td>
+                                        <td data-label="Database">@item.Database</td>
+                                        <td data-label="Legacy">@item.Legacy</td>
+                                        <td data-label="Proof">@FormatDate(item.ProofDate)</td>
+                                        <td data-label="Final">@FormatDate(item.FinalDate)</td>
+                                        <td data-label="Memo">@FormatDate(item.MemoDate)</td>
+                                        <td data-label="Final PO">@FormatDate(item.FinalPoDate)</td>
+                                        <td data-label="Shipping">@FormatDate(item.ShippingDate)</td>
+                                        <td data-label="Dirxion">@FormatDate(item.DirxionDate)</td>
+                                        <td data-label="Pub Date">@FormatDate(item.PubDate)</td>
+                                        <td data-label="Status">
                                             <span class="status-pill">Finished</span>
                                         </td>
                                     </tr>
@@ -340,19 +387,19 @@ else
                                 @foreach (var item in AsignacionesReporte)
                                 {
                                     <tr>
-                                        <td class="strong-cell">@item.EmployeeName</td>
+                                        <td class="strong-cell" data-label="Employee">@item.EmployeeName</td>
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                            <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
                                         }
-                                        <td>@item.BookName</td>
-                                        <td>@item.Kgen</td>
-                                        <td>@FormatDate(item.PubDate)</td>
-                                        <td>@FormatDate(item.DirectionDate)</td>
-                                        <td>@FormatDate(item.ProofDate)</td>
-                                        <td>@FormatDate(item.FinalDate)</td>
-                                        <td>@FormatDate(item.MemoDate)</td>
-                                        <td>
+                                        <td data-label="Book">@item.BookName</td>
+                                        <td data-label="KGEN">@item.Kgen</td>
+                                        <td data-label="Pub Date">@FormatDate(item.PubDate)</td>
+                                        <td data-label="Dirxion">@FormatDate(item.DirectionDate)</td>
+                                        <td data-label="Proof">@FormatDate(item.ProofDate)</td>
+                                        <td data-label="Final">@FormatDate(item.FinalDate)</td>
+                                        <td data-label="Memo">@FormatDate(item.MemoDate)</td>
+                                        <td data-label="Status">
                                             <span class="status-pill">Finished</span>
                                         </td>
                                     </tr>
@@ -391,24 +438,24 @@ else
                                 @foreach (var item in EvaluacionesReporte)
                                 {
                                     <tr>
-                                        <td class="strong-cell">@item.EmployeeName</td>
+                                        <td class="strong-cell" data-label="Employee">@item.EmployeeName</td>
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                            <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
                                         }
-                                        <td>@item.BookName</td>
-                                        <td>
+                                        <td data-label="Book">@item.BookName</td>
+                                        <td data-label="KGEN">
                                             <span class="kgen-pill">@item.Kgen</span>
                                         </td>
-                                        <td>@item.Lsa</td>
-                                        <td>@FormatDate(item.PubDate)</td>
-                                        <td>@FormatPercent(item.MotifYp)</td>
-                                        <td>@FormatPercent(item.MotifWp)</td>
-                                        <td>@FormatPercent(item.InventoryReport)</td>
-                                        <td>@FormatPercent(item.ProductShippingFolder)</td>
-                                        <td>@FormatPercent(item.TaskMemo)</td>
-                                        <td class="total-percent">@FormatPercent(item.TotalPorcentaje)</td>
-                                        <td>
+                                        <td data-label="LSA">@item.Lsa</td>
+                                        <td data-label="Pub Date">@FormatDate(item.PubDate)</td>
+                                        <td data-label="Motif YP">@FormatPercent(item.MotifYp)</td>
+                                        <td data-label="Motif WP">@FormatPercent(item.MotifWp)</td>
+                                        <td data-label="Inventory Report">@FormatPercent(item.InventoryReport)</td>
+                                        <td data-label="Shipping Folder">@FormatPercent(item.ProductShippingFolder)</td>
+                                        <td data-label="Task Memo">@FormatPercent(item.TaskMemo)</td>
+                                        <td class="total-percent" data-label="Total %">@FormatPercent(item.TotalPorcentaje)</td>
+                                        <td data-label="Status">
                                             <span class="status-pill">Finished</span>
                                         </td>
                                     </tr>
@@ -418,10 +465,10 @@ else
                     </div>
                 }
 
-                @if (TipoReporteSeleccionado == "NextDayAssignments")
+                @if (EsReporteAsignacionesProgramadas)
                 {
                     <div class="table-shell">
-                        <table class="reports-table reports-table-next-day">
+                        <table class="reports-table reports-table-next-day reports-table-scheduled-assignments">
                             <thead>
                                 <tr>
                                     <th>Employee</th>
@@ -507,25 +554,25 @@ else
                                 @foreach (var item in LateWorksReporte)
                                 {
                                     <tr>
-                                        <td class="strong-cell">@item.EmployeeName</td>
+                                        <td class="strong-cell" data-label="Employee">@item.EmployeeName</td>
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
+                                            <td data-label="Department"><span class="kgen-pill">@item.EmployeeTypeCode</span></td>
                                         }
-                                        <td>@item.BookName</td>
-                                        <td>
+                                        <td data-label="Book">@item.BookName</td>
+                                        <td data-label="KGEN">
                                             <span class="kgen-pill">@item.Kgen</span>
                                         </td>
-                                        <td>@item.Lsa</td>
-                                        <td>@item.LateWorkId</td>
-                                        <td>@item.ClientId</td>
-                                        <td>@FormatDate(item.DirxionDate)</td>
-                                        <td>@FormatDateTime(item.CreatedAt)</td>
-                                        <td>
+                                        <td data-label="LSA">@item.Lsa</td>
+                                        <td data-label="Late Work ID">@item.LateWorkId</td>
+                                        <td data-label="Client ID">@item.ClientId</td>
+                                        <td data-label="Dirxion">@FormatDate(item.DirxionDate)</td>
+                                        <td data-label="Created At">@FormatDateTime(item.CreatedAt)</td>
+                                        <td data-label="Completed">
                                             @(item.Completed ? "Yes" : "No")
                                         </td>
-                                        <td>@FormatDateTime(item.CompletedAt)</td>
-                                        <td>
+                                        <td data-label="Completed At">@FormatDateTime(item.CompletedAt)</td>
+                                        <td data-label="Status">
                                             <span class="status-pill">Finished Book</span>
                                         </td>
                                     </tr>
@@ -541,12 +588,72 @@ else
     </div>
 }
 
+
+@if (MostrarModalResultadoReporte)
+{
+    <div class="report-result-modal-overlay"
+         role="presentation"
+         @onclick="CerrarModalResultadoReporte">
+
+        <div class="report-result-modal-card @TipoModalResultadoReporte"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="reportResultModalTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="report-result-modal-accent"></div>
+
+            <div class="report-result-modal-content">
+                <div class="report-result-modal-icon" aria-hidden="true">
+                    @if (TipoModalResultadoReporte == "success")
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 6 9 17l-5-5"></path>
+                        </svg>
+                    }
+                    else if (TipoModalResultadoReporte == "error")
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v6"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 11v5"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                    }
+                </div>
+
+                <div class="report-result-modal-copy">
+                    <span class="report-result-modal-eyebrow">Reports Center</span>
+                    <h3 id="reportResultModalTitle">@TituloModalResultadoReporte</h3>
+                    <p>@MensajeModalResultadoReporte</p>
+                </div>
+            </div>
+
+            <div class="report-result-modal-actions">
+                <button type="button"
+                        class="report-result-modal-ok"
+                        @onclick="CerrarModalResultadoReporte">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
 
     private string TipoReporteSeleccionado { get; set; } = "Libros";
 
     private DateTime? FechaDesde { get; set; }
     private DateTime? FechaHasta { get; set; }
+    private DateTime? FechaReporteSeleccionada { get; set; }
 
     private DateOnly FechaAsignacionesDiaSiguiente { get; set; }
 
@@ -555,6 +662,14 @@ else
     private bool CargandoInicial { get; set; } = true;
     private bool _cargaInicialIniciada;
     private bool Cargando { get; set; }
+    private bool DescargandoReporte { get; set; }
+
+    private bool MostrarModalResultadoReporte { get; set; }
+    private string TituloModalResultadoReporte { get; set; } = string.Empty;
+    private string MensajeModalResultadoReporte { get; set; } = string.Empty;
+    private string TipoModalResultadoReporte { get; set; } = "success";
+
+    private bool EsEmpleado { get; set; }
     private UserDataScope Scope { get; set; } = new();
 
     private List<EmpleadoFiltroDto> EmpleadosFiltro { get; set; } = new();
@@ -564,19 +679,38 @@ else
     private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } = new();
     private List<LateWorkReporteDto> LateWorksReporte { get; set; } = new();
     private List<AssignedBookDashboardDto> AsignacionesDiaSiguienteReporte { get; set; } = new();
-    private List<AssignedBookDashboardDto>? _asignacionesDiaSiguienteBase;
+    private List<AssignedBookDashboardDto>? _asignacionesProgramadasBase;
+    private DateOnly? _fechaAsignacionesProgramadasBase;
     private List<Database> Databases { get; set; } = new();
     private List<Legacy_Code> LegacyCodes { get; set; } = new();
     private List<State> States { get; set; } = new();
+
+    private bool EsReporteAsignacionesProgramadas =>
+        TipoReporteSeleccionado == "NextDayAssignments" ||
+        TipoReporteSeleccionado == "AssignmentsByDate";
 
     private bool PermiteFiltroEmpleado =>
         TipoReporteSeleccionado == "Asignaciones" ||
         TipoReporteSeleccionado == "Evaluaciones" ||
         TipoReporteSeleccionado == "LateWork" ||
-        TipoReporteSeleccionado == "NextDayAssignments";
+        EsReporteAsignacionesProgramadas;
 
-    private bool PermiteFiltroFechas =>
-        TipoReporteSeleccionado != "NextDayAssignments";
+    private bool PuedeBuscar =>
+        TipoReporteSeleccionado != "AssignmentsByDate" ||
+        FechaReporteSeleccionada.HasValue;
+
+    private DateOnly FechaAsignacionesProgramadasActual =>
+        TipoReporteSeleccionado == "AssignmentsByDate"
+            ? DateOnly.FromDateTime(
+                FechaReporteSeleccionada?.Date ?? DateTime.Today)
+            : FechaAsignacionesDiaSiguiente;
+
+    private int CantidadEmpleadosProgramados =>
+        AsignacionesDiaSiguienteReporte
+            .Where(x => x.EmployeeId != Guid.Empty)
+            .Select(x => x.EmployeeId)
+            .Distinct()
+            .Count();
 
     private bool TieneDatos =>
         TipoReporteSeleccionado switch
@@ -586,6 +720,7 @@ else
             "Evaluaciones" => EvaluacionesReporte.Any(),
             "LateWork" => LateWorksReporte.Any(),
             "NextDayAssignments" => AsignacionesDiaSiguienteReporte.Any(),
+            "AssignmentsByDate" => AsignacionesDiaSiguienteReporte.Any(),
             _ => false
         };
 
@@ -597,6 +732,7 @@ else
             "Evaluaciones" => EvaluacionesReporte.Count,
             "LateWork" => LateWorksReporte.Count,
             "NextDayAssignments" => AsignacionesDiaSiguienteReporte.Count,
+            "AssignmentsByDate" => AsignacionesDiaSiguienteReporte.Count,
             _ => 0
         };
 
@@ -608,6 +744,7 @@ else
             "Evaluaciones" => "Finished Evaluations List",
             "LateWork" => "Finished Late Work List",
             "NextDayAssignments" => "Next Day Assignments List",
+            "AssignmentsByDate" => "Assignments by Date List",
             _ => "Finished Report"
         };
 
@@ -618,19 +755,21 @@ else
             "Asignaciones" => "Showing only finalized assignments.",
             "Evaluaciones" => "Showing only finalized evaluations.",
             "LateWork" => "Showing Late Work activities from books already finalized by Dirxion date.",
-            "NextDayAssignments" => $"Assignments scheduled for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}, using the same stage rules as Assigned Books.",
+            "NextDayAssignments" => $"Assignments scheduled for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}",
+            "AssignmentsByDate" => $"Assignments scheduled for {FechaAsignacionesProgramadasActual:MM/dd/yyyy}",
             _ => string.Empty
         };
 
     private string MensajeSinDatos =>
-        TipoReporteSeleccionado == "NextDayAssignments"
-            ? $"No assignments found for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}."
+        EsReporteAsignacionesProgramadas
+            ? $"No assignments found for {FechaAsignacionesProgramadasActual:MM/dd/yyyy}."
             : "No finalized records found with the selected filters.";
 
     protected override void OnInitialized()
     {
         FechaDesde = DateTime.Today.AddMonths(-1);
         FechaHasta = DateTime.Today;
+        FechaReporteSeleccionada = DateTime.Today;
         FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
             DateOnly.FromDateTime(DateTime.Today));
     }
@@ -654,6 +793,13 @@ else
             var authState =
                 await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
+            EsEmpleado = EsUsuarioEmpleado(authState.User);
+
+            if (EsEmpleado)
+            {
+                TipoReporteSeleccionado = "NextDayAssignments";
+            }
+
             Scope =
                 await UserDataScopeService.GetScopeAsync(authState.User);
 
@@ -662,6 +808,7 @@ else
             EmpleadosFiltro.Clear();
             EmpleadoIdSeleccionado = null;
 
+            await CargarEmpleadosFiltroAsync();
             await CargarReporteDatosAsync();
         }
         catch (Exception ex)
@@ -669,6 +816,11 @@ else
             Console.WriteLine($"Error loading finished reports: {ex}");
 
             LimpiarDatosReporte();
+
+            MostrarResultadoReporte(
+                "Unable to load reports",
+                $"The reports page could not be loaded. Details: {ex.Message}",
+                "error");
         }
         finally
         {
@@ -731,17 +883,13 @@ else
             return;
         }
 
-        if (TipoReporteSeleccionado == "NextDayAssignments")
+        if (EsReporteAsignacionesProgramadas)
         {
-            FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
-                DateOnly.FromDateTime(DateTime.Today));
+            var fechaReporte = FechaAsignacionesProgramadasActual;
 
-            _asignacionesDiaSiguienteBase =
-                await DashboardService.GetAssignedBooksForDateAsync(
-                    FechaAsignacionesDiaSiguiente,
-                    Scope);
+            await AsegurarAsignacionesProgramadasBaseAsync(fechaReporte);
 
-            EmpleadosFiltro = _asignacionesDiaSiguienteBase
+            EmpleadosFiltro = (_asignacionesProgramadasBase ?? new List<AssignedBookDashboardDto>())
                 .Where(x =>
                     x.EmployeeId != Guid.Empty &&
                     !string.IsNullOrWhiteSpace(x.EmployeeName))
@@ -846,8 +994,20 @@ else
 
     private async Task OnTipoReporteChanged()
     {
+        if (EsEmpleado &&
+            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+        {
+            TipoReporteSeleccionado = "NextDayAssignments";
+        }
+
+        if (TipoReporteSeleccionado == "AssignmentsByDate" &&
+            !FechaReporteSeleccionada.HasValue)
+        {
+            FechaReporteSeleccionada = DateTime.Today;
+        }
+
         EmpleadoIdSeleccionado = null;
-        _asignacionesDiaSiguienteBase = null;
+        InvalidarCacheAsignacionesProgramadas();
 
         await EjecutarCargaReporteAsync(
             recargarEmpleados: true);
@@ -857,28 +1017,41 @@ else
     {
         FechaDesde = DateTime.Today.AddMonths(-1);
         FechaHasta = DateTime.Today;
+        FechaReporteSeleccionada = DateTime.Today;
         EmpleadoIdSeleccionado = null;
 
+        if (EsReporteAsignacionesProgramadas)
+        {
+            InvalidarCacheAsignacionesProgramadas();
+        }
+
         await EjecutarCargaReporteAsync(
-            recargarEmpleados: false);
+            recargarEmpleados: EsReporteAsignacionesProgramadas);
     }
 
     private async Task CargarReporteAsync()
     {
+        if (!PuedeBuscar)
+            return;
+
+        if (EsEmpleado &&
+            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+        {
+            TipoReporteSeleccionado = "NextDayAssignments";
+        }
+
         await EjecutarCargaReporteAsync(
-            recargarEmpleados: false);
+            recargarEmpleados: EsReporteAsignacionesProgramadas,
+            mostrarResultado: true);
     }
 
     private async Task EjecutarCargaReporteAsync(
-        bool recargarEmpleados)
+        bool recargarEmpleados,
+        bool mostrarResultado = false)
     {
         Cargando = true;
         LimpiarDatosReporte();
 
-        /*
-         * Fuerza un render antes de iniciar las consultas.
-         * De esta forma el skeleton aparece inmediatamente.
-         */
         await InvokeAsync(StateHasChanged);
         await Task.Yield();
 
@@ -890,6 +1063,24 @@ else
             }
 
             await CargarReporteDatosAsync();
+
+            if (mostrarResultado)
+            {
+                if (TieneDatos)
+                {
+                    MostrarResultadoReporte(
+                        "Report ready",
+                        $"{TituloReporteActual} loaded successfully with {TotalActual} record{(TotalActual == 1 ? string.Empty : "s")}.",
+                        "success");
+                }
+                else
+                {
+                    MostrarResultadoReporte(
+                        "No records found",
+                        MensajeSinDatos,
+                        "info");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -897,12 +1088,55 @@ else
                 $"Error loading selected report: {ex}");
 
             LimpiarDatosReporte();
+
+            MostrarResultadoReporte(
+                "Unable to load report",
+                $"The selected report could not be loaded. Details: {ex.Message}",
+                "error");
         }
         finally
         {
             Cargando = false;
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private string TituloReporteActual =>
+        TipoReporteSeleccionado switch
+        {
+            "Libros" => "Finished Books",
+            "Asignaciones" => "Finished Assignments",
+            "Evaluaciones" => "Finished Evaluations",
+            "LateWork" => "Finished Late Work",
+            "NextDayAssignments" => "Next Day Assignments",
+            "AssignmentsByDate" => "Assignments by Date",
+            _ => "Report"
+        };
+
+    private void MostrarResultadoReporte(
+        string titulo,
+        string mensaje,
+        string tipo)
+    {
+        TituloModalResultadoReporte = titulo;
+        MensajeModalResultadoReporte = mensaje;
+
+        TipoModalResultadoReporte = tipo.ToLowerInvariant() switch
+        {
+            "error" => "error",
+            "info" => "info",
+            _ => "success"
+        };
+
+        MostrarModalResultadoReporte = true;
+    }
+
+    private void CerrarModalResultadoReporte()
+    {
+        MostrarModalResultadoReporte = false;
+        TituloModalResultadoReporte = string.Empty;
+        MensajeModalResultadoReporte = string.Empty;
+        TipoModalResultadoReporte = "success";
     }
 
     private void LimpiarDatosReporte()
@@ -916,9 +1150,15 @@ else
 
     private async Task CargarReporteDatosAsync()
     {
-        if (TipoReporteSeleccionado == "NextDayAssignments")
+        if (EsEmpleado &&
+            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
         {
-            await CargarAsignacionesDiaSiguienteAsync();
+            TipoReporteSeleccionado = "NextDayAssignments";
+        }
+
+        if (EsReporteAsignacionesProgramadas)
+        {
+            await CargarAsignacionesProgramadasAsync();
             return;
         }
 
@@ -947,11 +1187,33 @@ else
 
     private async Task DescargarReporteXlsxAsync()
     {
-        if (!TieneDatos)
+        if (DescargandoReporte)
             return;
+
+        if (EsEmpleado &&
+            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+        {
+            MostrarResultadoReporte(
+                "Report not available",
+                "Your user role does not have access to the selected report.",
+                "error");
+            return;
+        }
+
+        if (!TieneDatos)
+        {
+            MostrarResultadoReporte(
+                "No data to download",
+                "Load a report with records before downloading the XLSX file.",
+                "info");
+            return;
+        }
 
         try
         {
+            DescargandoReporte = true;
+            await InvokeAsync(StateHasChanged);
+
             using var workbook = new XLWorkbook();
 
             if (TipoReporteSeleccionado == "Libros")
@@ -970,9 +1232,9 @@ else
             {
                 GenerarHojaLateWork(workbook);
             }
-            else if (TipoReporteSeleccionado == "NextDayAssignments")
+            else if (EsReporteAsignacionesProgramadas)
             {
-                GenerarHojaAsignacionesDiaSiguiente(workbook);
+                GenerarHojaAsignacionesProgramadas(workbook);
             }
 
             using var stream = new MemoryStream();
@@ -988,6 +1250,7 @@ else
                 "Evaluaciones" => $"Finished_Evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 "LateWork" => $"Finished_Late_Work_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
                 "NextDayAssignments" => $"Next_Day_Assignments_{FechaAsignacionesDiaSiguiente:yyyyMMdd}.xlsx",
+                "AssignmentsByDate" => $"Assignments_By_Date_{FechaAsignacionesProgramadasActual:yyyyMMdd}.xlsx",
                 _ => $"Finished_Report_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
             };
 
@@ -996,28 +1259,37 @@ else
                 fileName,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 base64);
+
+            MostrarResultadoReporte(
+                "Report downloaded",
+                $"{TituloReporteActual} was downloaded successfully with {TotalActual} record{(TotalActual == 1 ? string.Empty : "s")}.",
+                "success");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error generating XLSX: {ex.Message}");
+
+            MostrarResultadoReporte(
+                "Unable to download report",
+                $"The XLSX file could not be generated. Details: {ex.Message}",
+                "error");
+        }
+        finally
+        {
+            DescargandoReporte = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
-    private async Task CargarAsignacionesDiaSiguienteAsync()
+    private async Task CargarAsignacionesProgramadasAsync()
     {
-        FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
-            DateOnly.FromDateTime(DateTime.Today));
+        var fechaReporte = FechaAsignacionesProgramadasActual;
 
-        if (_asignacionesDiaSiguienteBase is null)
-        {
-            _asignacionesDiaSiguienteBase =
-                await DashboardService.GetAssignedBooksForDateAsync(
-                    FechaAsignacionesDiaSiguiente,
-                    Scope);
-        }
+        await AsegurarAsignacionesProgramadasBaseAsync(fechaReporte);
 
         IEnumerable<AssignedBookDashboardDto> asignaciones =
-            _asignacionesDiaSiguienteBase;
+            _asignacionesProgramadasBase
+            ?? Enumerable.Empty<AssignedBookDashboardDto>();
 
         if (EmpleadoIdSeleccionado.HasValue)
         {
@@ -1030,6 +1302,55 @@ else
             .ThenBy(x => x.EmployeeName)
             .ThenBy(x => x.BookName)
             .ToList();
+    }
+
+    private async Task AsegurarAsignacionesProgramadasBaseAsync(
+        DateOnly fechaReporte)
+    {
+        if (_asignacionesProgramadasBase is not null &&
+            _fechaAsignacionesProgramadasBase == fechaReporte)
+        {
+            return;
+        }
+
+        _asignacionesProgramadasBase =
+            await DashboardService.GetAssignedBooksForDateAsync(
+                fechaReporte,
+                Scope);
+
+        _fechaAsignacionesProgramadasBase = fechaReporte;
+    }
+
+    private void InvalidarCacheAsignacionesProgramadas()
+    {
+        _asignacionesProgramadasBase = null;
+        _fechaAsignacionesProgramadasBase = null;
+    }
+
+    private static bool EsReportePermitidoParaEmpleado(string tipoReporte)
+    {
+        return tipoReporte == "NextDayAssignments" ||
+               tipoReporte == "AssignmentsByDate";
+    }
+
+    private static bool EsUsuarioEmpleado(ClaimsPrincipal user)
+    {
+        var lvlId = user.FindFirst("LvlId")?.Value;
+
+        var role =
+            user.FindFirst(ClaimTypes.Role)?.Value ??
+            user.FindFirst("Role")?.Value ??
+            user.FindFirst("RoleName")?.Value ??
+            user.FindFirst("PermissionLevel")?.Value ??
+            string.Empty;
+
+        return lvlId == "4" ||
+               role.Equals(
+                   "Employee",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "User",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private static DateOnly ObtenerSiguienteDiaLaborable(DateOnly fechaActual)
@@ -1171,9 +1492,12 @@ else
             .ToListAsync();
     }
 
-    private void GenerarHojaAsignacionesDiaSiguiente(XLWorkbook workbook)
+    private void GenerarHojaAsignacionesProgramadas(XLWorkbook workbook)
     {
-        var worksheet = workbook.Worksheets.Add("Next Day Assignments");
+        var worksheet = workbook.Worksheets.Add(
+            TipoReporteSeleccionado == "AssignmentsByDate"
+                ? "Assignments by Date"
+                : "Next Day Assignments");
 
         worksheet.Cell(1, 1).Value = "Employee";
         worksheet.Cell(1, 2).Value = "Department";
@@ -1642,7 +1966,6 @@ else
                 e.Asignacion.IdEmpleado == EmpleadoIdSeleccionado.Value);
         }
 
-        // En Evaluaciones, el filtro de fecha se toma desde el PubDate del libro relacionado.
         if (FechaDesde.HasValue)
         {
             var desde = DateOnly.FromDateTime(FechaDesde.Value);

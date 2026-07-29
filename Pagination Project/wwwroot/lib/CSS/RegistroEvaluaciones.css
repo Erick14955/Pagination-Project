@@ -1612,3 +1612,934 @@ html:not([data-theme]) .evaluations-page .assignment-cards-grid .summary-card.as
         font-weight: 800;
         text-shadow: none !important;
     }
+
+.evaluations-page {
+    --evaluation-page-bg: #f8fafc;
+    --evaluation-card-bg: #ffffff;
+    --evaluation-soft-bg: #f8fafc;
+    --evaluation-soft-bg-2: #f1f5f9;
+    --evaluation-border: #e2e8f0;
+    --evaluation-border-strong: #dbe4ee;
+    --evaluation-text: #0f172a;
+    --evaluation-muted: #64748b;
+    --evaluation-primary: #2563eb;
+    --evaluation-primary-strong: #1d4ed8;
+    --evaluation-primary-soft: rgba(37, 99, 235, 0.12);
+    --evaluation-primary-shadow: rgba(37, 99, 235, 0.22);
+    --evaluation-primary-border: rgba(37, 99, 235, 0.28);
+    --evaluation-danger: #be123c;
+    --evaluation-danger-soft: #fff1f2;
+    --evaluation-success: #15803d;
+    --evaluation-success-soft: #ecfdf3;
+    --evaluation-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
+    --evaluation-modal-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+    background: var(--evaluation-page-bg) !important;
+    color: var(--evaluation-text) !important;
+}
+
+    .evaluations-page .page-hero {
+        min-height: 150px;
+        background: linear-gradient(115deg, #081827 0%, #0f172a 48%, #111827 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18) !important;
+    }
+
+        .evaluations-page .page-hero h1,
+        .evaluations-page .page-hero p,
+        .evaluations-page .stat-card span,
+        .evaluations-page .stat-card strong {
+            text-shadow: none !important;
+        }
+
+        .evaluations-page .page-hero h1,
+        .evaluations-page .stat-card strong {
+            color: #ffffff !important;
+        }
+
+        .evaluations-page .page-hero p {
+            color: #e5e7eb !important;
+        }
+
+    .evaluations-page .stat-card {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    }
+
+        .evaluations-page .stat-card span {
+            color: #d1d5db !important;
+        }
+
+    .evaluations-page .form-card,
+    .evaluations-page .list-card,
+    .evaluations-page .evaluation-block,
+    .evaluations-page .summary-card {
+        background: var(--evaluation-card-bg) !important;
+        border-color: var(--evaluation-border) !important;
+        box-shadow: var(--evaluation-shadow) !important;
+    }
+
+        .evaluations-page .section-header h2,
+        .evaluations-page .block-header h2,
+        .evaluations-page .summary-card strong,
+        .evaluations-page .total-box strong,
+        .evaluations-page .employee-title strong,
+        .evaluations-page .book-title strong,
+        .evaluations-page .total-percent,
+        .evaluations-page .empty-state strong,
+        .evaluations-page .toggle-item {
+            color: var(--evaluation-text) !important;
+            text-shadow: none !important;
+        }
+
+        .evaluations-page .section-header p,
+        .evaluations-page .block-header p,
+        .evaluations-page .summary-card span,
+        .evaluations-page .summary-card small,
+        .evaluations-page .total-box span,
+        .evaluations-page .employee-title span,
+        .evaluations-page .book-title span,
+        .evaluations-page .form-group label,
+        .evaluations-page .loading-state,
+        .evaluations-page .empty-state {
+            color: var(--evaluation-muted) !important;
+            text-shadow: none !important;
+        }
+
+    .evaluations-page .btn-primary,
+    .evaluation-result-modal-ok {
+        background: linear-gradient(135deg, var(--evaluation-primary), var(--evaluation-primary-strong)) !important;
+        color: #ffffff !important;
+        box-shadow: 0 10px 24px var(--evaluation-primary-shadow) !important;
+    }
+
+        .evaluations-page .btn-primary:hover:not(:disabled),
+        .evaluation-result-modal-ok:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.02);
+        }
+
+    .evaluations-page .btn-light,
+    .evaluations-page .btn-filter-clear {
+        background: #eef4ff !important;
+        color: var(--evaluation-primary) !important;
+    }
+
+        .evaluations-page .btn-light:hover:not(:disabled),
+        .evaluations-page .btn-filter-clear:hover:not(:disabled) {
+            background: #dbeafe !important;
+        }
+
+    .evaluations-page .btn-danger {
+        background: var(--evaluation-danger-soft) !important;
+        color: var(--evaluation-danger) !important;
+    }
+
+    .evaluations-page .form-control,
+    .evaluations-page .search-box,
+    .evaluations-page .employee-filter-select {
+        background: var(--evaluation-soft-bg) !important;
+        color: var(--evaluation-text) !important;
+        border-color: var(--evaluation-border-strong) !important;
+        transition: background 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, color 0.24s ease, transform 0.18s ease;
+    }
+
+        .evaluations-page .form-control:focus,
+        .evaluations-page .search-box:focus-within,
+        .evaluations-page .employee-filter-select:focus {
+            background: var(--evaluation-card-bg) !important;
+            border-color: var(--evaluation-primary) !important;
+            box-shadow: 0 0 0 4px var(--evaluation-primary-soft) !important;
+        }
+
+        .evaluations-page .search-box input {
+            color: var(--evaluation-text) !important;
+        }
+
+            .evaluations-page .form-control::placeholder,
+            .evaluations-page .search-box input::placeholder {
+                color: #94a3b8 !important;
+                opacity: 1 !important;
+            }
+
+    .evaluations-page .assignment-card,
+    .evaluations-page .assignment-card-fixed {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 128px;
+        padding: 20px 22px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 48%, #eff6ff 100%) !important;
+        border: 1px solid #bfdbfe !important;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.90) !important;
+    }
+
+        .evaluations-page .assignment-card::before,
+        .evaluations-page .assignment-card-fixed::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 6px;
+            border-radius: 20px 0 0 20px;
+            background: linear-gradient(180deg, var(--evaluation-primary), #0f766e);
+        }
+
+        .evaluations-page .assignment-card span,
+        .evaluations-page .assignment-card-fixed span {
+            color: var(--evaluation-primary) !important;
+            font-size: 13px;
+            font-weight: 900;
+            text-shadow: none !important;
+        }
+
+        .evaluations-page .assignment-card strong,
+        .evaluations-page .assignment-card-fixed strong {
+            color: var(--evaluation-text) !important;
+            font-weight: 900;
+            text-shadow: none !important;
+        }
+
+        .evaluations-page .assignment-card small,
+        .evaluations-page .assignment-card-fixed small {
+            color: #475569 !important;
+            text-shadow: none !important;
+        }
+
+    .evaluations-page .summary-card {
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+        .evaluations-page .summary-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--evaluation-primary-border) !important;
+            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10) !important;
+        }
+
+    .evaluations-page .total-summary-card {
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #eef2ff 100%) !important;
+        border-color: rgba(37, 99, 235, 0.25) !important;
+    }
+
+        .evaluations-page .total-summary-card span {
+            color: var(--evaluation-primary) !important;
+        }
+
+        .evaluations-page .total-summary-card strong {
+            color: #1e3a8a !important;
+        }
+
+    .evaluations-page .evaluation-block {
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+        .evaluations-page .evaluation-block:hover {
+            border-color: var(--evaluation-primary-border) !important;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.09) !important;
+        }
+
+    .evaluations-page .block-header {
+        border-bottom-color: var(--evaluation-border) !important;
+    }
+
+    .evaluations-page .total-box {
+        background: var(--evaluation-soft-bg) !important;
+        border-color: var(--evaluation-border) !important;
+    }
+
+    .evaluations-page .slider {
+        background: #cbd5e1 !important;
+    }
+
+    .evaluations-page .switch input:checked + .slider {
+        background: var(--evaluation-primary) !important;
+    }
+
+    .evaluations-page .switch input:focus-visible + .slider {
+        box-shadow: 0 0 0 4px var(--evaluation-primary-soft);
+    }
+
+    .evaluations-page .table-container,
+    .evaluations-page .evaluations-table {
+        background: var(--evaluation-card-bg) !important;
+        border-color: var(--evaluation-border) !important;
+    }
+
+        .evaluations-page .evaluations-table thead {
+            position: relative;
+            z-index: 30;
+        }
+
+        .evaluations-page .evaluations-table th {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: #f8fafc !important;
+            color: #64748b !important;
+            border-bottom: 1px solid var(--evaluation-border) !important;
+            box-shadow: 0 1px 0 var(--evaluation-border), 0 8px 18px rgba(15, 23, 42, 0.08);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .evaluations-page .evaluations-table td {
+            color: var(--evaluation-text) !important;
+            border-bottom-color: var(--evaluation-border) !important;
+        }
+
+        .evaluations-page .evaluations-table tbody tr:hover {
+            background: rgba(37, 99, 235, 0.04) !important;
+        }
+
+        .evaluations-page .evaluations-table tbody tr.selected {
+            background: rgba(37, 99, 235, 0.08) !important;
+            box-shadow: inset 4px 0 0 var(--evaluation-primary);
+        }
+
+    .evaluations-page .kgen-pill {
+        background: #dbeafe !important;
+        color: var(--evaluation-primary) !important;
+    }
+
+    .evaluations-page .loading-state,
+    .evaluations-page .empty-state {
+        background: var(--evaluation-soft-bg) !important;
+        border-color: var(--evaluation-border-strong) !important;
+    }
+
+.evaluation-result-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    padding: calc(24px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: rgba(15, 23, 42, 0.45);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    animation: evaluationResultFadeIn 0.18s ease;
+}
+
+.evaluation-result-modal-card {
+    position: relative;
+    width: min(460px, 100%);
+    margin: auto 0;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    box-shadow: var(--evaluation-modal-shadow, 0 24px 60px rgba(15, 23, 42, 0.25));
+    animation: evaluationResultPopIn 0.18s ease;
+}
+
+.evaluation-result-modal-accent {
+    width: 100%;
+    height: 7px;
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.evaluation-result-modal-card.error .evaluation-result-modal-accent {
+    background: linear-gradient(90deg, #e11d48, #be123c);
+}
+
+.evaluation-result-modal-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 26px 26px 20px;
+}
+
+.evaluation-result-modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    border-radius: 18px;
+    background: #ecfdf3;
+    color: #15803d;
+    box-shadow: inset 0 0 0 1px rgba(21, 128, 61, 0.14);
+}
+
+.evaluation-result-modal-card.error .evaluation-result-modal-icon {
+    background: #fff1f2;
+    color: #be123c;
+    box-shadow: inset 0 0 0 1px rgba(190, 18, 60, 0.14);
+}
+
+.evaluation-result-modal-icon svg {
+    width: 27px;
+    height: 27px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.evaluation-result-modal-copy {
+    min-width: 0;
+}
+
+.evaluation-result-modal-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.evaluation-result-modal-card.error .evaluation-result-modal-eyebrow {
+    color: #be123c;
+}
+
+.evaluation-result-modal-copy h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.evaluation-result-modal-copy p {
+    margin: 9px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.evaluation-result-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 18px 26px 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.evaluation-result-modal-ok {
+    min-width: 108px;
+    min-height: 44px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+}
+
+html:has(.evaluation-result-modal-overlay),
+body:has(.evaluation-result-modal-overlay) {
+    overflow: hidden !important;
+}
+
+html.dark .evaluations-page,
+body.dark .evaluations-page,
+html[data-theme="dark"] .evaluations-page {
+    --evaluation-page-bg: #07111f;
+    --evaluation-card-bg: #0f172a;
+    --evaluation-soft-bg: #0b1324;
+    --evaluation-soft-bg-2: #1e293b;
+    --evaluation-border: rgba(148, 163, 184, 0.18);
+    --evaluation-border-strong: rgba(148, 163, 184, 0.26);
+    --evaluation-text: #f8fafc;
+    --evaluation-muted: #cbd5e1;
+    --evaluation-primary: #ff5a1f;
+    --evaluation-primary-strong: #ea580c;
+    --evaluation-primary-soft: rgba(255, 90, 31, 0.16);
+    --evaluation-primary-shadow: rgba(255, 90, 31, 0.24);
+    --evaluation-primary-border: rgba(255, 90, 31, 0.32);
+    --evaluation-danger: #fb7185;
+    --evaluation-danger-soft: rgba(244, 63, 94, 0.12);
+    --evaluation-success: #22c55e;
+    --evaluation-success-soft: rgba(34, 197, 94, 0.14);
+    --evaluation-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+    background: var(--evaluation-page-bg) !important;
+}
+
+    html.dark .evaluations-page .form-card,
+    html.dark .evaluations-page .list-card,
+    html.dark .evaluations-page .evaluation-block,
+    html.dark .evaluations-page .summary-card,
+    body.dark .evaluations-page .form-card,
+    body.dark .evaluations-page .list-card,
+    body.dark .evaluations-page .evaluation-block,
+    body.dark .evaluations-page .summary-card,
+    html[data-theme="dark"] .evaluations-page .form-card,
+    html[data-theme="dark"] .evaluations-page .list-card,
+    html[data-theme="dark"] .evaluations-page .evaluation-block,
+    html[data-theme="dark"] .evaluations-page .summary-card {
+        background: var(--evaluation-card-bg) !important;
+        border-color: var(--evaluation-border) !important;
+    }
+
+    html[data-theme="dark"] .evaluations-page .assignment-card,
+    html[data-theme="dark"] .evaluations-page .assignment-card-fixed {
+        background: #0b1324 !important;
+        border-color: rgba(255, 90, 31, 0.30) !important;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.26) !important;
+    }
+
+        html[data-theme="dark"] .evaluations-page .assignment-card::before,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed::before {
+            background: linear-gradient(180deg, #ff5a1f, #ea580c);
+        }
+
+        html[data-theme="dark"] .evaluations-page .assignment-card span,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed span {
+            color: #ff5a1f !important;
+        }
+
+        html[data-theme="dark"] .evaluations-page .assignment-card strong,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed strong {
+            color: #ffffff !important;
+        }
+
+        html[data-theme="dark"] .evaluations-page .assignment-card small,
+        html[data-theme="dark"] .evaluations-page .assignment-card-fixed small {
+            color: #cbd5e1 !important;
+        }
+
+    html[data-theme="dark"] .evaluations-page .total-summary-card {
+        background: linear-gradient(135deg, rgba(255, 90, 31, 0.15), #0f172a) !important;
+        border-color: rgba(255, 90, 31, 0.35) !important;
+    }
+
+        html[data-theme="dark"] .evaluations-page .total-summary-card span,
+        html[data-theme="dark"] .evaluations-page .total-summary-card strong {
+            color: #ff8a5c !important;
+        }
+
+    html[data-theme="dark"] .evaluations-page .evaluations-table th {
+        background: #0b1324 !important;
+        color: #cbd5e1 !important;
+        border-bottom-color: var(--evaluation-border) !important;
+        box-shadow: 0 1px 0 var(--evaluation-border), 0 10px 22px rgba(0, 0, 0, 0.35);
+    }
+
+    html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr:hover {
+        background: rgba(255, 90, 31, 0.08) !important;
+    }
+
+    html[data-theme="dark"] .evaluations-page .evaluations-table tbody tr.selected {
+        background: rgba(255, 90, 31, 0.12) !important;
+        box-shadow: inset 4px 0 0 #ff5a1f;
+    }
+
+    html[data-theme="dark"] .evaluations-page .kgen-pill {
+        background: rgba(219, 234, 254, 0.95) !important;
+        color: #2563eb !important;
+    }
+
+    html[data-theme="dark"] .evaluations-page .btn-light,
+    html[data-theme="dark"] .evaluations-page .btn-filter-clear {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+    }
+
+html[data-theme="dark"] .evaluation-result-modal-card {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] .evaluation-result-modal-accent {
+    background: linear-gradient(90deg, #ff5a1f, #ea580c);
+}
+
+html[data-theme="dark"] .evaluation-result-modal-card.error .evaluation-result-modal-accent {
+    background: linear-gradient(90deg, #fb7185, #e11d48);
+}
+
+html[data-theme="dark"] .evaluation-result-modal-icon {
+    background: rgba(34, 197, 94, 0.14);
+    color: #22c55e;
+}
+
+html[data-theme="dark"] .evaluation-result-modal-card.error .evaluation-result-modal-icon {
+    background: rgba(244, 63, 94, 0.12);
+    color: #fb7185;
+}
+
+html[data-theme="dark"] .evaluation-result-modal-eyebrow {
+    color: #ff5a1f;
+}
+
+html[data-theme="dark"] .evaluation-result-modal-card.error .evaluation-result-modal-eyebrow {
+    color: #fb7185;
+}
+
+html[data-theme="dark"] .evaluation-result-modal-copy h3 {
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .evaluation-result-modal-copy p {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .evaluation-result-modal-actions {
+    border-top-color: rgba(148, 163, 184, 0.18);
+}
+
+html[data-theme="liquid glass"] .evaluations-page {
+    --evaluation-page-bg: transparent;
+    --evaluation-card-bg: rgba(255, 255, 255, 0.36);
+    --evaluation-soft-bg: rgba(255, 255, 255, 0.45);
+    --evaluation-soft-bg-2: rgba(241, 245, 249, 0.62);
+    --evaluation-border: rgba(255, 255, 255, 0.62);
+    --evaluation-border-strong: rgba(255, 255, 255, 0.68);
+    --evaluation-text: #0f172a;
+    --evaluation-muted: #475569;
+    --evaluation-primary: #2563eb;
+    --evaluation-primary-strong: #1d4ed8;
+    --evaluation-primary-soft: rgba(37, 99, 235, 0.14);
+    --evaluation-primary-shadow: rgba(37, 99, 235, 0.22);
+    --evaluation-primary-border: rgba(37, 99, 235, 0.28);
+    --evaluation-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+    background: transparent !important;
+}
+
+    html[data-theme="liquid glass"] .evaluations-page .page-hero {
+        background: linear-gradient(115deg, rgba(8, 24, 39, 0.94), rgba(15, 23, 42, 0.90), rgba(17, 24, 39, 0.90)) !important;
+        border-color: rgba(255, 255, 255, 0.20) !important;
+    }
+
+        html[data-theme="liquid glass"] .evaluations-page .page-hero > div:first-child {
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        html[data-theme="liquid glass"] .evaluations-page .page-hero h1,
+        html[data-theme="liquid glass"] .evaluations-page .page-hero p,
+        html[data-theme="liquid glass"] .evaluations-page .stat-card span,
+        html[data-theme="liquid glass"] .evaluations-page .stat-card strong {
+            color: #ffffff !important;
+            text-shadow: none !important;
+        }
+
+    html[data-theme="liquid glass"] .evaluations-page .form-card,
+    html[data-theme="liquid glass"] .evaluations-page .list-card,
+    html[data-theme="liquid glass"] .evaluations-page .evaluation-block,
+    html[data-theme="liquid glass"] .evaluations-page .summary-card {
+        background: var(--evaluation-card-bg) !important;
+        border-color: var(--evaluation-border) !important;
+        box-shadow: var(--evaluation-shadow) !important;
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+    }
+
+    html[data-theme="liquid glass"] .evaluations-page .assignment-card,
+    html[data-theme="liquid glass"] .evaluations-page .assignment-card-fixed {
+        background: rgba(255, 255, 255, 0.48) !important;
+        border-color: rgba(255, 255, 255, 0.72) !important;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.10), inset 0 1px 1px rgba(255, 255, 255, 0.82) !important;
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+    }
+
+    html[data-theme="liquid glass"] .evaluations-page .evaluations-table th {
+        background: rgba(255, 255, 255, 0.96) !important;
+        color: #475569 !important;
+        box-shadow: 0 1px 0 rgba(226, 232, 240, 0.9), 0 10px 24px rgba(15, 23, 42, 0.10);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+html[data-theme="liquid glass"] .evaluation-result-modal-overlay {
+    background: rgba(15, 23, 42, 0.34);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-theme="liquid glass"] .evaluation-result-modal-card {
+    background: rgba(255, 255, 255, 0.76);
+    border-color: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16), inset 0 1px 1px rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+
+html[data-theme="liquid glass"] .evaluation-result-modal-actions {
+    border-top-color: rgba(255, 255, 255, 0.64);
+}
+
+html[data-theme="dark glass"] .evaluations-page {
+    --evaluation-page-bg: transparent;
+    --evaluation-card-bg: rgba(15, 23, 42, 0.62);
+    --evaluation-soft-bg: rgba(15, 23, 42, 0.72);
+    --evaluation-soft-bg-2: rgba(30, 41, 59, 0.82);
+    --evaluation-border: rgba(255, 255, 255, 0.12);
+    --evaluation-border-strong: rgba(255, 255, 255, 0.16);
+    --evaluation-text: #f8fafc;
+    --evaluation-muted: #cbd5e1;
+    --evaluation-primary: #ff5a1f;
+    --evaluation-primary-strong: #ea580c;
+    --evaluation-primary-soft: rgba(255, 90, 31, 0.16);
+    --evaluation-primary-shadow: rgba(255, 90, 31, 0.24);
+    --evaluation-primary-border: rgba(255, 90, 31, 0.32);
+    --evaluation-danger: #fb7185;
+    --evaluation-danger-soft: rgba(244, 63, 94, 0.14);
+    --evaluation-success: #22c55e;
+    --evaluation-success-soft: rgba(34, 197, 94, 0.16);
+    --evaluation-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+    background: transparent !important;
+}
+
+    html[data-theme="dark glass"] .evaluations-page .page-hero {
+        background: linear-gradient(115deg, rgba(8, 24, 39, 0.88), rgba(15, 23, 42, 0.84), rgba(17, 24, 39, 0.84)) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html[data-theme="dark glass"] .evaluations-page .form-card,
+    html[data-theme="dark glass"] .evaluations-page .list-card,
+    html[data-theme="dark glass"] .evaluations-page .evaluation-block,
+    html[data-theme="dark glass"] .evaluations-page .summary-card {
+        background: var(--evaluation-card-bg) !important;
+        border-color: var(--evaluation-border) !important;
+        box-shadow: var(--evaluation-shadow) !important;
+        backdrop-filter: blur(24px) saturate(170%);
+        -webkit-backdrop-filter: blur(24px) saturate(170%);
+    }
+
+    html[data-theme="dark glass"] .evaluations-page .assignment-card,
+    html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed {
+        background: rgba(15, 23, 42, 0.74) !important;
+        border-color: rgba(255, 90, 31, 0.32) !important;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
+    }
+
+        html[data-theme="dark glass"] .evaluations-page .assignment-card::before,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed::before {
+            background: linear-gradient(180deg, #ff5a1f, #ea580c);
+        }
+
+        html[data-theme="dark glass"] .evaluations-page .assignment-card span,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed span {
+            color: #ff7a45 !important;
+        }
+
+        html[data-theme="dark glass"] .evaluations-page .assignment-card strong,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed strong {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme="dark glass"] .evaluations-page .assignment-card small,
+        html[data-theme="dark glass"] .evaluations-page .assignment-card-fixed small {
+            color: #cbd5e1 !important;
+        }
+
+    html[data-theme="dark glass"] .evaluations-page .total-summary-card {
+        background: linear-gradient(135deg, rgba(255, 90, 31, 0.16), rgba(15, 23, 42, 0.62)) !important;
+        border-color: rgba(255, 90, 31, 0.35) !important;
+    }
+
+        html[data-theme="dark glass"] .evaluations-page .total-summary-card span,
+        html[data-theme="dark glass"] .evaluations-page .total-summary-card strong {
+            color: #ff8a5c !important;
+        }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table th {
+        background: #07111f !important;
+        color: #cbd5e1 !important;
+        border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.10), 0 12px 28px rgba(0, 0, 0, 0.42);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr:hover {
+        background: rgba(255, 90, 31, 0.08) !important;
+    }
+
+    html[data-theme="dark glass"] .evaluations-page .evaluations-table tbody tr.selected {
+        background: rgba(255, 90, 31, 0.14) !important;
+        box-shadow: inset 4px 0 0 #ff5a1f;
+    }
+
+    html[data-theme="dark glass"] .evaluations-page .btn-light,
+    html[data-theme="dark glass"] .evaluations-page .btn-filter-clear {
+        background: rgba(30, 41, 59, 0.82) !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+html[data-theme="dark glass"] .evaluation-result-modal-overlay {
+    background: rgba(2, 6, 23, 0.52);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-card {
+    background: rgba(15, 23, 42, 0.82);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-accent {
+    background: linear-gradient(90deg, #ff5a1f, #ea580c);
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-card.error .evaluation-result-modal-accent {
+    background: linear-gradient(90deg, #fb7185, #e11d48);
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-icon {
+    background: rgba(34, 197, 94, 0.16);
+    color: #22c55e;
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-card.error .evaluation-result-modal-icon {
+    background: rgba(244, 63, 94, 0.14);
+    color: #fb7185;
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-eyebrow {
+    color: #ff5a1f;
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-card.error .evaluation-result-modal-eyebrow {
+    color: #fb7185;
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-copy h3 {
+    color: #f8fafc;
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-copy p {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark glass"] .evaluation-result-modal-actions {
+    border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes evaluationResultFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes evaluationResultPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .evaluations-page .evaluations-table td::before {
+        content: attr(data-label) !important;
+        display: block !important;
+        position: absolute !important;
+        left: 10px !important;
+        top: 50% !important;
+        width: 38% !important;
+        transform: translateY(-50%) !important;
+        color: var(--evaluation-muted) !important;
+        font-size: 11px !important;
+        font-weight: 900 !important;
+        text-align: left !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        line-height: 1.25 !important;
+        white-space: normal !important;
+    }
+
+    .evaluations-page .evaluations-table tbody tr.selected {
+        border-color: var(--evaluation-primary-border) !important;
+        box-shadow: inset 4px 0 0 var(--evaluation-primary), 0 10px 26px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    .evaluation-result-modal-overlay {
+        padding: calc(14px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+
+    .evaluation-result-modal-card {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 18px;
+    }
+
+    .evaluation-result-modal-content {
+        padding: 22px 18px 18px;
+    }
+
+    .evaluation-result-modal-icon {
+        width: 48px;
+        height: 48px;
+        flex-basis: 48px;
+        border-radius: 16px;
+    }
+
+    .evaluation-result-modal-copy h3 {
+        font-size: 19px;
+    }
+
+    .evaluation-result-modal-copy p {
+        font-size: 13px;
+    }
+
+    .evaluation-result-modal-actions {
+        padding: 16px 18px 18px;
+    }
+
+    .evaluation-result-modal-ok {
+        width: 100%;
+        min-height: 44px;
+        border-radius: 13px;
+    }
+}
+
+@media (max-width: 520px) {
+    .evaluation-result-modal-content {
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .evaluation-result-modal-icon {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .evaluation-result-modal-overlay,
+    .evaluation-result-modal-card,
+    .evaluations-page *,
+    .evaluations-page *::before,
+    .evaluations-page *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

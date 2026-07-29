@@ -82,13 +82,6 @@ namespace Pagination_Project.Services
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
 
-            /*
-             * Los libros deben finalizarse utilizando la fecha real de hoy.
-             *
-             * No se debe utilizar targetDate para finalizar libros porque,
-             * cuando se consulta una fecha futura, no queremos finalizar
-             * libros anticipadamente.
-             */
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
@@ -98,10 +91,6 @@ namespace Pagination_Project.Services
                 targetDate,
                 scope);
 
-            /*
-             * El reporte Next Day Assignments solamente mostrará
-             * las asignaciones pendientes para la fecha solicitada.
-             */
             return result.Pending;
         }
 
@@ -197,6 +186,16 @@ namespace Pagination_Project.Services
                     .ToListAsync()
                 : new List<TemporaryAssignment>();
 
+            var finalPOTrabajados = assignmentIds.Any()
+                ? await db.AsignacionesTrabajadas
+                    .AsNoTracking()
+                    .Where(x =>
+                        assignmentIds.Contains(x.IdAsignacion) &&
+                        x.FinalPOWorked)
+                    .OrderByDescending(x => x.FechaTrabajo)
+                    .ToListAsync()
+                : new List<AsignacionTrabajada>();
+
             var pending = new List<AssignedBookDashboardDto>();
             var completed = new List<AssignedBookDashboardDto>();
 
@@ -216,6 +215,14 @@ namespace Pagination_Project.Services
                 var etapaCompletada = EstaEtapaCompletada(
                     registroTrabajado,
                     stageInfo.StageKey);
+
+                var registroFinalPO = finalPOTrabajados
+                    .FirstOrDefault(x =>
+                        x.IdAsignacion == item.AssignmentId);
+
+                var bookReadyToShip = EstaListoParaShipping(
+                    item.BindPlantName,
+                    registroFinalPO);
 
                 var temporalAplicable = temporalesActivas
                     .FirstOrDefault(x =>
@@ -251,7 +258,8 @@ namespace Pagination_Project.Services
                     StageKey = stageInfo.StageKey,
                     Stage = stageInfo.StageName,
                     CompletionStatus = stageInfo.CompletionStatus,
-                    StageDate = stageInfo.StageDate
+                    StageDate = stageInfo.StageDate,
+                    BookReadyToShip = bookReadyToShip
                 };
 
                 if (etapaCompletada)
@@ -623,6 +631,11 @@ namespace Pagination_Project.Services
                 bindPlantName,
                 "NZ");
 
+            var esNzShipping = EsBindPlant(
+                bindPlantName,
+                "WSTR",
+                "NZ");
+
             var excluirMemoPorBindPlant =
                 EsBindPlant(
                     bindPlantName,
@@ -649,7 +662,7 @@ namespace Pagination_Project.Services
                     esAu,
                     esNz);
 
-            var shippingDisplayDate = esIveau
+            var shippingDisplayDate = esNzShipping
                 ? GetPreviousWorkDate(
                     item.ShippingDate,
                     1)
@@ -879,6 +892,25 @@ namespace Pagination_Project.Services
             }
 
             return result;
+        }
+
+        private static bool EstaListoParaShipping(
+            string bindPlantName,
+            AsignacionTrabajada? registroFinalPO)
+        {
+            if (registroFinalPO?.FinalPOWorked != true)
+                return false;
+
+            if (EsBindPlant(
+                    bindPlantName,
+                    "IVEAU"))
+            {
+                return true;
+            }
+
+            return
+                registroFinalPO.ClosingCorrectionsVerified &&
+                registroFinalPO.LateWorkVerified;
         }
 
         private static bool EstaEtapaCompletada(

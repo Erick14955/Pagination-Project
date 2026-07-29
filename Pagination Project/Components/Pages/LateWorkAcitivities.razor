@@ -93,66 +93,99 @@ else
             {
                 <div class="late-card form-card">
                     <div class="card-title">
-                        <h2>Register Late Work</h2>
-                        <p>Select the assignment and enter one or multiple late work activities.</p>
-                    </div>
+                        <h2>@(LateWorkEditandoId.HasValue ? "Edit Late Work" : "Register Late Work")</h2>
+                        <p>
+                            @(LateWorkEditandoId.HasValue
+                                                ? "Update the selected late work activity and save the changes."
+                                                : "Select the assignment and enter one or multiple late work activities.")
+                </p>
+            </div>
 
                     <div class="form-group">
                         <label>Assignment</label>
                         <select @bind="AssignmentSeleccionadoId">
                             <option value="">Select assignment</option>
-                            @foreach (var item in Asignaciones)
+                    @foreach (var item in Asignaciones)
                             {
                                 <option value="@item.Id">
                                     @item.DisplayName
                                 </option>
                             }
-                        </select>
-                    </div>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label>Late Work ID</label>
-                        <input type="text"
-                               placeholder="Example: 100234"
-                               @bind="LateWorkIdTexto" />
-                    </div>
+                <div class="form-group">
+                    <label>Late Work ID</label>
+                    <input type="text"
+                           placeholder="Example: 100234"
+                           @bind="LateWorkIdTexto" />
+                </div>
 
-                    <div class="form-group">
-                        <label>Client ID</label>
-                        <input type="text"
-                               placeholder="Example: 24001"
-                               @bind="ClientIdTexto" />
-                    </div>
+                <div class="form-group">
+                    <label>Client ID</label>
+                    <input type="text"
+                           placeholder="Example: 24001"
+                           @bind="ClientIdTexto" />
+                </div>
 
-                    <div class="single-actions">
-                        <button type="button" class="btn-primary" @onclick="GuardarUnoAsync">
-                            Save One
-                        </button>
+                <div class="single-actions">
+                    <button type="button"
+                            class="btn-primary"
+                            disabled="@Procesando"
+                            @onclick="GuardarUnoAsync">
+                        @(Procesando
+                                            ? "Saving..."
+                                            : LateWorkEditandoId.HasValue
+                                            ? "Update Activity"
+                                            : "Save One")
+                </button>
 
                         <button type="button" class="btn-light" @onclick="LimpiarFormulario">
                             Clear
                         </button>
                     </div>
 
-                    <div class="bulk-box">
-                        <label>Bulk Register</label>
-                        <p>
-                            Enter one record per line using this format:
-                            <strong>LateWorkId, ClientId</strong>
-                        </p>
+            @if (LateWorkEditandoId.HasValue)
+                    {
+                        <div class="late-edit-mode-banner">
+                            <div>
+                                <span>Edit mode</span>
+                                <strong>Updating Late Work ID @LateWorkIdTexto</strong>
+                            </div>
 
-                        <textarea rows="8"
-                                  placeholder="Example:
-                                            100234, 24001
-                                            100235, 24002
-                                            100236, 24003"
-                                  @bind="TextoMasivo">
+                            <button type="button"
+                                    class="late-edit-cancel"
+                                    disabled="@Procesando"
+                                    @onclick="LimpiarFormulario">
+                                Cancel Edit
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bulk-box">
+                            <label>Bulk Register</label>
+                            <p>
+                                Enter one record per line using this format:
+                                <strong>LateWorkId, ClientId</strong>
+                            </p>
+
+                            <textarea rows="8"
+                                      placeholder="Example:
+                                                            100234, 24001
+                                                            100235, 24002
+                                                            100236, 24003"
+                                      @bind="TextoMasivo">
                                         </textarea>
 
-                        <button type="button" class="btn-dark" @onclick="GuardarMasivoAsync">
-                            Save Bulk
-                        </button>
-                    </div>
+                            <button type="button"
+                                    class="btn-dark"
+                                    disabled="@Procesando"
+                                    @onclick="GuardarMasivoAsync">
+                                @(Procesando ? "Saving..." : "Save Bulk")
+                            </button>
+                        </div>
+                    }
                 </div>
             }
             else
@@ -218,7 +251,7 @@ else
 
                         <button type="button"
                                 class="btn-complete-selected"
-                                disabled="@(!LateWorksFiltrados.Any(x => x.Seleccionado && !x.Completed))"
+                                disabled="@(!LateWorksFiltrados.Any(x => x.Seleccionado && !x.Completed) || Procesando)"
                                 @onclick="CompletarSeleccionadosAsync">
                             Complete Selected
                         </button>
@@ -232,7 +265,7 @@ else
                 }
 
                 <div class="table-wrap">
-                    <table>
+                    <table class="late-work-table">
                         <thead>
                             <tr>
                                 @if (PuedeCompletarLateWork)
@@ -261,7 +294,7 @@ else
                             @if (!LateWorksFiltrados.Any())
                             {
                                 <tr>
-                                    <td colspan="@ColspanTabla" class="empty-cell">
+                                    <td colspan="@ColspanTabla" class="empty-cell" data-label="">
                                         No late work activities found.
                                     </td>
                                 </tr>
@@ -270,10 +303,10 @@ else
                             {
                                 @foreach (var item in LateWorksFiltrados)
                                 {
-                                    <tr class="@(item.Completed ? "row-completed" : "")">
+                                    <tr class="@(item.Completed ? "row-completed" : item.Seleccionado ? "row-selected" : "")">
                                         @if (PuedeCompletarLateWork)
                                         {
-                                            <td>
+                                            <td data-label="Select">
                                                 @if (!item.Completed)
                                                 {
                                                     <input type="checkbox" @bind="item.Seleccionado" />
@@ -281,20 +314,20 @@ else
                                             </td>
                                         }
 
-                                        <td>
+                                        <td data-label="Late Work ID">
                                             <strong>@item.LateWorkId</strong>
                                         </td>
 
-                                        <td>@item.ClientId</td>
+                                        <td data-label="Client ID">@item.ClientId</td>
 
-                                        <td>@item.AssignmentName</td>
+                                        <td data-label="Assignment">@item.AssignmentName</td>
 
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="status pending">@item.EmployeeTypeCode</span></td>
+                                            <td data-label="Department"><span class="status pending">@item.EmployeeTypeCode</span></td>
                                         }
 
-                                        <td>
+                                        <td data-label="Status">
                                             @if (item.Completed)
                                             {
                                                 <span class="status completed">Completed</span>
@@ -305,7 +338,7 @@ else
                                             }
                                     </td>
 
-                                    <td>
+                                    <td data-label="Completed At">
                                         @(item.CompletedAt.HasValue
                                                                         ? item.CompletedAt.Value.ToLocalTime().ToString("MM/dd/yyyy hh:mm tt")
                                                                         : "-")
@@ -313,7 +346,7 @@ else
 
                             @if (PuedeCompletarLateWork || PuedeEditarLateWork || PuedeEliminarLateWork)
                                         {
-                                            <td>
+                                            <td data-label="Actions">
                                                 <div class="row-actions">
                                                     @if (PuedeCompletarLateWork)
                                                     {
@@ -321,6 +354,7 @@ else
                                                         {
                                                             <button type="button"
                                                                     class="btn-small-complete"
+                                                                    disabled="@Procesando"
                                                                     @onclick="() => CompletarUnoAsync(item.Id)">
                                                                 Complete
                                                             </button>
@@ -335,6 +369,7 @@ else
                                                     {
                                                         <button type="button"
                                                                 class="btn-small-edit"
+                                                                disabled="@Procesando"
                                                                 @onclick="() => PrepararEdicion(item)">
                                                             Edit
                                                         </button>
@@ -344,7 +379,8 @@ else
                                                     {
                                                         <button type="button"
                                                                 class="btn-small-delete"
-                                                                @onclick="() => EliminarLateWorkAsync(item.Id)">
+                                                                disabled="@Procesando"
+                                                                @onclick="() => PrepararEliminacion(item)">
                                                             Delete
                                                         </button>
                                                     }
@@ -360,6 +396,134 @@ else
             </div>
 
         </section>
+    </div>
+}
+
+
+@if (MostrarModalResultadoLateWork)
+{
+    <div class="late-result-modal-overlay"
+         role="presentation"
+         @onclick="CerrarModalResultadoLateWork">
+
+        <div class="late-result-modal-card @TipoModalResultadoLateWork"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="lateWorkResultModalTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="late-result-modal-accent"></div>
+
+            <div class="late-result-modal-content">
+                <div class="late-result-modal-icon" aria-hidden="true">
+                    @if (TipoModalResultadoLateWork == "success")
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 6 9 17l-5-5"></path>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M12 7v6"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    }
+                </div>
+
+                <div class="late-result-modal-copy">
+                    <span class="late-result-modal-eyebrow">Late Work Activities</span>
+                    <h3 id="lateWorkResultModalTitle">@TituloModalResultadoLateWork</h3>
+                    <p>@MensajeModalResultadoLateWork</p>
+                </div>
+            </div>
+
+            <div class="late-result-modal-actions">
+                <button type="button"
+                        class="late-result-modal-ok"
+                        @onclick="CerrarModalResultadoLateWork">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (MostrarConfirmacionEliminar && LateWorkPendienteEliminar is not null)
+{
+    <div class="late-delete-modal-overlay"
+         role="presentation"
+         @onclick="CancelarEliminacion">
+
+        <div class="late-delete-modal-card"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="lateWorkDeleteModalTitle"
+             @onclick:stopPropagation="true">
+
+            <div class="late-delete-modal-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 7h16"></path>
+                    <path d="M9 7V4h6v3"></path>
+                    <path d="M7 7l1 13h8l1-13"></path>
+                    <path d="M10 11v5"></path>
+                    <path d="M14 11v5"></path>
+                </svg>
+            </div>
+
+            <div class="late-delete-modal-copy">
+                <span>Delete late work activity</span>
+                <h3 id="lateWorkDeleteModalTitle">
+                    Delete Late Work ID @LateWorkPendienteEliminar.LateWorkId?
+                </h3>
+                <p>
+                    This action permanently removes the activity and cannot be undone.
+                </p>
+            </div>
+
+            <div class="late-delete-summary">
+                <div>
+                    <span>Late Work ID</span>
+                    <strong>@LateWorkPendienteEliminar.LateWorkId</strong>
+                </div>
+
+                <div>
+                    <span>Client ID</span>
+                    <strong>@LateWorkPendienteEliminar.ClientId</strong>
+                </div>
+
+                <div class="wide">
+                    <span>Assignment</span>
+                    <strong>@LateWorkPendienteEliminar.AssignmentName</strong>
+                </div>
+
+                <div>
+                    <span>Status</span>
+                    <strong>@(LateWorkPendienteEliminar.Completed ? "Completed" : "Pending")</strong>
+                </div>
+            </div>
+
+            <div class="late-delete-warning">
+                Deleting this activity may change the Final PO late-work verification for the related assignment.
+            </div>
+
+            <div class="late-delete-modal-actions">
+                <button type="button"
+                        class="late-delete-cancel"
+                        disabled="@Procesando"
+                        @onclick="CancelarEliminacion">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        class="late-delete-confirm"
+                        disabled="@Procesando"
+                        @onclick="ConfirmarEliminacionAsync">
+                    @(Procesando ? "Deleting..." : "Delete Activity")
+                </button>
+            </div>
+        </div>
     </div>
 }
 
@@ -381,6 +545,18 @@ else
     private string Mensaje { get; set; } = string.Empty;
 
     private bool EsError { get; set; }
+
+    private bool Procesando { get; set; }
+
+    private Guid? LateWorkEditandoId { get; set; }
+
+    private bool MostrarModalResultadoLateWork { get; set; }
+    private string TituloModalResultadoLateWork { get; set; } = string.Empty;
+    private string MensajeModalResultadoLateWork { get; set; } = string.Empty;
+    private string TipoModalResultadoLateWork { get; set; } = "success";
+
+    private bool MostrarConfirmacionEliminar { get; set; }
+    private LateWorkListItem? LateWorkPendienteEliminar { get; set; }
 
     private bool TodosSeleccionados { get; set; }
 
@@ -451,23 +627,6 @@ else
             }
 
             await using var db = await DbFactory.CreateDbContextAsync();
-
-            /*
-                IMPORTANTE:
-                Este bloque asume que tu entidad de usuario se llama Usuario,
-                que tiene Id tipo Guid y una propiedad de navegación llamada Permiso.
-
-                Si en tu proyecto la entidad se llama Users o Usuarios,
-                cambia solamente esta parte:
-
-                db.Set<Usuario>()
-
-                Y si tu propiedad de permiso se llama Permisos o PermissionLevel,
-                cambia:
-
-                .Include(x => x.Permiso)
-                usuario.Permiso
-            */
 
             if (!Guid.TryParse(userIdTexto, out var userId))
             {
@@ -595,296 +754,422 @@ else
 
     private async Task GuardarUnoAsync()
     {
+        if (Procesando)
+            return;
+
         LimpiarMensaje();
 
-        if (!PuedeCrearLateWork)
+        if (!PuedeCrearLateWork && !LateWorkEditandoId.HasValue)
         {
-            MostrarError("You do not have permission to create Late Work activities.");
+            MostrarError(
+                "You do not have permission to create Late Work activities.",
+                "Permission required");
+            return;
+        }
+
+        if (LateWorkEditandoId.HasValue && !PuedeEditarLateWork)
+        {
+            MostrarError(
+                "You do not have permission to edit Late Work activities.",
+                "Permission required");
             return;
         }
 
         if (AssignmentSeleccionadoId is null || AssignmentSeleccionadoId == Guid.Empty)
         {
-            MostrarError("You must select an assignment.");
+            MostrarError("You must select an assignment.", "Assignment required");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(LateWorkIdTexto))
         {
-            MostrarError("You must enter the Late Work ID.");
+            MostrarError("You must enter the Late Work ID.", "Late Work ID required");
             return;
         }
 
         if (!long.TryParse(LateWorkIdTexto.Trim(), out var lateWorkId))
         {
-            MostrarError("The Late Work ID must contain numbers only.");
+            MostrarError("The Late Work ID must contain numbers only.", "Invalid Late Work ID");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(ClientIdTexto))
         {
-            MostrarError("You must enter the Client ID.");
+            MostrarError("You must enter the Client ID.", "Client ID required");
             return;
         }
 
         if (!long.TryParse(ClientIdTexto.Trim(), out var clientId))
         {
-            MostrarError("The Client ID must contain numbers only.");
+            MostrarError("The Client ID must contain numbers only.", "Invalid Client ID");
             return;
         }
 
-        await using var db = await DbFactory.CreateDbContextAsync();
+        Procesando = true;
 
-        var asignacionActiva = await db.Asignaciones
-            .AsNoTracking()
-            .Include(x => x.Libro)
-            .ApplyScope(Scope)
-            .AnyAsync(x =>
-                x.Id == AssignmentSeleccionadoId.Value &&
-                !x.Finalizado &&
-                x.Libro != null &&
-                !x.Libro.Finalizado);
-
-        if (!asignacionActiva)
+        try
         {
-            MostrarError("This assignment is no longer available because the book has already passed its Dirxion date.");
-            return;
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var assignmentId = AssignmentSeleccionadoId.Value;
+
+            var asignacionActiva = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Libro)
+                .ApplyScope(Scope)
+                .AnyAsync(x =>
+                    x.Id == assignmentId &&
+                    !x.Finalizado &&
+                    x.Libro != null &&
+                    !x.Libro.Finalizado);
+
+            if (!asignacionActiva)
+            {
+                MostrarError(
+                    "This assignment is no longer available because the book has already passed its Dirxion date.",
+                    "Assignment unavailable");
+                return;
+            }
+
+            var existe = await ScopedLateWorkQuery(db).AnyAsync(x =>
+                (!LateWorkEditandoId.HasValue || x.Id != LateWorkEditandoId.Value) &&
+                x.AssignmentId == assignmentId &&
+                x.LateWorkId == lateWorkId &&
+                x.ClientId == clientId);
+
+            if (existe)
+            {
+                MostrarError(
+                    "This Late Work ID already exists for this assignment and client.",
+                    "Duplicate activity");
+                return;
+            }
+
+            if (LateWorkEditandoId.HasValue)
+            {
+                var item = await ScopedLateWorkQuery(db)
+                    .FirstOrDefaultAsync(x => x.Id == LateWorkEditandoId.Value);
+
+                if (item is null)
+                {
+                    MostrarError("Late work activity not found.", "Activity not found");
+                    return;
+                }
+
+                item.AssignmentId = assignmentId;
+                item.LateWorkId = lateWorkId;
+                item.ClientId = clientId;
+                item.UpdatedAt = DateTime.UtcNow;
+
+                await db.SaveChangesAsync();
+
+                LateWorkEditandoId = null;
+                LateWorkIdTexto = string.Empty;
+                ClientIdTexto = string.Empty;
+
+                await CargarDatosAsync();
+
+                MostrarExito(
+                    "Late work activity updated successfully.",
+                    "Activity updated");
+            }
+            else
+            {
+                var nuevo = new LateWorkActivity
+                {
+                    Id = Guid.NewGuid(),
+                    AssignmentId = assignmentId,
+                    LateWorkId = lateWorkId,
+                    ClientId = clientId,
+                    Completed = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                db.LateWorkActivities.Add(nuevo);
+                await db.SaveChangesAsync();
+
+                LateWorkIdTexto = string.Empty;
+                ClientIdTexto = string.Empty;
+
+                await CargarDatosAsync();
+
+                MostrarExito(
+                    "Late work activity registered successfully.",
+                    "Activity registered");
+            }
         }
-
-        var existe = await ScopedLateWorkQuery(db).AnyAsync(x =>
-            x.AssignmentId == AssignmentSeleccionadoId.Value &&
-            x.LateWorkId == lateWorkId &&
-            x.ClientId == clientId);
-
-        if (existe)
+        catch (DbUpdateException ex)
         {
-            MostrarError("This Late Work ID already exists for this assignment and client.");
-            return;
+            MostrarError(
+                $"The activity could not be saved. Details: {ex.InnerException?.Message ?? ex.Message}",
+                "Database error");
         }
-
-        var nuevo = new LateWorkActivity
+        catch (Exception ex)
         {
-            Id = Guid.NewGuid(),
-            AssignmentId = AssignmentSeleccionadoId.Value,
-            LateWorkId = lateWorkId,
-            ClientId = clientId,
-            Completed = false,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        db.LateWorkActivities.Add(nuevo);
-        await db.SaveChangesAsync();
-
-        MostrarExito("Late work activity registered successfully.");
-
-        LateWorkIdTexto = string.Empty;
-        ClientIdTexto = string.Empty;
-
-        await CargarDatosAsync();
+            MostrarError(
+                $"The activity could not be saved. Details: {ex.Message}",
+                "Unable to save activity");
+        }
+        finally
+        {
+            Procesando = false;
+        }
     }
 
     private async Task GuardarMasivoAsync()
     {
+        if (Procesando)
+            return;
+
         LimpiarMensaje();
+        Procesando = true;
 
-        if (!PuedeCrearLateWork)
+        try
         {
-            MostrarError("You do not have permission to create Late Work activities.");
-            return;
-        }
+            if (!PuedeCrearLateWork)
+            {
+                MostrarError("You do not have permission to create Late Work activities.");
+                return;
+            }
 
-        if (AssignmentSeleccionadoId is null || AssignmentSeleccionadoId == Guid.Empty)
-        {
-            MostrarError("You must select an assignment before bulk registering.");
-            return;
-        }
+            if (AssignmentSeleccionadoId is null || AssignmentSeleccionadoId == Guid.Empty)
+            {
+                MostrarError("You must select an assignment before bulk registering.");
+                return;
+            }
 
-        if (string.IsNullOrWhiteSpace(TextoMasivo))
-        {
-            MostrarError("You must enter at least one line.");
-            return;
-        }
+            if (string.IsNullOrWhiteSpace(TextoMasivo))
+            {
+                MostrarError("You must enter at least one line.");
+                return;
+            }
 
-        var lineas = TextoMasivo
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToList();
-
-        if (!lineas.Any())
-        {
-            MostrarError("No valid lines were found.");
-            return;
-        }
-
-        var nuevos = new List<LateWorkActivity>();
-        var errores = new List<string>();
-        var filasValidas = new List<(long LateWorkId, long ClientId)>();
-
-        for (int i = 0; i < lineas.Count; i++)
-        {
-            var linea = lineas[i].Trim();
-
-            var partes = linea
-                .Split(new[] { ',', ';', '\t', '|' }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            var lineas = TextoMasivo
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
 
-            if (partes.Count < 2)
+            if (!lineas.Any())
             {
-                errores.Add($"Line {i + 1}: invalid format. Use LateWorkId, ClientId.");
-                continue;
+                MostrarError("No valid lines were found.");
+                return;
             }
 
-            if (!long.TryParse(partes[0], out var lateWorkId))
+            var nuevos = new List<LateWorkActivity>();
+            var errores = new List<string>();
+            var filasValidas = new List<(long LateWorkId, long ClientId)>();
+
+            for (int i = 0; i < lineas.Count; i++)
             {
-                errores.Add($"Line {i + 1}: Late Work ID must contain numbers only.");
-                continue;
+                var linea = lineas[i].Trim();
+
+                var partes = linea
+                    .Split(new[] { ',', ';', '\t', '|' }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                    .ToList();
+
+                if (partes.Count < 2)
+                {
+                    errores.Add($"Line {i + 1}: invalid format. Use LateWorkId, ClientId.");
+                    continue;
+                }
+
+                if (!long.TryParse(partes[0], out var lateWorkId))
+                {
+                    errores.Add($"Line {i + 1}: Late Work ID must contain numbers only.");
+                    continue;
+                }
+
+                if (!long.TryParse(partes[1].Trim(), out var clientId))
+                {
+                    errores.Add($"Line {i + 1}: Client ID must contain numbers only.");
+                    continue;
+                }
+
+                filasValidas.Add((lateWorkId, clientId));
             }
 
-            if (!long.TryParse(partes[1].Trim(), out var clientId))
+            if (errores.Any())
             {
-                errores.Add($"Line {i + 1}: Client ID must contain numbers only.");
-                continue;
+                MostrarError(string.Join(" | ", errores));
+                return;
             }
 
-            filasValidas.Add((lateWorkId, clientId));
-        }
-
-        if (errores.Any())
-        {
-            MostrarError(string.Join(" | ", errores));
-            return;
-        }
-
-        if (!filasValidas.Any())
-        {
-            MostrarError("No valid records were found.");
-            return;
-        }
-
-        var duplicadosEnTexto = filasValidas
-            .GroupBy(x => new { x.LateWorkId, x.ClientId })
-            .Where(g => g.Count() > 1)
-            .Select(g => $"{g.Key.LateWorkId} - {g.Key.ClientId}")
-            .ToList();
-
-        if (duplicadosEnTexto.Any())
-        {
-            MostrarError("Duplicated records in the text: " + string.Join(", ", duplicadosEnTexto));
-            return;
-        }
-
-        await using var db = await DbFactory.CreateDbContextAsync();
-
-        var assignmentId = AssignmentSeleccionadoId.Value;
-
-        var asignacionActiva = await db.Asignaciones
-            .AsNoTracking()
-            .Include(x => x.Libro)
-            .ApplyScope(Scope)
-            .AnyAsync(x =>
-                x.Id == assignmentId &&
-                !x.Finalizado &&
-                x.Libro != null &&
-                !x.Libro.Finalizado);
-
-        if (!asignacionActiva)
-        {
-            MostrarError("This assignment is no longer available because the book has already passed its Dirxion date.");
-            return;
-        }
-
-        var existentes = await ScopedLateWorkQuery(db)
-            .Where(x => x.AssignmentId == assignmentId)
-            .Select(x => new
+            if (!filasValidas.Any())
             {
-                x.LateWorkId,
-                x.ClientId
-            })
-            .ToListAsync();
+                MostrarError("No valid records were found.");
+                return;
+            }
 
-        var existentesSet = existentes
-            .Select(x => $"{x.LateWorkId}|{x.ClientId}")
-            .ToHashSet();
+            var duplicadosEnTexto = filasValidas
+                .GroupBy(x => new { x.LateWorkId, x.ClientId })
+                .Where(g => g.Count() > 1)
+                .Select(g => $"{g.Key.LateWorkId} - {g.Key.ClientId}")
+                .ToList();
 
-        foreach (var item in filasValidas)
-        {
-            var key = $"{item.LateWorkId}|{item.ClientId}";
-
-            if (existentesSet.Contains(key))
-                continue;
-
-            nuevos.Add(new LateWorkActivity
+            if (duplicadosEnTexto.Any())
             {
-                Id = Guid.NewGuid(),
-                AssignmentId = assignmentId,
-                LateWorkId = item.LateWorkId,
-                ClientId = item.ClientId,
-                Completed = false,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
+                MostrarError("Duplicated records in the text: " + string.Join(", ", duplicadosEnTexto));
+                return;
+            }
 
-        if (!nuevos.Any())
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var assignmentId = AssignmentSeleccionadoId.Value;
+
+            var asignacionActiva = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Libro)
+                .ApplyScope(Scope)
+                .AnyAsync(x =>
+                    x.Id == assignmentId &&
+                    !x.Finalizado &&
+                    x.Libro != null &&
+                    !x.Libro.Finalizado);
+
+            if (!asignacionActiva)
+            {
+                MostrarError("This assignment is no longer available because the book has already passed its Dirxion date.");
+                return;
+            }
+
+            var existentes = await ScopedLateWorkQuery(db)
+                .Where(x => x.AssignmentId == assignmentId)
+                .Select(x => new
+                {
+                    x.LateWorkId,
+                    x.ClientId
+                })
+                .ToListAsync();
+
+            var existentesSet = existentes
+                .Select(x => $"{x.LateWorkId}|{x.ClientId}")
+                .ToHashSet();
+
+            foreach (var item in filasValidas)
+            {
+                var key = $"{item.LateWorkId}|{item.ClientId}";
+
+                if (existentesSet.Contains(key))
+                    continue;
+
+                nuevos.Add(new LateWorkActivity
+                {
+                    Id = Guid.NewGuid(),
+                    AssignmentId = assignmentId,
+                    LateWorkId = item.LateWorkId,
+                    ClientId = item.ClientId,
+                    Completed = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            if (!nuevos.Any())
+            {
+                MostrarError("All records already exist. No new late work activities were created.");
+                return;
+            }
+
+            db.LateWorkActivities.AddRange(nuevos);
+            await db.SaveChangesAsync();
+
+            TextoMasivo = string.Empty;
+
+            MostrarExito($"{nuevos.Count} late work activities registered successfully.", "Bulk registration completed");
+
+            await CargarDatosAsync();
+
+        }
+        catch (DbUpdateException ex)
         {
-            MostrarError("All records already exist. No new late work activities were created.");
-            return;
+            MostrarError(
+                $"The bulk registration could not be saved. Details: {ex.InnerException?.Message ?? ex.Message}",
+                "Database error");
         }
-
-        db.LateWorkActivities.AddRange(nuevos);
-        await db.SaveChangesAsync();
-
-        TextoMasivo = string.Empty;
-
-        MostrarExito($"{nuevos.Count} late work activities registered successfully.");
-
-        await CargarDatosAsync();
+        catch (Exception ex)
+        {
+            MostrarError(
+                $"The bulk registration could not be completed. Details: {ex.Message}",
+                "Bulk registration failed");
+        }
+        finally
+        {
+            Procesando = false;
+        }
     }
 
     private async Task CompletarUnoAsync(Guid id)
     {
+        if (Procesando)
+            return;
+
         LimpiarMensaje();
 
         if (!PuedeCompletarLateWork)
         {
-            MostrarError("You do not have permission to complete Late Work activities.");
+            MostrarError(
+                "You do not have permission to complete Late Work activities.",
+                "Permission required");
             return;
         }
 
-        await using var db = await DbFactory.CreateDbContextAsync();
+        Procesando = true;
 
-        var item = await ScopedLateWorkQuery(db)
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (item is null)
+        try
         {
-            MostrarError("Late work activity not found.");
-            return;
-        }
+            await using var db = await DbFactory.CreateDbContextAsync();
 
-        if (item.Completed)
+            var item = await ScopedLateWorkQuery(db)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (item is null)
+            {
+                MostrarError("Late work activity not found.", "Activity not found");
+                return;
+            }
+
+            if (item.Completed)
+            {
+                MostrarError(
+                    "This late work activity is already completed.",
+                    "Already completed");
+                return;
+            }
+
+            item.Completed = true;
+            item.CompletedAt = DateTime.UtcNow;
+            item.UpdatedAt = DateTime.UtcNow;
+
+            await db.SaveChangesAsync();
+            await CargarDatosAsync();
+
+            MostrarExito(
+                "Late work activity marked as completed.",
+                "Activity completed");
+        }
+        catch (Exception ex)
         {
-            MostrarError("This late work activity is already completed.");
-            return;
+            MostrarError(
+                $"The activity could not be completed. Details: {ex.Message}",
+                "Unable to complete activity");
         }
-
-        item.Completed = true;
-        item.CompletedAt = DateTime.UtcNow;
-        item.UpdatedAt = DateTime.UtcNow;
-
-        await db.SaveChangesAsync();
-
-        MostrarExito("Late work activity marked as completed.");
-
-        await CargarDatosAsync();
+        finally
+        {
+            Procesando = false;
+        }
     }
 
     private async Task CompletarSeleccionadosAsync()
     {
+        if (Procesando)
+            return;
+
         LimpiarMensaje();
 
         if (!PuedeCompletarLateWork)
         {
-            MostrarError("You do not have permission to complete Late Work activities.");
+            MostrarError(
+                "You do not have permission to complete Late Work activities.",
+                "Permission required");
             return;
         }
 
@@ -895,59 +1180,140 @@ else
 
         if (!ids.Any())
         {
-            MostrarError("You must select at least one pending activity.");
+            MostrarError(
+                "You must select at least one pending activity.",
+                "Selection required");
             return;
         }
 
-        await using var db = await DbFactory.CreateDbContextAsync();
+        Procesando = true;
 
-        var registros = await ScopedLateWorkQuery(db)
-            .Where(x => ids.Contains(x.Id) && !x.Completed)
-            .ToListAsync();
-
-        foreach (var item in registros)
+        try
         {
-            item.Completed = true;
-            item.CompletedAt = DateTime.UtcNow;
-            item.UpdatedAt = DateTime.UtcNow;
+            await using var db = await DbFactory.CreateDbContextAsync();
+
+            var registros = await ScopedLateWorkQuery(db)
+                .Where(x => ids.Contains(x.Id) && !x.Completed)
+                .ToListAsync();
+
+            foreach (var item in registros)
+            {
+                item.Completed = true;
+                item.CompletedAt = DateTime.UtcNow;
+                item.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await db.SaveChangesAsync();
+
+            TodosSeleccionados = false;
+            await CargarDatosAsync();
+
+            MostrarExito(
+                $"{registros.Count} late work activities marked as completed.",
+                registros.Count == 1 ? "Activity completed" : "Activities completed");
         }
-
-        await db.SaveChangesAsync();
-
-        MostrarExito($"{registros.Count} late work activities marked as completed.");
-
-        TodosSeleccionados = false;
-
-        await CargarDatosAsync();
+        catch (Exception ex)
+        {
+            MostrarError(
+                $"The selected activities could not be completed. Details: {ex.Message}",
+                "Unable to complete activities");
+        }
+        finally
+        {
+            Procesando = false;
+        }
     }
 
-    private async Task EliminarLateWorkAsync(Guid id)
+    private void PrepararEliminacion(LateWorkListItem item)
     {
         LimpiarMensaje();
 
         if (!PuedeEliminarLateWork)
         {
-            MostrarError("You do not have permission to delete Late Work activities.");
+            MostrarError(
+                "You do not have permission to delete Late Work activities.",
+                "Permission required");
             return;
         }
 
-        await using var db = await DbFactory.CreateDbContextAsync();
+        LateWorkPendienteEliminar = item;
+        MostrarConfirmacionEliminar = true;
+    }
 
-        var item = await ScopedLateWorkQuery(db)
-            .FirstOrDefaultAsync(x => x.Id == id);
+    private void CancelarEliminacion()
+    {
+        if (Procesando)
+            return;
 
-        if (item is null)
+        MostrarConfirmacionEliminar = false;
+        LateWorkPendienteEliminar = null;
+    }
+
+    private async Task ConfirmarEliminacionAsync()
+    {
+        if (Procesando || LateWorkPendienteEliminar is null)
+            return;
+
+        if (!PuedeEliminarLateWork)
         {
-            MostrarError("Late work activity not found.");
+            CancelarEliminacion();
+            MostrarError(
+                "You do not have permission to delete Late Work activities.",
+                "Permission required");
             return;
         }
 
-        db.LateWorkActivities.Remove(item);
-        await db.SaveChangesAsync();
+        var id = LateWorkPendienteEliminar.Id;
+        Procesando = true;
 
-        MostrarExito("Late work activity deleted successfully.");
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
 
-        await CargarDatosAsync();
+            var item = await ScopedLateWorkQuery(db)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (item is null)
+            {
+                MostrarConfirmacionEliminar = false;
+                LateWorkPendienteEliminar = null;
+                MostrarError("Late work activity not found.", "Activity not found");
+                return;
+            }
+
+            db.LateWorkActivities.Remove(item);
+            await db.SaveChangesAsync();
+
+            if (LateWorkEditandoId == id)
+            {
+                LateWorkEditandoId = null;
+                AssignmentSeleccionadoId = null;
+                LateWorkIdTexto = string.Empty;
+                ClientIdTexto = string.Empty;
+            }
+
+            MostrarConfirmacionEliminar = false;
+            LateWorkPendienteEliminar = null;
+
+            await CargarDatosAsync();
+
+            MostrarExito(
+                "Late work activity deleted successfully.",
+                "Activity deleted");
+        }
+        catch (Exception ex)
+        {
+            MostrarConfirmacionEliminar = false;
+            LateWorkPendienteEliminar = null;
+
+            MostrarError(
+                $"The activity could not be deleted. Details: {ex.Message}",
+                "Unable to delete activity");
+        }
+        finally
+        {
+            Procesando = false;
+        }
     }
 
     private void PrepararEdicion(LateWorkListItem item)
@@ -956,15 +1322,20 @@ else
 
         if (!PuedeEditarLateWork)
         {
-            MostrarError("You do not have permission to edit Late Work activities.");
+            MostrarError(
+                "You do not have permission to edit Late Work activities.",
+                "Permission required");
             return;
         }
 
+        LateWorkEditandoId = item.Id;
         AssignmentSeleccionadoId = item.AssignmentId;
         LateWorkIdTexto = item.LateWorkId.ToString();
         ClientIdTexto = item.ClientId.ToString();
 
-        MostrarExito("Record loaded for editing. Add the update logic when you want to enable full edit mode.");
+        MostrarExito(
+            "The activity was loaded into the form. Update the values and select Update Activity.",
+            "Activity loaded for editing");
     }
 
     private void SeleccionarTodos(ChangeEventArgs e)
@@ -1029,6 +1400,8 @@ else
 
     private void LimpiarFormulario()
     {
+        LateWorkEditandoId = null;
+        AssignmentSeleccionadoId = null;
         LateWorkIdTexto = string.Empty;
         ClientIdTexto = string.Empty;
         TextoMasivo = string.Empty;
@@ -1041,16 +1414,47 @@ else
         EsError = false;
     }
 
-    private void MostrarExito(string mensaje)
+    private void MostrarExito(
+        string mensaje,
+        string titulo = "Operation completed")
     {
         Mensaje = mensaje;
         EsError = false;
+        MostrarResultadoLateWork(titulo, mensaje, "success");
     }
 
-    private void MostrarError(string mensaje)
+    private void MostrarError(
+        string mensaje,
+        string titulo = "Unable to continue")
     {
         Mensaje = mensaje;
         EsError = true;
+        MostrarResultadoLateWork(titulo, mensaje, "error");
+    }
+
+    private void MostrarResultadoLateWork(
+        string titulo,
+        string mensaje,
+        string tipo)
+    {
+        TituloModalResultadoLateWork = titulo;
+        MensajeModalResultadoLateWork = mensaje;
+        TipoModalResultadoLateWork = string.Equals(
+            tipo,
+            "error",
+            StringComparison.OrdinalIgnoreCase)
+                ? "error"
+                : "success";
+
+        MostrarModalResultadoLateWork = true;
+    }
+
+    private void CerrarModalResultadoLateWork()
+    {
+        MostrarModalResultadoLateWork = false;
+        TituloModalResultadoLateWork = string.Empty;
+        MensajeModalResultadoLateWork = string.Empty;
+        TipoModalResultadoLateWork = "success";
     }
 
     private void VolverDashboard()

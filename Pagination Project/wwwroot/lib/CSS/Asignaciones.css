@@ -2981,10 +2981,6 @@ html[data-theme="liquid glass"] .assignments-page .stage-chip-next {
     }
 }
 
-/* ==========================================================================
-   STATUS OF BOOKS BUTTON
-   ========================================================================== */
-
 .assignments-page .btn-status-books {
     display: inline-flex;
     align-items: center;
@@ -3022,10 +3018,6 @@ html[data-theme="liquid glass"] .assignments-page .stage-chip-next {
         transform: none;
         box-shadow: none;
     }
-
-/* ==========================================================================
-   STATUS OF BOOKS — EMPLOYEE REQUIRED MODAL
-   ========================================================================== */
 
 .status-books-modal-backdrop {
     position: fixed;
@@ -3304,10 +3296,6 @@ html[data-theme="liquid glass"] .assignments-page .btn-template-xlsx {
         min-height: 44px;
     }
 }
-
-/* ==========================================================================
-   ASSIGNMENTS SKELETON LOADER
-   ========================================================================== */
 
 .assignments-skeleton-page {
     pointer-events: none;
@@ -3828,13 +3816,6 @@ html[data-theme="dark glass"] .assignments-skeleton-table-row {
     }
 }
 
-
-
-/* ========================================================================== 
-   ASSIGNMENTS TABLE SCROLL FIX
-   Removes the artificial left gutter and adapts the scrollbars to each theme.
-   ========================================================================== */
-
 @media (min-width: 769px) {
     .assignments-page .table-container {
         overflow-x: auto !important;
@@ -3937,4 +3918,556 @@ html[data-theme="dark glass"] .assignments-skeleton-table-row {
             html[data-theme="dark glass"] .assignments-page .table-container::-webkit-scrollbar-thumb:hover {
                 background: rgba(203, 213, 225, 0.82);
             }
+}
+
+.assignments-page {
+    --assign-primary: #2563eb;
+    --assign-primary-strong: #1d4ed8;
+    --assign-primary-soft: rgba(37, 99, 235, 0.12);
+    --assign-text: #0f172a;
+    --assign-muted: #64748b;
+    --assign-card: #ffffff;
+    --assign-soft: #f8fafc;
+    --assign-border: #e2e8f0;
+}
+
+    .assignments-page .page-hero {
+        min-height: 150px;
+        padding: 28px 30px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        background: linear-gradient(115deg, #081827 0%, #0f172a 48%, #111827 100%);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    }
+
+        .assignments-page .page-hero h1 {
+            color: #ffffff;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .assignments-page .page-hero p {
+            max-width: 780px;
+            color: #e5e7eb;
+            font-size: 17px;
+            line-height: 1.4;
+        }
+
+        .assignments-page .page-hero .stat-card {
+            min-width: 150px;
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.10);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+            .assignments-page .page-hero .stat-card span {
+                color: #d1d5db;
+            }
+
+            .assignments-page .page-hero .stat-card strong {
+                color: #ffffff;
+            }
+
+    .assignments-page .form-card,
+    .assignments-page .list-card,
+    .assignments-page .import-result-card {
+        border: 1px solid var(--assign-border);
+        border-radius: 24px;
+        background: var(--assign-card);
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .assignments-page .section-header h2 {
+        color: var(--assign-text);
+        font-weight: 850;
+    }
+
+    .assignments-page .section-header p,
+    .assignments-page .month-filter label,
+    .assignments-page .form-group label {
+        color: var(--assign-muted);
+    }
+
+    .assignments-page .form-control,
+    .assignments-page .employee-filter-select,
+    .assignments-page .filter-select,
+    .assignments-page .search-box,
+    .assignments-page input[type="date"],
+    .assignments-page select {
+        border-color: #dbe4ee;
+        background: var(--assign-soft);
+        color: var(--assign-text);
+    }
+
+        .assignments-page .form-control:focus,
+        .assignments-page .employee-filter-select:focus,
+        .assignments-page .filter-select:focus,
+        .assignments-page .search-box:focus-within,
+        .assignments-page input[type="date"]:focus,
+        .assignments-page select:focus {
+            border-color: var(--assign-primary);
+            background: var(--assign-card);
+            box-shadow: 0 0 0 4px var(--assign-primary-soft);
+        }
+
+    .assignments-page .btn-primary,
+    .assignments-page .assignment-modal-actions button,
+    .assignments-page .temporary-search-button {
+        background: linear-gradient(135deg, var(--assign-primary), var(--assign-primary-strong));
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+    }
+
+    .assignments-page .btn-light,
+    .assignments-page .btn-secondary {
+        background: #eef4ff;
+        color: var(--assign-primary);
+    }
+
+    .assignments-page .btn-template-xlsx {
+        border-color: rgba(37, 99, 235, 0.28);
+        background: #eef4ff;
+        color: var(--assign-primary);
+    }
+
+    .assignments-page .btn-update-xlsx {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .assignments-page .preview-card,
+    .assignments-page .temporary-assignment-preview-card {
+        border-color: #dbeafe;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 52%, #eef4ff 100%);
+    }
+
+        .assignments-page .preview-card span,
+        .assignments-page .temporary-assignment-preview-card span {
+            color: var(--assign-primary);
+        }
+
+    .assignments-page .assignments-table tbody tr {
+        transition: background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+        .assignments-page .assignments-table tbody tr:hover {
+            background: rgba(37, 99, 235, 0.045);
+        }
+
+    .assignments-page .pill,
+    .assignments-page .stage-chip-next {
+        border-color: rgba(37, 99, 235, 0.22);
+        background: #eaf1ff;
+        color: var(--assign-primary-strong);
+    }
+
+    .assignments-page .icon-btn,
+    .assignments-page .actions-cell .icon-btn {
+        box-shadow: 0 8px 18px rgba(190, 18, 60, 0.12);
+    }
+
+.assignment-action-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    overflow-y: auto;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    animation: assignmentModalFade 0.18s ease;
+}
+
+.assignment-action-modal {
+    width: min(470px, 100%);
+    padding: 28px;
+    border: 1px solid #e2e8f0;
+    border-top: 7px solid #2563eb;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32);
+    text-align: center;
+    animation: assignmentModalPop 0.18s ease;
+}
+
+    .assignment-action-modal.error,
+    .assignment-delete-confirm-modal {
+        border-top-color: #e11d48;
+    }
+
+.assignment-action-modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 66px;
+    height: 66px;
+    margin-bottom: 17px;
+    border-radius: 21px;
+    background: linear-gradient(135deg, #dbeafe, #eef4ff);
+    color: #2563eb;
+    font-size: 31px;
+    font-weight: 950;
+    box-shadow: 0 13px 28px rgba(37, 99, 235, 0.17);
+}
+
+    .assignment-action-modal-icon.error,
+    .assignment-action-modal-icon.danger {
+        background: linear-gradient(135deg, #ffe4e6, #fff1f2);
+        color: #be123c;
+        box-shadow: 0 13px 28px rgba(190, 18, 60, 0.15);
+    }
+
+.assignment-action-modal-content h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+}
+
+.assignment-action-modal-content > p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.assignment-result-detail {
+    margin-top: 17px;
+    padding: 13px 15px;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.assignment-action-summary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 18px;
+    text-align: left;
+}
+
+    .assignment-action-summary div {
+        padding: 13px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+    }
+
+    .assignment-action-summary span,
+    .assignment-action-summary small {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .assignment-action-summary strong {
+        display: block;
+        margin-top: 3px;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 850;
+        overflow-wrap: anywhere;
+    }
+
+    .assignment-action-summary small {
+        margin-top: 3px;
+    }
+
+.assignment-action-warning {
+    color: #be123c !important;
+    font-weight: 800;
+}
+
+.assignment-action-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 11px;
+    margin-top: 23px;
+    padding-top: 18px;
+    border-top: 1px solid #e2e8f0;
+}
+
+    .assignment-action-modal-actions.single {
+        justify-content: center;
+    }
+
+.assignment-action-primary,
+.assignment-action-secondary,
+.assignment-action-danger {
+    min-height: 44px;
+    padding: 0 21px;
+    border: none;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 850;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.assignment-action-primary {
+    min-width: 120px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    box-shadow: 0 11px 24px rgba(37, 99, 235, 0.23);
+}
+
+.assignment-action-secondary {
+    background: #eef4ff;
+    color: #2563eb;
+}
+
+.assignment-action-danger {
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    color: #ffffff;
+    box-shadow: 0 11px 24px rgba(190, 18, 60, 0.22);
+}
+
+    .assignment-action-primary:hover,
+    .assignment-action-secondary:hover,
+    .assignment-action-danger:hover {
+        transform: translateY(-1px);
+    }
+
+    .assignment-action-primary:disabled,
+    .assignment-action-secondary:disabled,
+    .assignment-action-danger:disabled {
+        opacity: 0.62;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+@keyframes assignmentModalFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes assignmentModalPop {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+html[data-theme="dark"] .assignments-page,
+html[data-theme="dark glass"] .assignments-page {
+    --assign-primary: #ff5a1f;
+    --assign-primary-strong: #ea580c;
+    --assign-primary-soft: rgba(255, 90, 31, 0.16);
+}
+
+    html[data-theme="dark"] .assignments-page .btn-primary,
+    html[data-theme="dark"] .assignments-page .temporary-search-button,
+    html[data-theme="dark glass"] .assignments-page .btn-primary,
+    html[data-theme="dark glass"] .assignments-page .temporary-search-button {
+        background: linear-gradient(135deg, #ff5a1f, #ea580c);
+        box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24);
+    }
+
+    html[data-theme="dark"] .assignments-page .btn-light,
+    html[data-theme="dark"] .assignments-page .btn-secondary,
+    html[data-theme="dark"] .assignments-page .btn-template-xlsx,
+    html[data-theme="dark glass"] .assignments-page .btn-light,
+    html[data-theme="dark glass"] .assignments-page .btn-secondary,
+    html[data-theme="dark glass"] .assignments-page .btn-template-xlsx {
+        border-color: rgba(255, 90, 31, 0.25);
+        background: rgba(255, 90, 31, 0.12);
+        color: #ff8a5c;
+    }
+
+    html[data-theme="dark"] .assignments-page .btn-update-xlsx,
+    html[data-theme="dark glass"] .assignments-page .btn-update-xlsx {
+        background: linear-gradient(135deg, #ff5a1f, #ea580c);
+    }
+
+    html[data-theme="dark"] .assignments-page .pill,
+    html[data-theme="dark"] .assignments-page .stage-chip-next,
+    html[data-theme="dark glass"] .assignments-page .pill,
+    html[data-theme="dark glass"] .assignments-page .stage-chip-next {
+        border-color: rgba(255, 90, 31, 0.32);
+        background: rgba(255, 90, 31, 0.13);
+        color: #ffb08e;
+    }
+
+    html[data-theme="dark"] .assignments-page .assignments-table tbody tr:hover,
+    html[data-theme="dark glass"] .assignments-page .assignments-table tbody tr:hover {
+        background: rgba(255, 90, 31, 0.065);
+    }
+
+html[data-theme="dark"] .assignment-action-modal,
+html[data-theme="dark glass"] .assignment-action-modal {
+    border-color: rgba(255, 255, 255, 0.12);
+    border-top-color: #ff5a1f;
+    background: #0f172a;
+    color: #f8fafc;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.54);
+}
+
+    html[data-theme="dark"] .assignment-action-modal.error,
+    html[data-theme="dark"] .assignment-delete-confirm-modal,
+    html[data-theme="dark glass"] .assignment-action-modal.error,
+    html[data-theme="dark glass"] .assignment-delete-confirm-modal {
+        border-top-color: #fb7185;
+    }
+
+html[data-theme="dark"] .assignment-action-modal-icon.success,
+html[data-theme="dark glass"] .assignment-action-modal-icon.success {
+    border: 1px solid rgba(255, 90, 31, 0.30);
+    background: rgba(255, 90, 31, 0.15);
+    color: #ff8a5c;
+    box-shadow: 0 13px 28px rgba(255, 90, 31, 0.13);
+}
+
+html[data-theme="dark"] .assignment-action-modal-content h2,
+html[data-theme="dark"] .assignment-action-summary strong,
+html[data-theme="dark glass"] .assignment-action-modal-content h2,
+html[data-theme="dark glass"] .assignment-action-summary strong {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .assignment-action-modal-content > p,
+html[data-theme="dark"] .assignment-action-summary span,
+html[data-theme="dark"] .assignment-action-summary small,
+html[data-theme="dark glass"] .assignment-action-modal-content > p,
+html[data-theme="dark glass"] .assignment-action-summary span,
+html[data-theme="dark glass"] .assignment-action-summary small {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .assignment-result-detail,
+html[data-theme="dark"] .assignment-action-summary div,
+html[data-theme="dark glass"] .assignment-result-detail,
+html[data-theme="dark glass"] .assignment-action-summary div {
+    border-color: rgba(255, 255, 255, 0.11);
+    background: #111c2f;
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .assignment-action-modal-actions,
+html[data-theme="dark glass"] .assignment-action-modal-actions {
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="dark"] .assignment-action-primary,
+html[data-theme="dark glass"] .assignment-action-primary {
+    background: linear-gradient(135deg, #ff5a1f, #ea580c);
+    box-shadow: 0 12px 28px rgba(255, 90, 31, 0.24);
+}
+
+html[data-theme="dark"] .assignment-action-secondary,
+html[data-theme="dark glass"] .assignment-action-secondary {
+    background: rgba(255, 90, 31, 0.12);
+    color: #ff9a70;
+}
+
+html[data-theme="liquid glass"] .assignment-action-modal {
+    border-color: rgba(255, 255, 255, 0.68);
+    background: rgba(255, 255, 255, 0.54);
+    backdrop-filter: blur(34px) saturate(185%);
+    -webkit-backdrop-filter: blur(34px) saturate(185%);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.86);
+}
+
+html[data-theme="liquid glass"] .assignment-result-detail,
+html[data-theme="liquid glass"] .assignment-action-summary div {
+    border-color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.42);
+}
+
+html[data-theme="dark glass"] .assignment-action-modal {
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(30px) saturate(175%);
+    -webkit-backdrop-filter: blur(30px) saturate(175%);
+}
+
+@media (max-width: 768px) {
+    .assignments-page .page-hero h1 {
+        font-size: 24px;
+    }
+
+    .assignments-page .page-hero p {
+        font-size: 13.5px;
+    }
+
+    .assignment-action-modal-backdrop {
+        align-items: flex-start;
+        padding-top: calc(24px + env(safe-area-inset-top));
+        padding-right: max(12px, env(safe-area-inset-right));
+        padding-bottom: calc(18px + env(safe-area-inset-bottom));
+        padding-left: max(12px, env(safe-area-inset-left));
+    }
+
+    .assignment-action-modal {
+        width: 100%;
+        margin-top: 4vh;
+        padding: 23px 19px;
+        border-radius: 20px;
+    }
+
+    .assignment-action-modal-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+        .assignment-action-modal-actions.single {
+            flex-direction: column;
+        }
+
+    .assignment-action-primary,
+    .assignment-action-secondary,
+    .assignment-action-danger {
+        width: 100%;
+        min-height: 46px;
+    }
+}
+
+@media (max-width: 520px) {
+    .assignment-action-modal {
+        padding: 21px 16px;
+        border-radius: 18px;
+    }
+
+    .assignment-action-modal-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        font-size: 27px;
+    }
+
+    .assignment-action-modal-content h2 {
+        font-size: 20px;
+    }
+
+    .assignment-action-modal-content > p {
+        font-size: 14px;
+    }
 }

@@ -34,6 +34,20 @@ namespace Pagination_Project.Models
         [Column("Dirxion_Worked")]
         public bool DirxionWorked { get; set; }
 
+        [Column("Closing_Corrections_Verified")]
+        public bool ClosingCorrectionsVerified { get; set; }
+
+        [Column("Late_Work_Verified")]
+        public bool LateWorkVerified { get; set; }
+
+        [Column("Final_PO_Verified_At")]
+        public DateTime? FinalPOVerifiedAt { get; set; }
+
+        [Column("Final_PO_Verified_By_User_Id")]
+        public Guid? FinalPOVerifiedByUserId { get; set; }
+
         public Asignaciones? Asignacion { get; set; }
+
+        public Usuario? FinalPOVerifiedByUser { get; set; }
     }
 }

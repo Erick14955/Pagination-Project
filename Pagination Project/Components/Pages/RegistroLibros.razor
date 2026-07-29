@@ -290,6 +290,56 @@ else
             </div>
         }
 
+
+        @if (MostrarModalResultadoLibro)
+        {
+            <div class="book-result-modal-overlay"
+                 role="presentation"
+                 @onclick="CerrarModalResultadoLibro">
+                <div class="book-result-modal-card @TipoModalResultadoLibro"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-labelledby="bookResultModalTitle"
+                     @onclick:stopPropagation="true">
+
+                    <div class="book-result-modal-accent"></div>
+
+                    <div class="book-result-modal-content">
+                        <div class="book-result-modal-icon" aria-hidden="true">
+                            @if (TipoModalResultadoLibro == "success")
+                            {
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M20 6 9 17l-5-5"></path>
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="9"></circle>
+                                    <path d="M12 7v6"></path>
+                                    <path d="M12 17h.01"></path>
+                                </svg>
+                            }
+                        </div>
+
+                        <div class="book-result-modal-copy">
+                            <span class="book-result-modal-eyebrow">Book Management</span>
+                            <h3 id="bookResultModalTitle">@TituloModalResultadoLibro</h3>
+                            <p>@MensajeModalResultadoLibro</p>
+                        </div>
+                    </div>
+
+                    <div class="book-result-modal-actions">
+                        <button type="button"
+                                class="book-result-modal-ok"
+                                @onclick="CerrarModalResultadoLibro">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
         @if (PuedeVerFormularioLibro)
         {
             <section class="form-card">
@@ -837,8 +887,6 @@ else
 @code {
     private List<Libros> Libros { get; set; } = new();
 
-    // Estado acumulado de las etapas trabajadas por libro.
-    // Se construye desde Assignments_Worked a través de la asignación del libro.
     private Dictionary<Guid, BookWorkedStages> EtapasTrabajadasPorLibro { get; set; } = new();
 
     private ClaimsPrincipal? _user;
@@ -895,6 +943,11 @@ else
     private ActualizacionLibrosResultado? ResultadoActualizacionModal { get; set; }
     private string TituloModalActualizacionXlsx { get; set; } = "XLSX Books Update";
     private string TipoModalActualizacionXlsx { get; set; } = "success";
+
+    private bool MostrarModalResultadoLibro { get; set; } = false;
+    private string TituloModalResultadoLibro { get; set; } = string.Empty;
+    private string MensajeModalResultadoLibro { get; set; } = string.Empty;
+    private string TipoModalResultadoLibro { get; set; } = "success";
 
     private IEnumerable<Libros> LibrosFiltrados
     {
@@ -1027,10 +1080,6 @@ else
 
             using var workbook = new XLWorkbook();
 
-            // =========================================================
-            // FIRST WORKSHEET: THIS IS THE SHEET THE IMPORTER WILL READ.
-            // DO NOT PLACE ANY TITLE OR EXTRA ROW ABOVE THE HEADER.
-            // =========================================================
             var worksheet = workbook.Worksheets.Add("Books Upload");
 
             var headers = new[]
@@ -1081,7 +1130,6 @@ else
             headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
-            // Required columns: employee_type, Product Name and KGen Product Code.
             foreach (var requiredColumn in new[] { 1, 2, 3 })
             {
                 worksheet.Cell(headerRow, requiredColumn)
@@ -1092,7 +1140,6 @@ else
             worksheet.SheetView.FreezeRows(1);
             headerRange.SetAutoFilter();
 
-            // Date columns accepted by the importer.
             worksheet.Range(
                     firstDataRow,
                     12,
@@ -1107,28 +1154,27 @@ else
                     lastColumn)
                 .Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
-            // Useful widths for data entry.
             var widths = new double[]
             {
-                18, // employee_type
-                34, // Product Name
-                22, // KGen Product Code
-                18, // LSA Code
-                20, // Product Issue
-                20, // Foot Print
-                18, // Legacy Co
-                18, // State
-                22, // Graphics Database
-                18, // Trim Size
-                18, // Bind Plant
-                19, // First Due Printer
-                18, // Proof Extract
-                18, // Extract - Final
-                18, // Memo Extract
-                18, // Dirxion
-                18, // Pub Date
-                22, // SRL Suppression Flag
-                12  // NWP
+                18, 
+                34, 
+                22,
+                18, 
+                20, 
+                20, 
+                18, 
+                18, 
+                22, 
+                18, 
+                18, 
+                19, 
+                18, 
+                18, 
+                18, 
+                18, 
+                18, 
+                22, 
+                12  
             };
 
             for (var column = 1; column <= widths.Length; column++)
@@ -1136,9 +1182,6 @@ else
                 worksheet.Column(column).Width = widths[column - 1];
             }
 
-            // =========================================================
-            // INSTRUCTIONS WORKSHEET
-            // =========================================================
             var instructionsSheet = workbook.Worksheets.Add("Instructions");
 
             instructionsSheet.Cell(1, 1).Value = "Books Upload Template";
@@ -1372,9 +1415,6 @@ else
             instructionsSheet.Row(3).Height = 42;
             instructionsSheet.SheetView.FreezeRows(5);
 
-            // =========================================================
-            // ALLOWED VALUES WORKSHEET
-            // =========================================================
             var allowedValuesSheet = workbook.Worksheets.Add("Allowed Values");
 
             var allowedLists = new List<(string Header, IEnumerable<string> Values)>
@@ -1756,7 +1796,6 @@ else
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            // Importante: se cargan todos, incluso finalizados, para poder reactivar si las fechas nuevas aplican.
             var librosDb = await db.Libros.ToListAsync();
 
             var today = DateOnly.FromDateTime(DateTime.Today);
@@ -1919,7 +1958,6 @@ else
                     }
                 }
 
-                // Datos principales
                 if (!string.IsNullOrWhiteSpace(bookName))
                     libro.BookName = bookName;
 
@@ -1932,7 +1970,6 @@ else
                 if (!string.IsNullOrWhiteSpace(productIssue))
                     libro.ProductIssue = productIssue;
 
-                // Fechas: solo actualiza si la columna existe y trae valor válido.
                 if (proofExtract.HasValue)
                     libro.ProofExtract = proofExtract.Value;
 
@@ -1962,7 +1999,6 @@ else
                 if (pubDate.HasValue)
                     libro.PubDate = pubDate.Value;
 
-                // Catálogos: solo actualiza si el XLSX trae valor.
                 var footPrintText = ReadText(row, headerMap, "Foot Print");
                 var legacyCoText = ReadText(row, headerMap, "Legacy Co");
                 var stateText = ReadText(row, headerMap, "State");
@@ -2018,7 +2054,6 @@ else
                 if (HeaderExists(headerMap, "NWP"))
                     libro.NWP = ReadYesNoBool(row, headerMap, "NWP");
 
-                // Si la nueva fecha Dirxion ya pasó, queda finalizado. Si se actualiza a futuro, se reactiva.
                 libro.Finalizado = libro.DirxionDate != default && libro.DirxionDate < today;
 
                 resultado.LibrosActualizados++;
@@ -2448,9 +2483,13 @@ else
     {
         if (!PuedeCrearOEditarLibro)
         {
-            MostrarMensaje("You do not have permission to save books.", "error");
+            MostrarResultadoLibro(
+                "Unauthorized",
+                "You do not have permission to save books.",
+                "error");
             return;
         }
+
         try
         {
             Guardando = true;
@@ -2458,23 +2497,36 @@ else
 
             if (string.IsNullOrWhiteSpace(Formulario.BookName))
             {
-                MostrarMensaje("Book name is required.", "error");
+                MostrarResultadoLibro(
+                    "Unable to save book",
+                    "Book name is required.",
+                    "error");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(Formulario.KGENCode))
             {
-                MostrarMensaje("KGEN Code is required.", "error");
+                MostrarResultadoLibro(
+                    "Unable to save book",
+                    "KGEN Code is required.",
+                    "error");
                 return;
             }
 
             if (Formulario.EmployeeTypeId <= 0 || !Scope.CanAccess(Formulario.EmployeeTypeId))
             {
-                MostrarMensaje("Select a valid employee type.", "error");
+                MostrarResultadoLibro(
+                    "Unable to save book",
+                    "Select a valid employee type.",
+                    "error");
                 return;
             }
 
+            Formulario.BookName = Formulario.BookName.Trim();
             Formulario.KGENCode = Formulario.KGENCode.Trim();
+
+            var editando = Formulario.Id != Guid.Empty;
+            var nombreLibro = Formulario.BookName;
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
@@ -2485,18 +2537,19 @@ else
 
             if (duplicatedKgen)
             {
-                MostrarMensaje("The KGEN Code already exists. KGEN is unique across DR and Eclerx.", "error");
+                MostrarResultadoLibro(
+                    "Duplicate KGEN Code",
+                    "The KGEN Code already exists. KGEN is unique across DR and Eclerx.",
+                    "error");
                 return;
             }
 
-            if (Formulario.Id == Guid.Empty)
+            if (!editando)
             {
                 Formulario.Id = Guid.NewGuid();
 
                 db.Libros.Add(ClonarLibro(Formulario));
                 await db.SaveChangesAsync();
-
-                MostrarMensaje("Book saved successfully.", "success");
             }
             else
             {
@@ -2506,14 +2559,20 @@ else
 
                 if (libroDb is null)
                 {
-                    MostrarMensaje("The selected book was not found.", "error");
+                    MostrarResultadoLibro(
+                        "Book not found",
+                        "The selected book was not found.",
+                        "error");
                     return;
                 }
 
                 if (libroDb.EmployeeTypeId != Formulario.EmployeeTypeId &&
                     await db.Asignaciones.AnyAsync(a => a.IdLibro == libroDb.Id))
                 {
-                    MostrarMensaje("The employee type cannot be changed because this book already has assignments.", "error");
+                    MostrarResultadoLibro(
+                        "Department cannot be changed",
+                        "The employee type cannot be changed because this book already has assignments.",
+                        "error");
                     return;
                 }
 
@@ -2542,16 +2601,24 @@ else
                 libroDb.NWP = Formulario.NWP;
 
                 await db.SaveChangesAsync();
-
-                MostrarMensaje("Book updated successfully.", "success");
             }
 
             await CargarLibrosAsync();
             LimpiarFormulario();
+
+            MostrarResultadoLibro(
+                editando ? "Book updated" : "Book created",
+                editando
+                    ? $"The book '{nombreLibro}' was updated successfully."
+                    : $"The book '{nombreLibro}' was saved successfully.",
+                "success");
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error saving book: {ex.Message}", "error");
+            MostrarResultadoLibro(
+                "Error saving book",
+                $"The book could not be saved. {ex.Message}",
+                "error");
         }
         finally
         {
@@ -3293,6 +3360,28 @@ else
             return "-";
 
         return fecha.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+    }
+
+    private void MostrarResultadoLibro(string titulo, string mensaje, string tipo)
+    {
+        TituloModalResultadoLibro = titulo;
+        MensajeModalResultadoLibro = mensaje;
+        TipoModalResultadoLibro = string.Equals(
+            tipo,
+            "error",
+            StringComparison.OrdinalIgnoreCase)
+                ? "error"
+                : "success";
+
+        MostrarModalResultadoLibro = true;
+    }
+
+    private void CerrarModalResultadoLibro()
+    {
+        MostrarModalResultadoLibro = false;
+        TituloModalResultadoLibro = string.Empty;
+        MensajeModalResultadoLibro = string.Empty;
+        TipoModalResultadoLibro = "success";
     }
 
     private void MostrarMensaje(string mensaje, string tipo)
