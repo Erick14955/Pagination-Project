@@ -202,8 +202,8 @@
                     var segundos = ObtenerSegundosTranscurridos(item);
 
                     <article class="tracker-assignment-card
-                                                    @(item.IsRunning ? "tracker-card-running" : string.Empty)
-                                                    @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
+                                                                    @(item.IsRunning ? "tracker-card-running" : string.Empty)
+                                                                    @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
 
                         <div class="tracker-card-top">
                             <div class="tracker-book-information">
@@ -375,7 +375,7 @@
 
                 <p>
                     This action will stop the timer and mark the current stage
-                    as worked for today.
+                    as worked.
                 </p>
             </div>
 
@@ -435,6 +435,138 @@
                     else
                     {
                         <span>Finish &amp; Complete</span>
+                    }
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
+@if (MostrarModalVerificacionFinalPO &&
+     AsignacionPendienteFinalizar is not null)
+{
+    <div class="tracker-modal-backdrop tracker-finalpo-backdrop"
+         role="presentation">
+
+        <section class="tracker-modal tracker-finalpo-modal"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="tracker-finalpo-title"
+                 @onclick:stopPropagation="true">
+
+            <div class="tracker-modal-icon tracker-modal-icon-warning"
+                 aria-hidden="true">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                    <path d="M10.3 2.9 1.8 17.2A2 2 0 0 0 3.5 20h17a2 2 0 0 0 1.7-2.8L13.7 2.9a2 2 0 0 0-3.4 0Z"></path>
+                </svg>
+            </div>
+
+            <div class="tracker-modal-copy">
+                <span class="tracker-modal-kicker">
+                    Required Final PO verification
+                </span>
+
+                <h2 id="tracker-finalpo-title">
+                    Confirm Final PO completion
+                </h2>
+
+                <p>
+                    Both confirmations are mandatory. This window will remain
+                    open until the required checks are completed and the
+                    assignment is successfully saved.
+                </p>
+            </div>
+
+            <div class="tracker-modal-summary tracker-finalpo-summary">
+                <div>
+                    <span>Book</span>
+                    <strong>@AsignacionPendienteFinalizar.BookName</strong>
+                </div>
+
+                <div>
+                    <span>KGEN</span>
+                    <strong>@ValorOPlaceholder(AsignacionPendienteFinalizar.KgenCode)</strong>
+                </div>
+
+                <div>
+                    <span>Bind plant</span>
+                    <strong>@ValorOPlaceholder(AsignacionPendienteFinalizar.BindPlantName)</strong>
+                </div>
+
+                <div>
+                    <span>Tracked time</span>
+                    <strong>
+                        @FormatoDuracion(
+                        ObtenerSegundosTranscurridos(
+                        AsignacionPendienteFinalizar))
+                </strong>
+            </div>
+        </div>
+
+        <div class="tracker-finalpo-checks">
+            <label class="tracker-finalpo-check">
+                <input type="checkbox"
+                       @bind="ClosingCorrectionsConfirmed" />
+
+                <span class="tracker-finalpo-checkbox"
+                      aria-hidden="true"></span>
+
+                <span class="tracker-finalpo-check-copy">
+                    <strong>Closing corrections verified</strong>
+                    <small>
+                        I confirm that closing corrections were received,
+                        reviewed and completed when necessary.
+                    </small>
+                </span>
+            </label>
+
+            <label class="tracker-finalpo-check">
+                <input type="checkbox"
+                       @bind="LateWorkConfirmed" />
+
+                <span class="tracker-finalpo-checkbox"
+                      aria-hidden="true"></span>
+
+                <span class="tracker-finalpo-check-copy">
+                    <strong>All late work completed</strong>
+                    <small>
+                        I confirm that all late work for this assignment
+                        has been completed.
+                    </small>
+                </span>
+            </label>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(
+                MensajeVerificacionFinalPO))
+            {
+                <div class="tracker-finalpo-error">
+                    <strong>Final PO cannot be completed</strong>
+                    <span>@MensajeVerificacionFinalPO</span>
+                </div>
+            }
+
+            <div class="tracker-modal-actions tracker-finalpo-actions">
+                <button type="button"
+                        class="tracker-modal-button tracker-modal-button-primary"
+                        disabled="@(!PuedeConfirmarFinalPO)"
+                        @onclick="ConfirmarVerificacionFinalPOAsync">
+
+                    @if (GuardandoRowKey is not null)
+                    {
+                        <span class="button-spinner"></span>
+                        <span>Validating and completing...</span>
+                    }
+                    else
+                    {
+                        <span>Verify &amp; Complete Final PO</span>
                     }
                 </button>
             </div>
@@ -616,7 +748,12 @@
     private bool MensajeEsError;
 
     private bool MostrarModalConfirmacionFinalizacion;
+    private bool MostrarModalVerificacionFinalPO;
     private bool MostrarModalResultado;
+
+    private bool ClosingCorrectionsConfirmed;
+    private bool LateWorkConfirmed;
+    private string MensajeVerificacionFinalPO = string.Empty;
 
     private string TituloModalResultado = string.Empty;
     private string MensajeModalResultado = string.Empty;
@@ -651,6 +788,11 @@
 
     private int TotalCompletadas =>
         AsignacionesDia.Count(x => x.YaCompletada);
+
+    private bool PuedeConfirmarFinalPO =>
+        ClosingCorrectionsConfirmed &&
+        LateWorkConfirmed &&
+        GuardandoRowKey is null;
 
     private long TotalSegundosDelDia =>
         AsignacionesDia.Sum(ObtenerSegundosTranscurridos);
@@ -912,14 +1054,21 @@
                     .OrderByDescending(x => x.CreatedAt)
                     .ToListAsync();
 
-            var trabajadasHoy = assignmentIds.Count == 0
+            /*
+             * Assignments_Worked conserva una sola fila por asignación.
+             * Por eso se cargan todos los registros de esas asignaciones,
+             * sin limitar por Work_Date.
+             */
+            var registrosTrabajados = assignmentIds.Count == 0
                 ? new List<AsignacionTrabajada>()
                 : await db.AsignacionesTrabajadas
                     .AsNoTracking()
                     .Where(x =>
-                        assignmentIds.Contains(x.IdAsignacion) &&
-                        x.FechaTrabajo == FechaTrabajo)
+                        assignmentIds.Contains(x.IdAsignacion))
                     .ToListAsync();
+
+            var trabajadasPorAsignacion = registrosTrabajados
+                .ToLookup(x => x.IdAsignacion);
 
             foreach (var item in data)
             {
@@ -957,10 +1106,14 @@
                         item.EmployeeName;
                 }
 
-                var registroTrabajado = trabajadasHoy
-                    .FirstOrDefault(x =>
-                        x.IdAsignacion ==
-                        item.AssignmentId);
+                var registrosDeLaAsignacion =
+                    trabajadasPorAsignacion[item.AssignmentId];
+
+                var etapaYaCompletada =
+                    registrosDeLaAsignacion.Any(registro =>
+                        EstaEtapaCompletada(
+                            registro,
+                            etapa.Key));
 
                 AsignacionesDia.Add(
                     new AsignacionTrackerVm
@@ -993,6 +1146,9 @@
                         BookName =
                             item.BookName,
 
+                        BindPlantName =
+                            item.BindPlantName,
+
                         StageKey =
                             etapa.Key,
 
@@ -1003,9 +1159,7 @@
                             etapa.Date,
 
                         YaCompletada =
-                            EstaEtapaCompletada(
-                                registroTrabajado,
-                                etapa.Key)
+                            etapaYaCompletada
                     });
             }
 
@@ -1348,6 +1502,29 @@
         AsignacionPendienteFinalizar =
             item;
 
+        MensajeVerificacionFinalPO =
+            string.Empty;
+
+        ClosingCorrectionsConfirmed =
+            false;
+
+        LateWorkConfirmed =
+            false;
+
+        if (RequiereVerificacionFinalPO(item))
+        {
+            MostrarModalConfirmacionFinalizacion =
+                false;
+
+            MostrarModalVerificacionFinalPO =
+                true;
+
+            return;
+        }
+
+        MostrarModalVerificacionFinalPO =
+            false;
+
         MostrarModalConfirmacionFinalizacion =
             true;
     }
@@ -1381,17 +1558,51 @@
         AsignacionPendienteFinalizar =
             null;
 
-        await FinalizarAsync(item);
+        await FinalizarAsync(
+            item,
+            verificacionesFinalPOConfirmadas: false);
+    }
+
+    private async Task ConfirmarVerificacionFinalPOAsync()
+    {
+        var item =
+            AsignacionPendienteFinalizar;
+
+        if (item is null ||
+            GuardandoRowKey is not null)
+        {
+            return;
+        }
+
+        MensajeVerificacionFinalPO =
+            string.Empty;
+
+        if (!ClosingCorrectionsConfirmed ||
+            !LateWorkConfirmed)
+        {
+            MensajeVerificacionFinalPO =
+                "Both confirmations are required before completing Final PO.";
+
+            return;
+        }
+
+        await FinalizarAsync(
+            item,
+            verificacionesFinalPOConfirmadas: true);
     }
 
     private async Task FinalizarAsync(
-        AsignacionTrackerVm item)
+        AsignacionTrackerVm item,
+        bool verificacionesFinalPOConfirmadas)
     {
         if (item.YaCompletada ||
             GuardandoRowKey is not null)
         {
             return;
         }
+
+        var requiereVerificacionFinalPO =
+            RequiereVerificacionFinalPO(item);
 
         var rowKey =
             GetRowKey(item);
@@ -1402,8 +1613,28 @@
         Mensaje =
             string.Empty;
 
+        MensajeVerificacionFinalPO =
+            string.Empty;
+
         try
         {
+            if (requiereVerificacionFinalPO)
+            {
+                if (!verificacionesFinalPOConfirmadas ||
+                    !ClosingCorrectionsConfirmed ||
+                    !LateWorkConfirmed)
+                {
+                    throw new InvalidOperationException(
+                        "Both Final PO confirmations are required.");
+                }
+
+                /*
+                 * Se valida antes de detener el reloj para que, si existe
+                 * late work pendiente, la asignación no sea finalizada.
+                 */
+                await ValidarLateWorkCompletadoAsync(item);
+            }
+
             var ahora =
                 DateTimeOffset.UtcNow;
 
@@ -1416,7 +1647,9 @@
 
             await PersistirCacheSeguroAsync();
 
-            await MarcarEtapaCompletadaAsync(item);
+            await MarcarEtapaCompletadaAsync(
+                item,
+                verificacionesFinalPOConfirmadas);
 
             item.YaCompletada =
                 true;
@@ -1435,6 +1668,11 @@
             UltimoResultadoAsignacion =
                 item;
 
+            if (requiereVerificacionFinalPO)
+            {
+                ResetearVerificacionFinalPO();
+            }
+
             MostrarResultadoTracker(
                 "Assignment completed",
                 $"{item.BookName} was completed successfully.",
@@ -1451,10 +1689,24 @@
             UltimoResultadoAsignacion =
                 null;
 
-            MostrarResultadoTracker(
-                "Assignment could not be completed",
-                $"Details: {ex.Message}",
-                "error");
+            if (requiereVerificacionFinalPO)
+            {
+                MostrarModalVerificacionFinalPO =
+                    true;
+
+                AsignacionPendienteFinalizar =
+                    item;
+
+                MensajeVerificacionFinalPO =
+                    ex.Message;
+            }
+            else
+            {
+                MostrarResultadoTracker(
+                    "Assignment could not be completed",
+                    $"Details: {ex.Message}",
+                    "error");
+            }
         }
         finally
         {
@@ -1464,6 +1716,7 @@
             DetenerRelojSiNoEsNecesario();
         }
     }
+
 
     private void MostrarResultadoTracker(
         string titulo,
@@ -1518,10 +1771,14 @@
         };
 
     private async Task MarcarEtapaCompletadaAsync(
-        AsignacionTrackerVm item)
+        AsignacionTrackerVm item,
+        bool verificacionesFinalPOConfirmadas)
     {
         await using var db =
             await DbFactory.CreateDbContextAsync();
+
+        await using var transaction =
+            await db.Database.BeginTransactionAsync();
 
         var tieneAcceso = await db.Asignaciones
             .AsNoTracking()
@@ -1535,10 +1792,50 @@
                 "The assignment is outside your employee type scope.");
         }
 
+        var requiereVerificacionFinalPO =
+            RequiereVerificacionFinalPO(item);
+
+        if (requiereVerificacionFinalPO)
+        {
+            if (!verificacionesFinalPOConfirmadas ||
+                !ClosingCorrectionsConfirmed ||
+                !LateWorkConfirmed)
+            {
+                throw new InvalidOperationException(
+                    "Both Final PO confirmations are required.");
+            }
+
+            /*
+             * Segunda validación dentro de la operación de guardado.
+             * Evita completar Final PO si apareció late work pendiente
+             * después de abrir el modal.
+             */
+            var lateWorkPendiente =
+                await db.LateWorkActivities
+                    .AsNoTracking()
+                    .CountAsync(x =>
+                        x.AssignmentId ==
+                            item.AssignmentId &&
+                        !x.Completed);
+
+            if (lateWorkPendiente > 0)
+            {
+                throw new InvalidOperationException(
+                    $"This assignment still has {lateWorkPendiente} " +
+                    "incomplete late work activity or activities.");
+            }
+        }
+
+        /*
+         * Una asignación debe conservar una sola fila en Assignments_Worked.
+         * No se filtra por FechaTrabajo porque las etapas pueden completarse
+         * en fechas distintas sobre el mismo registro.
+         */
         var registro = await db.AsignacionesTrabajadas
-            .FirstOrDefaultAsync(x =>
-                x.IdAsignacion == item.AssignmentId &&
-                x.FechaTrabajo == FechaTrabajo);
+            .Where(x =>
+                x.IdAsignacion == item.AssignmentId)
+            .OrderByDescending(x => x.FechaTrabajo)
+            .FirstOrDefaultAsync();
 
         if (registro is null)
         {
@@ -1558,12 +1855,110 @@
                 registro);
         }
 
+        if (requiereVerificacionFinalPO)
+        {
+            var userIdVerificador =
+                await ObtenerUserIdVerificadorAsync(db);
+
+            registro.ClosingCorrectionsVerified =
+                true;
+
+            registro.LateWorkVerified =
+                true;
+
+            registro.FinalPOVerifiedAt =
+                DateTime.UtcNow;
+
+            registro.FinalPOVerifiedByUserId =
+                userIdVerificador;
+        }
+
         MarcarEtapa(
             registro,
             item.StageKey);
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
+
+    private async Task ValidarLateWorkCompletadoAsync(
+        AsignacionTrackerVm item)
+    {
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
+        var lateWorkPendiente =
+            await db.LateWorkActivities
+                .AsNoTracking()
+                .CountAsync(x =>
+                    x.AssignmentId ==
+                        item.AssignmentId &&
+                    !x.Completed);
+
+        if (lateWorkPendiente > 0)
+        {
+            throw new InvalidOperationException(
+                $"This assignment still has {lateWorkPendiente} " +
+                "incomplete late work activity or activities. " +
+                "Complete them before finishing Final PO.");
+        }
+    }
+
+    private async Task<Guid> ObtenerUserIdVerificadorAsync(
+        AppDbContext db)
+    {
+        if (Scope.UserId != Guid.Empty)
+            return Scope.UserId;
+
+        if (CurrentEmployeeId.HasValue &&
+            CurrentEmployeeId.Value != Guid.Empty)
+        {
+            var userId = await db.Users
+                .AsNoTracking()
+                .Where(x =>
+                    x.EmployeeId ==
+                        CurrentEmployeeId.Value)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            if (userId != Guid.Empty)
+                return userId;
+        }
+
+        throw new InvalidOperationException(
+            "The current user could not be identified for the Final PO verification.");
+    }
+
+    private static bool RequiereVerificacionFinalPO(
+        AsignacionTrackerVm item)
+    {
+        return string.Equals(
+                   item.StageKey,
+                   "FinalPO",
+                   StringComparison.OrdinalIgnoreCase) &&
+               !EsBindPlant(
+                   item.BindPlantName,
+                   "IVEAU");
+    }
+
+    private void ResetearVerificacionFinalPO()
+    {
+        MostrarModalVerificacionFinalPO =
+            false;
+
+        ClosingCorrectionsConfirmed =
+            false;
+
+        LateWorkConfirmed =
+            false;
+
+        MensajeVerificacionFinalPO =
+            string.Empty;
+
+        AsignacionPendienteFinalizar =
+            null;
+    }
+
 
     private static void MarcarEtapa(
         AsignacionTrabajada registro,
@@ -1817,18 +2212,44 @@
     {
         var bindPlantName =
             (item.BindPlantName ?? string.Empty)
-            .Trim()
-            .ToUpperInvariant();
+                .Trim()
+                .ToUpperInvariant();
 
-        var esIveau =
-            bindPlantName == "IVEAU" ||
-            bindPlantName == "WSTR";
+        /*
+         * Mantiene exactamente la misma configuración utilizada
+         * por Finish Assignments y DashboardService.
+         */
+        var esIveau = EsBindPlant(
+            bindPlantName,
+            "IVEAU",
+            "WSTR");
+
+        var esAu = EsBindPlant(
+            bindPlantName,
+            "AU");
+
+        var esNz = EsBindPlant(
+            bindPlantName,
+            "NZ");
+
+        /*
+         * Shipping especial solamente para NZ/WSTR.
+         * IVEAU/AU utiliza ShippingDate de la base de datos.
+         */
+        var esNzShipping = EsBindPlant(
+            bindPlantName,
+            "WSTR",
+            "NZ");
 
         var excluirMemoPorBindPlant =
-            bindPlantName == "PREM" ||
-            bindPlantName == "DIRX" ||
-            bindPlantName == "WSTR" ||
-            bindPlantName == "IVEAU";
+            EsBindPlant(
+                bindPlantName,
+                "PREM",
+                "DIRX",
+                "WSTR",
+                "IVEAU",
+                "AU",
+                "NZ");
 
         var proofDisplayDate =
             GetNextBusinessDay(
@@ -1843,14 +2264,14 @@
                 item.MemoExtract);
 
         var finalPODisplayDate =
-            esIveau
-                ? GetPreviousWorkDate(
-                    item.FinalPODate,
-                    3)
-                : item.FinalPODate;
+            ObtenerFinalPODisplayDate(
+                item,
+                esIveau,
+                esAu,
+                esNz);
 
         var shippingDisplayDate =
-            esIveau
+            esNzShipping
                 ? GetPreviousWorkDate(
                     item.ShippingDate,
                     1)
@@ -1885,7 +2306,8 @@
         {
             return new EtapaDia(
                 "FinalPO",
-                "Final PO Date",
+                ObtenerNombreEtapaFinalPO(
+                    bindPlantName),
                 finalPODisplayDate);
         }
 
@@ -1906,6 +2328,109 @@
         }
 
         return null;
+    }
+
+    private static DateOnly ObtenerFinalPODisplayDate(
+        RawAssignmentVm item,
+        bool esIveau,
+        bool esAu,
+        bool esNz)
+    {
+        if (esNz)
+        {
+            return GetSameOrNextBusinessDay(
+                item.MemoExtract);
+        }
+
+        if (esAu)
+        {
+            if (item.MemoExtract == default)
+                return default;
+
+            return GetSameOrNextBusinessDay(
+                item.MemoExtract.AddDays(1));
+        }
+
+        if (esIveau)
+        {
+            return GetPreviousWorkDate(
+                item.FinalPODate,
+                3);
+        }
+
+        return item.FinalPODate;
+    }
+
+    private static string ObtenerNombreEtapaFinalPO(
+        string bindPlantName)
+    {
+        var bindPlantsPermitidos = new[]
+        {
+            "WAUK",
+            "LMRA",
+            "DIRX",
+            "IVEAU",
+            "SUSX",
+            "PREM",
+            "WSTR"
+        };
+
+        var bindPlantEncontrado =
+            bindPlantsPermitidos
+                .FirstOrDefault(codigo =>
+                    EsBindPlant(
+                        bindPlantName,
+                        codigo));
+
+        return string.IsNullOrWhiteSpace(
+                bindPlantEncontrado)
+            ? "Final PO Date"
+            : $"Final PO {bindPlantEncontrado}";
+    }
+
+
+    private static bool EsBindPlant(
+        string? bindPlantName,
+        params string[] codigos)
+    {
+        if (string.IsNullOrWhiteSpace(bindPlantName))
+            return false;
+
+        var normalizado =
+            bindPlantName
+                .Trim()
+                .ToUpperInvariant();
+
+        if (codigos.Any(codigo =>
+                normalizado ==
+                codigo.Trim().ToUpperInvariant()))
+        {
+            return true;
+        }
+
+        var partes = normalizado.Split(
+            new[]
+            {
+                ' ',
+                '-',
+                '_',
+                '/',
+                '\\',
+                ',',
+                ';',
+                '.',
+                '|',
+                '(',
+                ')',
+                '[',
+                ']'
+            },
+            StringSplitOptions.RemoveEmptyEntries);
+
+        return partes.Any(parte =>
+            codigos.Any(codigo =>
+                parte ==
+                codigo.Trim().ToUpperInvariant()));
     }
 
     private static DateOnly GetNextBusinessDay(
@@ -1944,6 +2469,26 @@
         {
             result =
                 result.AddDays(-1);
+        }
+
+        return result;
+    }
+
+    private static DateOnly GetSameOrNextBusinessDay(
+        DateOnly sourceDate)
+    {
+        if (sourceDate == default)
+            return default;
+
+        var result =
+            sourceDate;
+
+        while (result.DayOfWeek is
+               DayOfWeek.Saturday or
+               DayOfWeek.Sunday)
+        {
+            result =
+                result.AddDays(1);
         }
 
         return result;
@@ -2206,6 +2751,9 @@
             string.Empty;
 
         public string BookName { get; set; } =
+            string.Empty;
+
+        public string BindPlantName { get; set; } =
             string.Empty;
 
         public string StageKey { get; set; } =

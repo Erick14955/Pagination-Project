@@ -17,7 +17,7 @@ namespace Pagination_Project.Services
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
 
-            var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = ObtenerFechaHoyRepublicaDominicana();
 
             await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
 
@@ -82,7 +82,7 @@ namespace Pagination_Project.Services
         {
             await using var db = await _dbFactory.CreateDbContextAsync();
 
-            var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = ObtenerFechaHoyRepublicaDominicana();
 
             await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
 
@@ -102,16 +102,18 @@ namespace Pagination_Project.Services
                 DateOnly targetDate,
                 UserDataScope scope)
         {
-            var trabajadasFecha = await db.AsignacionesTrabajadas
-                .AsNoTracking()
-                .Where(x => x.FechaTrabajo == targetDate)
-                .ToListAsync();
-
-            var trabajadasPorAsignacion = trabajadasFecha
-                .GroupBy(x => x.IdAsignacion)
-                .ToDictionary(
-                    x => x.Key,
-                    x => x.First());
+            /*
+             * Assignments_Worked puede contener una sola fila por asignación,
+             * actualizada a medida que se completan las diferentes etapas.
+             *
+             * Por esa razón NO se debe filtrar primero por Work_Date.
+             * Si Proof se trabajó un día y Final PO se trabajó después sobre
+             * la misma fila, Work_Date puede conservar la fecha inicial.
+             *
+             * El dashboard determina la etapa correspondiente a targetDate
+             * usando las fechas del libro, y después revisa si el booleano
+             * de esa etapa está marcado en cualquier registro de la asignación.
+             */
 
             var data = await (
                 from a in db.Asignaciones.AsNoTracking()
@@ -135,10 +137,16 @@ namespace Pagination_Project.Services
 
                 from bp in bindPlantGroup.DefaultIfEmpty()
 
-                where !a.Finalizado &&
-                      !l.Finalizado &&
-                      (scope.ViewAllEmployeeTypes ||
-                       l.EmployeeTypeId == scope.EmployeeTypeId)
+                where
+                    (
+                        (!a.Finalizado && !l.Finalizado) ||
+                        db.AsignacionesTrabajadas.Any(aw =>
+                            aw.IdAsignacion == a.Id)
+                    ) &&
+                    (
+                        scope.ViewAllEmployeeTypes ||
+                        l.EmployeeTypeId == scope.EmployeeTypeId
+                    )
 
                 select new RawAssignmentDashboardDto
                 {
@@ -154,6 +162,7 @@ namespace Pagination_Project.Services
                     Database = d != null
                         ? d.Database_Name
                         : string.Empty,
+
                     EmployeeTypeId = l.EmployeeTypeId,
                     EmployeeTypeCode = et.Code,
 
@@ -175,6 +184,21 @@ namespace Pagination_Project.Services
                 .Distinct()
                 .ToList();
 
+            /*
+             * Se cargan TODOS los registros trabajados de las asignaciones,
+             * sin limitar por Work_Date.
+             */
+            var registrosTrabajados = assignmentIds.Any()
+                ? await db.AsignacionesTrabajadas
+                    .AsNoTracking()
+                    .Where(x =>
+                        assignmentIds.Contains(x.IdAsignacion))
+                    .ToListAsync()
+                : new List<AsignacionTrabajada>();
+
+            var trabajadasPorAsignacion = registrosTrabajados
+                .ToLookup(x => x.IdAsignacion);
+
             var temporalesActivas = assignmentIds.Any()
                 ? await db.TemporaryAssignments
                     .AsNoTracking()
@@ -186,15 +210,10 @@ namespace Pagination_Project.Services
                     .ToListAsync()
                 : new List<TemporaryAssignment>();
 
-            var finalPOTrabajados = assignmentIds.Any()
-                ? await db.AsignacionesTrabajadas
-                    .AsNoTracking()
-                    .Where(x =>
-                        assignmentIds.Contains(x.IdAsignacion) &&
-                        x.FinalPOWorked)
-                    .OrderByDescending(x => x.FechaTrabajo)
-                    .ToListAsync()
-                : new List<AsignacionTrabajada>();
+            var finalPOTrabajados = registrosTrabajados
+                .Where(x => x.FinalPOWorked)
+                .OrderByDescending(x => x.FechaTrabajo)
+                .ToList();
 
             var pending = new List<AssignedBookDashboardDto>();
             var completed = new List<AssignedBookDashboardDto>();
@@ -208,13 +227,18 @@ namespace Pagination_Project.Services
                 if (stageInfo is null)
                     continue;
 
-                trabajadasPorAsignacion.TryGetValue(
-                    item.AssignmentId,
-                    out var registroTrabajado);
+                var registrosDeLaAsignacion =
+                    trabajadasPorAsignacion[item.AssignmentId];
 
-                var etapaCompletada = EstaEtapaCompletada(
-                    registroTrabajado,
-                    stageInfo.StageKey);
+                /*
+                 * Se valida el booleano de la etapa programada para targetDate.
+                 * Work_Date no se utiliza para decidir si está completada.
+                 */
+                var etapaCompletada =
+                    registrosDeLaAsignacion.Any(registro =>
+                        EstaEtapaCompletada(
+                            registro,
+                            stageInfo.StageKey));
 
                 var registroFinalPO = finalPOTrabajados
                     .FirstOrDefault(x =>
@@ -960,6 +984,48 @@ namespace Pagination_Project.Services
             }
 
             return result;
+        }
+
+        private static DateOnly ObtenerFechaHoyRepublicaDominicana()
+        {
+            var utcNow = DateTime.UtcNow;
+
+            try
+            {
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(
+                    "America/Santo_Domingo");
+
+                var localDateTime =
+                    TimeZoneInfo.ConvertTimeFromUtc(
+                        utcNow,
+                        timeZone);
+
+                return DateOnly.FromDateTime(localDateTime);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                try
+                {
+                    var windowsTimeZone =
+                        TimeZoneInfo.FindSystemTimeZoneById(
+                            "SA Western Standard Time");
+
+                    var localDateTime =
+                        TimeZoneInfo.ConvertTimeFromUtc(
+                            utcNow,
+                            windowsTimeZone);
+
+                    return DateOnly.FromDateTime(localDateTime);
+                }
+                catch
+                {
+                    return DateOnly.FromDateTime(DateTime.Today);
+                }
+            }
+            catch (InvalidTimeZoneException)
+            {
+                return DateOnly.FromDateTime(DateTime.Today);
+            }
         }
 
         private static async Task
