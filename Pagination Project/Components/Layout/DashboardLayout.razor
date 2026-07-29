@@ -245,13 +245,12 @@
             user.FindFirst("PermissionLevel")?.Value ??
             string.Empty;
 
-        return lvlId == "4" ||
+        return lvlId is "3" or "4" ||
+               role.Equals(
+                   "Assistant",
+                   StringComparison.OrdinalIgnoreCase) ||
                role.Equals(
                    "Employee",
-                   StringComparison.OrdinalIgnoreCase) ||
-                   lvlId == "4" ||
-                   role.Equals(
-                   "Assistant",
                    StringComparison.OrdinalIgnoreCase);
     }
 

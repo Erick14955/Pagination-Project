@@ -822,10 +822,9 @@
     }
 
     private static bool PuedeAccederAlTimeTracker(
-    ClaimsPrincipal user)
+        ClaimsPrincipal user)
     {
-        var lvlId =
-            user.FindFirst("LvlId")?.Value;
+        var lvlId = user.FindFirst("LvlId")?.Value;
 
         var role =
             user.FindFirst(ClaimTypes.Role)?.Value ??
@@ -834,12 +833,12 @@
             user.FindFirst("PermissionLevel")?.Value ??
             string.Empty;
 
-        return lvlId == "4" ||
-               role.Equals(
-                   "Employee",
-                   StringComparison.OrdinalIgnoreCase) ||
+        return lvlId is "3" or "4" ||
                role.Equals(
                    "Assistant",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "Employee",
                    StringComparison.OrdinalIgnoreCase);
     }
 
