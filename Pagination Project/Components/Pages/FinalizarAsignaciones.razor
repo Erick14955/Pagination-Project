@@ -500,9 +500,12 @@
                 .OrderByDescending(x => x.CreatedAt)
                 .ToListAsync();
 
-            var trabajadasHoy = await db.AsignacionesTrabajadas
+            // Se cargan todos los registros de las asignaciones mostradas,
+            // sin filtrar por fecha. Cada asignación debe tener un único
+            // registro acumulativo en Assignments_Worked.
+            var registrosTrabajados = await db.AsignacionesTrabajadas
                 .AsNoTracking()
-                .Where(x => x.FechaTrabajo == Hoy)
+                .Where(x => assignmentIds.Contains(x.IdAsignacion))
                 .ToListAsync();
 
             AsignacionesDia.Clear();
@@ -527,7 +530,7 @@
                 if (string.IsNullOrWhiteSpace(empleadoResponsableNombre))
                     empleadoResponsableNombre = item.EmployeeName;
 
-                var registroTrabajado = trabajadasHoy
+                var registroTrabajado = registrosTrabajados
                     .FirstOrDefault(x => x.IdAsignacion == item.AssignmentId);
 
                 AsignacionesDia.Add(new AsignacionDiaVm
@@ -932,10 +935,10 @@
                     "One or more assignments are outside your employee type scope.");
             }
 
+            // La búsqueda se realiza únicamente por AssignmentId.
+            // La fecha no forma parte de la identidad del registro trabajado.
             var registrosExistentes = await db.AsignacionesTrabajadas
-                .Where(x =>
-                    asignacionIds.Contains(x.IdAsignacion) &&
-                    x.FechaTrabajo == Hoy)
+                .Where(x => asignacionIds.Contains(x.IdAsignacion))
                 .ToListAsync();
 
             var verifiedAt = DateTime.UtcNow;
@@ -944,8 +947,7 @@
             {
                 var registro = registrosExistentes
                     .FirstOrDefault(x =>
-                        x.IdAsignacion == item.AssignmentId &&
-                        x.FechaTrabajo == Hoy);
+                        x.IdAsignacion == item.AssignmentId);
 
                 if (registro is null)
                 {
