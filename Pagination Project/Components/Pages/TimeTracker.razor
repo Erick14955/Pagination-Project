@@ -202,8 +202,8 @@
                     var segundos = ObtenerSegundosTranscurridos(item);
 
                     <article class="tracker-assignment-card
-                                                                    @(item.IsRunning ? "tracker-card-running" : string.Empty)
-                                                                    @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
+                                                                            @(item.IsRunning ? "tracker-card-running" : string.Empty)
+                                                                            @(item.YaCompletada ? "tracker-card-completed" : string.Empty)">
 
                         <div class="tracker-card-top">
                             <div class="tracker-book-information">
@@ -1628,10 +1628,9 @@
                 }
 
                 /*
-                 * Se valida antes de detener el reloj para que, si existe
-                 * late work pendiente, la asignación no sea finalizada.
+                 * La confirmación de Late Work se registra directamente.
+                 * No se consulta la tabla LateWorkActivities.
                  */
-                await ValidarLateWorkCompletadoAsync(item);
             }
 
             var ahora =
@@ -1776,9 +1775,6 @@
         await using var db =
             await DbFactory.CreateDbContextAsync();
 
-        await using var transaction =
-            await db.Database.BeginTransactionAsync();
-
         var tieneAcceso = await db.Asignaciones
             .AsNoTracking()
             .ApplyScope(Scope)
@@ -1796,6 +1792,10 @@
 
         if (requiereVerificacionFinalPO)
         {
+            /*
+             * Se mantienen las dos confirmaciones obligatorias,
+             * pero no se consulta LateWorkActivities.
+             */
             if (!verificacionesFinalPOConfirmadas ||
                 !ClosingCorrectionsConfirmed ||
                 !LateWorkConfirmed)
@@ -1803,38 +1803,16 @@
                 throw new InvalidOperationException(
                     "Both Final PO confirmations are required.");
             }
-
-            /*
-             * Segunda validación dentro de la operación de guardado.
-             * Evita completar Final PO si apareció late work pendiente
-             * después de abrir el modal.
-             */
-            var lateWorkPendiente =
-                await db.LateWorkActivities
-                    .AsNoTracking()
-                    .CountAsync(x =>
-                        x.AssignmentId ==
-                            item.AssignmentId &&
-                        !x.Completed);
-
-            if (lateWorkPendiente > 0)
-            {
-                throw new InvalidOperationException(
-                    $"This assignment still has {lateWorkPendiente} " +
-                    "incomplete late work activity or activities.");
-            }
         }
 
         /*
-         * Una asignación debe conservar una sola fila en Assignments_Worked.
-         * No se filtra por FechaTrabajo porque las etapas pueden completarse
-         * en fechas distintas sobre el mismo registro.
+         * Assignments_Worked conserva una sola fila por asignación.
+         * La fecha no forma parte de la identidad del registro porque
+         * sus etapas pueden completarse en fechas diferentes.
          */
         var registro = await db.AsignacionesTrabajadas
-            .Where(x =>
-                x.IdAsignacion == item.AssignmentId)
-            .OrderByDescending(x => x.FechaTrabajo)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(x =>
+                x.IdAsignacion == item.AssignmentId);
 
         if (registro is null)
         {
@@ -1876,31 +1854,12 @@
             registro,
             item.StageKey);
 
+        /*
+         * Un único SaveChangesAsync ya se ejecuta de forma atómica.
+         * No se abre una transacción manual porque el contexto utiliza
+         * NpgsqlRetryingExecutionStrategy mediante EnableRetryOnFailure.
+         */
         await db.SaveChangesAsync();
-        await transaction.CommitAsync();
-    }
-
-    private async Task ValidarLateWorkCompletadoAsync(
-        AsignacionTrackerVm item)
-    {
-        await using var db =
-            await DbFactory.CreateDbContextAsync();
-
-        var lateWorkPendiente =
-            await db.LateWorkActivities
-                .AsNoTracking()
-                .CountAsync(x =>
-                    x.AssignmentId ==
-                        item.AssignmentId &&
-                    !x.Completed);
-
-        if (lateWorkPendiente > 0)
-        {
-            throw new InvalidOperationException(
-                $"This assignment still has {lateWorkPendiente} " +
-                "incomplete late work activity or activities. " +
-                "Complete them before finishing Final PO.");
-        }
     }
 
     private async Task<Guid> ObtenerUserIdVerificadorAsync(
