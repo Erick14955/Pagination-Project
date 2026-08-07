@@ -57,17 +57,17 @@ else
             <div class="late-stats">
                 <div class="late-stat-card">
                     <span>Total</span>
-                    <strong>@LateWorks.Count</strong>
+                    <strong>@TotalLateWorkGroups</strong>
                 </div>
 
                 <div class="late-stat-card success">
                     <span>Completed</span>
-                    <strong>@LateWorks.Count(x => x.Completed)</strong>
+                    <strong>@CompletedLateWorkGroups</strong>
                 </div>
 
                 <div class="late-stat-card warning">
                     <span>Pending</span>
-                    <strong>@LateWorks.Count(x => !x.Completed)</strong>
+                    <strong>@PendingLateWorkGroups</strong>
                 </div>
             </div>
         </section>
@@ -97,22 +97,110 @@ else
                         <p>
                             @(LateWorkEditandoId.HasValue
                                                 ? "Update the selected late work activity and save the changes."
-                                                : "Select the assignment and enter one or multiple late work activities.")
+                                                : "Select one or multiple assignments and assign one or multiple late work activities at once.")
                 </p>
             </div>
 
-                    <div class="form-group">
-                        <label>Assignment</label>
-                        <select @bind="AssignmentSeleccionadoId">
-                            <option value="">Select assignment</option>
-                    @foreach (var item in Asignaciones)
-                            {
-                                <option value="@item.Id">
-                                    @item.DisplayName
-                                </option>
-                            }
-                    </select>
-                </div>
+            @if (LateWorkEditandoId.HasValue)
+                    {
+                        <div class="form-group">
+                            <label>Assignment</label>
+                            <select @bind="AssignmentSeleccionadoId">
+                                <option value="">Select assignment</option>
+                                @foreach (var item in Asignaciones)
+                                {
+                                    <option value="@item.Id">
+                                        @item.DisplayName
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            <label>Assignments</label>
+                            <input type="text"
+                                   placeholder="Search book, employee, KGEN or LSA..."
+                                   @bind="BusquedaAsignacionesRegistro"
+                                   @bind:event="oninput" />
+                        </div>
+
+                        <div class="bulk-actions">
+                            <label class="check-all">
+                                <input type="checkbox"
+                                       checked="@TodasAsignacionesRegistroSeleccionadas"
+                                       @onchange="SeleccionarTodasAsignacionesRegistro" />
+                                Select visible assignments
+                            </label>
+
+                            <button type="button"
+                                    class="btn-light"
+                                    disabled="@Procesando"
+                                    @onclick="LimpiarAsignacionesRegistro">
+                                Clear assignments
+                            </button>
+                        </div>
+
+                        <div class="table-wrap" style="max-height:320px; overflow:auto;">
+                            <table class="late-work-table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Assignment</th>
+                                        @if (Scope.ViewAllEmployeeTypes)
+                                        {
+                                            <th>Department</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!AsignacionesRegistroFiltradas.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="@(Scope.ViewAllEmployeeTypes ? 3 : 2)"
+                                                class="empty-cell"
+                                                data-label="">
+                                                No assignments found.
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var item in AsignacionesRegistroFiltradas)
+                                        {
+                                            <tr class="@(AssignmentSeleccionados.Contains(item.Id) ? "row-selected" : "")">
+                                                <td data-label="Select">
+                                                    <input type="checkbox"
+                                                           checked="@AssignmentSeleccionados.Contains(item.Id)"
+                                                           @onchange="e => ToggleAssignmentRegistro(item.Id, e)" />
+                                                </td>
+                                                <td data-label="Assignment">
+                                                    <strong>@item.DisplayName</strong>
+                                                    <div style="margin-top:4px; font-size:.82rem; opacity:.72;">
+                                                        KGEN: @(string.IsNullOrWhiteSpace(item.KgenCode) ? "-" : item.KgenCode)
+                                                        &nbsp;·&nbsp;
+                                                        LSA: @(string.IsNullOrWhiteSpace(item.LsaCode) ? "-" : item.LsaCode)
+                                                    </div>
+                                                </td>
+                                                @if (Scope.ViewAllEmployeeTypes)
+                                                {
+                                                    <td data-label="Department">
+                                                        <span class="status pending">@item.EmployeeTypeCode</span>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="readonly-warning">
+                            @AssignmentSeleccionados.Count assignment(s) selected.
+                            Every Late Work entered below will be assigned to all selected assignments.
+                        </div>
+                    }
 
                 <div class="form-group">
                     <label>Late Work ID</label>
@@ -137,7 +225,7 @@ else
                                             ? "Saving..."
                                             : LateWorkEditandoId.HasValue
                                             ? "Update Activity"
-                                            : "Save One")
+                                            : "Assign to Selected")
                 </button>
 
                         <button type="button" class="btn-light" @onclick="LimpiarFormulario">
@@ -166,23 +254,23 @@ else
                         <div class="bulk-box">
                             <label>Bulk Register</label>
                             <p>
-                                Enter one record per line using this format:
+                                Enter one Late Work per line using this format:
                                 <strong>LateWorkId, ClientId</strong>
                             </p>
 
                             <textarea rows="8"
                                       placeholder="Example:
-                                                            100234, 24001
-                                                            100235, 24002
-                                                            100236, 24003"
+                                                                                    100234, 24001
+                                                                                    100235, 24002
+                                                                                    100236, 24003"
                                       @bind="TextoMasivo">
-                                        </textarea>
+                                                                </textarea>
 
                             <button type="button"
                                     class="btn-dark"
                                     disabled="@Procesando"
                                     @onclick="GuardarMasivoAsync">
-                                @(Procesando ? "Saving..." : "Save Bulk")
+                                @(Procesando ? "Saving..." : "Assign All to Selected")
                             </button>
                         </div>
                     }
@@ -226,15 +314,16 @@ else
                         <label>Status</label>
                         <select @bind="FiltroEstado" @bind:after="AplicarFiltro">
                             <option value="all">All</option>
-                            <option value="pending">Pending</option>
-                            <option value="completed">Completed</option>
+                            <option value="pending">Pending / Partial</option>
+                            <option value="partial">Partial</option>
+                            <option value="completed">Completed Total</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Search</label>
                         <input type="text"
-                               placeholder="Late work ID or client ID"
+                               placeholder="Late Work ID, Client ID, KGEN, LSA, book or employee..."
                                @bind="TextoBuscar"
                                @bind:event="oninput"
                                @bind:after="AplicarFiltro" />
@@ -246,12 +335,12 @@ else
                     <div class="bulk-actions">
                         <label class="check-all">
                             <input type="checkbox" checked="@TodosSeleccionados" @onchange="SeleccionarTodos" />
-                            Select visible pending
+                            Select my visible pending
                         </label>
 
                         <button type="button"
                                 class="btn-complete-selected"
-                                disabled="@(!LateWorksFiltrados.Any(x => x.Seleccionado && !x.Completed) || Procesando)"
+                                disabled="@(!LateWorksFiltrados.Any(x => x.Seleccionado && !x.Completed && x.EsAsignacionPropia) || Procesando)"
                                 @onclick="CompletarSeleccionadosAsync">
                             Complete Selected
                         </button>
@@ -280,7 +369,8 @@ else
                                 {
                                     <th>Department</th>
                                 }
-                                <th>Status</th>
+                                <th>My Assignment Status</th>
+                                <th>Overall Progress</th>
                                 <th>Completed At</th>
 
                                 @if (PuedeCompletarLateWork || PuedeEditarLateWork || PuedeEliminarLateWork)
@@ -307,9 +397,13 @@ else
                                         @if (PuedeCompletarLateWork)
                                         {
                                             <td data-label="Select">
-                                                @if (!item.Completed)
+                                                @if (!item.Completed && item.EsAsignacionPropia)
                                                 {
                                                     <input type="checkbox" @bind="item.Seleccionado" />
+                                                }
+                                                else if (!item.Completed)
+                                                {
+                                                    <input type="checkbox" disabled />
                                                 }
                                             </td>
                                         }
@@ -320,7 +414,14 @@ else
 
                                         <td data-label="Client ID">@item.ClientId</td>
 
-                                        <td data-label="Assignment">@item.AssignmentName</td>
+                                        <td data-label="Assignment">
+                                            <strong>@item.AssignmentName</strong>
+                                            <div style="margin-top:4px; font-size:.82rem; opacity:.72;">
+                                                KGEN: @(string.IsNullOrWhiteSpace(item.KgenCode) ? "-" : item.KgenCode)
+                                                &nbsp;·&nbsp;
+                                                LSA: @(string.IsNullOrWhiteSpace(item.LsaCode) ? "-" : item.LsaCode)
+                                            </div>
+                                        </td>
 
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
@@ -332,9 +433,38 @@ else
                                             {
                                                 <span class="status completed">Completed</span>
                                             }
+                                            else if (item.EsAsignacionPropia)
+                                            {
+                                                <span class="status pending">Pending - Mine</span>
+                                            }
                                             else
                                             {
-                                                <span class="status pending">Pending</span>
+                                                <span class="status pending">Pending - Read only</span>
+                                            }
+                                        </td>
+
+                                        @{
+                                            var progreso = ObtenerProgresoLateWork(item);
+                                        }
+
+                                        <td data-label="Overall Progress">
+                                            @if (progreso.Total > 0 && progreso.Completed == progreso.Total)
+                                            {
+                                                <span class="status completed">
+                                                    Completed Total (@progreso.Completed/@progreso.Total)
+                                                </span>
+                                            }
+                                            else if (progreso.Completed > 0)
+                                            {
+                                                <span class="status pending">
+                                                    Partial (@progreso.Completed/@progreso.Total)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status pending">
+                                                    Pending Total (0/@progreso.Total)
+                                                </span>
                                             }
                                     </td>
 
@@ -350,18 +480,22 @@ else
                                                 <div class="row-actions">
                                                     @if (PuedeCompletarLateWork)
                                                     {
-                                                        @if (!item.Completed)
+                                                        @if (item.Completed)
+                                                        {
+                                                            <span class="done-text">Done</span>
+                                                        }
+                                                        else if (item.EsAsignacionPropia)
                                                         {
                                                             <button type="button"
                                                                     class="btn-small-complete"
                                                                     disabled="@Procesando"
                                                                     @onclick="() => CompletarUnoAsync(item.Id)">
-                                                                Complete
+                                                                Complete My Book
                                                             </button>
                                                         }
                                                         else
                                                         {
-                                                            <span class="done-text">Done</span>
+                                                            <span class="done-text">Read only</span>
                                                         }
                                                     }
 
@@ -530,6 +664,12 @@ else
 @code {
     private Guid? AssignmentSeleccionadoId { get; set; }
 
+    private HashSet<Guid> AssignmentSeleccionados { get; set; } = new();
+
+    private string BusquedaAsignacionesRegistro { get; set; } = string.Empty;
+
+    private Guid? CurrentEmployeeId { get; set; }
+
     private string LateWorkIdTexto { get; set; } = string.Empty;
 
     private string ClientIdTexto { get; set; } = string.Empty;
@@ -576,16 +716,71 @@ else
     private bool PuedeCompletarLateWork => PermisosUsuarioActual?.CompleteLateWork == true;
 
     private int ColspanTabla =>
-        5 +
+        6 +
         (Scope.ViewAllEmployeeTypes ? 1 : 0) +
         (PuedeCompletarLateWork ? 1 : 0) +
         ((PuedeCompletarLateWork || PuedeEditarLateWork || PuedeEliminarLateWork) ? 1 : 0);
+
+    private int TotalLateWorkGroups =>
+        LateWorks
+            .Select(x => (x.LateWorkId, x.ClientId))
+            .Distinct()
+            .Count();
+
+    private int CompletedLateWorkGroups =>
+        LateWorks
+            .Select(x => (x.LateWorkId, x.ClientId))
+            .Distinct()
+            .Count(key =>
+                ProgresoGlobalLateWork.TryGetValue(key, out var progreso) &&
+                progreso.Total > 0 &&
+                progreso.Completed == progreso.Total);
+
+    private int PendingLateWorkGroups =>
+        TotalLateWorkGroups - CompletedLateWorkGroups;
+
+    private IEnumerable<AssignmentComboItem> AsignacionesRegistroFiltradas
+    {
+        get
+        {
+            IEnumerable<AssignmentComboItem> query = Asignaciones;
+
+            if (!string.IsNullOrWhiteSpace(BusquedaAsignacionesRegistro))
+            {
+                var term = BusquedaAsignacionesRegistro.Trim();
+
+                query = query.Where(x =>
+                    x.DisplayName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    x.KgenCode.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    x.LsaCode.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    x.BookName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    x.EmployeeName.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return query;
+        }
+    }
+
+    private bool TodasAsignacionesRegistroSeleccionadas
+    {
+        get
+        {
+            var visibles = AsignacionesRegistroFiltradas.ToList();
+
+            return visibles.Any() &&
+                   visibles.All(x => AssignmentSeleccionados.Contains(x.Id));
+        }
+    }
 
     private List<AssignmentComboItem> Asignaciones { get; set; } = new();
 
     private List<LateWorkListItem> LateWorks { get; set; } = new();
 
     private List<LateWorkListItem> LateWorksFiltrados { get; set; } = new();
+
+    private Dictionary<(long LateWorkId, long ClientId), (int Completed, int Total)>
+        ProgresoGlobalLateWork
+    { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -611,6 +806,24 @@ else
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
             Scope = await UserDataScopeService.GetScopeAsync(user);
+
+            CurrentEmployeeId = Scope.EmployeeId;
+
+            if (!CurrentEmployeeId.HasValue ||
+                CurrentEmployeeId.Value == Guid.Empty)
+            {
+                var employeeClaim =
+                    user.FindFirst("EmployeeId")?.Value ??
+                    user.FindFirst("Employee_Id")?.Value ??
+                    user.FindFirst("EmpleadoId")?.Value ??
+                    user.FindFirst("IdEmpleado")?.Value;
+
+                if (Guid.TryParse(employeeClaim, out var employeeId) &&
+                    employeeId != Guid.Empty)
+                {
+                    CurrentEmployeeId = employeeId;
+                }
+            }
 
             if (user?.Identity?.IsAuthenticated != true)
             {
@@ -669,6 +882,11 @@ else
             .Select(x => new AssignmentComboItem
             {
                 Id = x.Id,
+                EmployeeId = x.IdEmpleado,
+                BookName = x.Libro != null ? x.Libro.BookName : "Book without name",
+                EmployeeName = x.Empleado != null ? x.Empleado.Nombre : "Employee without name",
+                KgenCode = x.Libro != null ? (x.Libro.KGENCode ?? string.Empty) : string.Empty,
+                LsaCode = x.Libro != null ? (x.Libro.LSACode ?? string.Empty) : string.Empty,
                 EmployeeTypeCode = x.Libro != null && x.Libro.EmployeeType != null
                     ? x.Libro.EmployeeType.Code
                     : "",
@@ -700,13 +918,31 @@ else
             {
                 Id = x.Id,
                 AssignmentId = x.AssignmentId,
+                EmployeeId = x.Assignment != null ? x.Assignment.IdEmpleado : Guid.Empty,
                 EmployeeTypeCode = x.Assignment != null && x.Assignment.Libro != null && x.Assignment.Libro.EmployeeType != null
                     ? x.Assignment.Libro.EmployeeType.Code
                     : "",
                 LateWorkId = x.LateWorkId,
                 ClientId = x.ClientId,
+                BookName =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? x.Assignment.Libro.BookName
+                        : "Book without name",
+                EmployeeName =
+                    x.Assignment != null && x.Assignment.Empleado != null
+                        ? x.Assignment.Empleado.Nombre
+                        : "Employee without name",
+                KgenCode =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? (x.Assignment.Libro.KGENCode ?? string.Empty)
+                        : string.Empty,
+                LsaCode =
+                    x.Assignment != null && x.Assignment.Libro != null
+                        ? (x.Assignment.Libro.LSACode ?? string.Empty)
+                        : string.Empty,
                 Completed = x.Completed,
                 CompletedAt = x.CompletedAt,
+                CreatedAt = x.CreatedAt,
                 AssignmentName =
                     x.Assignment != null
                         ? ((x.Assignment.Libro != null ? x.Assignment.Libro.BookName : "Book without name")
@@ -715,6 +951,131 @@ else
                         : "Assignment not found"
             })
             .ToListAsync();
+
+        ProgresoGlobalLateWork.Clear();
+
+        var clavesVisibles = LateWorks
+            .Select(x => (x.LateWorkId, x.ClientId))
+            .Distinct()
+            .ToHashSet();
+
+        if (clavesVisibles.Any())
+        {
+            var lateWorkIdsVisibles = clavesVisibles
+                .Select(x => x.LateWorkId)
+                .Distinct()
+                .ToList();
+
+            var clientIdsVisibles = clavesVisibles
+                .Select(x => x.ClientId)
+                .Distinct()
+                .ToList();
+
+            var progresoRows = await db.LateWorkActivities
+                .AsNoTracking()
+                .Where(x =>
+                    lateWorkIdsVisibles.Contains(x.LateWorkId) &&
+                    clientIdsVisibles.Contains(x.ClientId) &&
+                    x.Assignment != null &&
+                    !x.Assignment.Finalizado &&
+                    x.Assignment.Libro != null &&
+                    !x.Assignment.Libro.Finalizado)
+                .Select(x => new
+                {
+                    x.LateWorkId,
+                    x.ClientId,
+                    x.Completed
+                })
+                .ToListAsync();
+
+            ProgresoGlobalLateWork = progresoRows
+                .Where(x =>
+                    clavesVisibles.Contains(
+                        (x.LateWorkId, x.ClientId)))
+                .GroupBy(x => new
+                {
+                    x.LateWorkId,
+                    x.ClientId
+                })
+                .ToDictionary(
+                    g => (g.Key.LateWorkId, g.Key.ClientId),
+                    g => (
+                        Completed: g.Count(x => x.Completed),
+                        Total: g.Count()));
+        }
+
+        var assignmentIdsParaResponsabilidad =
+            Asignaciones
+                .Select(x => x.Id)
+                .Concat(LateWorks.Select(x => x.AssignmentId))
+                .Distinct()
+                .ToList();
+
+        var temporalesFinalPO = await db.TemporaryAssignments
+            .AsNoTracking()
+            .Include(x => x.TemporaryEmployee)
+            .Where(x =>
+                x.Active &&
+                x.FinalPO &&
+                assignmentIdsParaResponsabilidad.Contains(x.AssignmentId))
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
+        foreach (var item in Asignaciones)
+        {
+            var temporal = temporalesFinalPO
+                .FirstOrDefault(x =>
+                    x.AssignmentId == item.Id);
+
+            if (temporal is not null)
+            {
+                item.EmployeeId =
+                    temporal.TemporaryEmployeeId;
+
+                if (!string.IsNullOrWhiteSpace(
+                        temporal.TemporaryEmployee?.Nombre))
+                {
+                    item.EmployeeName =
+                        temporal.TemporaryEmployee.Nombre;
+                }
+            }
+
+            item.DisplayName =
+                (Scope.ViewAllEmployeeTypes
+                    ? "[" + item.EmployeeTypeCode + "] "
+                    : "")
+                + item.BookName
+                + " - "
+                + item.EmployeeName;
+        }
+
+        foreach (var item in LateWorks)
+        {
+            var temporal = temporalesFinalPO
+                .FirstOrDefault(x =>
+                    x.AssignmentId == item.AssignmentId);
+
+            if (temporal is not null)
+            {
+                item.EmployeeId =
+                    temporal.TemporaryEmployeeId;
+
+                if (!string.IsNullOrWhiteSpace(
+                        temporal.TemporaryEmployee?.Nombre))
+                {
+                    item.EmployeeName =
+                        temporal.TemporaryEmployee.Nombre;
+                }
+            }
+
+            item.AssignmentName =
+                item.BookName + " - " + item.EmployeeName;
+
+            item.EsAsignacionPropia =
+                CurrentEmployeeId.HasValue &&
+                CurrentEmployeeId.Value != Guid.Empty &&
+                item.EmployeeId == CurrentEmployeeId.Value;
+        }
 
         AplicarFiltro();
     }
@@ -775,33 +1136,54 @@ else
             return;
         }
 
-        if (AssignmentSeleccionadoId is null || AssignmentSeleccionadoId == Guid.Empty)
+        if (LateWorkEditandoId.HasValue)
         {
-            MostrarError("You must select an assignment.", "Assignment required");
+            if (AssignmentSeleccionadoId is null ||
+                AssignmentSeleccionadoId == Guid.Empty)
+            {
+                MostrarError(
+                    "You must select an assignment.",
+                    "Assignment required");
+                return;
+            }
+        }
+        else if (!AssignmentSeleccionados.Any())
+        {
+            MostrarError(
+                "You must select at least one assignment.",
+                "Assignments required");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(LateWorkIdTexto))
         {
-            MostrarError("You must enter the Late Work ID.", "Late Work ID required");
+            MostrarError(
+                "You must enter the Late Work ID.",
+                "Late Work ID required");
             return;
         }
 
         if (!long.TryParse(LateWorkIdTexto.Trim(), out var lateWorkId))
         {
-            MostrarError("The Late Work ID must contain numbers only.", "Invalid Late Work ID");
+            MostrarError(
+                "The Late Work ID must contain numbers only.",
+                "Invalid Late Work ID");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(ClientIdTexto))
         {
-            MostrarError("You must enter the Client ID.", "Client ID required");
+            MostrarError(
+                "You must enter the Client ID.",
+                "Client ID required");
             return;
         }
 
         if (!long.TryParse(ClientIdTexto.Trim(), out var clientId))
         {
-            MostrarError("The Client ID must contain numbers only.", "Invalid Client ID");
+            MostrarError(
+                "The Client ID must contain numbers only.",
+                "Invalid Client ID");
             return;
         }
 
@@ -809,50 +1191,55 @@ else
 
         try
         {
-            await using var db = await DbFactory.CreateDbContextAsync();
-
-            var assignmentId = AssignmentSeleccionadoId.Value;
-
-            var asignacionActiva = await db.Asignaciones
-                .AsNoTracking()
-                .Include(x => x.Libro)
-                .ApplyScope(Scope)
-                .AnyAsync(x =>
-                    x.Id == assignmentId &&
-                    !x.Finalizado &&
-                    x.Libro != null &&
-                    !x.Libro.Finalizado);
-
-            if (!asignacionActiva)
-            {
-                MostrarError(
-                    "This assignment is no longer available because the book has already passed its Dirxion date.",
-                    "Assignment unavailable");
-                return;
-            }
-
-            var existe = await ScopedLateWorkQuery(db).AnyAsync(x =>
-                (!LateWorkEditandoId.HasValue || x.Id != LateWorkEditandoId.Value) &&
-                x.AssignmentId == assignmentId &&
-                x.LateWorkId == lateWorkId &&
-                x.ClientId == clientId);
-
-            if (existe)
-            {
-                MostrarError(
-                    "This Late Work ID already exists for this assignment and client.",
-                    "Duplicate activity");
-                return;
-            }
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
 
             if (LateWorkEditandoId.HasValue)
             {
+                var assignmentId = AssignmentSeleccionadoId!.Value;
+
+                var asignacionActiva = await db.Asignaciones
+                    .AsNoTracking()
+                    .Include(x => x.Libro)
+                    .ApplyScope(Scope)
+                    .AnyAsync(x =>
+                        x.Id == assignmentId &&
+                        !x.Finalizado &&
+                        x.Libro != null &&
+                        !x.Libro.Finalizado);
+
+                if (!asignacionActiva)
+                {
+                    MostrarError(
+                        "This assignment is no longer available.",
+                        "Assignment unavailable");
+                    return;
+                }
+
+                var existe = await ScopedLateWorkQuery(db)
+                    .AnyAsync(x =>
+                        x.Id != LateWorkEditandoId.Value &&
+                        x.AssignmentId == assignmentId &&
+                        x.LateWorkId == lateWorkId &&
+                        x.ClientId == clientId);
+
+                if (existe)
+                {
+                    MostrarError(
+                        "This Late Work ID already exists for this assignment and client.",
+                        "Duplicate activity");
+                    return;
+                }
+
                 var item = await ScopedLateWorkQuery(db)
-                    .FirstOrDefaultAsync(x => x.Id == LateWorkEditandoId.Value);
+                    .FirstOrDefaultAsync(
+                        x => x.Id == LateWorkEditandoId.Value);
 
                 if (item is null)
                 {
-                    MostrarError("Late work activity not found.", "Activity not found");
+                    MostrarError(
+                        "Late work activity not found.",
+                        "Activity not found");
                     return;
                 }
 
@@ -864,6 +1251,8 @@ else
                 await db.SaveChangesAsync();
 
                 LateWorkEditandoId = null;
+                AssignmentSeleccionadoId = null;
+                AssignmentSeleccionados.Clear();
                 LateWorkIdTexto = string.Empty;
                 ClientIdTexto = string.Empty;
 
@@ -872,31 +1261,74 @@ else
                 MostrarExito(
                     "Late work activity updated successfully.",
                     "Activity updated");
+
+                return;
             }
-            else
+
+            var assignmentIds = AssignmentSeleccionados.ToList();
+
+            var asignacionesActivas = await db.Asignaciones
+                .AsNoTracking()
+                .Include(x => x.Libro)
+                .ApplyScope(Scope)
+                .Where(x =>
+                    assignmentIds.Contains(x.Id) &&
+                    !x.Finalizado &&
+                    x.Libro != null &&
+                    !x.Libro.Finalizado)
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            if (asignacionesActivas.Count != assignmentIds.Count)
             {
-                var nuevo = new LateWorkActivity
+                MostrarError(
+                    "One or more selected assignments are no longer available or are outside your scope.",
+                    "Assignments unavailable");
+                return;
+            }
+
+            var existentes = await ScopedLateWorkQuery(db)
+                .Where(x =>
+                    assignmentIds.Contains(x.AssignmentId) &&
+                    x.LateWorkId == lateWorkId &&
+                    x.ClientId == clientId)
+                .Select(x => x.AssignmentId)
+                .ToListAsync();
+
+            var existentesSet = existentes.ToHashSet();
+
+            var nuevos = assignmentIds
+                .Where(id => !existentesSet.Contains(id))
+                .Select(id => new LateWorkActivity
                 {
                     Id = Guid.NewGuid(),
-                    AssignmentId = assignmentId,
+                    AssignmentId = id,
                     LateWorkId = lateWorkId,
                     ClientId = clientId,
                     Completed = false,
                     CreatedAt = DateTime.UtcNow
-                };
+                })
+                .ToList();
 
-                db.LateWorkActivities.Add(nuevo);
-                await db.SaveChangesAsync();
-
-                LateWorkIdTexto = string.Empty;
-                ClientIdTexto = string.Empty;
-
-                await CargarDatosAsync();
-
-                MostrarExito(
-                    "Late work activity registered successfully.",
-                    "Activity registered");
+            if (!nuevos.Any())
+            {
+                MostrarError(
+                    "This Late Work already exists for all selected assignments.",
+                    "No new activities");
+                return;
             }
+
+            db.LateWorkActivities.AddRange(nuevos);
+            await db.SaveChangesAsync();
+
+            LateWorkIdTexto = string.Empty;
+            ClientIdTexto = string.Empty;
+
+            await CargarDatosAsync();
+
+            MostrarExito(
+                $"{nuevos.Count} assignment(s) linked to Late Work ID {lateWorkId}.",
+                "Late Work assigned");
         }
         catch (DbUpdateException ex)
         {
@@ -922,150 +1354,182 @@ else
             return;
 
         LimpiarMensaje();
+
+        if (!PuedeCrearLateWork)
+        {
+            MostrarError(
+                "You do not have permission to create Late Work activities.",
+                "Permission required");
+            return;
+        }
+
+        if (!AssignmentSeleccionados.Any())
+        {
+            MostrarError(
+                "You must select at least one assignment before bulk registering.",
+                "Assignments required");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(TextoMasivo))
+        {
+            MostrarError(
+                "You must enter at least one Late Work line.",
+                "Late Work required");
+            return;
+        }
+
+        var lineas = TextoMasivo
+            .Split(
+                '\n',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToList();
+
+        var errores = new List<string>();
+        var filasValidas =
+            new List<(long LateWorkId, long ClientId)>();
+
+        for (int i = 0; i < lineas.Count; i++)
+        {
+            var partes = lineas[i]
+                .Split(
+                    new[] { ',', ';', '\t', '|' },
+                    StringSplitOptions.TrimEntries |
+                    StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+
+            if (partes.Count < 2)
+            {
+                errores.Add(
+                    $"Line {i + 1}: invalid format. Use LateWorkId, ClientId.");
+                continue;
+            }
+
+            if (!long.TryParse(partes[0], out var lateWorkId))
+            {
+                errores.Add(
+                    $"Line {i + 1}: Late Work ID must contain numbers only.");
+                continue;
+            }
+
+            if (!long.TryParse(partes[1], out var clientId))
+            {
+                errores.Add(
+                    $"Line {i + 1}: Client ID must contain numbers only.");
+                continue;
+            }
+
+            filasValidas.Add((lateWorkId, clientId));
+        }
+
+        if (errores.Any())
+        {
+            MostrarError(
+                string.Join(" | ", errores),
+                "Invalid bulk data");
+            return;
+        }
+
+        filasValidas = filasValidas
+            .Distinct()
+            .ToList();
+
+        if (!filasValidas.Any())
+        {
+            MostrarError(
+                "No valid records were found.",
+                "No records");
+            return;
+        }
+
         Procesando = true;
 
         try
         {
-            if (!PuedeCrearLateWork)
-            {
-                MostrarError("You do not have permission to create Late Work activities.");
-                return;
-            }
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
 
-            if (AssignmentSeleccionadoId is null || AssignmentSeleccionadoId == Guid.Empty)
-            {
-                MostrarError("You must select an assignment before bulk registering.");
-                return;
-            }
+            var assignmentIds = AssignmentSeleccionados.ToList();
 
-            if (string.IsNullOrWhiteSpace(TextoMasivo))
-            {
-                MostrarError("You must enter at least one line.");
-                return;
-            }
-
-            var lineas = TextoMasivo
-                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .ToList();
-
-            if (!lineas.Any())
-            {
-                MostrarError("No valid lines were found.");
-                return;
-            }
-
-            var nuevos = new List<LateWorkActivity>();
-            var errores = new List<string>();
-            var filasValidas = new List<(long LateWorkId, long ClientId)>();
-
-            for (int i = 0; i < lineas.Count; i++)
-            {
-                var linea = lineas[i].Trim();
-
-                var partes = linea
-                    .Split(new[] { ',', ';', '\t', '|' }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                    .ToList();
-
-                if (partes.Count < 2)
-                {
-                    errores.Add($"Line {i + 1}: invalid format. Use LateWorkId, ClientId.");
-                    continue;
-                }
-
-                if (!long.TryParse(partes[0], out var lateWorkId))
-                {
-                    errores.Add($"Line {i + 1}: Late Work ID must contain numbers only.");
-                    continue;
-                }
-
-                if (!long.TryParse(partes[1].Trim(), out var clientId))
-                {
-                    errores.Add($"Line {i + 1}: Client ID must contain numbers only.");
-                    continue;
-                }
-
-                filasValidas.Add((lateWorkId, clientId));
-            }
-
-            if (errores.Any())
-            {
-                MostrarError(string.Join(" | ", errores));
-                return;
-            }
-
-            if (!filasValidas.Any())
-            {
-                MostrarError("No valid records were found.");
-                return;
-            }
-
-            var duplicadosEnTexto = filasValidas
-                .GroupBy(x => new { x.LateWorkId, x.ClientId })
-                .Where(g => g.Count() > 1)
-                .Select(g => $"{g.Key.LateWorkId} - {g.Key.ClientId}")
-                .ToList();
-
-            if (duplicadosEnTexto.Any())
-            {
-                MostrarError("Duplicated records in the text: " + string.Join(", ", duplicadosEnTexto));
-                return;
-            }
-
-            await using var db = await DbFactory.CreateDbContextAsync();
-
-            var assignmentId = AssignmentSeleccionadoId.Value;
-
-            var asignacionActiva = await db.Asignaciones
+            var asignacionesActivas = await db.Asignaciones
                 .AsNoTracking()
                 .Include(x => x.Libro)
                 .ApplyScope(Scope)
-                .AnyAsync(x =>
-                    x.Id == assignmentId &&
+                .Where(x =>
+                    assignmentIds.Contains(x.Id) &&
                     !x.Finalizado &&
                     x.Libro != null &&
-                    !x.Libro.Finalizado);
+                    !x.Libro.Finalizado)
+                .Select(x => x.Id)
+                .ToListAsync();
 
-            if (!asignacionActiva)
+            if (asignacionesActivas.Count != assignmentIds.Count)
             {
-                MostrarError("This assignment is no longer available because the book has already passed its Dirxion date.");
+                MostrarError(
+                    "One or more selected assignments are no longer available or are outside your scope.",
+                    "Assignments unavailable");
                 return;
             }
 
+            var lateWorkIds = filasValidas
+                .Select(x => x.LateWorkId)
+                .Distinct()
+                .ToList();
+
+            var clientIds = filasValidas
+                .Select(x => x.ClientId)
+                .Distinct()
+                .ToList();
+
             var existentes = await ScopedLateWorkQuery(db)
-                .Where(x => x.AssignmentId == assignmentId)
+                .Where(x =>
+                    assignmentIds.Contains(x.AssignmentId) &&
+                    lateWorkIds.Contains(x.LateWorkId) &&
+                    clientIds.Contains(x.ClientId))
                 .Select(x => new
                 {
+                    x.AssignmentId,
                     x.LateWorkId,
                     x.ClientId
                 })
                 .ToListAsync();
 
             var existentesSet = existentes
-                .Select(x => $"{x.LateWorkId}|{x.ClientId}")
+                .Select(x =>
+                    $"{x.AssignmentId}|{x.LateWorkId}|{x.ClientId}")
                 .ToHashSet();
 
-            foreach (var item in filasValidas)
+            var nuevos = new List<LateWorkActivity>();
+
+            foreach (var assignmentId in assignmentIds)
             {
-                var key = $"{item.LateWorkId}|{item.ClientId}";
-
-                if (existentesSet.Contains(key))
-                    continue;
-
-                nuevos.Add(new LateWorkActivity
+                foreach (var lateWork in filasValidas)
                 {
-                    Id = Guid.NewGuid(),
-                    AssignmentId = assignmentId,
-                    LateWorkId = item.LateWorkId,
-                    ClientId = item.ClientId,
-                    Completed = false,
-                    CreatedAt = DateTime.UtcNow
-                });
+                    var key =
+                        $"{assignmentId}|{lateWork.LateWorkId}|{lateWork.ClientId}";
+
+                    if (existentesSet.Contains(key))
+                        continue;
+
+                    nuevos.Add(new LateWorkActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        AssignmentId = assignmentId,
+                        LateWorkId = lateWork.LateWorkId,
+                        ClientId = lateWork.ClientId,
+                        Completed = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
             }
 
             if (!nuevos.Any())
             {
-                MostrarError("All records already exist. No new late work activities were created.");
+                MostrarError(
+                    "All Late Work records already exist for all selected assignments.",
+                    "No new activities");
                 return;
             }
 
@@ -1074,10 +1538,11 @@ else
 
             TextoMasivo = string.Empty;
 
-            MostrarExito($"{nuevos.Count} late work activities registered successfully.", "Bulk registration completed");
-
             await CargarDatosAsync();
 
+            MostrarExito(
+                $"{filasValidas.Count} Late Work item(s) were assigned across {assignmentIds.Count} assignment(s). {nuevos.Count} new assignment activity record(s) were created.",
+                "Bulk registration completed");
         }
         catch (DbUpdateException ex)
         {
@@ -1112,25 +1577,51 @@ else
             return;
         }
 
+        if (!CurrentEmployeeId.HasValue ||
+            CurrentEmployeeId.Value == Guid.Empty)
+        {
+            MostrarError(
+                "Your user is not linked to an employee. You cannot complete assignment Late Work.",
+                "Employee link required");
+            return;
+        }
+
         Procesando = true;
 
         try
         {
-            await using var db = await DbFactory.CreateDbContextAsync();
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
 
             var item = await ScopedLateWorkQuery(db)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (item is null)
             {
-                MostrarError("Late work activity not found.", "Activity not found");
+                MostrarError(
+                    "Late work activity not found.",
+                    "Activity not found");
+                return;
+            }
+
+            var empleadoResponsableId =
+                await ObtenerEmpleadoResponsableLateWorkAsync(
+                    db,
+                    item.AssignmentId,
+                    item.Assignment?.IdEmpleado);
+
+            if (empleadoResponsableId != CurrentEmployeeId.Value)
+            {
+                MostrarError(
+                    "You can only complete Late Work for your own assignment.",
+                    "Read-only assignment");
                 return;
             }
 
             if (item.Completed)
             {
                 MostrarError(
-                    "This late work activity is already completed.",
+                    "This assignment is already completed for this Late Work.",
                     "Already completed");
                 return;
             }
@@ -1140,11 +1631,30 @@ else
             item.UpdatedAt = DateTime.UtcNow;
 
             await db.SaveChangesAsync();
+
+            var lateWorkId = item.LateWorkId;
+            var clientId = item.ClientId;
+
+            var total = await ScopedLateWorkQuery(db)
+                .CountAsync(x =>
+                    x.LateWorkId == lateWorkId &&
+                    x.ClientId == clientId);
+
+            var completados = await ScopedLateWorkQuery(db)
+                .CountAsync(x =>
+                    x.LateWorkId == lateWorkId &&
+                    x.ClientId == clientId &&
+                    x.Completed);
+
             await CargarDatosAsync();
 
             MostrarExito(
-                "Late work activity marked as completed.",
-                "Activity completed");
+                total > 0 && total == completados
+                    ? $"Your book was completed. Late Work ID {lateWorkId} is now Completed Total ({completados}/{total})."
+                    : $"Your book was completed. Late Work ID {lateWorkId} progress: {completados}/{total}.",
+                total > 0 && total == completados
+                    ? "Late Work completed total"
+                    : "Assignment completed");
         }
         catch (Exception ex)
         {
@@ -1173,15 +1683,27 @@ else
             return;
         }
 
+        if (!CurrentEmployeeId.HasValue ||
+            CurrentEmployeeId.Value == Guid.Empty)
+        {
+            MostrarError(
+                "Your user is not linked to an employee. You cannot complete assignment Late Work.",
+                "Employee link required");
+            return;
+        }
+
         var ids = LateWorksFiltrados
-            .Where(x => x.Seleccionado && !x.Completed)
+            .Where(x =>
+                x.Seleccionado &&
+                !x.Completed &&
+                x.EsAsignacionPropia)
             .Select(x => x.Id)
             .ToList();
 
         if (!ids.Any())
         {
             MostrarError(
-                "You must select at least one pending activity.",
+                "You must select at least one of your pending assignments.",
                 "Selection required");
             return;
         }
@@ -1190,11 +1712,59 @@ else
 
         try
         {
-            await using var db = await DbFactory.CreateDbContextAsync();
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
 
             var registros = await ScopedLateWorkQuery(db)
-                .Where(x => ids.Contains(x.Id) && !x.Completed)
+                .Where(x =>
+                    ids.Contains(x.Id) &&
+                    !x.Completed)
                 .ToListAsync();
+
+            if (registros.Count != ids.Count)
+            {
+                MostrarError(
+                    "One or more selected records could not be loaded.",
+                    "Selection changed");
+                return;
+            }
+
+            var assignmentIds = registros
+                .Select(x => x.AssignmentId)
+                .Distinct()
+                .ToList();
+
+            var temporalesFinalPO = await db.TemporaryAssignments
+                .AsNoTracking()
+                .Where(x =>
+                    x.Active &&
+                    x.FinalPO &&
+                    assignmentIds.Contains(x.AssignmentId))
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+
+            var employeeId =
+                CurrentEmployeeId.Value;
+
+            foreach (var item in registros)
+            {
+                var temporal = temporalesFinalPO
+                    .FirstOrDefault(x =>
+                        x.AssignmentId == item.AssignmentId);
+
+                var empleadoResponsableId =
+                    temporal?.TemporaryEmployeeId ??
+                    item.Assignment?.IdEmpleado ??
+                    Guid.Empty;
+
+                if (empleadoResponsableId != employeeId)
+                {
+                    MostrarError(
+                        "One or more selected records are not your assignments. No unauthorized assignment was completed.",
+                        "Read-only assignment");
+                    return;
+                }
+            }
 
             foreach (var item in registros)
             {
@@ -1209,8 +1779,10 @@ else
             await CargarDatosAsync();
 
             MostrarExito(
-                $"{registros.Count} late work activities marked as completed.",
-                registros.Count == 1 ? "Activity completed" : "Activities completed");
+                $"{registros.Count} of your Late Work assignment(s) were marked as completed.",
+                registros.Count == 1
+                    ? "Assignment completed"
+                    : "Assignments completed");
         }
         catch (Exception ex)
         {
@@ -1222,6 +1794,41 @@ else
         {
             Procesando = false;
         }
+    }
+
+    private async Task<Guid> ObtenerEmpleadoResponsableLateWorkAsync(
+        AppDbContext db,
+        Guid assignmentId,
+        Guid? empleadoOriginalId = null)
+    {
+        var temporalEmployeeId =
+            await db.TemporaryAssignments
+                .AsNoTracking()
+                .Where(x =>
+                    x.Active &&
+                    x.FinalPO &&
+                    x.AssignmentId == assignmentId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => (Guid?)x.TemporaryEmployeeId)
+                .FirstOrDefaultAsync();
+
+        if (temporalEmployeeId.HasValue &&
+            temporalEmployeeId.Value != Guid.Empty)
+        {
+            return temporalEmployeeId.Value;
+        }
+
+        if (empleadoOriginalId.HasValue &&
+            empleadoOriginalId.Value != Guid.Empty)
+        {
+            return empleadoOriginalId.Value;
+        }
+
+        return await db.Asignaciones
+            .AsNoTracking()
+            .Where(x => x.Id == assignmentId)
+            .Select(x => x.IdEmpleado)
+            .FirstOrDefaultAsync();
     }
 
     private void PrepararEliminacion(LateWorkListItem item)
@@ -1328,6 +1935,8 @@ else
             return;
         }
 
+        AssignmentSeleccionados.Clear();
+        BusquedaAsignacionesRegistro = string.Empty;
         LateWorkEditandoId = item.Id;
         AssignmentSeleccionadoId = item.AssignmentId;
         LateWorkIdTexto = item.LateWorkId.ToString();
@@ -1343,65 +1952,188 @@ else
         if (!PuedeCompletarLateWork)
             return;
 
-        TodosSeleccionados = e.Value is bool value && value;
+        TodosSeleccionados =
+            e.Value is bool value && value;
 
-        foreach (var item in LateWorksFiltrados.Where(x => !x.Completed))
+        foreach (var item in LateWorksFiltrados)
         {
-            item.Seleccionado = TodosSeleccionados;
+            item.Seleccionado =
+                TodosSeleccionados &&
+                !item.Completed &&
+                item.EsAsignacionPropia;
         }
     }
 
 
-    private IQueryable<LateWorkActivity> ScopedLateWorkQuery(AppDbContext db)
+    private IQueryable<LateWorkActivity> ScopedLateWorkQuery(
+        AppDbContext db)
     {
         var query = db.LateWorkActivities
-            .Where(x => x.Assignment != null && x.Assignment.Libro != null);
+            .Include(x => x.Assignment)
+                .ThenInclude(x => x!.Libro)
+            .Where(x =>
+                x.Assignment != null &&
+                x.Assignment.Libro != null);
 
         return Scope.ViewAllEmployeeTypes
             ? query
-            : query.Where(x => x.Assignment!.Libro!.EmployeeTypeId == Scope.EmployeeTypeId);
+            : query.Where(x =>
+                x.Assignment!.Libro!.EmployeeTypeId ==
+                Scope.EmployeeTypeId);
     }
 
     private void AplicarFiltro()
     {
         IEnumerable<LateWorkListItem> query = LateWorks;
 
-        if (!string.IsNullOrWhiteSpace(FiltroAssignmentId) && Guid.TryParse(FiltroAssignmentId, out var assignmentId))
+        if (!string.IsNullOrWhiteSpace(FiltroAssignmentId) &&
+            Guid.TryParse(
+                FiltroAssignmentId,
+                out var assignmentId))
         {
-            query = query.Where(x => x.AssignmentId == assignmentId);
+            query = query.Where(
+                x => x.AssignmentId == assignmentId);
         }
 
         if (FiltroEstado == "pending")
         {
-            query = query.Where(x => !x.Completed);
+            query = query.Where(
+                x => !EstaCompletadoTotal(x));
+        }
+        else if (FiltroEstado == "partial")
+        {
+            query = query.Where(x =>
+            {
+                var progreso = ObtenerProgresoLateWork(x);
+
+                return progreso.Completed > 0 &&
+                       progreso.Completed < progreso.Total;
+            });
         }
         else if (FiltroEstado == "completed")
         {
-            query = query.Where(x => x.Completed);
+            query = query.Where(EstaCompletadoTotal);
         }
 
         if (!string.IsNullOrWhiteSpace(TextoBuscar))
         {
-            var buscar = TextoBuscar.Trim().ToLower();
+            var buscar =
+                TextoBuscar.Trim().ToLowerInvariant();
 
             query = query.Where(x =>
-                x.LateWorkId.ToString().Contains(buscar) ||
-                x.ClientId.ToString().Contains(buscar) ||
-                x.AssignmentName.ToLower().Contains(buscar));
+                x.LateWorkId
+                    .ToString()
+                    .Contains(buscar) ||
+                x.ClientId
+                    .ToString()
+                    .Contains(buscar) ||
+                x.KgenCode
+                    .ToLowerInvariant()
+                    .Contains(buscar) ||
+                x.LsaCode
+                    .ToLowerInvariant()
+                    .Contains(buscar) ||
+                x.BookName
+                    .ToLowerInvariant()
+                    .Contains(buscar) ||
+                x.EmployeeName
+                    .ToLowerInvariant()
+                    .Contains(buscar) ||
+                x.AssignmentName
+                    .ToLowerInvariant()
+                    .Contains(buscar));
         }
 
-        LateWorksFiltrados = query.ToList();
+        LateWorksFiltrados = query
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenBy(x => x.LateWorkId)
+            .ThenBy(x => x.AssignmentName)
+            .ToList();
 
         TodosSeleccionados =
             PuedeCompletarLateWork &&
-            LateWorksFiltrados.Any(x => !x.Completed) &&
-            LateWorksFiltrados.Where(x => !x.Completed).All(x => x.Seleccionado);
+            LateWorksFiltrados.Any(x =>
+                !x.Completed &&
+                x.EsAsignacionPropia) &&
+            LateWorksFiltrados
+                .Where(x =>
+                    !x.Completed &&
+                    x.EsAsignacionPropia)
+                .All(x => x.Seleccionado);
+    }
+
+    private void ToggleAssignmentRegistro(
+        Guid assignmentId,
+        ChangeEventArgs e)
+    {
+        var selected =
+            e.Value is bool value && value;
+
+        if (selected)
+            AssignmentSeleccionados.Add(assignmentId);
+        else
+            AssignmentSeleccionados.Remove(assignmentId);
+    }
+
+    private void SeleccionarTodasAsignacionesRegistro(
+        ChangeEventArgs e)
+    {
+        var selected =
+            e.Value is bool value && value;
+
+        foreach (var item in AsignacionesRegistroFiltradas)
+        {
+            if (selected)
+                AssignmentSeleccionados.Add(item.Id);
+            else
+                AssignmentSeleccionados.Remove(item.Id);
+        }
+    }
+
+    private void LimpiarAsignacionesRegistro()
+    {
+        AssignmentSeleccionados.Clear();
+    }
+
+    private (int Completed, int Total)
+        ObtenerProgresoLateWork(
+            LateWorkListItem item)
+    {
+        var key =
+            (item.LateWorkId, item.ClientId);
+
+        if (ProgresoGlobalLateWork.TryGetValue(
+                key,
+                out var progreso))
+        {
+            return progreso;
+        }
+
+        var grupo = LateWorks.Where(x =>
+            x.LateWorkId == item.LateWorkId &&
+            x.ClientId == item.ClientId);
+
+        var total = grupo.Count();
+        var completed = grupo.Count(x => x.Completed);
+
+        return (completed, total);
+    }
+
+    private bool EstaCompletadoTotal(
+        LateWorkListItem item)
+    {
+        var progreso = ObtenerProgresoLateWork(item);
+
+        return progreso.Total > 0 &&
+               progreso.Completed == progreso.Total;
     }
 
     private void LimpiarFormulario()
     {
         LateWorkEditandoId = null;
         AssignmentSeleccionadoId = null;
+        AssignmentSeleccionados.Clear();
+        BusquedaAsignacionesRegistro = string.Empty;
         LateWorkIdTexto = string.Empty;
         ClientIdTexto = string.Empty;
         TextoMasivo = string.Empty;
@@ -1465,8 +2197,12 @@ else
     private class AssignmentComboItem
     {
         public Guid Id { get; set; }
+        public Guid EmployeeId { get; set; }
+        public string BookName { get; set; } = string.Empty;
+        public string EmployeeName { get; set; } = string.Empty;
+        public string KgenCode { get; set; } = string.Empty;
+        public string LsaCode { get; set; } = string.Empty;
         public string EmployeeTypeCode { get; set; } = string.Empty;
-
         public string DisplayName { get; set; } = string.Empty;
     }
 
@@ -1475,17 +2211,26 @@ else
         public Guid Id { get; set; }
 
         public Guid AssignmentId { get; set; }
+        public Guid EmployeeId { get; set; }
         public string EmployeeTypeCode { get; set; } = string.Empty;
+
+        public bool EsAsignacionPropia { get; set; }
 
         public long LateWorkId { get; set; }
 
         public long ClientId { get; set; }
 
+        public string BookName { get; set; } = string.Empty;
+        public string EmployeeName { get; set; } = string.Empty;
+        public string KgenCode { get; set; } = string.Empty;
+        public string LsaCode { get; set; } = string.Empty;
         public string AssignmentName { get; set; } = string.Empty;
 
         public bool Completed { get; set; }
 
         public DateTime? CompletedAt { get; set; }
+
+        public DateTime CreatedAt { get; set; }
 
         public bool Seleccionado { get; set; }
     }
