@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Pagination_Project.Components;
 using Pagination_Project.Data;
+using Pagination_Project.Models;
 using Pagination_Project.Services;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
@@ -20,7 +21,8 @@ builder.WebHost.ConfigureKestrel(options =>
     options.AddServerHeader = false;
 });
 
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpClient();
@@ -28,7 +30,8 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("SupabaseConnection"),
+        builder.Configuration.GetConnectionString(
+            "SupabaseConnection"),
         npgsqlOptions =>
         {
             npgsqlOptions.EnableRetryOnFailure(
@@ -39,22 +42,47 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
             npgsqlOptions.CommandTimeout(60);
         }));
 
-builder.Services.AddDataProtection()
+builder.Services
+    .AddDataProtection()
     .SetApplicationName("Pagination_Project")
     .PersistKeysToDbContext<AppDbContext>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
-builder.Services.AddHttpClient<IEmailService, EmailService>();
-builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
+builder.Services.AddScoped<
+    IDashboardService,
+    DashboardService>();
+
+builder.Services.AddScoped<
+    IUsuarioService,
+    UsuarioService>();
+
+builder.Services.AddScoped<
+    IEmpleadoService,
+    EmpleadoService>();
+
+builder.Services.AddHttpClient<
+    IEmailService,
+    EmailService>();
+
+builder.Services.AddScoped<
+    IPasswordResetService,
+    PasswordResetService>();
+
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IPaginationChecklistService, PaginationChecklistService>();
-builder.Services.AddScoped<IUserDataScopeService, UserDataScopeService>();
+
+builder.Services.AddScoped<
+    IPaginationChecklistService,
+    PaginationChecklistService>();
+
+builder.Services.AddScoped<
+    IUserDataScopeService,
+    UserDataScopeService>();
 
 builder.Services.AddControllers();
 
-var isDevelopment = builder.Environment.IsDevelopment();
+var isDevelopment =
+    builder.Environment.IsDevelopment();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -68,166 +96,251 @@ builder.Services.AddAntiforgery(options =>
         ? CookieSecurePolicy.SameAsRequest
         : CookieSecurePolicy.Always;
 
-    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SameSite =
+        SameSiteMode.Strict;
+
     options.Cookie.Path = "/";
 });
 
 builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddAuthentication(
+        CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/login";
-        options.LogoutPath = "/account/logout";
-        options.AccessDeniedPath = "/login";
+
+        options.LogoutPath =
+            "/account/logout";
+
+        options.AccessDeniedPath =
+            "/login";
 
         options.Cookie.Name = isDevelopment
             ? "Pagination_Project.Auth"
             : "__Host-Pagination_Project.Auth";
 
         options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax;
+
+        options.Cookie.SameSite =
+            SameSiteMode.Lax;
 
         options.Cookie.SecurePolicy = isDevelopment
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
 
         options.Cookie.Path = "/";
+
         options.Cookie.IsEssential = true;
 
         options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
 
-        options.Events = new CookieAuthenticationEvents
-        {
-            OnValidatePrincipal = async context =>
+        options.ExpireTimeSpan =
+            TimeSpan.FromHours(8);
+
+        options.Events =
+            new CookieAuthenticationEvents
             {
-                /*
-                 * Blazor y los recursos internos pueden realizar varias solicitudes
-                 * mientras establecen o recuperan un circuito. Esas solicitudes no
-                 * necesitan consultar la base de datos para validar al usuario.
-                 */
-                if (EsRutaTecnicaAutenticacion(context.Request.Path))
+                OnValidatePrincipal = async context =>
                 {
-                    return;
-                }
+                    if (EsRutaTecnicaAutenticacion(
+                            context.Request.Path))
+                    {
+                        return;
+                    }
 
-                var userIdClaim = context.Principal?
-                    .FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userIdClaim =
+                        context.Principal?
+                            .FindFirstValue(
+                                ClaimTypes.NameIdentifier);
 
-                if (!Guid.TryParse(userIdClaim, out var usuarioId))
-                {
-                    context.RejectPrincipal();
+                    if (!Guid.TryParse(
+                            userIdClaim,
+                            out var usuarioId))
+                    {
+                        context.RejectPrincipal();
 
-                    await context.HttpContext.SignOutAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme);
+                        await context.HttpContext
+                            .SignOutAsync(
+                                CookieAuthenticationDefaults
+                                    .AuthenticationScheme);
 
-                    return;
-                }
+                        return;
+                    }
 
-                var cache = context.HttpContext.RequestServices
-                    .GetRequiredService<IMemoryCache>();
+                    var cache =
+                        context.HttpContext
+                            .RequestServices
+                            .GetRequiredService<IMemoryCache>();
 
-                var cacheKey = ObtenerClaveCacheUsuario(usuarioId);
+                    var cacheKey =
+                        ObtenerClaveCacheUsuario(
+                            usuarioId);
 
-                if (!cache.TryGetValue<bool>(cacheKey, out var usuarioValido))
-                {
-                    var authService = context.HttpContext.RequestServices
-                        .GetRequiredService<IAuthService>();
+                    if (!cache.TryGetValue<bool>(
+                            cacheKey,
+                            out var usuarioValido))
+                    {
+                        var authService =
+                            context.HttpContext
+                                .RequestServices
+                                .GetRequiredService<IAuthService>();
 
-                    usuarioValido = await authService
-                        .UsuarioSigueActivoAsync(usuarioId);
-
-                    cache.Set(
-                        cacheKey,
-                        usuarioValido,
-                        new MemoryCacheEntryOptions
+                        try
                         {
-                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
-                        });
-                }
+                            usuarioValido =
+                                await authService
+                                    .UsuarioSigueActivoAsync(
+                                        usuarioId);
+                        }
+                        catch
+                        {
+                            context.RejectPrincipal();
 
-                if (!usuarioValido)
+                            await context.HttpContext
+                                .SignOutAsync(
+                                    CookieAuthenticationDefaults
+                                        .AuthenticationScheme);
+
+                            return;
+                        }
+
+                        cache.Set(
+                            cacheKey,
+                            usuarioValido,
+                            new MemoryCacheEntryOptions
+                            {
+                                AbsoluteExpirationRelativeToNow =
+                                    TimeSpan.FromMinutes(1)
+                            });
+                    }
+
+                    if (!usuarioValido)
+                    {
+                        cache.Remove(cacheKey);
+
+                        context.RejectPrincipal();
+
+                        await context.HttpContext
+                            .SignOutAsync(
+                                CookieAuthenticationDefaults
+                                    .AuthenticationScheme);
+                    }
+                },
+
+                OnRedirectToLogin = context =>
                 {
-                    cache.Remove(cacheKey);
-                    context.RejectPrincipal();
+                    if (EsRutaTecnicaAutenticacion(
+                            context.Request.Path))
+                    {
+                        context.Response.StatusCode =
+                            StatusCodes
+                                .Status401Unauthorized;
 
-                    await context.HttpContext.SignOutAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme);
-                }
-            },
+                        return Task.CompletedTask;
+                    }
 
-            OnRedirectToLogin = context =>
-            {
-                if (EsRutaTecnicaAutenticacion(context.Request.Path))
+                    context.Response.Redirect(
+                        context.RedirectUri);
+
+                    return Task.CompletedTask;
+                },
+
+                OnRedirectToAccessDenied = context =>
                 {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    if (EsRutaTecnicaAutenticacion(
+                            context.Request.Path))
+                    {
+                        context.Response.StatusCode =
+                            StatusCodes
+                                .Status403Forbidden;
+
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(
+                        context.RedirectUri);
+
                     return Task.CompletedTask;
                 }
-
-                context.Response.Redirect(context.RedirectUri);
-                return Task.CompletedTask;
-            },
-
-            OnRedirectToAccessDenied = context =>
-            {
-                if (EsRutaTecnicaAutenticacion(context.Request.Path))
-                {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    return Task.CompletedTask;
-                }
-
-                context.Response.Redirect(context.RedirectUri);
-                return Task.CompletedTask;
-            }
-        };
+            };
     });
 
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders =
-        ForwardedHeaders.XForwardedFor |
-        ForwardedHeaders.XForwardedProto;
+builder.Services.Configure<ForwardedHeadersOptions>(
+    options =>
+    {
+        options.ForwardedHeaders =
+            ForwardedHeaders.XForwardedFor |
+            ForwardedHeaders.XForwardedProto;
 
-    options.ForwardLimit = 1;
+        options.ForwardLimit = 1;
 
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
 
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
+    options.FallbackPolicy =
+        new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
 });
 
-builder.Services.AddCascadingAuthenticationState();
+builder.Services
+    .AddCascadingAuthenticationState();
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.RejectionStatusCode =
+        StatusCodes.Status429TooManyRequests;
 
-    options.AddPolicy("login-policy", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(1),
-                QueueLimit = 0,
-                AutoReplenishment = true
-            }));
+    options.AddPolicy(
+        "login-policy",
+        httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey:
+                    httpContext
+                        .Connection
+                        .RemoteIpAddress?
+                        .ToString()
+                    ?? "unknown",
 
-    options.AddPolicy("password-reset-policy", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 3,
-                Window = TimeSpan.FromMinutes(10),
-                QueueLimit = 0,
-                AutoReplenishment = true
-            }));
+                factory: _ =>
+                    new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+
+                        Window =
+                            TimeSpan.FromMinutes(1),
+
+                        QueueLimit = 0,
+
+                        AutoReplenishment = true
+                    }));
+
+    options.AddPolicy(
+        "password-reset-policy",
+        httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey:
+                    httpContext
+                        .Connection
+                        .RemoteIpAddress?
+                        .ToString()
+                    ?? "unknown",
+
+                factory: _ =>
+                    new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 3,
+
+                        Window =
+                            TimeSpan.FromMinutes(10),
+
+                        QueueLimit = 0,
+
+                        AutoReplenishment = true
+                    }));
 });
 
 var app = builder.Build();
@@ -236,7 +349,10 @@ app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler(
+        "/Error",
+        createScopeForErrors: true);
+
     app.UseHsts();
 }
 
@@ -246,14 +362,26 @@ app.Use(async (context, next) =>
 {
     context.Response.OnStarting(() =>
     {
-        var headers = context.Response.Headers;
+        var headers =
+            context.Response.Headers;
 
-        headers["X-Content-Type-Options"] = "nosniff";
-        headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-        headers["X-Frame-Options"] = "DENY";
-        headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
-        headers["Cross-Origin-Opener-Policy"] = "same-origin";
-        headers["Cross-Origin-Resource-Policy"] = "same-origin";
+        headers["X-Content-Type-Options"] =
+            "nosniff";
+
+        headers["Referrer-Policy"] =
+            "strict-origin-when-cross-origin";
+
+        headers["X-Frame-Options"] =
+            "DENY";
+
+        headers["Permissions-Policy"] =
+            "camera=(), microphone=(), geolocation=()";
+
+        headers["Cross-Origin-Opener-Policy"] =
+            "same-origin";
+
+        headers["Cross-Origin-Resource-Policy"] =
+            "same-origin";
 
         headers["Content-Security-Policy"] =
             "default-src 'self'; " +
@@ -272,9 +400,12 @@ app.Use(async (context, next) =>
         return Task.CompletedTask;
     });
 
-    if (HttpMethods.IsOptions(context.Request.Method))
+    if (HttpMethods.IsOptions(
+            context.Request.Method))
     {
-        context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+        context.Response.StatusCode =
+            StatusCodes.Status405MethodNotAllowed;
+
         return;
     }
 
@@ -283,39 +414,41 @@ app.Use(async (context, next) =>
 
 app.UseCookiePolicy();
 
-/*
- * Los archivos estáticos se sirven antes de autenticación para evitar que
- * cada CSS, JavaScript o imagen ejecute la validación de la cookie.
- */
 app.UseStaticFiles();
 
 app.UseAuthentication();
 
-/*
- * Si todavía existe una cookie válida y el usuario intenta abrir el login,
- * se envía directamente al dashboard. Esto evita mostrar el login encima de
- * una sesión activa.
- */
 app.Use(async (context, next) =>
 {
-    var path = context.Request.Path;
+    var path =
+        context.Request.Path;
 
     var estaAutenticado =
-        context.User?.Identity?.IsAuthenticated == true;
+        context.User?
+            .Identity?
+            .IsAuthenticated == true;
 
     var esSolicitudGet =
-        HttpMethods.IsGet(context.Request.Method);
+        HttpMethods.IsGet(
+            context.Request.Method);
 
     var esPaginaLogin =
         path == "/" ||
-        path.StartsWithSegments("/login");
+        path.StartsWithSegments(
+            "/login");
 
-    if (esSolicitudGet && estaAutenticado && esPaginaLogin)
+    if (esSolicitudGet &&
+        estaAutenticado &&
+        esPaginaLogin)
     {
-        var requiereCambioPassword = string.Equals(
-            context.User?.FindFirst("RequirePasswordChange")?.Value,
-            "True",
-            StringComparison.OrdinalIgnoreCase);
+        var requiereCambioPassword =
+            string.Equals(
+                context.User?
+                    .FindFirst(
+                        "RequirePasswordChange")?
+                    .Value,
+                "True",
+                StringComparison.OrdinalIgnoreCase);
 
         context.Response.Redirect(
             requiereCambioPassword
@@ -328,48 +461,96 @@ app.Use(async (context, next) =>
     await next();
 });
 
-/*
- * Obliga a completar el cambio de contraseña antes de utilizar el resto del
- * sistema, sin bloquear recursos internos, archivos estáticos o endpoints de
- * autenticación.
- */
 app.Use(async (context, next) =>
 {
-    var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
+    var path =
+        context.Request.Path
+            .Value?
+            .ToLowerInvariant()
+        ?? string.Empty;
 
     var estaAutenticado =
-        context.User?.Identity?.IsAuthenticated == true;
+        context.User?
+            .Identity?
+            .IsAuthenticated == true;
 
-    var requiereCambioPassword = string.Equals(
-        context.User?.FindFirst("RequirePasswordChange")?.Value,
-        "True",
-        StringComparison.OrdinalIgnoreCase);
+    var requiereCambioPassword =
+        string.Equals(
+            context.User?
+                .FindFirst(
+                    "RequirePasswordChange")?
+                .Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
 
     var esRutaPermitida =
-        path.StartsWith("/cambiar-password") ||
-        path.StartsWith("/account/change-password") ||
-        path.StartsWith("/account/logout") ||
-        path.StartsWith("/account/login") ||
-        path.StartsWith("/login") ||
-        path.StartsWith("/_framework") ||
-        path.StartsWith("/_blazor") ||
-        path.StartsWith("/_content") ||
-        path.StartsWith("/css") ||
-        path.StartsWith("/js") ||
-        path.StartsWith("/style") ||
-        path.StartsWith("/lib") ||
-        path.StartsWith("/images") ||
-        path.StartsWith("/favicon") ||
-        path.StartsWith("/forgot-password") ||
-        path.StartsWith("/reset-password") ||
-        path.StartsWith("/account/forgot-password") ||
-        path.StartsWith("/account/reset-password") ||
-        path.StartsWith("/.well-known/security.txt") ||
-        path.StartsWith("/security.txt");
+        path.StartsWith(
+            "/cambiar-password") ||
 
-    if (estaAutenticado && requiereCambioPassword && !esRutaPermitida)
+        path.StartsWith(
+            "/account/change-password") ||
+
+        path.StartsWith(
+            "/account/logout") ||
+
+        path.StartsWith(
+            "/account/login") ||
+
+        path.StartsWith(
+            "/login") ||
+
+        path.StartsWith(
+            "/_framework") ||
+
+        path.StartsWith(
+            "/_blazor") ||
+
+        path.StartsWith(
+            "/_content") ||
+
+        path.StartsWith(
+            "/css") ||
+
+        path.StartsWith(
+            "/js") ||
+
+        path.StartsWith(
+            "/style") ||
+
+        path.StartsWith(
+            "/lib") ||
+
+        path.StartsWith(
+            "/images") ||
+
+        path.StartsWith(
+            "/favicon") ||
+
+        path.StartsWith(
+            "/forgot-password") ||
+
+        path.StartsWith(
+            "/reset-password") ||
+
+        path.StartsWith(
+            "/account/forgot-password") ||
+
+        path.StartsWith(
+            "/account/reset-password") ||
+
+        path.StartsWith(
+            "/.well-known/security.txt") ||
+
+        path.StartsWith(
+            "/security.txt");
+
+    if (estaAutenticado &&
+        requiereCambioPassword &&
+        !esRutaPermitida)
     {
-        context.Response.Redirect("/cambiar-password");
+        context.Response.Redirect(
+            "/cambiar-password");
+
         return;
     }
 
@@ -377,285 +558,398 @@ app.Use(async (context, next) =>
 });
 
 app.UseAuthorization();
+
 app.UseRateLimiter();
+
 app.UseAntiforgery();
 
-app.MapPost("/account/login", async (
-    HttpContext httpContext,
-    IAuthService authService) =>
-{
-    var form = await httpContext.Request.ReadFormAsync();
-
-    var username = form["Username"].ToString().Trim().ToLowerInvariant();
-    var password = form["Password"].ToString();
-    var returnUrl = form["ReturnUrl"].ToString();
-    var rememberMe =
-    form.TryGetValue("RememberMe", out var rememberValue) &&
-    string.Equals(rememberValue.ToString(), "true", StringComparison.OrdinalIgnoreCase);
-
-    if (string.IsNullOrWhiteSpace(returnUrl))
+app.MapPost(
+    "/account/login",
+    async (
+        HttpContext httpContext,
+        IAuthService authService,
+        IMemoryCache cache) =>
     {
-        returnUrl = "/dashboard";
-    }
+        var form =
+            await httpContext.Request.ReadFormAsync(
+                httpContext.RequestAborted);
 
-    if (!returnUrl.StartsWith("/", StringComparison.Ordinal) ||
-        returnUrl.StartsWith("//", StringComparison.Ordinal))
-    {
-        returnUrl = "/dashboard";
-    }
+        var username =
+            form["Username"]
+                .ToString()
+                .Trim()
+                .ToLowerInvariant();
 
-    var resultado = await authService.ValidarLoginDetalladoAsync(username, password);
+        var password =
+            form["Password"]
+                .ToString();
 
-    if (!resultado.Exitoso || resultado.Usuario is null)
-    {
-        var error = resultado.Estado switch
+        var returnUrl =
+            NormalizarReturnUrl(
+                form["ReturnUrl"]
+                    .ToString());
+
+        var rememberMe =
+            form.TryGetValue(
+                "RememberMe",
+                out var rememberValue) &&
+            string.Equals(
+                rememberValue.ToString(),
+                "true",
+                StringComparison.OrdinalIgnoreCase);
+
+        var resultado =
+            await authService
+                .ValidarLoginDetalladoAsync(
+                    username,
+                    password);
+
+        if (!resultado.Exitoso ||
+            resultado.Usuario is null)
         {
-            LoginEstado.UsuarioNoExiste => "usuario",
-            LoginEstado.ContrasenaIncorrecta => "password",
-            LoginEstado.UsuarioInactivo => "inactivo",
-            LoginEstado.CuentaBloqueada => "bloqueado",
-            _ => "general"
-        };
+            var error =
+                resultado.Estado switch
+                {
+                    LoginEstado.UsuarioNoExiste =>
+                        "usuario",
 
-        return Results.Redirect($"/login?error={error}");
-    }
+                    LoginEstado.ContrasenaIncorrecta =>
+                        "password",
 
-    var usuario = resultado.Usuario;
+                    LoginEstado.UsuarioInactivo =>
+                        "inactivo",
 
-    var requiereCambioPassword = usuario.RequirePasswordChange;
+                    LoginEstado.CuentaBloqueada =>
+                        "bloqueado",
 
-    var claims = new List<Claim>
-    {
-        new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-        new(ClaimTypes.Name, usuario.Name ?? string.Empty),
-        new("Username", usuario.Username ?? string.Empty),
-        new(ClaimTypes.Email, usuario.email ?? string.Empty),
-        new("LvlId", usuario.lvl_Id.ToString()),
-        new("RequirePasswordChange", requiereCambioPassword.ToString())
-    };
+                    _ =>
+                        "general"
+                };
 
-    if (usuario.EmployeeId.HasValue)
-    {
-        claims.Add(new("EmployeeId", usuario.EmployeeId.Value.ToString()));
-    }
-
-    if (usuario.Empleado is not null)
-    {
-        claims.Add(new("EmployeeCode", usuario.Empleado.IdEmpleado.ToString()));
-        claims.Add(new("EmployeeName", usuario.Empleado.Nombre ?? string.Empty));
-        claims.Add(new("EmployeeEmail", usuario.Empleado.Email ?? string.Empty));
-        claims.Add(new("EmployeeTypeId", usuario.Empleado.EmployeeTypeId.ToString()));
-
-        if (usuario.Empleado.EmployeeType is not null)
-        {
-            claims.Add(new("EmployeeTypeCode", usuario.Empleado.EmployeeType.Code ?? string.Empty));
+            return Results.Redirect(
+                $"/login?error={error}");
         }
-    }
 
-    if (usuario.Permisos is not null)
-    {
-        claims.Add(new("CreateUser", usuario.Permisos.CreateUser.ToString()));
-        claims.Add(new("EditUser", usuario.Permisos.EditUser.ToString()));
-        claims.Add(new("DeleteUser", usuario.Permisos.DeleteUser.ToString()));
-        claims.Add(new("UnlockUsers", usuario.Permisos.UnlockUsers.ToString()));
+        var usuario =
+            resultado.Usuario;
 
-        claims.Add(new("CreateBook", usuario.Permisos.CreateBook.ToString()));
-        claims.Add(new("EditBook", usuario.Permisos.EditBook.ToString()));
-        claims.Add(new("DeleteBook", usuario.Permisos.DeleteBook.ToString()));
-        claims.Add(new("BooksView", usuario.Permisos.BooksView.ToString()));
+        var requiereCambioPassword =
+            usuario.RequirePasswordChange;
 
-        claims.Add(new("CreateAssignations", usuario.Permisos.CreateAssignations.ToString()));
-        claims.Add(new("AsignBook", usuario.Permisos.AsignBook.ToString()));
-        claims.Add(new("ViewAssignations", usuario.Permisos.ViewAssignations.ToString()));
+        var claims =
+            CrearClaimsUsuario(
+                usuario);
 
-        claims.Add(new("QualifyBook", usuario.Permisos.QualifyBook.ToString()));
+        var identity =
+            new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme);
 
-        claims.Add(new("CreateEmployees", usuario.Permisos.CreateEmployees.ToString()));
-        claims.Add(new("EditEmployees", usuario.Permisos.EditEmployees.ToString()));
-        claims.Add(new("DeleteEmployees", usuario.Permisos.DeleteEmployees.ToString()));
-        claims.Add(new("ViewEmployees", usuario.Permisos.ViewEmployees.ToString()));
+        var principal =
+            new ClaimsPrincipal(
+                identity);
 
-        claims.Add(new("LateWork", usuario.Permisos.LateWork.ToString()));
-        claims.Add(new("CreateLateWork", usuario.Permisos.CreateLateWork.ToString()));
-        claims.Add(new("EditLateWork", usuario.Permisos.EditLateWork.ToString()));
-        claims.Add(new("DeleteLateWork", usuario.Permisos.DeleteLateWork.ToString()));
-        claims.Add(new("CompleteLateWork", usuario.Permisos.CompleteLateWork.ToString()));
+        await httpContext.SignInAsync(
+            CookieAuthenticationDefaults
+                .AuthenticationScheme,
+            principal,
+            new AuthenticationProperties
+            {
+                IsPersistent = rememberMe,
 
-        claims.Add(new("EditPermissionLevels", usuario.Permisos.EditPermissionLevels.ToString()));
-        claims.Add(new("ViewAllEmployeeTypes", usuario.Permisos.ViewAllEmployeeTypes.ToString()));
-    }
+                AllowRefresh = true,
 
-    var identity = new ClaimsIdentity(
-        claims,
-        CookieAuthenticationDefaults.AuthenticationScheme);
+                ExpiresUtc = rememberMe
+                    ? DateTimeOffset.UtcNow
+                        .AddHours(8)
+                    : null
+            });
 
-    var principal = new ClaimsPrincipal(identity);
+        cache.Set(
+            ObtenerClaveCacheUsuario(
+                usuario.Id),
+            true,
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow =
+                    TimeSpan.FromMinutes(1)
+            });
 
-    await httpContext.SignInAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme,
-        principal,
-        new AuthenticationProperties
+        if (requiereCambioPassword)
         {
-            IsPersistent = rememberMe,
-            AllowRefresh = true,
-            ExpiresUtc = rememberMe
-                ? DateTimeOffset.UtcNow.AddHours(8)
-                : null
-        });
+            return Results.Redirect(
+                "/cambiar-password");
+        }
 
-    if (requiereCambioPassword)
+        return Results.Redirect(
+            returnUrl);
+    })
+    .AllowAnonymous()
+    .RequireRateLimiting(
+        "login-policy")
+    .AddEndpointFilter(
+        ValidarAntiforgeryEndpoint);
+
+app.MapPost(
+    "/account/change-password",
+    async (
+        HttpContext httpContext,
+        IUsuarioService usuarioService,
+        IMemoryCache cache) =>
     {
-        return Results.Redirect("/cambiar-password");
-    }
+        if (httpContext.User?
+                .Identity?
+                .IsAuthenticated != true)
+        {
+            return Results.Redirect(
+                "/login?error=general");
+        }
 
-    return Results.Redirect(returnUrl);
-})
-.AllowAnonymous()
-.RequireRateLimiting("login-policy")
-.AddEndpointFilter(ValidarAntiforgeryEndpoint);
+        var userIdClaim =
+            httpContext.User
+                .FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
-app.MapPost("/account/change-password", async (
-    HttpContext httpContext,
-    IUsuarioService usuarioService) =>
-{
-    if (httpContext.User?.Identity?.IsAuthenticated != true)
+        if (!Guid.TryParse(
+                userIdClaim,
+                out var usuarioId))
+        {
+            await httpContext.SignOutAsync(
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme);
+
+            return Results.Redirect(
+                "/login?error=general");
+        }
+
+        var form =
+            await httpContext.Request
+                .ReadFormAsync(
+                    httpContext.RequestAborted);
+
+        var nuevaPassword =
+            form["NewPassword"]
+                .ToString();
+
+        var confirmarPassword =
+            form["ConfirmPassword"]
+                .ToString();
+
+        if (string.IsNullOrWhiteSpace(
+                nuevaPassword) ||
+            nuevaPassword.Length < 6)
+        {
+            return Results.Redirect(
+                "/cambiar-password?error=short");
+        }
+
+        if (!string.Equals(
+                nuevaPassword,
+                confirmarPassword,
+                StringComparison.Ordinal))
+        {
+            return Results.Redirect(
+                "/cambiar-password?error=mismatch");
+        }
+
+        var actualizado =
+            await usuarioService
+                .CambiarPasswordAsync(
+                    usuarioId,
+                    nuevaPassword);
+
+        if (!actualizado)
+        {
+            return Results.Redirect(
+                "/cambiar-password?error=notfound");
+        }
+
+        cache.Remove(
+            ObtenerClaveCacheUsuario(
+                usuarioId));
+
+        await httpContext.SignOutAsync(
+            CookieAuthenticationDefaults
+                .AuthenticationScheme);
+
+        return Results.Redirect(
+            "/login?changed=1");
+    })
+    .RequireAuthorization()
+    .AddEndpointFilter(
+        ValidarAntiforgeryEndpoint);
+
+app.MapPost(
+    "/account/logout",
+    async (
+        HttpContext httpContext,
+        IMemoryCache cache) =>
     {
-        return Results.Redirect("/login?error=general");
-    }
+        var userIdClaim =
+            httpContext.User
+                .FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
-    var userIdClaim = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (Guid.TryParse(
+                userIdClaim,
+                out var usuarioId))
+        {
+            cache.Remove(
+                ObtenerClaveCacheUsuario(
+                    usuarioId));
+        }
 
-    if (!Guid.TryParse(userIdClaim, out var usuarioId))
+        await httpContext.SignOutAsync(
+            CookieAuthenticationDefaults
+                .AuthenticationScheme);
+
+        return Results.Redirect(
+            "/login");
+    })
+    .RequireAuthorization()
+    .AddEndpointFilter(
+        ValidarAntiforgeryEndpoint);
+
+app.MapPost(
+    "/account/forgot-password",
+    async (
+        HttpContext httpContext,
+        IConfiguration configuration,
+        IPasswordResetService passwordResetService) =>
     {
-        await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Results.Redirect("/login?error=general");
-    }
+        var form =
+            await httpContext.Request
+                .ReadFormAsync(
+                    httpContext.RequestAborted);
 
-    var form = await httpContext.Request.ReadFormAsync();
+        var username =
+            form["Username"]
+                .ToString()
+                .Trim();
 
-    var nuevaPassword = form["NewPassword"].ToString();
-    var confirmarPassword = form["ConfirmPassword"].ToString();
+        var configuredBaseUrl =
+            configuration[
+                "App:BaseUrl"];
 
-    if (string.IsNullOrWhiteSpace(nuevaPassword) || nuevaPassword.Length < 6)
+        var baseUrl =
+            !string.IsNullOrWhiteSpace(
+                configuredBaseUrl)
+                ? configuredBaseUrl.TrimEnd('/')
+                : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+
+        await passwordResetService
+            .SolicitarRecuperacionAsync(
+                username,
+                baseUrl);
+
+        return Results.Redirect(
+            "/forgot-password?sent=1");
+    })
+    .AllowAnonymous()
+    .RequireRateLimiting(
+        "password-reset-policy")
+    .AddEndpointFilter(
+        ValidarAntiforgeryEndpoint);
+
+app.MapPost(
+    "/account/reset-password",
+    async (
+        HttpContext httpContext,
+        IPasswordResetService passwordResetService) =>
     {
-        return Results.Redirect("/cambiar-password?error=short");
-    }
+        var form =
+            await httpContext.Request
+                .ReadFormAsync(
+                    httpContext.RequestAborted);
 
-    if (nuevaPassword != confirmarPassword)
+        var token =
+            form["Token"]
+                .ToString();
+
+        var nuevaPassword =
+            form["NewPassword"]
+                .ToString();
+
+        var confirmarPassword =
+            form["ConfirmPassword"]
+                .ToString();
+
+        if (string.IsNullOrWhiteSpace(
+                nuevaPassword) ||
+            nuevaPassword.Length < 6)
+        {
+            return Results.Redirect(
+                $"/reset-password?token={Uri.EscapeDataString(token)}&error=short");
+        }
+
+        if (!string.Equals(
+                nuevaPassword,
+                confirmarPassword,
+                StringComparison.Ordinal))
+        {
+            return Results.Redirect(
+                $"/reset-password?token={Uri.EscapeDataString(token)}&error=mismatch");
+        }
+
+        var actualizado =
+            await passwordResetService
+                .RestablecerPasswordAsync(
+                    token,
+                    nuevaPassword);
+
+        if (!actualizado)
+        {
+            return Results.Redirect(
+                "/reset-password?error=invalid");
+        }
+
+        await httpContext.SignOutAsync(
+            CookieAuthenticationDefaults
+                .AuthenticationScheme);
+
+        return Results.Redirect(
+            "/login?changed=1");
+    })
+    .AllowAnonymous()
+    .RequireRateLimiting(
+        "password-reset-policy")
+    .AddEndpointFilter(
+        ValidarAntiforgeryEndpoint);
+
+var securityTxtHandler =
+    (
+        IConfiguration configuration,
+        HttpContext httpContext) =>
     {
-        return Results.Redirect("/cambiar-password?error=mismatch");
-    }
+        var configuredBaseUrl =
+            configuration[
+                "App:BaseUrl"];
 
-    var actualizado = await usuarioService.CambiarPasswordAsync(usuarioId, nuevaPassword);
+        var baseUrl =
+            !string.IsNullOrWhiteSpace(
+                configuredBaseUrl)
+                ? configuredBaseUrl.TrimEnd('/')
+                : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
 
-    if (!actualizado)
-    {
-        return Results.Redirect("/cambiar-password?error=notfound");
-    }
+        var contactEmail =
+            configuration[
+                "Security:ContactEmail"];
 
-    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        if (string.IsNullOrWhiteSpace(
+                contactEmail))
+        {
+            contactEmail =
+                "soporte@tu-dominio.com";
+        }
 
-    return Results.Redirect("/login?changed=1");
-})
-.RequireAuthorization()
-.AddEndpointFilter(ValidarAntiforgeryEndpoint);
+        var expires =
+            DateTime.UtcNow
+                .AddYears(1)
+                .ToString(
+                    "yyyy-MM-ddTHH:mm:ss.000Z");
 
-app.MapPost("/account/logout", async (
-    HttpContext httpContext,
-    IMemoryCache cache) =>
-{
-    var userIdClaim = httpContext.User
-        .FindFirstValue(ClaimTypes.NameIdentifier);
-
-    if (Guid.TryParse(userIdClaim, out var usuarioId))
-    {
-        cache.Remove(ObtenerClaveCacheUsuario(usuarioId));
-    }
-
-    await httpContext.SignOutAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme);
-
-    return Results.Redirect("/login");
-})
-.RequireAuthorization()
-.AddEndpointFilter(ValidarAntiforgeryEndpoint);
-
-app.MapPost("/account/forgot-password", async (
-    HttpContext httpContext,
-    IConfiguration configuration,
-    IPasswordResetService passwordResetService) =>
-{
-    var form = await httpContext.Request.ReadFormAsync();
-
-    var username = form["Username"].ToString();
-
-    var configuredBaseUrl = configuration["App:BaseUrl"];
-
-    var baseUrl = !string.IsNullOrWhiteSpace(configuredBaseUrl)
-        ? configuredBaseUrl.TrimEnd('/')
-        : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
-
-    await passwordResetService.SolicitarRecuperacionAsync(username, baseUrl);
-
-    return Results.Redirect("/forgot-password?sent=1");
-})
-.AllowAnonymous()
-.RequireRateLimiting("password-reset-policy")
-.AddEndpointFilter(ValidarAntiforgeryEndpoint);
-
-app.MapPost("/account/reset-password", async (
-    HttpContext httpContext,
-    IPasswordResetService passwordResetService) =>
-{
-    var form = await httpContext.Request.ReadFormAsync();
-
-    var token = form["Token"].ToString();
-    var nuevaPassword = form["NewPassword"].ToString();
-    var confirmarPassword = form["ConfirmPassword"].ToString();
-
-    if (string.IsNullOrWhiteSpace(nuevaPassword) || nuevaPassword.Length < 6)
-    {
-        return Results.Redirect($"/reset-password?token={Uri.EscapeDataString(token)}&error=short");
-    }
-
-    if (nuevaPassword != confirmarPassword)
-    {
-        return Results.Redirect($"/reset-password?token={Uri.EscapeDataString(token)}&error=mismatch");
-    }
-
-    var actualizado = await passwordResetService.RestablecerPasswordAsync(token, nuevaPassword);
-
-    if (!actualizado)
-    {
-        return Results.Redirect("/reset-password?error=invalid");
-    }
-
-    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-    return Results.Redirect("/login?changed=1");
-})
-.AllowAnonymous()
-.RequireRateLimiting("password-reset-policy")
-.AddEndpointFilter(ValidarAntiforgeryEndpoint);
-
-var securityTxtHandler = (IConfiguration configuration, HttpContext httpContext) =>
-{
-    var configuredBaseUrl = configuration["App:BaseUrl"];
-
-    var baseUrl = !string.IsNullOrWhiteSpace(configuredBaseUrl)
-        ? configuredBaseUrl.TrimEnd('/')
-        : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
-
-    var contactEmail = configuration["Security:ContactEmail"];
-
-    if (string.IsNullOrWhiteSpace(contactEmail))
-    {
-        contactEmail = "soporte@tu-dominio.com";
-    }
-
-    var expires = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-ddTHH:mm:ss.000Z");
-
-    var content =
+        var content =
 $"""
 Contact: mailto:{contactEmail}
 Preferred-Languages: es,en
@@ -663,19 +957,27 @@ Canonical: {baseUrl}/.well-known/security.txt
 Expires: {expires}
 """;
 
-    return Results.Text(content, "text/plain");
-};
+        return Results.Text(
+            content,
+            "text/plain");
+    };
 
-app.MapGet("/.well-known/security.txt", securityTxtHandler);
-app.MapGet("/security.txt", securityTxtHandler);
+app.MapGet(
+    "/.well-known/security.txt",
+    securityTxtHandler);
+
+app.MapGet(
+    "/security.txt",
+    securityTxtHandler);
 
 app.MapControllers();
 
 app.MapStaticAssets()
-   .Add(endpointBuilder =>
-   {
-       endpointBuilder.Metadata.Add(new AllowAnonymousAttribute());
-   });
+    .Add(endpointBuilder =>
+    {
+        endpointBuilder.Metadata.Add(
+            new AllowAnonymousAttribute());
+    });
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
@@ -684,39 +986,335 @@ static async ValueTask<object?> ValidarAntiforgeryEndpoint(
     EndpointFilterInvocationContext context,
     EndpointFilterDelegate next)
 {
-    var antiforgery = context.HttpContext.RequestServices.GetRequiredService<IAntiforgery>();
+    var antiforgery =
+        context.HttpContext
+            .RequestServices
+            .GetRequiredService<IAntiforgery>();
 
     try
     {
-        await antiforgery.ValidateRequestAsync(context.HttpContext);
+        await antiforgery
+            .ValidateRequestAsync(
+                context.HttpContext);
     }
     catch (AntiforgeryValidationException)
     {
-        return Results.BadRequest("Solicitud inválida.");
+        return Results.BadRequest(
+            "Solicitud inválida.");
     }
 
     return await next(context);
 }
 
-static bool EsRutaTecnicaAutenticacion(PathString path)
+static List<Claim> CrearClaimsUsuario(
+    Usuario usuario)
 {
-    return
-        path.StartsWithSegments("/_framework") ||
-        path.StartsWithSegments("/_blazor") ||
-        path.StartsWithSegments("/_content") ||
-        path.StartsWithSegments("/css") ||
-        path.StartsWithSegments("/js") ||
-        path.StartsWithSegments("/style") ||
-        path.StartsWithSegments("/lib") ||
-        path.StartsWithSegments("/images") ||
-        path.StartsWithSegments("/favicon") ||
-        path.StartsWithSegments("/robots.txt") ||
-        path.StartsWithSegments("/.well-known");
+    var claims =
+        new List<Claim>
+        {
+            new(
+                ClaimTypes.NameIdentifier,
+                usuario.Id.ToString()),
+
+            new(
+                ClaimTypes.Name,
+                usuario.Name
+                ?? string.Empty),
+
+            new(
+                "Username",
+                usuario.Username
+                ?? string.Empty),
+
+            new(
+                ClaimTypes.Email,
+                usuario.email
+                ?? string.Empty),
+
+            new(
+                "LvlId",
+                usuario.lvl_Id.ToString()),
+
+            new(
+                "RequirePasswordChange",
+                usuario.RequirePasswordChange
+                    .ToString())
+        };
+
+    if (usuario.EmployeeId.HasValue)
+    {
+        claims.Add(
+            new Claim(
+                "EmployeeId",
+                usuario.EmployeeId
+                    .Value
+                    .ToString()));
+    }
+
+    if (usuario.Empleado is not null)
+    {
+        claims.Add(
+            new Claim(
+                "EmployeeCode",
+                usuario.Empleado
+                    .IdEmpleado
+                    .ToString()));
+
+        claims.Add(
+            new Claim(
+                "EmployeeName",
+                usuario.Empleado
+                    .Nombre
+                ?? string.Empty));
+
+        claims.Add(
+            new Claim(
+                "EmployeeEmail",
+                usuario.Empleado
+                    .Email
+                ?? string.Empty));
+
+        claims.Add(
+            new Claim(
+                "EmployeeTypeId",
+                usuario.Empleado
+                    .EmployeeTypeId
+                    .ToString()));
+
+        if (usuario.Empleado.EmployeeType is not null)
+        {
+            claims.Add(
+                new Claim(
+                    "EmployeeTypeCode",
+                    usuario.Empleado
+                        .EmployeeType
+                        .Code
+                    ?? string.Empty));
+        }
+    }
+
+    if (usuario.Permisos is not null)
+    {
+        var permisos =
+            usuario.Permisos;
+
+        AgregarPermiso(
+            claims,
+            "CreateUser",
+            permisos.CreateUser);
+
+        AgregarPermiso(
+            claims,
+            "EditUser",
+            permisos.EditUser);
+
+        AgregarPermiso(
+            claims,
+            "DeleteUser",
+            permisos.DeleteUser);
+
+        AgregarPermiso(
+            claims,
+            "UnlockUsers",
+            permisos.UnlockUsers);
+
+        AgregarPermiso(
+            claims,
+            "CreateBook",
+            permisos.CreateBook);
+
+        AgregarPermiso(
+            claims,
+            "EditBook",
+            permisos.EditBook);
+
+        AgregarPermiso(
+            claims,
+            "DeleteBook",
+            permisos.DeleteBook);
+
+        AgregarPermiso(
+            claims,
+            "BooksView",
+            permisos.BooksView);
+
+        AgregarPermiso(
+            claims,
+            "CreateAssignations",
+            permisos.CreateAssignations);
+
+        AgregarPermiso(
+            claims,
+            "AsignBook",
+            permisos.AsignBook);
+
+        AgregarPermiso(
+            claims,
+            "ViewAssignations",
+            permisos.ViewAssignations);
+
+        AgregarPermiso(
+            claims,
+            "QualifyBook",
+            permisos.QualifyBook);
+
+        AgregarPermiso(
+            claims,
+            "CreateEmployees",
+            permisos.CreateEmployees);
+
+        AgregarPermiso(
+            claims,
+            "EditEmployees",
+            permisos.EditEmployees);
+
+        AgregarPermiso(
+            claims,
+            "DeleteEmployees",
+            permisos.DeleteEmployees);
+
+        AgregarPermiso(
+            claims,
+            "ViewEmployees",
+            permisos.ViewEmployees);
+
+        AgregarPermiso(
+            claims,
+            "LateWork",
+            permisos.LateWork);
+
+        AgregarPermiso(
+            claims,
+            "CreateLateWork",
+            permisos.CreateLateWork);
+
+        AgregarPermiso(
+            claims,
+            "EditLateWork",
+            permisos.EditLateWork);
+
+        AgregarPermiso(
+            claims,
+            "DeleteLateWork",
+            permisos.DeleteLateWork);
+
+        AgregarPermiso(
+            claims,
+            "CompleteLateWork",
+            permisos.CompleteLateWork);
+
+        AgregarPermiso(
+            claims,
+            "EditPermissionLevels",
+            permisos.EditPermissionLevels);
+
+        AgregarPermiso(
+            claims,
+            "ViewAllEmployeeTypes",
+            permisos.ViewAllEmployeeTypes);
+    }
+
+    return claims;
 }
 
-static string ObtenerClaveCacheUsuario(Guid usuarioId)
+static void AgregarPermiso(
+    ICollection<Claim> claims,
+    string nombre,
+    bool tienePermiso)
 {
-    return $"pagination-auth-user-valid-{usuarioId:N}";
+    if (!tienePermiso)
+    {
+        return;
+    }
+
+    claims.Add(
+        new Claim(
+            nombre,
+            bool.TrueString));
+}
+
+static string NormalizarReturnUrl(
+    string? returnUrl)
+{
+    if (string.IsNullOrWhiteSpace(
+            returnUrl))
+    {
+        return "/dashboard";
+    }
+
+    returnUrl =
+        returnUrl.Trim();
+
+    if (!returnUrl.StartsWith(
+            "/",
+            StringComparison.Ordinal))
+    {
+        return "/dashboard";
+    }
+
+    if (returnUrl.StartsWith(
+            "//",
+            StringComparison.Ordinal))
+    {
+        return "/dashboard";
+    }
+
+    if (returnUrl.StartsWith(
+            @"\\",
+            StringComparison.Ordinal) ||
+        returnUrl.StartsWith(
+            @"/\",
+            StringComparison.Ordinal))
+    {
+        return "/dashboard";
+    }
+
+    return returnUrl;
+}
+
+static bool EsRutaTecnicaAutenticacion(
+    PathString path)
+{
+    return
+        path.StartsWithSegments(
+            "/_framework") ||
+
+        path.StartsWithSegments(
+            "/_blazor") ||
+
+        path.StartsWithSegments(
+            "/_content") ||
+
+        path.StartsWithSegments(
+            "/css") ||
+
+        path.StartsWithSegments(
+            "/js") ||
+
+        path.StartsWithSegments(
+            "/style") ||
+
+        path.StartsWithSegments(
+            "/lib") ||
+
+        path.StartsWithSegments(
+            "/images") ||
+
+        path.StartsWithSegments(
+            "/favicon") ||
+
+        path.StartsWithSegments(
+            "/robots.txt") ||
+
+        path.StartsWithSegments(
+            "/.well-known");
+}
+
+static string ObtenerClaveCacheUsuario(
+    Guid usuarioId)
+{
+    return
+        $"pagination-auth-user-valid-{usuarioId:N}";
 }
 
 app.Run();

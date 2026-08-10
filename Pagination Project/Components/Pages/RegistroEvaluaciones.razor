@@ -38,7 +38,7 @@
 
             <div class="stat-card">
                 <span>Available Assignments</span>
-                <strong>@Asignaciones.Count</strong>
+                <strong>@TotalAsignacionesDisponibles</strong>
             </div>
         </div>
     </section>
@@ -55,6 +55,7 @@
         <div class="evaluation-result-modal-overlay"
              role="presentation"
              @onclick="CerrarModalResultadoEvaluacion">
+
             <div class="evaluation-result-modal-card @TipoModalResultadoEvaluacion"
                  role="dialog"
                  aria-modal="true"
@@ -64,6 +65,7 @@
                 <div class="evaluation-result-modal-accent"></div>
 
                 <div class="evaluation-result-modal-content">
+
                     <div class="evaluation-result-modal-icon" aria-hidden="true">
                         @if (TipoModalResultadoEvaluacion == "success")
                         {
@@ -82,10 +84,17 @@
                     </div>
 
                     <div class="evaluation-result-modal-copy">
-                        <span class="evaluation-result-modal-eyebrow">Evaluation Management</span>
-                        <h3 id="evaluationResultModalTitle">@TituloModalResultadoEvaluacion</h3>
+                        <span class="evaluation-result-modal-eyebrow">
+                            Evaluation Management
+                        </span>
+
+                        <h3 id="evaluationResultModalTitle">
+                            @TituloModalResultadoEvaluacion
+                        </h3>
+
                         <p>@MensajeModalResultadoEvaluacion</p>
                     </div>
+
                 </div>
 
                 <div class="evaluation-result-modal-actions">
@@ -95,11 +104,13 @@
                         OK
                     </button>
                 </div>
+
             </div>
         </div>
     }
 
     <section class="form-card">
+
         <div class="section-header">
             <div>
                 <h2>Select Assignment</h2>
@@ -107,7 +118,9 @@
             </div>
 
             <div class="header-actions">
-                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                <button type="button"
+                        class="btn-light"
+                        @onclick="LimpiarFormulario">
                     ✨ New
                 </button>
             </div>
@@ -115,9 +128,11 @@
 
         <div class="form-grid">
             <div class="form-group full">
+
                 <label>Search Assignment</label>
 
                 <div class="search-assignment-box">
+
                     <input class="form-control"
                            placeholder="Search by KGEN Code or LSA Code..."
                            @bind="TextoBusquedaAsignacion"
@@ -129,6 +144,7 @@
                             @onclick="BuscarAsignacionAsync">
                         Search
                     </button>
+
                 </div>
             </div>
         </div>
@@ -161,9 +177,11 @@
 
             </div>
         }
+
     </section>
 
     <section class="summary-grid">
+
         <div class="summary-card">
             <span>Motif YP</span>
             <strong>@PorcentajeMotifYpVista.ToString("0.00")%</strong>
@@ -199,11 +217,13 @@
             <strong>@PorcentajeGeneralVista.ToString("0.00")%</strong>
             <small>Average of all 5 evaluation areas</small>
         </div>
+
     </section>
 
     <section class="evaluation-grid">
 
         <div class="evaluation-block">
+
             <div class="block-header">
                 <div>
                     <h2>📌 Motif YP</h2>
@@ -283,9 +303,11 @@
                 </div>
 
             </div>
+
         </div>
 
         <div class="evaluation-block">
+
             <div class="block-header">
                 <div>
                     <h2>⚙️ Motif WP</h2>
@@ -325,9 +347,11 @@
                 </div>
 
             </div>
+
         </div>
 
         <div class="evaluation-block">
+
             <div class="block-header">
                 <div>
                     <h2>📦 Inventory Report</h2>
@@ -375,9 +399,11 @@
                 </div>
 
             </div>
+
         </div>
 
         <div class="evaluation-block">
+
             <div class="block-header">
                 <div>
                     <h2>📎 Product Shipping Folder</h2>
@@ -457,9 +483,11 @@
                 </div>
 
             </div>
+
         </div>
 
         <div class="evaluation-block">
+
             <div class="block-header">
                 <div>
                     <h2>📋 Task Memo</h2>
@@ -499,25 +527,37 @@
                 </div>
 
             </div>
+
         </div>
 
     </section>
 
     <section class="form-card">
+
         <div class="section-header actions-section">
+
             <div>
                 <h2>@(ModoEdicion ? "Update Evaluation" : "Save Evaluation")</h2>
             </div>
 
             <div class="header-actions">
+
                 <button type="button"
                         class="btn-primary"
                         disabled="@Guardando"
                         @onclick="GuardarEvaluacionAsync">
-                    @(Guardando ? "Saving..." : ModoEdicion ? "Update Evaluation" : "Save Evaluation")
+
+                    @(Guardando
+                                        ? "Saving..."
+                                        : ModoEdicion
+                                        ? "Update Evaluation"
+                                        : "Save Evaluation")
+
                 </button>
 
-                <button type="button" class="btn-light" @onclick="LimpiarFormulario">
+                <button type="button"
+                        class="btn-light"
+                        @onclick="LimpiarFormulario">
                     Clear
                 </button>
 
@@ -527,12 +567,17 @@
                         @onclick="EliminarEvaluacionAsync">
                     Delete
                 </button>
+
             </div>
+
         </div>
+
     </section>
 
     <section class="list-card">
+
         <div class="section-header table-header">
+
             <div>
                 <h2>Evaluation History</h2>
                 <p>Double click on a row to load and edit an evaluation.</p>
@@ -541,28 +586,40 @@
             <div class="list-filters">
 
                 <select class="employee-filter-select"
-                        @bind="EmpleadoFiltroNombre">
-                    <option value="">All Employees</option>
+                        value="@EmpleadoFiltroNombre"
+                        @onchange="OnEmpleadoFiltroChanged">
+
+                    <option value="">
+                        All Employees
+                    </option>
 
                     @foreach (var empleado in EmpleadosParaFiltro)
                     {
-                        <option value="@empleado.EmpleadoNombre">
-                            @empleado.EmpleadoNombre
+                        <option value="@empleado">
+                            @empleado
                         </option>
                     }
+
                 </select>
 
                 <div class="search-box">
+
                     <span>🔎</span>
+
                     <input placeholder="Search by employee or KGEN..."
-                           @bind="Busqueda"
-                           @bind:event="oninput" />
+                           value="@Busqueda"
+                           @oninput="OnBusquedaHistorialChanged" />
+
                 </div>
 
-                <button type="button" class="btn-filter-clear" @onclick="LimpiarFiltros">
+                <button type="button"
+                        class="btn-filter-clear"
+                        @onclick="LimpiarFiltros">
                     Clear
                 </button>
+
             </div>
+
         </div>
 
         @if (Cargando)
@@ -571,7 +628,7 @@
                 Loading evaluations...
             </div>
         }
-        else if (!HistorialFiltrado.Any())
+        else if (HistorialFiltrado.Count == 0)
         {
             <div class="empty-state">
                 <strong>No evaluations to display.</strong>
@@ -581,14 +638,18 @@
         else
         {
             <div class="table-container">
+
                 <table class="evaluations-table">
+
                     <thead>
                         <tr>
                             <th>Employee</th>
+
                             @if (Scope.ViewAllEmployeeTypes)
                             {
                                 <th>Department</th>
                             }
+
                             <th>KGEN</th>
                             <th>Motif YP</th>
                             <th>Motif WP</th>
@@ -600,91 +661,139 @@
                     </thead>
 
                     <tbody>
+
                         @foreach (var item in HistorialFiltrado)
                         {
                             <tr class="@(Evaluacion.Id == item.Id ? "selected" : string.Empty)"
                                 @ondblclick="() => SeleccionarEvaluacionAsync(item.Id)">
+
                                 <td data-label="Employee">
+
                                     <div class="employee-title">
                                         <strong>@item.EmpleadoNombre</strong>
                                     </div>
+
                                 </td>
 
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
                                     <td data-label="Department">
-                                        <span class="kgen-pill">@item.EmployeeTypeCode</span>
+                                        <span class="kgen-pill">
+                                            @item.EmployeeTypeCode
+                                        </span>
                                     </td>
                                 }
 
                                 <td data-label="KGEN">
-                                    <span class="kgen-pill">@item.KGENCode</span>
+                                    <span class="kgen-pill">
+                                        @item.KGENCode
+                                    </span>
                                 </td>
 
-                                <td data-label="Motif YP">@MostrarPorcentaje(item.MotifYp)</td>
-                                <td data-label="Motif WP">@MostrarPorcentaje(item.MotifWp)</td>
-                                <td data-label="Inventory">@MostrarPorcentaje(item.InventoryReport)</td>
-                                <td data-label="Shipping">@MostrarPorcentaje(item.ProductShippingFolder)</td>
-                                <td data-label="Task Memo">@MostrarPorcentaje(item.TaskMemo)</td>
+                                <td data-label="Motif YP">
+                                    @MostrarPorcentaje(item.MotifYp)
+                                </td>
+
+                                <td data-label="Motif WP">
+                                    @MostrarPorcentaje(item.MotifWp)
+                                </td>
+
+                                <td data-label="Inventory">
+                                    @MostrarPorcentaje(item.InventoryReport)
+                                </td>
+
+                                <td data-label="Shipping">
+                                    @MostrarPorcentaje(item.ProductShippingFolder)
+                                </td>
+
+                                <td data-label="Task Memo">
+                                    @MostrarPorcentaje(item.TaskMemo)
+                                </td>
 
                                 <td data-label="Total %">
+
                                     <strong class="total-percent">
                                         @MostrarPorcentaje(item.PorcentajeGeneral)
                                     </strong>
+
                                 </td>
+
                             </tr>
                         }
+
                     </tbody>
+
                 </table>
+
             </div>
         }
+
     </section>
 
 </div>
 
 @code {
     private UserDataScope Scope { get; set; } = new();
-    private Evaluaciones Evaluacion { get; set; } = new();
 
-    private List<AsignacionComboDto> Asignaciones { get; set; } = new();
-    private List<EvaluacionListadoDto> Historial { get; set; } = new();
-
-    private string Mensaje { get; set; } = string.Empty;
-    private string TipoMensaje { get; set; } = "success";
-    private string Busqueda { get; set; } = string.Empty;
-    private string TextoBusquedaAsignacion { get; set; } = string.Empty;
-
-    private AsignacionSeleccionadaDto? AsignacionSeleccionada { get; set; }
-
-    private string EmpleadoFiltroNombre { get; set; } = string.Empty;
-
-    private IEnumerable<EvaluacionListadoDto> EmpleadosParaFiltro
-    {
-        get
-        {
-            return Historial
-                .Where(x => !string.IsNullOrWhiteSpace(x.EmpleadoNombre) && x.EmpleadoNombre != "-")
-                .GroupBy(x => x.EmpleadoNombre)
-                .Select(g => g.First())
-                .OrderBy(x => x.EmpleadoNombre);
-        }
-    }
+    private Evaluaciones Evaluacion { get; set; } =
+        CrearEvaluacionVacia();
 
     private bool Cargando { get; set; } = true;
-    private bool Guardando { get; set; } = false;
-    private bool ModoEdicion { get; set; } = false;
+    private bool Guardando { get; set; }
+    private bool ModoEdicion { get; set; }
 
-    private bool MostrarModalResultadoEvaluacion { get; set; } = false;
-    private string TituloModalResultadoEvaluacion { get; set; } = string.Empty;
-    private string MensajeModalResultadoEvaluacion { get; set; } = string.Empty;
-    private string TipoModalResultadoEvaluacion { get; set; } = "success";
+    private int TotalAsignacionesDisponibles;
+
+    private string Mensaje { get; set; } =
+        string.Empty;
+
+    private string TipoMensaje { get; set; } =
+        "success";
+
+    private string Busqueda { get; set; } =
+        string.Empty;
+
+    private string TextoBusquedaAsignacion { get; set; } =
+        string.Empty;
+
+    private string EmpleadoFiltroNombre { get; set; } =
+        string.Empty;
+
+    private AsignacionSeleccionadaDto?
+        AsignacionSeleccionada
+    { get; set; }
+
+    private List<EvaluacionListadoDto> Historial { get; set; } =
+        new();
+
+    private List<EvaluacionListadoDto> HistorialFiltrado { get; set; } =
+        new();
+
+    private List<string> EmpleadosParaFiltro { get; set; } =
+        new();
+
+    private bool MostrarModalResultadoEvaluacion { get; set; }
+
+    private string TituloModalResultadoEvaluacion { get; set; } =
+        string.Empty;
+
+    private string MensajeModalResultadoEvaluacion { get; set; } =
+        string.Empty;
+
+    private string TipoModalResultadoEvaluacion { get; set; } =
+        "success";
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        Scope = await UserDataScopeService.GetScopeAsync(authState.User);
+        var authState =
+            await AuthenticationStateProvider
+                .GetAuthenticationStateAsync();
+
+        Scope =
+            await UserDataScopeService
+                .GetScopeAsync(authState.User);
+
         await CargarDatosAsync();
-        LimpiarFormulario();
     }
 
     private async Task CargarDatosAsync()
@@ -692,17 +801,22 @@
         try
         {
             Cargando = true;
+            LimpiarMensaje();
 
-            await using var db = await DbFactory.CreateDbContextAsync();
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
 
             await ActualizarFinalizadosPorDirxionAsync(db);
 
-            await CargarAsignacionesAsync(db);
+            await CargarTotalAsignacionesDisponiblesAsync(db);
+
             await CargarHistorialAsync(db);
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error loading evaluations: {ex.Message}", "error");
+            MostrarMensaje(
+                $"Error loading evaluations: {ex.Message}",
+                "error");
         }
         finally
         {
@@ -710,11 +824,30 @@
         }
     }
 
-    private async Task BuscarAsignacionConEnter(KeyboardEventArgs e)
+    private async Task CargarTotalAsignacionesDisponiblesAsync(
+        AppDbContext db)
+    {
+        TotalAsignacionesDisponibles =
+            await db.Asignaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+                .CountAsync(a =>
+                    !a.Finalizado &&
+                    a.Libro != null &&
+                    !a.Libro.Finalizado &&
+                    !db.Evaluaciones.Any(
+                        e => e.AssignationId == a.Id));
+    }
+
+    private async Task BuscarAsignacionConEnter(
+        KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
+        {
             await BuscarAsignacionAsync();
+        }
     }
+
 
     private async Task BuscarAsignacionAsync()
     {
@@ -722,358 +855,819 @@
         {
             LimpiarMensaje();
 
-            var filtro = TextoBusquedaAsignacion?.Trim();
+            var filtro =
+                TextoBusquedaAsignacion?.Trim();
 
             if (string.IsNullOrWhiteSpace(filtro))
             {
-                MostrarMensaje("Enter a KGEN Code or LSA Code.", "error");
+                MostrarMensaje(
+                    "Enter a KGEN Code or LSA Code.",
+                    "error");
+
                 return;
             }
 
-            await using var db = await DbFactory.CreateDbContextAsync();
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
 
-            var filtroUpper = filtro.ToUpper();
+            var patron = $"%{filtro}%";
 
-            var asignacion = await db.Asignaciones
-                .AsNoTracking()
-                .ApplyScope(Scope)
-                .Include(a => a.Empleado)
-                .Include(a => a.Libro)
-                    .ThenInclude(l => l!.EmployeeType)
-                .Where(a => !a.Finalizado &&
-                            a.Libro != null &&
-                            !a.Libro.Finalizado &&
-                            !db.Evaluaciones.Any(e => e.AssignationId == a.Id) &&
+
+            var asignacion =
+                await db.Asignaciones
+                    .AsNoTracking()
+                    .ApplyScope(Scope)
+
+                    .Where(a =>
+                        !a.Finalizado &&
+                        a.Libro != null &&
+                        !a.Libro.Finalizado &&
+
+                        !db.Evaluaciones.Any(
+                            e =>
+                                e.AssignationId ==
+                                a.Id) &&
+
+                        (
                             (
-                                (a.Libro!.KGENCode != null && a.Libro.KGENCode.ToUpper().Contains(filtroUpper)) ||
-                                (a.Libro!.LSACode != null && a.Libro.LSACode.ToUpper().Contains(filtroUpper))
-                            ))
-                .OrderBy(a => a.Empleado!.Nombre)
-                .ThenBy(a => a.Libro!.BookName)
-                .Select(a => new
-                {
-                    a.Id,
-                    EmpleadoNombre = a.Empleado != null ? a.Empleado.Nombre : "-",
-                    BookName = a.Libro != null ? a.Libro.BookName : "-",
-                    KGENCode = a.Libro != null ? a.Libro.KGENCode : "-",
-                    LSACode = a.Libro != null ? a.Libro.LSACode : "-",
-                    EmployeeTypeCode = a.Libro != null && a.Libro.EmployeeType != null
-                        ? a.Libro.EmployeeType.Code
-                        : string.Empty
-                })
-                .FirstOrDefaultAsync();
+                                a.Libro.KGENCode != null &&
+                                EF.Functions.ILike(
+                                    a.Libro.KGENCode,
+                                    patron)
+                            )
+                            ||
+                            (
+                                a.Libro.LSACode != null &&
+                                EF.Functions.ILike(
+                                    a.Libro.LSACode,
+                                    patron)
+                            )
+                        ))
+
+                    .OrderByDescending(a =>
+                        a.Libro!.KGENCode == filtro ||
+                        a.Libro.LSACode == filtro)
+
+                    .ThenBy(a =>
+                        a.Empleado != null
+                            ? a.Empleado.Nombre
+                            : string.Empty)
+
+                    .ThenBy(a =>
+                        a.Libro!.BookName)
+
+                    .Select(a =>
+                        new AssignmentSearchVm
+                        {
+                            Id = a.Id,
+
+                            EmpleadoNombre =
+                                a.Empleado != null
+                                    ? a.Empleado.Nombre ?? "-"
+                                    : "-",
+
+                            BookName =
+                                a.Libro != null
+                                    ? a.Libro.BookName ?? "-"
+                                    : "-",
+
+                            KGENCode =
+                                a.Libro != null
+                                    ? a.Libro.KGENCode ?? "-"
+                                    : "-",
+
+                            LSACode =
+                                a.Libro != null
+                                    ? a.Libro.LSACode ?? "-"
+                                    : "-",
+
+                            EmployeeTypeCode =
+                                a.Libro != null &&
+                                a.Libro.EmployeeType != null
+
+                                    ? a.Libro.EmployeeType.Code
+                                        ?? string.Empty
+
+                                    : string.Empty
+                        })
+
+                    .FirstOrDefaultAsync();
+
 
             if (asignacion is null)
             {
-                Evaluacion = new Evaluaciones
-                {
-                    Id = Guid.Empty,
-                    AssignationId = Guid.Empty,
-                    Finalizado = false
-                };
+                Evaluacion =
+                    CrearEvaluacionVacia();
 
-                AsignacionSeleccionada = null;
-                ModoEdicion = false;
+                AsignacionSeleccionada =
+                    null;
 
-                MostrarMensaje("No available assignment was found with that KGEN Code or LSA Code.", "error");
+                ModoEdicion =
+                    false;
+
+                MostrarMensaje(
+                    "No available assignment was found with that KGEN Code or LSA Code.",
+                    "error");
+
                 return;
             }
 
-            var empleadoNombre = await ObtenerEmpleadoEvaluacionAsync(
-                db,
-                asignacion.Id,
-                asignacion.EmpleadoNombre ?? "-");
 
-            Evaluacion = new Evaluaciones
-            {
-                Id = Guid.Empty,
-                AssignationId = asignacion.Id,
-                Finalizado = false
-            };
+            var empleadoNombre =
+                await ObtenerEmpleadoEvaluacionAsync(
+                    db,
+                    asignacion.Id,
+                    asignacion.EmpleadoNombre);
 
-            AsignacionSeleccionada = new AsignacionSeleccionadaDto
-            {
-                Id = asignacion.Id,
-                EmpleadoNombre = empleadoNombre,
-                BookName = asignacion.BookName ?? "-",
-                KGENCode = asignacion.KGENCode ?? "-",
-                LSACode = asignacion.LSACode ?? "-",
-                EmployeeTypeCode = asignacion.EmployeeTypeCode ?? string.Empty
-            };
 
-            ModoEdicion = false;
+            Evaluacion =
+                new Evaluaciones
+                {
+                    Id = Guid.Empty,
+                    AssignationId = asignacion.Id,
+                    Finalizado = false
+                };
+
+
+            AsignacionSeleccionada =
+                new AsignacionSeleccionadaDto
+                {
+                    Id =
+                        asignacion.Id,
+
+                    EmpleadoNombre =
+                        empleadoNombre,
+
+                    BookName =
+                        asignacion.BookName,
+
+                    KGENCode =
+                        asignacion.KGENCode,
+
+                    LSACode =
+                        asignacion.LSACode,
+
+                    EmployeeTypeCode =
+                        asignacion.EmployeeTypeCode
+                };
+
+
+            ModoEdicion =
+                false;
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error searching assignment: {ex.Message}", "error");
+            MostrarMensaje(
+                $"Error searching assignment: {ex.Message}",
+                "error");
         }
     }
 
-    private async Task<string> ObtenerEmpleadoEvaluacionAsync(AppDbContext db, Guid assignmentId, string empleadoOriginal)
+    private static async Task<string>
+        ObtenerEmpleadoEvaluacionAsync(
+            AppDbContext db,
+            Guid assignmentId,
+            string empleadoOriginal)
     {
-        var temporal = await db.TemporaryAssignments
-            .AsNoTracking()
-            .Include(x => x.TemporaryEmployee)
-            .Where(x => x.AssignmentId == assignmentId && x.Active)
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync();
+        var nombreTemporal =
+            await db.TemporaryAssignments
+                .AsNoTracking()
 
-        if (temporal?.TemporaryEmployee is not null &&
-            !string.IsNullOrWhiteSpace(temporal.TemporaryEmployee.Nombre))
+                .Where(x =>
+                    x.AssignmentId == assignmentId &&
+                    x.Active)
+
+                .OrderByDescending(
+                    x => x.CreatedAt)
+
+                .Select(x =>
+                    x.TemporaryEmployee != null
+                        ? x.TemporaryEmployee.Nombre
+                        : null)
+
+                .FirstOrDefaultAsync();
+
+
+        if (!string.IsNullOrWhiteSpace(
+                nombreTemporal))
         {
-            return temporal.TemporaryEmployee.Nombre;
+            return nombreTemporal;
         }
 
-        return empleadoOriginal;
+
+        return string.IsNullOrWhiteSpace(
+            empleadoOriginal)
+                ? "-"
+                : empleadoOriginal;
     }
 
-    private async Task CargarAsignacionesAsync(AppDbContext db)
+    private async Task CargarHistorialAsync(
+        AppDbContext db)
     {
-        var assignationIdActual = Evaluacion.AssignationId;
+        var evaluacionesDb =
+            await db.Evaluaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
 
-        Asignaciones = await db.Asignaciones
-            .AsNoTracking()
-            .ApplyScope(Scope)
-            .Include(a => a.Empleado)
-            .Include(a => a.Libro)
-                .ThenInclude(l => l!.EmployeeType)
-            .Where(a => !a.Finalizado &&
-                        a.Libro != null &&
-                        !a.Libro.Finalizado &&
-                        (
-                            !db.Evaluaciones.Any(e => e.AssignationId == a.Id) ||
-                            a.Id == assignationIdActual
-                        ))
-            .OrderBy(a => a.Empleado!.Nombre)
-            .ThenBy(a => a.Libro!.BookName)
-            .Select(a => new AsignacionComboDto
-            {
-                Id = a.Id,
-                Descripcion =
-                    (a.Empleado != null ? a.Empleado.Nombre : "-") +
-                    " - " +
-                    (a.Libro != null ? a.Libro.BookName : "-") +
-                    " | KGEN: " +
-                    (a.Libro != null ? a.Libro.KGENCode : "-") +
-                    " | LSA: " +
-                    (a.Libro != null ? a.Libro.LSACode : "-") +
-                    (Scope.ViewAllEmployeeTypes && a.Libro != null && a.Libro.EmployeeType != null
-                        ? " | " + a.Libro.EmployeeType.Code
+                .OrderBy(e =>
+                    e.Asignacion != null &&
+                    e.Asignacion.Empleado != null
+
+                        ? e.Asignacion.Empleado.Nombre
                         : string.Empty)
-            })
-            .ToListAsync();
-    }
 
-    private async Task CargarHistorialAsync(AppDbContext db)
-    {
-        var evaluacionesDb = await db.Evaluaciones
-            .AsNoTracking()
-            .ApplyScope(Scope)
-            .Include(e => e.Asignacion)
-                .ThenInclude(a => a.Empleado)
-            .Include(e => e.Asignacion)
-                .ThenInclude(a => a.Libro)
-                    .ThenInclude(l => l!.EmployeeType)
-            .OrderBy(e => e.Asignacion.Empleado!.Nombre)
-            .ThenBy(e => e.Asignacion.Libro!.KGENCode)
-            .ToListAsync();
+                .ThenBy(e =>
+                    e.Asignacion != null &&
+                    e.Asignacion.Libro != null
 
-        var assignmentIds = evaluacionesDb
-            .Select(e => e.AssignationId)
-            .Distinct()
-            .ToList();
+                        ? e.Asignacion.Libro.KGENCode
+                        : string.Empty)
 
-        var temporalesDb = await db.TemporaryAssignments
-            .AsNoTracking()
-            .Include(x => x.TemporaryEmployee)
-            .Where(x => x.Active && assignmentIds.Contains(x.AssignmentId))
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
+                .Select(e =>
+                    new EvaluacionHistorialRawDto
+                    {
+                        Id =
+                            e.Id,
 
-        Historial = evaluacionesDb.Select(e =>
+                        AssignationId =
+                            e.AssignationId,
+
+                        EmpleadoNombre =
+                            e.Asignacion != null &&
+                            e.Asignacion.Empleado != null
+
+                                ? e.Asignacion.Empleado.Nombre ?? "-"
+                                : "-",
+
+                        KGENCode =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null
+
+                                ? e.Asignacion.Libro.KGENCode ?? "-"
+                                : "-",
+
+                        EmployeeTypeCode =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null &&
+                            e.Asignacion.Libro.EmployeeType != null
+
+                                ? e.Asignacion.Libro.EmployeeType.Code
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        MotifYp =
+                            e.MotifYp,
+
+                        MotifWp =
+                            e.MotifWp,
+
+                        InventoryReport =
+                            e.InventoryReport,
+
+                        ProductShippingFolder =
+                            e.ProductShippingFolder,
+
+                        TaskMemo =
+                            e.TaskMemo
+                    })
+
+                .ToListAsync();
+
+
+        if (evaluacionesDb.Count == 0)
         {
-            var temporal = temporalesDb
-                .FirstOrDefault(t => t.AssignmentId == e.AssignationId);
+            Historial.Clear();
+            HistorialFiltrado.Clear();
+            EmpleadosParaFiltro.Clear();
 
-            var empleadoNombre = temporal?.TemporaryEmployee?.Nombre;
-
-            if (string.IsNullOrWhiteSpace(empleadoNombre))
-                empleadoNombre = e.Asignacion?.Empleado?.Nombre ?? "-";
-
-            return new EvaluacionListadoDto
-            {
-                Id = e.Id,
-                AssignationId = e.AssignationId,
-
-                EmpleadoNombre = empleadoNombre,
-
-                KGENCode = e.Asignacion?.Libro?.KGENCode ?? "-",
-                EmployeeTypeCode = e.Asignacion?.Libro?.EmployeeType?.Code ?? string.Empty,
-
-                MotifYp = e.MotifYp,
-                MotifWp = e.MotifWp,
-                InventoryReport = e.InventoryReport,
-                ProductShippingFolder = e.ProductShippingFolder,
-                TaskMemo = e.TaskMemo
-            };
-        }).ToList();
-
-        foreach (var item in Historial)
-        {
-            item.PorcentajeGeneral = CalcularPorcentajeGeneral(item);
+            return;
         }
+
+
+        var assignmentIds =
+            evaluacionesDb
+                .Select(x =>
+                    x.AssignationId)
+
+                .Distinct()
+
+                .ToList();
+
+        var temporalesDb =
+            await db.TemporaryAssignments
+                .AsNoTracking()
+
+                .Where(x =>
+                    x.Active &&
+                    assignmentIds.Contains(
+                        x.AssignmentId))
+
+                .OrderByDescending(
+                    x => x.CreatedAt)
+
+                .Select(x =>
+                    new TemporaryEmployeeHistoryVm
+                    {
+                        AssignmentId =
+                            x.AssignmentId,
+
+                        EmployeeName =
+                            x.TemporaryEmployee != null
+
+                                ? x.TemporaryEmployee.Nombre
+                                    ?? string.Empty
+
+                                : string.Empty
+                    })
+
+                .ToListAsync();
+
+        var temporalPorAsignacion =
+            temporalesDb
+                .GroupBy(x =>
+                    x.AssignmentId)
+
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.First().EmployeeName);
+
+
+        Historial =
+            new List<EvaluacionListadoDto>(
+                evaluacionesDb.Count);
+
+
+        foreach (var evaluacion in evaluacionesDb)
+        {
+            var empleadoNombre =
+                evaluacion.EmpleadoNombre;
+
+
+            if (temporalPorAsignacion.TryGetValue(
+                    evaluacion.AssignationId,
+                    out var nombreTemporal)
+
+                &&
+
+                !string.IsNullOrWhiteSpace(
+                    nombreTemporal))
+            {
+                empleadoNombre =
+                    nombreTemporal;
+            }
+
+
+            var item =
+                new EvaluacionListadoDto
+                {
+                    Id =
+                        evaluacion.Id,
+
+                    AssignationId =
+                        evaluacion.AssignationId,
+
+                    EmpleadoNombre =
+                        empleadoNombre,
+
+                    KGENCode =
+                        evaluacion.KGENCode,
+
+                    EmployeeTypeCode =
+                        evaluacion.EmployeeTypeCode,
+
+                    MotifYp =
+                        evaluacion.MotifYp,
+
+                    MotifWp =
+                        evaluacion.MotifWp,
+
+                    InventoryReport =
+                        evaluacion.InventoryReport,
+
+                    ProductShippingFolder =
+                        evaluacion.ProductShippingFolder,
+
+                    TaskMemo =
+                        evaluacion.TaskMemo
+                };
+
+
+            item.PorcentajeGeneral =
+                CalcularPorcentajeGeneral(
+                    item);
+
+
+            Historial.Add(item);
+        }
+
+
+        ActualizarListaEmpleadosFiltro();
+
+        AplicarFiltrosHistorial();
     }
 
-    private IEnumerable<EvaluacionListadoDto> HistorialFiltrado
+    private void AplicarFiltrosHistorial()
     {
-        get
-        {
-            IEnumerable<EvaluacionListadoDto> query = Historial;
+        IEnumerable<EvaluacionListadoDto> query =
+            Historial;
 
-            if (!string.IsNullOrWhiteSpace(EmpleadoFiltroNombre))
-            {
-                query = query.Where(x =>
+
+        if (!string.IsNullOrWhiteSpace(
+                EmpleadoFiltroNombre))
+        {
+            var empleado =
+                EmpleadoFiltroNombre.Trim();
+
+
+            query =
+                query.Where(x =>
                     string.Equals(
-                        x.EmpleadoNombre?.Trim(),
-                        EmpleadoFiltroNombre.Trim(),
+                        x.EmpleadoNombre,
+                        empleado,
                         StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(Busqueda))
-            {
-                var filtro = Busqueda.Trim().ToUpperInvariant();
-
-                query = query.Where(x =>
-                    (x.EmpleadoNombre ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
-                    (x.KGENCode ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
-                    (x.EmployeeTypeCode ?? string.Empty).ToUpperInvariant().Contains(filtro));
-            }
-
-            return query;
         }
+
+
+        if (!string.IsNullOrWhiteSpace(
+                Busqueda))
+        {
+            var filtro =
+                Busqueda.Trim();
+
+
+            query =
+                query.Where(x =>
+                    ContieneIgnorandoMayusculas(
+                        x.EmpleadoNombre,
+                        filtro)
+
+                    ||
+
+                    ContieneIgnorandoMayusculas(
+                        x.KGENCode,
+                        filtro)
+
+                    ||
+
+                    ContieneIgnorandoMayusculas(
+                        x.EmployeeTypeCode,
+                        filtro));
+        }
+
+
+        HistorialFiltrado =
+            query.ToList();
+    }
+
+
+    private static bool ContieneIgnorandoMayusculas(
+        string? source,
+        string value)
+    {
+        return !string.IsNullOrEmpty(source) &&
+               source.Contains(
+                   value,
+                   StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    private void ActualizarListaEmpleadosFiltro()
+    {
+        EmpleadosParaFiltro =
+            Historial
+                .Where(x =>
+                    !string.IsNullOrWhiteSpace(
+                        x.EmpleadoNombre)
+
+                    &&
+
+                    x.EmpleadoNombre != "-")
+
+                .Select(x =>
+                    x.EmpleadoNombre)
+
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+
+                .OrderBy(x =>
+                    x)
+
+                .ToList();
+    }
+
+
+    private void OnEmpleadoFiltroChanged(
+        ChangeEventArgs e)
+    {
+        EmpleadoFiltroNombre =
+            e.Value?.ToString()
+            ?? string.Empty;
+
+
+        AplicarFiltrosHistorial();
+    }
+
+
+    private void OnBusquedaHistorialChanged(
+        ChangeEventArgs e)
+    {
+        Busqueda =
+            e.Value?.ToString()
+            ?? string.Empty;
+
+
+        AplicarFiltrosHistorial();
     }
 
     private async Task GuardarEvaluacionAsync()
     {
         try
         {
+            if (Guardando)
+                return;
+
+
             Guardando = true;
+
             LimpiarMensaje();
 
-            if (Evaluacion.AssignationId == Guid.Empty)
+
+            if (Evaluacion.AssignationId ==
+                Guid.Empty)
             {
                 MostrarResultadoEvaluacion(
                     "Unable to save evaluation",
                     "Select a valid assignment before saving the evaluation.",
                     "error");
+
                 return;
             }
 
-            var editando = Evaluacion.Id != Guid.Empty;
-            var empleadoNombre = AsignacionSeleccionada?.EmpleadoNombre ?? "Selected employee";
-            var kgenCode = AsignacionSeleccionada?.KGENCode;
 
-            if (string.IsNullOrWhiteSpace(kgenCode))
-                kgenCode = TextoBusquedaAsignacion?.Trim();
+            var editando =
+                Evaluacion.Id != Guid.Empty;
 
-            if (string.IsNullOrWhiteSpace(kgenCode))
+
+            var empleadoNombre =
+                AsignacionSeleccionada
+                    ?.EmpleadoNombre
+                ?? "Selected employee";
+
+
+            var kgenCode =
+                AsignacionSeleccionada
+                    ?.KGENCode;
+
+
+            if (string.IsNullOrWhiteSpace(
+                    kgenCode))
+            {
+                kgenCode =
+                    TextoBusquedaAsignacion
+                        ?.Trim();
+            }
+
+
+            if (string.IsNullOrWhiteSpace(
+                    kgenCode))
+            {
                 kgenCode = "-";
+            }
 
-            Evaluacion.MotifYp = PorcentajeMotifYpVista;
-            Evaluacion.MotifWp = PorcentajeMotifWpVista;
-            Evaluacion.InventoryReport = PorcentajeInventoryVista;
-            Evaluacion.ProductShippingFolder = PorcentajeShippingVista;
-            Evaluacion.TaskMemo = PorcentajeTaskVista;
+            Evaluacion.MotifYp =
+                PorcentajeMotifYpVista;
 
-            await using var db = await DbFactory.CreateDbContextAsync();
+            Evaluacion.MotifWp =
+                PorcentajeMotifWpVista;
+
+            Evaluacion.InventoryReport =
+                PorcentajeInventoryVista;
+
+            Evaluacion.ProductShippingFolder =
+                PorcentajeShippingVista;
+
+            Evaluacion.TaskMemo =
+                PorcentajeTaskVista;
+
+
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
+
 
             if (!editando)
             {
-                var existe = await db.Evaluaciones
-                    .AnyAsync(e => e.AssignationId == Evaluacion.AssignationId);
+                var estadoAsignacion =
+                    await db.Asignaciones
+                        .AsNoTracking()
+                        .ApplyScope(Scope)
 
-                if (existe)
+                        .Where(a =>
+                            a.Id ==
+                            Evaluacion.AssignationId)
+
+                        .Select(a =>
+                            new AssignmentAvailabilityVm
+                            {
+                                Disponible =
+                                    !a.Finalizado &&
+                                    a.Libro != null &&
+                                    !a.Libro.Finalizado,
+
+                                TieneEvaluacion =
+                                    db.Evaluaciones.Any(
+                                        e =>
+                                            e.AssignationId ==
+                                            a.Id)
+                            })
+
+                        .FirstOrDefaultAsync();
+
+
+                if (estadoAsignacion is null ||
+                    !estadoAsignacion.Disponible)
+                {
+                    MostrarResultadoEvaluacion(
+                        "Assignment unavailable",
+                        "The selected assignment is no longer available or is outside your employee type scope.",
+                        "error");
+
+                    return;
+                }
+
+
+                if (estadoAsignacion.TieneEvaluacion)
                 {
                     MostrarResultadoEvaluacion(
                         "Evaluation already exists",
                         "This assignment already has an evaluation. Open it from the history to edit it.",
                         "error");
+
                     return;
                 }
 
-                Evaluacion.Id = Guid.NewGuid();
-                Evaluacion.Finalizado = false;
 
-                db.Evaluaciones.Add(Evaluacion);
+                Evaluacion.Id =
+                    Guid.NewGuid();
+
+                Evaluacion.Finalizado =
+                    false;
+
+
+                db.Evaluaciones.Add(
+                    Evaluacion);
             }
             else
             {
-                var existente = await db.Evaluaciones
-                    .FirstOrDefaultAsync(e => e.Id == Evaluacion.Id);
+                var existente =
+                    await db.Evaluaciones
+                        .ApplyScope(Scope)
+
+                        .FirstOrDefaultAsync(
+                            e =>
+                                e.Id ==
+                                Evaluacion.Id);
+
 
                 if (existente is null)
                 {
                     MostrarResultadoEvaluacion(
                         "Evaluation not found",
-                        "The selected evaluation was not found.",
+                        "The selected evaluation was not found or is outside your employee type scope.",
                         "error");
+
                     return;
                 }
 
-                existente.AssignationId = Evaluacion.AssignationId;
 
-                existente.TouchingRule = Evaluacion.TouchingRule;
-                existente.PagesSwapped = Evaluacion.PagesSwapped;
-                existente.PplpWrongPlace = Evaluacion.PplpWrongPlace;
-                existente.CouponsHeading = Evaluacion.CouponsHeading;
-                existente.DoubleTruckWrongPlace = Evaluacion.DoubleTruckWrongPlace;
-                existente.FillersOutside = Evaluacion.FillersOutside;
-                existente.MissingYspFiller = Evaluacion.MissingYspFiller;
-                existente.GradeUnder75 = Evaluacion.GradeUnder75;
+                existente.AssignationId =
+                    Evaluacion.AssignationId;
 
-                existente.WhpsNoAnchors = Evaluacion.WhpsNoAnchors;
-                existente.WfpsNoAnchors = Evaluacion.WfpsNoAnchors;
-                existente.WdqcsNoAnchors = Evaluacion.WdqcsNoAnchors;
+                existente.TouchingRule =
+                    Evaluacion.TouchingRule;
 
-                existente.MissingCornerAd = Evaluacion.MissingCornerAd;
-                existente.MissingBanner = Evaluacion.MissingBanner;
-                existente.MissingRandomTab = Evaluacion.MissingRandomTab;
-                existente.MissingForcedTab = Evaluacion.MissingForcedTab;
+                existente.PagesSwapped =
+                    Evaluacion.PagesSwapped;
 
-                existente.FileNamingIssue = Evaluacion.FileNamingIssue;
-                existente.OutputWrongDate = Evaluacion.OutputWrongDate;
-                existente.WrongPitstop = Evaluacion.WrongPitstop;
-                existente.RestaurantBleedIssue = Evaluacion.RestaurantBleedIssue;
-                existente.WrongSigFiller = Evaluacion.WrongSigFiller;
-                existente.FobFolder = Evaluacion.FobFolder;
-                existente.MissingPaidItem = Evaluacion.MissingPaidItem;
-                existente.MissingSelfPromo = Evaluacion.MissingSelfPromo;
+                existente.PplpWrongPlace =
+                    Evaluacion.PplpWrongPlace;
 
-                existente.Corrections = Evaluacion.Corrections;
-                existente.PendingCorrections = Evaluacion.PendingCorrections;
-                existente.TaskMemoWrongComment = Evaluacion.TaskMemoWrongComment;
+                existente.CouponsHeading =
+                    Evaluacion.CouponsHeading;
 
-                existente.MotifYp = Evaluacion.MotifYp;
-                existente.MotifWp = Evaluacion.MotifWp;
-                existente.InventoryReport = Evaluacion.InventoryReport;
-                existente.ProductShippingFolder = Evaluacion.ProductShippingFolder;
-                existente.TaskMemo = Evaluacion.TaskMemo;
+                existente.DoubleTruckWrongPlace =
+                    Evaluacion.DoubleTruckWrongPlace;
 
-                existente.Finalizado = Evaluacion.Finalizado;
+                existente.FillersOutside =
+                    Evaluacion.FillersOutside;
+
+                existente.MissingYspFiller =
+                    Evaluacion.MissingYspFiller;
+
+                existente.GradeUnder75 =
+                    Evaluacion.GradeUnder75;
+
+                existente.WhpsNoAnchors =
+                    Evaluacion.WhpsNoAnchors;
+
+                existente.WfpsNoAnchors =
+                    Evaluacion.WfpsNoAnchors;
+
+                existente.WdqcsNoAnchors =
+                    Evaluacion.WdqcsNoAnchors;
+
+                existente.MissingCornerAd =
+                    Evaluacion.MissingCornerAd;
+
+                existente.MissingBanner =
+                    Evaluacion.MissingBanner;
+
+                existente.MissingRandomTab =
+                    Evaluacion.MissingRandomTab;
+
+                existente.MissingForcedTab =
+                    Evaluacion.MissingForcedTab;
+
+                existente.FileNamingIssue =
+                    Evaluacion.FileNamingIssue;
+
+                existente.OutputWrongDate =
+                    Evaluacion.OutputWrongDate;
+
+                existente.WrongPitstop =
+                    Evaluacion.WrongPitstop;
+
+                existente.RestaurantBleedIssue =
+                    Evaluacion.RestaurantBleedIssue;
+
+                existente.WrongSigFiller =
+                    Evaluacion.WrongSigFiller;
+
+                existente.FobFolder =
+                    Evaluacion.FobFolder;
+
+                existente.MissingPaidItem =
+                    Evaluacion.MissingPaidItem;
+
+                existente.MissingSelfPromo =
+                    Evaluacion.MissingSelfPromo;
+
+                existente.Corrections =
+                    Evaluacion.Corrections;
+
+                existente.PendingCorrections =
+                    Evaluacion.PendingCorrections;
+
+                existente.TaskMemoWrongComment =
+                    Evaluacion.TaskMemoWrongComment;
+
+                existente.MotifYp =
+                    Evaluacion.MotifYp;
+
+                existente.MotifWp =
+                    Evaluacion.MotifWp;
+
+                existente.InventoryReport =
+                    Evaluacion.InventoryReport;
+
+                existente.ProductShippingFolder =
+                    Evaluacion.ProductShippingFolder;
+
+                existente.TaskMemo =
+                    Evaluacion.TaskMemo;
+
+
+                existente.Finalizado =
+                    Evaluacion.Finalizado;
             }
+
 
             await db.SaveChangesAsync();
 
+            var itemHistorial =
+                CrearItemHistorialActual();
+
+
+            ActualizarHistorialLocal(
+                itemHistorial,
+                editando);
+
+            await CargarTotalAsignacionesDisponiblesAsync(
+                db);
+
+
             LimpiarFormulario();
 
-            await CargarAsignacionesAsync(db);
-            await CargarHistorialAsync(db);
 
             MostrarResultadoEvaluacion(
-                editando ? "Evaluation updated" : "Evaluation created",
+                editando
+                    ? "Evaluation updated"
+                    : "Evaluation created",
+
                 editando
                     ? $"The evaluation for {empleadoNombre}, KGEN {kgenCode}, was updated successfully."
                     : $"The evaluation for {empleadoNombre}, KGEN {kgenCode}, was saved successfully.",
+
                 "success");
         }
         catch (Exception ex)
@@ -1089,114 +1683,374 @@
         }
     }
 
-    private async Task SeleccionarEvaluacionAsync(Guid id)
+    private EvaluacionListadoDto CrearItemHistorialActual()
+    {
+        var anterior =
+            Historial.FirstOrDefault(
+                x =>
+                    x.Id ==
+                    Evaluacion.Id);
+
+
+        var item =
+            new EvaluacionListadoDto
+            {
+                Id =
+                    Evaluacion.Id,
+
+                AssignationId =
+                    Evaluacion.AssignationId,
+
+                EmpleadoNombre =
+                    AsignacionSeleccionada
+                        ?.EmpleadoNombre
+
+                    ?? anterior
+                        ?.EmpleadoNombre
+
+                    ?? "-",
+
+                KGENCode =
+                    AsignacionSeleccionada
+                        ?.KGENCode
+
+                    ?? anterior
+                        ?.KGENCode
+
+                    ?? "-",
+
+                EmployeeTypeCode =
+                    AsignacionSeleccionada
+                        ?.EmployeeTypeCode
+
+                    ?? anterior
+                        ?.EmployeeTypeCode
+
+                    ?? string.Empty,
+
+                MotifYp =
+                    Evaluacion.MotifYp,
+
+                MotifWp =
+                    Evaluacion.MotifWp,
+
+                InventoryReport =
+                    Evaluacion.InventoryReport,
+
+                ProductShippingFolder =
+                    Evaluacion.ProductShippingFolder,
+
+                TaskMemo =
+                    Evaluacion.TaskMemo
+            };
+
+
+        item.PorcentajeGeneral =
+            CalcularPorcentajeGeneral(
+                item);
+
+
+        return item;
+    }
+
+
+    private void ActualizarHistorialLocal(
+        EvaluacionListadoDto item,
+        bool editando)
+    {
+        if (editando)
+        {
+            var index =
+                Historial.FindIndex(
+                    x =>
+                        x.Id ==
+                        item.Id);
+
+
+            if (index >= 0)
+            {
+                Historial[index] =
+                    item;
+            }
+            else
+            {
+                Historial.Add(item);
+            }
+        }
+        else
+        {
+            Historial.Add(item);
+        }
+
+
+        Historial =
+            Historial
+                .OrderBy(x =>
+                    x.EmpleadoNombre)
+
+                .ThenBy(x =>
+                    x.KGENCode)
+
+                .ToList();
+
+
+        ActualizarListaEmpleadosFiltro();
+
+        AplicarFiltrosHistorial();
+    }
+
+    private async Task SeleccionarEvaluacionAsync(
+        Guid id)
     {
         try
         {
             LimpiarMensaje();
 
-            await using var db = await DbFactory.CreateDbContextAsync();
 
-            var item = await db.Evaluaciones
-                .AsNoTracking()
-                .Include(e => e.Asignacion)
-                    .ThenInclude(a => a.Empleado)
-                .Include(e => e.Asignacion)
-                    .ThenInclude(a => a.Libro)
-                        .ThenInclude(l => l!.EmployeeType)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
+
+            var item =
+                await db.Evaluaciones
+                    .AsNoTracking()
+                    .ApplyScope(Scope)
+
+                    .FirstOrDefaultAsync(
+                        e => e.Id == id);
+
 
             if (item is null)
             {
-                MostrarMensaje("The selected evaluation was not found.", "error");
+                MostrarMensaje(
+                    "The selected evaluation was not found.",
+                    "error");
+
                 return;
             }
 
-            Evaluacion = item;
-            ModoEdicion = true;
 
-            if (item.Asignacion?.Libro is not null)
+            Evaluacion =
+                item;
+
+            ModoEdicion =
+                true;
+
+            var asignacion =
+                await db.Asignaciones
+                    .AsNoTracking()
+                    .ApplyScope(Scope)
+
+                    .Where(a =>
+                        a.Id ==
+                        item.AssignationId)
+
+                    .Select(a =>
+                        new AssignmentSearchVm
+                        {
+                            Id =
+                                a.Id,
+
+                            EmpleadoNombre =
+                                a.Empleado != null
+
+                                    ? a.Empleado.Nombre
+                                        ?? "-"
+
+                                    : "-",
+
+                            BookName =
+                                a.Libro != null
+
+                                    ? a.Libro.BookName
+                                        ?? "-"
+
+                                    : "-",
+
+                            KGENCode =
+                                a.Libro != null
+
+                                    ? a.Libro.KGENCode
+                                        ?? "-"
+
+                                    : "-",
+
+                            LSACode =
+                                a.Libro != null
+
+                                    ? a.Libro.LSACode
+                                        ?? "-"
+
+                                    : "-",
+
+                            EmployeeTypeCode =
+                                a.Libro != null &&
+                                a.Libro.EmployeeType != null
+
+                                    ? a.Libro.EmployeeType.Code
+                                        ?? string.Empty
+
+                                    : string.Empty
+                        })
+
+                    .FirstOrDefaultAsync();
+
+
+            if (asignacion is null)
             {
-                var empleadoNombre = await ObtenerEmpleadoEvaluacionAsync(
+                TextoBusquedaAsignacion =
+                    string.Empty;
+
+                AsignacionSeleccionada =
+                    null;
+
+                return;
+            }
+
+
+            var empleadoNombre =
+                await ObtenerEmpleadoEvaluacionAsync(
                     db,
                     item.AssignationId,
-                    item.Asignacion?.Empleado?.Nombre ?? "-");
+                    asignacion.EmpleadoNombre);
 
-                var libroAsignacion = item.Asignacion?.Libro;
 
-                TextoBusquedaAsignacion = !string.IsNullOrWhiteSpace(libroAsignacion?.KGENCode)
-                    ? libroAsignacion.KGENCode
-                    : libroAsignacion?.LSACode ?? string.Empty;
+            TextoBusquedaAsignacion =
+                !string.IsNullOrWhiteSpace(
+                    asignacion.KGENCode)
 
-                AsignacionSeleccionada = new AsignacionSeleccionadaDto
+                &&
+
+                asignacion.KGENCode != "-"
+
+                    ? asignacion.KGENCode
+
+                    : asignacion.LSACode;
+
+
+            AsignacionSeleccionada =
+                new AsignacionSeleccionadaDto
                 {
-                    Id = item.AssignationId,
-                    EmpleadoNombre = empleadoNombre,
-                    BookName = item.Asignacion?.Libro?.BookName ?? "-",
-                    KGENCode = item.Asignacion?.Libro?.KGENCode ?? "-",
-                    LSACode = item.Asignacion?.Libro?.LSACode ?? "-",
-                    EmployeeTypeCode = item.Asignacion?.Libro?.EmployeeType?.Code ?? string.Empty
+                    Id =
+                        item.AssignationId,
+
+                    EmpleadoNombre =
+                        empleadoNombre,
+
+                    BookName =
+                        asignacion.BookName,
+
+                    KGENCode =
+                        asignacion.KGENCode,
+
+                    LSACode =
+                        asignacion.LSACode,
+
+                    EmployeeTypeCode =
+                        asignacion.EmployeeTypeCode
                 };
-            }
-            else
-            {
-                TextoBusquedaAsignacion = string.Empty;
-                AsignacionSeleccionada = null;
-            }
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error selecting evaluation: {ex.Message}", "error");
+            MostrarMensaje(
+                $"Error selecting evaluation: {ex.Message}",
+                "error");
         }
     }
 
     private async Task EliminarEvaluacionAsync()
     {
-        if (!ModoEdicion || Evaluacion.Id == Guid.Empty)
+        if (!ModoEdicion ||
+            Evaluacion.Id == Guid.Empty)
         {
             MostrarResultadoEvaluacion(
                 "Evaluation not selected",
                 "Open an evaluation from the history before deleting it.",
                 "error");
+
             return;
         }
 
-        var empleadoNombre = AsignacionSeleccionada?.EmpleadoNombre ?? "Selected employee";
-        var kgenCode = AsignacionSeleccionada?.KGENCode ?? "-";
 
-        var confirmar = await JS.InvokeAsync<bool>(
-            "confirm",
-            $"Are you sure you want to delete the evaluation for {empleadoNombre}, KGEN {kgenCode}?");
+        var idEvaluacion =
+            Evaluacion.Id;
+
+
+        var empleadoNombre =
+            AsignacionSeleccionada
+                ?.EmpleadoNombre
+            ?? "Selected employee";
+
+
+        var kgenCode =
+            AsignacionSeleccionada
+                ?.KGENCode
+            ?? "-";
+
+
+        var confirmar =
+            await JS.InvokeAsync<bool>(
+                "confirm",
+                $"Are you sure you want to delete the evaluation for {empleadoNombre}, KGEN {kgenCode}?");
+
 
         if (!confirmar)
             return;
 
+
         try
         {
             Guardando = true;
+
             LimpiarMensaje();
 
-            await using var db = await DbFactory.CreateDbContextAsync();
 
-            var item = await db.Evaluaciones
-                .FirstOrDefaultAsync(e => e.Id == Evaluacion.Id);
+            await using var db =
+                await DbFactory.CreateDbContextAsync();
+
+
+            var item =
+                await db.Evaluaciones
+                    .ApplyScope(Scope)
+
+                    .FirstOrDefaultAsync(
+                        e =>
+                            e.Id ==
+                            idEvaluacion);
+
 
             if (item is null)
             {
                 MostrarResultadoEvaluacion(
                     "Evaluation not found",
-                    "The selected evaluation was not found.",
+                    "The selected evaluation was not found or is outside your employee type scope.",
                     "error");
+
                 return;
             }
 
-            db.Evaluaciones.Remove(item);
+
+            db.Evaluaciones.Remove(
+                item);
+
+
             await db.SaveChangesAsync();
+
+            Historial.RemoveAll(
+                x =>
+                    x.Id ==
+                    idEvaluacion);
+
+
+            ActualizarListaEmpleadosFiltro();
+
+            AplicarFiltrosHistorial();
+
+            await CargarTotalAsignacionesDisponiblesAsync(
+                db);
+
 
             LimpiarFormulario();
 
-            await CargarAsignacionesAsync(db);
-            await CargarHistorialAsync(db);
 
             MostrarResultadoEvaluacion(
                 "Evaluation deleted",
@@ -1216,93 +2070,223 @@
         }
     }
 
-    private async Task ActualizarFinalizadosPorDirxionAsync(AppDbContext db)
+    private async Task ActualizarFinalizadosPorDirxionAsync(
+        AppDbContext db)
     {
-        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        var hoy =
+            DateOnly.FromDateTime(
+                DateTime.Today);
 
-        var librosParaFinalizar = await db.Libros
-            .ApplyScope(Scope)
-            .Include(x => x.Asignaciones)
-                .ThenInclude(a => a.Evaluaciones)
-            .Where(x => !x.Finalizado &&
-                        x.DirxionDate < hoy)
-            .ToListAsync();
 
-        if (!librosParaFinalizar.Any())
+        var libroIds =
+            await db.Libros
+                .AsNoTracking()
+                .ApplyScope(Scope)
+
+                .Where(x =>
+                    !x.Finalizado &&
+                    x.DirxionDate < hoy)
+
+                .Select(x =>
+                    x.Id)
+
+                .ToListAsync();
+
+
+        if (libroIds.Count == 0)
             return;
 
-        foreach (var libro in librosParaFinalizar)
-        {
-            libro.Finalizado = true;
 
-            foreach (var asignacion in libro.Asignaciones)
+        var assignmentIds =
+            await db.Asignaciones
+                .AsNoTracking()
+
+                .Where(a =>
+                    libroIds.Contains(
+                        a.IdLibro))
+
+                .Select(a =>
+                    a.Id)
+
+                .ToListAsync();
+
+        var strategy =
+            db.Database
+                .CreateExecutionStrategy();
+
+
+        await strategy.ExecuteAsync(
+            async () =>
             {
-                asignacion.Finalizado = true;
+                await using var transaction =
+                    await db.Database
+                        .BeginTransactionAsync();
 
-                foreach (var evaluacion in asignacion.Evaluaciones)
+
+                if (assignmentIds.Count > 0)
                 {
-                    evaluacion.Finalizado = true;
-                }
-            }
-        }
+                    await db.Evaluaciones
 
-        await db.SaveChangesAsync();
+                        .Where(e =>
+                            assignmentIds.Contains(
+                                e.AssignationId)
+
+                            &&
+
+                            !e.Finalizado)
+
+                        .ExecuteUpdateAsync(
+                            setters =>
+                                setters.SetProperty(
+                                    e => e.Finalizado,
+                                    true));
+
+
+                    await db.Asignaciones
+
+                        .Where(a =>
+                            assignmentIds.Contains(
+                                a.Id)
+
+                            &&
+
+                            !a.Finalizado)
+
+                        .ExecuteUpdateAsync(
+                            setters =>
+                                setters.SetProperty(
+                                    a => a.Finalizado,
+                                    true));
+                }
+
+
+                await db.Libros
+
+                    .Where(l =>
+                        libroIds.Contains(
+                            l.Id)
+
+                        &&
+
+                        !l.Finalizado)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                l => l.Finalizado,
+                                true));
+
+
+                await transaction.CommitAsync();
+            });
     }
 
     private void LimpiarFormulario()
     {
-        Evaluacion = new Evaluaciones
+        Evaluacion =
+            CrearEvaluacionVacia();
+
+
+        TextoBusquedaAsignacion =
+            string.Empty;
+
+
+        AsignacionSeleccionada =
+            null;
+
+
+        ModoEdicion =
+            false;
+
+
+        LimpiarMensaje();
+    }
+
+
+    private static Evaluaciones CrearEvaluacionVacia()
+    {
+        return new Evaluaciones
         {
             Id = Guid.Empty,
             AssignationId = Guid.Empty,
             Finalizado = false
         };
-
-        TextoBusquedaAsignacion = string.Empty;
-        AsignacionSeleccionada = null;
-
-        ModoEdicion = false;
-        LimpiarMensaje();
     }
 
     private void LimpiarFiltros()
     {
-        Busqueda = string.Empty;
-        EmpleadoFiltroNombre = string.Empty;
+        Busqueda =
+            string.Empty;
+
+        EmpleadoFiltroNombre =
+            string.Empty;
+
+
+        AplicarFiltrosHistorial();
     }
 
-    private void MostrarResultadoEvaluacion(string titulo, string mensaje, string tipo)
+    private void MostrarResultadoEvaluacion(
+        string titulo,
+        string mensaje,
+        string tipo)
     {
-        TituloModalResultadoEvaluacion = titulo;
-        MensajeModalResultadoEvaluacion = mensaje;
-        TipoModalResultadoEvaluacion = string.Equals(
-            tipo,
-            "error",
-            StringComparison.OrdinalIgnoreCase)
-                ? "error"
-                : "success";
+        TituloModalResultadoEvaluacion =
+            titulo;
 
-        MostrarModalResultadoEvaluacion = true;
+
+        MensajeModalResultadoEvaluacion =
+            mensaje;
+
+
+        TipoModalResultadoEvaluacion =
+            string.Equals(
+                tipo,
+                "error",
+                StringComparison.OrdinalIgnoreCase)
+
+                    ? "error"
+                    : "success";
+
+
+        MostrarModalResultadoEvaluacion =
+            true;
     }
+
 
     private void CerrarModalResultadoEvaluacion()
     {
-        MostrarModalResultadoEvaluacion = false;
-        TituloModalResultadoEvaluacion = string.Empty;
-        MensajeModalResultadoEvaluacion = string.Empty;
-        TipoModalResultadoEvaluacion = "success";
+        MostrarModalResultadoEvaluacion =
+            false;
+
+        TituloModalResultadoEvaluacion =
+            string.Empty;
+
+        MensajeModalResultadoEvaluacion =
+            string.Empty;
+
+        TipoModalResultadoEvaluacion =
+            "success";
     }
 
-    private void MostrarMensaje(string mensaje, string tipo)
+    private void MostrarMensaje(
+        string mensaje,
+        string tipo)
     {
-        Mensaje = mensaje;
-        TipoMensaje = tipo;
+        Mensaje =
+            mensaje;
+
+        TipoMensaje =
+            tipo;
     }
+
 
     private void LimpiarMensaje()
     {
-        Mensaje = string.Empty;
-        TipoMensaje = "success";
+        Mensaje =
+            string.Empty;
+
+        TipoMensaje =
+            "success";
     }
 
     private int TotalMotifYpVista =>
@@ -1315,54 +2299,19 @@
         Contar(Evaluacion.MissingYspFiller) +
         Contar(Evaluacion.GradeUnder75);
 
+
     private int TotalMotifWpVista =>
         Contar(Evaluacion.WhpsNoAnchors) +
         Contar(Evaluacion.WfpsNoAnchors) +
         Contar(Evaluacion.WdqcsNoAnchors);
 
-    private decimal PorcentajeMotifYpVista =>
-CalcularPorcentajeVistaDecimal(TotalMotifYpVista, 8);
-
-    private decimal PorcentajeMotifWpVista =>
-        CalcularPorcentajeVistaDecimal(TotalMotifWpVista, 3);
-
-    private decimal PorcentajeInventoryVista =>
-        CalcularPorcentajeVistaDecimal(TotalInventoryVista, 4);
-
-    private decimal PorcentajeShippingVista =>
-        CalcularPorcentajeVistaDecimal(TotalShippingVista, 8);
-
-    private decimal PorcentajeTaskVista =>
-        CalcularPorcentajeVistaDecimal(TotalTaskVista, 3);
-
-    private decimal PorcentajeGeneralVista =>
-        Math.Round(new[]
-        {
-        PorcentajeMotifYpVista,
-        PorcentajeMotifWpVista,
-        PorcentajeInventoryVista,
-        PorcentajeShippingVista,
-        PorcentajeTaskVista
-        }.Average(), 2);
-
-    private static decimal CalcularPorcentajeVistaDecimal(int errores, int total)
-    {
-        if (total <= 0)
-            return 0;
-
-        var porcentaje = ((total - errores) * 100m) / total;
-
-        if (porcentaje < 0)
-            porcentaje = 0;
-
-        return Math.Round(porcentaje, 2);
-    }
 
     private int TotalInventoryVista =>
         Contar(Evaluacion.MissingCornerAd) +
         Contar(Evaluacion.MissingBanner) +
         Contar(Evaluacion.MissingRandomTab) +
         Contar(Evaluacion.MissingForcedTab);
+
 
     private int TotalShippingVista =>
         Contar(Evaluacion.FileNamingIssue) +
@@ -1374,90 +2323,258 @@ CalcularPorcentajeVistaDecimal(TotalMotifYpVista, 8);
         Contar(Evaluacion.MissingPaidItem) +
         Contar(Evaluacion.MissingSelfPromo);
 
+
     private int TotalTaskVista =>
         Contar(Evaluacion.Corrections) +
         Contar(Evaluacion.PendingCorrections) +
         Contar(Evaluacion.TaskMemoWrongComment);
 
-    private static int Contar(bool valor)
+
+    private decimal PorcentajeMotifYpVista =>
+        CalcularPorcentajeVistaDecimal(
+            TotalMotifYpVista,
+            8);
+
+
+    private decimal PorcentajeMotifWpVista =>
+        CalcularPorcentajeVistaDecimal(
+            TotalMotifWpVista,
+            3);
+
+
+    private decimal PorcentajeInventoryVista =>
+        CalcularPorcentajeVistaDecimal(
+            TotalInventoryVista,
+            4);
+
+
+    private decimal PorcentajeShippingVista =>
+        CalcularPorcentajeVistaDecimal(
+            TotalShippingVista,
+            8);
+
+
+    private decimal PorcentajeTaskVista =>
+        CalcularPorcentajeVistaDecimal(
+            TotalTaskVista,
+            3);
+
+
+    private decimal PorcentajeGeneralVista =>
+        Math.Round(
+            (
+                PorcentajeMotifYpVista +
+                PorcentajeMotifWpVista +
+                PorcentajeInventoryVista +
+                PorcentajeShippingVista +
+                PorcentajeTaskVista
+            ) / 5m,
+            2);
+
+
+    private static decimal CalcularPorcentajeVistaDecimal(
+        int errores,
+        int total)
+    {
+        if (total <= 0)
+            return 0;
+
+
+        var porcentaje =
+            ((total - errores) * 100m)
+            / total;
+
+
+        if (porcentaje < 0)
+        {
+            porcentaje = 0;
+        }
+
+
+        return Math.Round(
+            porcentaje,
+            2);
+    }
+
+
+    private static int Contar(
+        bool valor)
     {
         return valor ? 1 : 0;
     }
 
-    private static string PorcentajeVista(int errores, int total)
+
+    private static string MostrarPorcentaje(
+        decimal? valor)
     {
-        if (total <= 0)
-            return "0.00";
-
-        var porcentaje = ((total - errores) * 100m) / total;
-
-        if (porcentaje < 0)
-            porcentaje = 0;
-
-        return porcentaje.ToString("0.00");
+        return valor.HasValue
+            ? $"{valor.Value:0.00}%"
+            : "0.00%";
     }
 
-    private static string MostrarPorcentaje(decimal? valor)
-    {
-        return valor.HasValue ? $"{valor.Value:0.00}%" : "0.00%";
-    }
 
-    private static decimal CalcularPorcentajeGeneral(EvaluacionListadoDto item)
+    private static decimal CalcularPorcentajeGeneral(
+        EvaluacionListadoDto item)
     {
-        var valores = new List<decimal>();
+        decimal suma = 0;
+        var cantidad = 0;
+
 
         if (item.MotifYp.HasValue)
-            valores.Add(item.MotifYp.Value);
+        {
+            suma += item.MotifYp.Value;
+            cantidad++;
+        }
+
 
         if (item.MotifWp.HasValue)
-            valores.Add(item.MotifWp.Value);
+        {
+            suma += item.MotifWp.Value;
+            cantidad++;
+        }
+
 
         if (item.InventoryReport.HasValue)
-            valores.Add(item.InventoryReport.Value);
+        {
+            suma += item.InventoryReport.Value;
+            cantidad++;
+        }
+
 
         if (item.ProductShippingFolder.HasValue)
-            valores.Add(item.ProductShippingFolder.Value);
+        {
+            suma += item.ProductShippingFolder.Value;
+            cantidad++;
+        }
+
 
         if (item.TaskMemo.HasValue)
-            valores.Add(item.TaskMemo.Value);
+        {
+            suma += item.TaskMemo.Value;
+            cantidad++;
+        }
 
-        if (valores.Count == 0)
+
+        if (cantidad == 0)
             return 0;
 
-        return Math.Round(valores.Average(), 2);
+
+        return Math.Round(
+            suma / cantidad,
+            2);
     }
 
-    private sealed class AsignacionComboDto
+    private sealed class AssignmentSearchVm
     {
         public Guid Id { get; set; }
-        public string Descripcion { get; set; } = string.Empty;
+
+        public string EmpleadoNombre { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string KGENCode { get; set; } =
+            string.Empty;
+
+        public string LSACode { get; set; } =
+            string.Empty;
+
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
     }
+
+
+    private sealed class AssignmentAvailabilityVm
+    {
+        public bool Disponible { get; set; }
+
+        public bool TieneEvaluacion { get; set; }
+    }
+
+
+    private sealed class TemporaryEmployeeHistoryVm
+    {
+        public Guid AssignmentId { get; set; }
+
+        public string EmployeeName { get; set; } =
+            string.Empty;
+    }
+
+
+    private sealed class EvaluacionHistorialRawDto
+    {
+        public Guid Id { get; set; }
+
+        public Guid AssignationId { get; set; }
+
+        public string EmpleadoNombre { get; set; } =
+            string.Empty;
+
+        public string KGENCode { get; set; } =
+            string.Empty;
+
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public decimal? MotifYp { get; set; }
+
+        public decimal? MotifWp { get; set; }
+
+        public decimal? InventoryReport { get; set; }
+
+        public decimal? ProductShippingFolder { get; set; }
+
+        public decimal? TaskMemo { get; set; }
+    }
+
 
     private sealed class EvaluacionListadoDto
     {
         public Guid Id { get; set; }
+
         public Guid AssignationId { get; set; }
 
-        public string EmpleadoNombre { get; set; } = string.Empty;
-        public string KGENCode { get; set; } = string.Empty;
-        public string EmployeeTypeCode { get; set; } = string.Empty;
+        public string EmpleadoNombre { get; set; } =
+            string.Empty;
+
+        public string KGENCode { get; set; } =
+            string.Empty;
+
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
 
         public decimal? MotifYp { get; set; }
+
         public decimal? MotifWp { get; set; }
+
         public decimal? InventoryReport { get; set; }
+
         public decimal? ProductShippingFolder { get; set; }
+
         public decimal? TaskMemo { get; set; }
 
         public decimal PorcentajeGeneral { get; set; }
     }
 
+
     private sealed class AsignacionSeleccionadaDto
     {
         public Guid Id { get; set; }
-        public string EmpleadoNombre { get; set; } = string.Empty;
-        public string BookName { get; set; } = string.Empty;
-        public string KGENCode { get; set; } = string.Empty;
-        public string LSACode { get; set; } = string.Empty;
-        public string EmployeeTypeCode { get; set; } = string.Empty;
+
+        public string EmpleadoNombre { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string KGENCode { get; set; } =
+            string.Empty;
+
+        public string LSACode { get; set; } =
+            string.Empty;
+
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
     }
 }

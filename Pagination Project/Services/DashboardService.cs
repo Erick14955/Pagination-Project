@@ -6,72 +6,93 @@ namespace Pagination_Project.Services
 {
     public class DashboardService : IDashboardService
     {
+        private const int CandidateDaysBefore = 3;
+        private const int CandidateDaysAfter = 5;
+
+        private static readonly char[] BindPlantSeparators =
+        {
+            ' ',
+            '-',
+            '_',
+            '/',
+            '\\',
+            ',',
+            ';',
+            '.',
+            '|',
+            '(',
+            ')',
+            '[',
+            ']'
+        };
+
+        private static readonly string[] NamedFinalPoBindPlants =
+        {
+            "WAUK",
+            "LMRA",
+            "DIRX",
+            "IVEAU",
+            "SUSX",
+            "PREM",
+            "WSTR"
+        };
+
+        private static readonly TimeZoneInfo DominicanTimeZone =
+            ResolveDominicanTimeZone();
+
         private readonly IDbContextFactory<AppDbContext> _dbFactory;
 
-        public DashboardService(IDbContextFactory<AppDbContext> dbFactory)
+        public DashboardService(
+            IDbContextFactory<AppDbContext> dbFactory)
         {
             _dbFactory = dbFactory;
         }
 
-        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(UserDataScope scope)
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(
+            UserDataScope scope)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync();
+            ValidarScope(scope);
 
-            var today = ObtenerFechaHoyRepublicaDominicana();
+            await using var db =
+                await _dbFactory.CreateDbContextAsync();
 
-            await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
+            var today =
+                ObtenerFechaHoyRepublicaDominicana();
 
-            var usersQuery = db.Users.AsNoTracking().AsQueryable();
-
-            if (!scope.ViewAllEmployeeTypes)
-            {
-                usersQuery = usersQuery.Where(u =>
-                    u.Empleado != null &&
-                    u.Empleado.EmployeeTypeId == scope.EmployeeTypeId);
-            }
-
-            DashboardStatsDto stats = new DashboardStatsDto
-            {
-                TotalUsers = await usersQuery.CountAsync(),
-
-                TotalEmployees = await db.Empleados
-                    .AsNoTracking()
-                    .ApplyScope(scope)
-                    .CountAsync(),
-
-                TotalBooks = await db.Libros
-                    .AsNoTracking()
-                    .ApplyScope(scope)
-                    .CountAsync(l => !l.Finalizado),
-
-                TotalEvaluations = await db.Evaluaciones
-                    .AsNoTracking()
-                    .ApplyScope(scope)
-                    .CountAsync(ev =>
-                        !ev.Finalizado &&
-                        ev.Asignacion != null &&
-                        !ev.Asignacion.Finalizado &&
-                        ev.Asignacion.Libro != null &&
-                        !ev.Asignacion.Libro.Finalizado)
-            };
-
-            var asignacionesHoy = await CargarAsignacionesPorFechaAsync(
+            await ActualizarFinalizadosPorDirxionAsync(
                 db,
                 today,
                 scope);
 
-            var assignedBooks = asignacionesHoy.Pending;
-            var completedAssignments = asignacionesHoy.Completed;
+            var stats =
+                await CargarEstadisticasAsync(
+                    db,
+                    scope);
+
+            var asignacionesHoy =
+                await CargarAsignacionesPorFechaAsync(
+                    db,
+                    today,
+                    scope);
 
             var weeklyEvaluations =
-                await CargarEvaluacionesSemanaAnteriorAsync(db, today, scope);
+                await CargarEvaluacionesSemanaAnteriorAsync(
+                    db,
+                    today,
+                    scope);
 
             return new DashboardSummaryDto
             {
                 Stats = stats,
-                AssignedBooks = assignedBooks,
-                CompletedAssignments = completedAssignments,
-                WeeklyEvaluations = weeklyEvaluations
+
+                AssignedBooks =
+                    asignacionesHoy.Pending,
+
+                CompletedAssignments =
+                    asignacionesHoy.Completed,
+
+                WeeklyEvaluations =
+                    weeklyEvaluations
             };
         }
 
@@ -80,18 +101,80 @@ namespace Pagination_Project.Services
                 DateOnly targetDate,
                 UserDataScope scope)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync();
+            ValidarScope(scope);
 
-            var today = ObtenerFechaHoyRepublicaDominicana();
+            await using var db =
+                await _dbFactory.CreateDbContextAsync();
 
-            await ActualizarFinalizadosPorDirxionAsync(db, today, scope);
+            var today =
+                ObtenerFechaHoyRepublicaDominicana();
 
-            var result = await CargarAsignacionesPorFechaAsync(
+            await ActualizarFinalizadosPorDirxionAsync(
                 db,
-                targetDate,
+                today,
                 scope);
 
+            var result =
+                await CargarAsignacionesPorFechaAsync(
+                    db,
+                    targetDate,
+                    scope);
+
             return result.Pending;
+        }
+
+        private static async Task<DashboardStatsDto>
+            CargarEstadisticasAsync(
+                AppDbContext db,
+                UserDataScope scope)
+        {
+            IQueryable<Usuario> usersQuery =
+                db.Users.AsNoTracking();
+
+            if (!scope.ViewAllEmployeeTypes)
+            {
+                var employeeTypeId =
+                    scope.EmployeeTypeId!.Value;
+
+                usersQuery =
+                    usersQuery.Where(u =>
+                        u.Empleado != null &&
+                        u.Empleado.EmployeeTypeId ==
+                        employeeTypeId);
+            }
+
+            var totalUsers =
+                await usersQuery.CountAsync();
+
+            var totalEmployees =
+                await db.Empleados
+                    .AsNoTracking()
+                    .ApplyScope(scope)
+                    .CountAsync();
+
+            var totalBooks =
+                await db.Libros
+                    .AsNoTracking()
+                    .ApplyScope(scope)
+                    .CountAsync(l =>
+                        !l.Finalizado);
+
+            var totalEvaluations =
+                await db.Evaluaciones
+                    .AsNoTracking()
+                    .ApplyScope(scope)
+                    .CountAsync(ev =>
+                        !ev.Finalizado &&
+                        !ev.Asignacion!.Finalizado &&
+                        !ev.Asignacion.Libro!.Finalizado);
+
+            return new DashboardStatsDto
+            {
+                TotalUsers = totalUsers,
+                TotalEmployees = totalEmployees,
+                TotalBooks = totalBooks,
+                TotalEvaluations = totalEvaluations
+            };
         }
 
         private static async Task<(
@@ -102,18 +185,13 @@ namespace Pagination_Project.Services
                 DateOnly targetDate,
                 UserDataScope scope)
         {
-            /*
-             * Assignments_Worked puede contener una sola fila por asignación,
-             * actualizada a medida que se completan las diferentes etapas.
-             *
-             * Por esa razón NO se debe filtrar primero por Work_Date.
-             * Si Proof se trabajó un día y Final PO se trabajó después sobre
-             * la misma fila, Work_Date puede conservar la fecha inicial.
-             *
-             * El dashboard determina la etapa correspondiente a targetDate
-             * usando las fechas del libro, y después revisa si el booleano
-             * de esa etapa está marcado en cualquier registro de la asignación.
-             */
+            var candidateStartDate =
+                targetDate.AddDays(
+                    -CandidateDaysBefore);
+
+            var candidateEndDate =
+                targetDate.AddDays(
+                    CandidateDaysAfter);
 
             var data = await (
                 from a in db.Asignaciones.AsNoTracking()
@@ -128,24 +206,63 @@ namespace Pagination_Project.Services
                     on l.EmployeeTypeId equals et.Id
 
                 join d in db.Databases.AsNoTracking()
-                    on l.DatabaseId equals d.Id into database
+                    on l.DatabaseId equals d.Id
+                    into databaseGroup
 
-                from d in database.DefaultIfEmpty()
+                from d in databaseGroup.DefaultIfEmpty()
 
                 join bpJoin in db.Bind_Plants.AsNoTracking()
-                    on l.BindPlantId equals bpJoin.Id into bindPlantGroup
+                    on l.BindPlantId equals bpJoin.Id
+                    into bindPlantGroup
 
                 from bp in bindPlantGroup.DefaultIfEmpty()
 
                 where
                     (
-                        (!a.Finalizado && !l.Finalizado) ||
-                        db.AsignacionesTrabajadas.Any(aw =>
-                            aw.IdAsignacion == a.Id)
-                    ) &&
+                        (
+                            l.ProofExtract >= candidateStartDate &&
+                            l.ProofExtract <= candidateEndDate
+                        )
+                        ||
+                        (
+                            l.FinalExtract >= candidateStartDate &&
+                            l.FinalExtract <= candidateEndDate
+                        )
+                        ||
+                        (
+                            l.MemoExtract >= candidateStartDate &&
+                            l.MemoExtract <= candidateEndDate
+                        )
+                        ||
+                        (
+                            l.FinalPODate >= candidateStartDate &&
+                            l.FinalPODate <= candidateEndDate
+                        )
+                        ||
+                        (
+                            l.ShippingDate >= candidateStartDate &&
+                            l.ShippingDate <= candidateEndDate
+                        )
+                        ||
+                        (
+                            l.DirxionDate >= candidateStartDate &&
+                            l.DirxionDate <= candidateEndDate
+                        )
+                    )
+                    &&
                     (
-                        scope.ViewAllEmployeeTypes ||
-                        l.EmployeeTypeId == scope.EmployeeTypeId
+                        (!a.Finalizado && !l.Finalizado)
+                        ||
+                        db.AsignacionesTrabajadas.Any(
+                            aw =>
+                                aw.IdAsignacion == a.Id)
+                    )
+                    &&
+                    (
+                        scope.ViewAllEmployeeTypes
+                        ||
+                        l.EmployeeTypeId ==
+                        scope.EmployeeTypeId
                     )
 
                 select new RawAssignmentDashboardDto
@@ -154,137 +271,230 @@ namespace Pagination_Project.Services
                     BookId = l.Id,
                     EmployeeId = e.Id,
 
-                    EmployeeName = e.Nombre ?? string.Empty,
-                    KgenCode = l.KGENCode ?? string.Empty,
-                    LsaCode = l.LSACode ?? string.Empty,
-                    BookName = l.BookName ?? string.Empty,
+                    EmployeeName =
+                        e.Nombre ?? string.Empty,
 
-                    Database = d != null
-                        ? d.Database_Name
-                        : string.Empty,
+                    KgenCode =
+                        l.KGENCode ?? string.Empty,
 
-                    EmployeeTypeId = l.EmployeeTypeId,
-                    EmployeeTypeCode = et.Code,
+                    LsaCode =
+                        l.LSACode ?? string.Empty,
 
-                    ProofExtract = l.ProofExtract,
-                    FinalExtract = l.FinalExtract,
-                    MemoExtract = l.MemoExtract,
-                    DirxionDate = l.DirxionDate,
-                    FinalPODate = l.FinalPODate,
-                    ShippingDate = l.ShippingDate,
+                    BookName =
+                        l.BookName ?? string.Empty,
 
-                    BindPlantName = bp != null
-                        ? bp.Bind_Plant_Name
-                        : string.Empty
+                    Database =
+                        d != null
+                            ? d.Database_Name
+                            : string.Empty,
+
+                    EmployeeTypeId =
+                        l.EmployeeTypeId,
+
+                    EmployeeTypeCode =
+                        et.Code ?? string.Empty,
+
+                    ProofExtract =
+                        l.ProofExtract,
+
+                    FinalExtract =
+                        l.FinalExtract,
+
+                    MemoExtract =
+                        l.MemoExtract,
+
+                    DirxionDate =
+                        l.DirxionDate,
+
+                    FinalPODate =
+                        l.FinalPODate,
+
+                    ShippingDate =
+                        l.ShippingDate,
+
+                    BindPlantName =
+                        bp != null
+                            ? bp.Bind_Plant_Name ?? string.Empty
+                            : string.Empty
                 }
             ).ToListAsync();
 
-            var assignmentIds = data
-                .Select(x => x.AssignmentId)
-                .Distinct()
-                .ToList();
+            if (data.Count == 0)
+            {
+                return (
+                    new List<AssignedBookDashboardDto>(),
+                    new List<AssignedBookDashboardDto>());
+            }
 
-            /*
-             * Se cargan TODOS los registros trabajados de las asignaciones,
-             * sin limitar por Work_Date.
-             */
-            var registrosTrabajados = assignmentIds.Any()
-                ? await db.AsignacionesTrabajadas
+            var assignmentIds =
+                data
+                    .Select(x => x.AssignmentId)
+                    .Distinct()
+                    .ToList();
+
+            var registrosTrabajados =
+                await db.AsignacionesTrabajadas
                     .AsNoTracking()
                     .Where(x =>
-                        assignmentIds.Contains(x.IdAsignacion))
-                    .ToListAsync()
-                : new List<AsignacionTrabajada>();
+                        assignmentIds.Contains(
+                            x.IdAsignacion))
+                    .OrderByDescending(x =>
+                        x.FechaTrabajo)
+                    .Select(x =>
+                        new RawAssignmentWorkDto
+                        {
+                            AssignmentId =
+                                x.IdAsignacion,
 
-            var trabajadasPorAsignacion = registrosTrabajados
-                .ToLookup(x => x.IdAsignacion);
+                            ProofExtractWorked =
+                                x.ProofExtractWorked,
 
-            var temporalesActivas = assignmentIds.Any()
-                ? await db.TemporaryAssignments
-                    .AsNoTracking()
-                    .Include(x => x.TemporaryEmployee)
-                    .Where(x =>
-                        x.Active &&
-                        assignmentIds.Contains(x.AssignmentId))
-                    .OrderByDescending(x => x.CreatedAt)
-                    .ToListAsync()
-                : new List<TemporaryAssignment>();
+                            FinalExtractWorked =
+                                x.FinalExtractWorked,
 
-            var finalPOTrabajados = registrosTrabajados
-                .Where(x => x.FinalPOWorked)
-                .OrderByDescending(x => x.FechaTrabajo)
-                .ToList();
+                            MemoExtractWorked =
+                                x.MemoExtractWorked,
 
-            var pending = new List<AssignedBookDashboardDto>();
-            var completed = new List<AssignedBookDashboardDto>();
+                            FinalPOWorked =
+                                x.FinalPOWorked,
+
+                            ShippingWorked =
+                                x.ShippingWorked,
+
+                            DirxionWorked =
+                                x.DirxionWorked,
+
+                            ClosingCorrectionsVerified =
+                                x.ClosingCorrectionsVerified,
+
+                            LateWorkVerified =
+                                x.LateWorkVerified
+                        })
+                    .ToListAsync();
+
+            var workStateByAssignment =
+                ConstruirEstadosTrabajo(
+                    registrosTrabajados);
+
+            var temporalesActivos =
+                await CargarTemporalesActivosAsync(
+                    db,
+                    assignmentIds);
+
+            var temporalByAssignmentStage =
+                ConstruirTemporalesPorEtapa(
+                    temporalesActivos);
+
+            var pending =
+                new List<AssignedBookDashboardDto>(
+                    data.Count);
+
+            var completed =
+                new List<AssignedBookDashboardDto>(
+                    data.Count);
 
             foreach (var item in data)
             {
-                var stageInfo = ObtenerEtapaDelDia(
-                    item,
-                    targetDate);
+                var bindPlantCodes =
+                    ObtenerCodigosBindPlant(
+                        item.BindPlantName);
+
+                var stageInfo =
+                    ObtenerEtapaDelDia(
+                        item,
+                        targetDate,
+                        bindPlantCodes);
 
                 if (stageInfo is null)
+                {
                     continue;
+                }
 
-                var registrosDeLaAsignacion =
-                    trabajadasPorAsignacion[item.AssignmentId];
+                workStateByAssignment.TryGetValue(
+                    item.AssignmentId,
+                    out var workState);
 
-                /*
-                 * Se valida el booleano de la etapa programada para targetDate.
-                 * Work_Date no se utiliza para decidir si está completada.
-                 */
                 var etapaCompletada =
-                    registrosDeLaAsignacion.Any(registro =>
-                        EstaEtapaCompletada(
-                            registro,
-                            stageInfo.StageKey));
+                    EstaEtapaCompletada(
+                        workState,
+                        stageInfo.StageKey);
 
-                var registroFinalPO = finalPOTrabajados
-                    .FirstOrDefault(x =>
-                        x.IdAsignacion == item.AssignmentId);
+                var bookReadyToShip =
+                    EstaListoParaShipping(
+                        bindPlantCodes,
+                        workState);
 
-                var bookReadyToShip = EstaListoParaShipping(
-                    item.BindPlantName,
-                    registroFinalPO);
-
-                var temporalAplicable = temporalesActivas
-                    .FirstOrDefault(x =>
-                        x.AssignmentId == item.AssignmentId &&
-                        AsignacionTemporalAplicaEtapa(
-                            x,
-                            stageInfo.StageKey));
+                temporalByAssignmentStage.TryGetValue(
+                    (
+                        item.AssignmentId,
+                        stageInfo.StageKey
+                    ),
+                    out var temporalAplicable);
 
                 var employeeId =
-                    temporalAplicable?.TemporaryEmployeeId ??
-                    item.EmployeeId;
+                    temporalAplicable?
+                        .TemporaryEmployeeId
+                    ?? item.EmployeeId;
 
                 var employeeName =
-                    temporalAplicable?.TemporaryEmployee?.Nombre;
+                    temporalAplicable?
+                        .TemporaryEmployeeName;
 
-                if (string.IsNullOrWhiteSpace(employeeName))
-                    employeeName = item.EmployeeName;
-
-                var dto = new AssignedBookDashboardDto
+                if (string.IsNullOrWhiteSpace(
+                        employeeName))
                 {
-                    AssignmentId = item.AssignmentId,
-                    BookId = item.BookId,
-                    EmployeeId = employeeId,
+                    employeeName =
+                        item.EmployeeName;
+                }
 
-                    EmployeeName = employeeName,
-                    KgenCode = item.KgenCode,
-                    LsaCode = item.LsaCode,
-                    BookName = item.BookName,
-                    Database = item.Database,
-                    EmployeeTypeId = item.EmployeeTypeId,
-                    EmployeeTypeCode = item.EmployeeTypeCode,
+                var dto =
+                    new AssignedBookDashboardDto
+                    {
+                        AssignmentId =
+                            item.AssignmentId,
 
-                    StageKey = stageInfo.StageKey,
-                    Stage = stageInfo.StageName,
-                    CompletionStatus = stageInfo.CompletionStatus,
-                    StageDate = stageInfo.StageDate,
-                    BookReadyToShip = bookReadyToShip
-                };
+                        BookId =
+                            item.BookId,
+
+                        EmployeeId =
+                            employeeId,
+
+                        EmployeeName =
+                            employeeName ?? string.Empty,
+
+                        KgenCode =
+                            item.KgenCode,
+
+                        LsaCode =
+                            item.LsaCode,
+
+                        BookName =
+                            item.BookName,
+
+                        Database =
+                            item.Database,
+
+                        EmployeeTypeId =
+                            item.EmployeeTypeId,
+
+                        EmployeeTypeCode =
+                            item.EmployeeTypeCode,
+
+                        StageKey =
+                            stageInfo.StageKey,
+
+                        Stage =
+                            stageInfo.StageName,
+
+                        CompletionStatus =
+                            stageInfo.CompletionStatus,
+
+                        StageDate =
+                            stageInfo.StageDate,
+
+                        BookReadyToShip =
+                            bookReadyToShip
+                    };
 
                 if (etapaCompletada)
                 {
@@ -296,35 +506,213 @@ namespace Pagination_Project.Services
                 }
             }
 
-            pending = pending
-                .OrderBy(x => x.StageDate)
-                .ThenBy(x => x.EmployeeName)
-                .ThenBy(x => x.BookName)
-                .ToList();
+            pending.Sort(
+                AssignedBookDashboardComparer.Instance);
 
-            completed = completed
-                .OrderBy(x => x.StageDate)
-                .ThenBy(x => x.EmployeeName)
-                .ThenBy(x => x.BookName)
-                .ToList();
+            completed.Sort(
+                AssignedBookDashboardComparer.Instance);
 
-            return (pending, completed);
+            return (
+                pending,
+                completed);
         }
 
-        private static bool AsignacionTemporalAplicaEtapa(
-            TemporaryAssignment temporal,
-            string stageKey)
+        private static Dictionary<Guid, AssignmentWorkState>
+            ConstruirEstadosTrabajo(
+                IEnumerable<RawAssignmentWorkDto> registros)
         {
-            return stageKey switch
+            var result =
+                new Dictionary<Guid, AssignmentWorkState>();
+
+            foreach (var registro in registros)
             {
-                "ProofExtract" => temporal.Proof,
-                "FinalExtract" => temporal.Final,
-                "MemoExtract" => temporal.Memo,
-                "FinalPO" => temporal.FinalPO,
-                "Shipping" => temporal.Shipping,
-                "Dirxion" => temporal.Dirxion,
-                _ => false
-            };
+                if (!result.TryGetValue(
+                        registro.AssignmentId,
+                        out var state))
+                {
+                    state =
+                        new AssignmentWorkState();
+
+                    result.Add(
+                        registro.AssignmentId,
+                        state);
+                }
+
+                state.ProofExtractWorked |=
+                    registro.ProofExtractWorked;
+
+                state.FinalExtractWorked |=
+                    registro.FinalExtractWorked;
+
+                state.MemoExtractWorked |=
+                    registro.MemoExtractWorked;
+
+                state.FinalPOWorked |=
+                    registro.FinalPOWorked;
+
+                state.ShippingWorked |=
+                    registro.ShippingWorked;
+
+                state.DirxionWorked |=
+                    registro.DirxionWorked;
+
+                if (registro.FinalPOWorked &&
+                    !state.HasFinalPoVerification)
+                {
+                    state.HasFinalPoVerification =
+                        true;
+
+                    state.ClosingCorrectionsVerified =
+                        registro.ClosingCorrectionsVerified;
+
+                    state.LateWorkVerified =
+                        registro.LateWorkVerified;
+                }
+            }
+
+            return result;
+        }
+
+        private static async Task<List<RawTemporaryAssignmentDto>>
+            CargarTemporalesActivosAsync(
+                AppDbContext db,
+                IReadOnlyCollection<Guid> assignmentIds,
+                bool soloShipping = false)
+        {
+            if (assignmentIds.Count == 0)
+            {
+                return new List<RawTemporaryAssignmentDto>();
+            }
+
+            var query =
+                db.TemporaryAssignments
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.Active &&
+                        assignmentIds.Contains(
+                            x.AssignmentId));
+
+            if (soloShipping)
+            {
+                query =
+                    query.Where(x =>
+                        x.Shipping);
+            }
+
+            return await query
+                .OrderByDescending(x =>
+                    x.CreatedAt)
+                .Select(x =>
+                    new RawTemporaryAssignmentDto
+                    {
+                        AssignmentId =
+                            x.AssignmentId,
+
+                        TemporaryEmployeeId =
+                            x.TemporaryEmployeeId,
+
+                        TemporaryEmployeeName =
+                            x.TemporaryEmployee != null
+                                ? x.TemporaryEmployee.Nombre
+                                    ?? string.Empty
+                                : string.Empty,
+
+                        Proof =
+                            x.Proof,
+
+                        Final =
+                            x.Final,
+
+                        Memo =
+                            x.Memo,
+
+                        FinalPO =
+                            x.FinalPO,
+
+                        Shipping =
+                            x.Shipping,
+
+                        Dirxion =
+                            x.Dirxion
+                    })
+                .ToListAsync();
+        }
+
+        private static Dictionary<
+                (Guid AssignmentId, string StageKey),
+                RawTemporaryAssignmentDto>
+            ConstruirTemporalesPorEtapa(
+                IEnumerable<RawTemporaryAssignmentDto> temporales)
+        {
+            var result =
+                new Dictionary<
+                    (Guid AssignmentId, string StageKey),
+                    RawTemporaryAssignmentDto>();
+
+            foreach (var temporal in temporales)
+            {
+                if (temporal.Proof)
+                {
+                    result.TryAdd(
+                        (
+                            temporal.AssignmentId,
+                            "ProofExtract"
+                        ),
+                        temporal);
+                }
+
+                if (temporal.Final)
+                {
+                    result.TryAdd(
+                        (
+                            temporal.AssignmentId,
+                            "FinalExtract"
+                        ),
+                        temporal);
+                }
+
+                if (temporal.Memo)
+                {
+                    result.TryAdd(
+                        (
+                            temporal.AssignmentId,
+                            "MemoExtract"
+                        ),
+                        temporal);
+                }
+
+                if (temporal.FinalPO)
+                {
+                    result.TryAdd(
+                        (
+                            temporal.AssignmentId,
+                            "FinalPO"
+                        ),
+                        temporal);
+                }
+
+                if (temporal.Shipping)
+                {
+                    result.TryAdd(
+                        (
+                            temporal.AssignmentId,
+                            "Shipping"
+                        ),
+                        temporal);
+                }
+
+                if (temporal.Dirxion)
+                {
+                    result.TryAdd(
+                        (
+                            temporal.AssignmentId,
+                            "Dirxion"
+                        ),
+                        temporal);
+                }
+            }
+
+            return result;
         }
 
         private static async Task<List<WeeklyEvaluationDashboardDto>>
@@ -333,7 +721,9 @@ namespace Pagination_Project.Services
                 DateOnly today,
                 UserDataScope scope)
         {
-            var rango = ObtenerRangoSemanaAnterior(today);
+            var rango =
+                ObtenerRangoSemanaAnterior(
+                    today);
 
             var data = await (
                 from ev in db.Evaluaciones.AsNoTracking()
@@ -350,10 +740,17 @@ namespace Pagination_Project.Services
                 join et in db.EmployeeTypes.AsNoTracking()
                     on l.EmployeeTypeId equals et.Id
 
-                where l.ShippingDate >= rango.Start &&
-                      l.ShippingDate <= rango.End &&
-                      (scope.ViewAllEmployeeTypes ||
-                       l.EmployeeTypeId == scope.EmployeeTypeId)
+                where
+                    l.ShippingDate >= rango.Start
+                    &&
+                    l.ShippingDate <= rango.End
+                    &&
+                    (
+                        scope.ViewAllEmployeeTypes
+                        ||
+                        l.EmployeeTypeId ==
+                        scope.EmployeeTypeId
+                    )
 
                 select new RawWeeklyEvaluationDashboardDto
                 {
@@ -362,93 +759,176 @@ namespace Pagination_Project.Services
                     BookId = l.Id,
                     EmployeeId = e.Id,
 
-                    EmployeeName = e.Nombre ?? string.Empty,
-                    KgenCode = l.KGENCode ?? string.Empty,
-                    LsaCode = l.LSACode ?? string.Empty,
-                    BookName = l.BookName ?? string.Empty,
-                    EmployeeTypeId = l.EmployeeTypeId,
-                    EmployeeTypeCode = et.Code,
-                    ShippingDate = l.ShippingDate,
+                    EmployeeName =
+                        e.Nombre ?? string.Empty,
 
-                    MotifYp = ev.MotifYp,
-                    MotifWp = ev.MotifWp,
-                    InventoryReport = ev.InventoryReport,
+                    KgenCode =
+                        l.KGENCode ?? string.Empty,
+
+                    LsaCode =
+                        l.LSACode ?? string.Empty,
+
+                    BookName =
+                        l.BookName ?? string.Empty,
+
+                    EmployeeTypeId =
+                        l.EmployeeTypeId,
+
+                    EmployeeTypeCode =
+                        et.Code ?? string.Empty,
+
+                    ShippingDate =
+                        l.ShippingDate,
+
+                    MotifYp =
+                        ev.MotifYp,
+
+                    MotifWp =
+                        ev.MotifWp,
+
+                    InventoryReport =
+                        ev.InventoryReport,
+
                     ProductShippingFolder =
                         ev.ProductShippingFolder,
-                    TaskMemo = ev.TaskMemo,
 
-                    TouchingRule = ev.TouchingRule,
-                    PagesSwapped = ev.PagesSwapped,
-                    PplpWrongPlace = ev.PplpWrongPlace,
-                    CouponsHeading = ev.CouponsHeading,
+                    TaskMemo =
+                        ev.TaskMemo,
+
+                    TouchingRule =
+                        ev.TouchingRule,
+
+                    PagesSwapped =
+                        ev.PagesSwapped,
+
+                    PplpWrongPlace =
+                        ev.PplpWrongPlace,
+
+                    CouponsHeading =
+                        ev.CouponsHeading,
+
                     DoubleTruckWrongPlace =
                         ev.DoubleTruckWrongPlace,
-                    FillersOutside = ev.FillersOutside,
-                    MissingYspFiller = ev.MissingYspFiller,
-                    GradeUnder75 = ev.GradeUnder75,
 
-                    WhpsNoAnchors = ev.WhpsNoAnchors,
-                    WfpsNoAnchors = ev.WfpsNoAnchors,
-                    WdqcsNoAnchors = ev.WdqcsNoAnchors,
+                    FillersOutside =
+                        ev.FillersOutside,
 
-                    MissingCornerAd = ev.MissingCornerAd,
-                    MissingBanner = ev.MissingBanner,
-                    MissingRandomTab = ev.MissingRandomTab,
-                    MissingForcedTab = ev.MissingForcedTab,
+                    MissingYspFiller =
+                        ev.MissingYspFiller,
 
-                    FileNamingIssue = ev.FileNamingIssue,
-                    OutputWrongDate = ev.OutputWrongDate,
-                    WrongPitstop = ev.WrongPitstop,
+                    GradeUnder75 =
+                        ev.GradeUnder75,
+
+                    WhpsNoAnchors =
+                        ev.WhpsNoAnchors,
+
+                    WfpsNoAnchors =
+                        ev.WfpsNoAnchors,
+
+                    WdqcsNoAnchors =
+                        ev.WdqcsNoAnchors,
+
+                    MissingCornerAd =
+                        ev.MissingCornerAd,
+
+                    MissingBanner =
+                        ev.MissingBanner,
+
+                    MissingRandomTab =
+                        ev.MissingRandomTab,
+
+                    MissingForcedTab =
+                        ev.MissingForcedTab,
+
+                    FileNamingIssue =
+                        ev.FileNamingIssue,
+
+                    OutputWrongDate =
+                        ev.OutputWrongDate,
+
+                    WrongPitstop =
+                        ev.WrongPitstop,
+
                     RestaurantBleedIssue =
                         ev.RestaurantBleedIssue,
-                    WrongSigFiller = ev.WrongSigFiller,
-                    FobFolder = ev.FobFolder,
-                    MissingPaidItem = ev.MissingPaidItem,
-                    MissingSelfPromo = ev.MissingSelfPromo,
 
-                    Corrections = ev.Corrections,
-                    PendingCorrections = ev.PendingCorrections,
+                    WrongSigFiller =
+                        ev.WrongSigFiller,
+
+                    FobFolder =
+                        ev.FobFolder,
+
+                    MissingPaidItem =
+                        ev.MissingPaidItem,
+
+                    MissingSelfPromo =
+                        ev.MissingSelfPromo,
+
+                    Corrections =
+                        ev.Corrections,
+
+                    PendingCorrections =
+                        ev.PendingCorrections,
+
                     TaskMemoWrongComment =
                         ev.TaskMemoWrongComment
                 }
             ).ToListAsync();
 
-            var assignmentIds = data
-                .Select(x => x.AssignmentId)
-                .Distinct()
-                .ToList();
+            if (data.Count == 0)
+            {
+                return new List<WeeklyEvaluationDashboardDto>();
+            }
 
-            var temporalesShipping = await db.TemporaryAssignments
-                .AsNoTracking()
-                .Include(x => x.TemporaryEmployee)
-                .Where(x =>
-                    x.Active &&
-                    x.Shipping &&
-                    assignmentIds.Contains(x.AssignmentId))
-                .OrderByDescending(x => x.CreatedAt)
-                .ToListAsync();
+            var assignmentIds =
+                data
+                    .Select(x =>
+                        x.AssignmentId)
+                    .Distinct()
+                    .ToList();
+
+            var temporalesShipping =
+                await CargarTemporalesActivosAsync(
+                    db,
+                    assignmentIds,
+                    soloShipping: true);
+
+            var temporalesPorEtapa =
+                ConstruirTemporalesPorEtapa(
+                    temporalesShipping);
 
             var result =
-                new List<WeeklyEvaluationDashboardDto>();
+                new List<WeeklyEvaluationDashboardDto>(
+                    data.Count);
 
             foreach (var item in data)
             {
-                var temporalAplicable = temporalesShipping
-                    .FirstOrDefault(x =>
-                        x.AssignmentId == item.AssignmentId);
+                temporalesPorEtapa.TryGetValue(
+                    (
+                        item.AssignmentId,
+                        "Shipping"
+                    ),
+                    out var temporalAplicable);
 
                 var employeeId =
-                    temporalAplicable?.TemporaryEmployeeId ??
-                    item.EmployeeId;
+                    temporalAplicable?
+                        .TemporaryEmployeeId
+                    ?? item.EmployeeId;
 
                 var employeeName =
-                    temporalAplicable?.TemporaryEmployee?.Nombre;
+                    temporalAplicable?
+                        .TemporaryEmployeeName;
 
-                if (string.IsNullOrWhiteSpace(employeeName))
-                    employeeName = item.EmployeeName;
+                if (string.IsNullOrWhiteSpace(
+                        employeeName))
+                {
+                    employeeName =
+                        item.EmployeeName;
+                }
 
                 var motifYp =
-                    item.MotifYp ??
+                    item.MotifYp
+                    ??
                     CalcularPorcentaje(
                         CountErrors(
                             item.TouchingRule,
@@ -462,7 +942,8 @@ namespace Pagination_Project.Services
                         8);
 
                 var motifWp =
-                    item.MotifWp ??
+                    item.MotifWp
+                    ??
                     CalcularPorcentaje(
                         CountErrors(
                             item.WhpsNoAnchors,
@@ -471,7 +952,8 @@ namespace Pagination_Project.Services
                         3);
 
                 var inventory =
-                    item.InventoryReport ??
+                    item.InventoryReport
+                    ??
                     CalcularPorcentaje(
                         CountErrors(
                             item.MissingCornerAd,
@@ -481,7 +963,8 @@ namespace Pagination_Project.Services
                         4);
 
                 var shipping =
-                    item.ProductShippingFolder ??
+                    item.ProductShippingFolder
+                    ??
                     CalcularPorcentaje(
                         CountErrors(
                             item.FileNamingIssue,
@@ -495,7 +978,8 @@ namespace Pagination_Project.Services
                         8);
 
                 var taskMemo =
-                    item.TaskMemo ??
+                    item.TaskMemo
+                    ??
                     CalcularPorcentaje(
                         CountErrors(
                             item.Corrections,
@@ -503,109 +987,237 @@ namespace Pagination_Project.Services
                             item.TaskMemoWrongComment),
                         3);
 
-                var totalAverage = CalcularPromedio(
-                    motifYp,
-                    motifWp,
-                    inventory,
-                    shipping,
-                    taskMemo);
+                var totalAverage =
+                    CalcularPromedio(
+                        motifYp,
+                        motifWp,
+                        inventory,
+                        shipping,
+                        taskMemo);
 
-                result.Add(new WeeklyEvaluationDashboardDto
-                {
-                    EvaluationId = item.EvaluationId,
-                    AssignmentId = item.AssignmentId,
-                    BookId = item.BookId,
-                    EmployeeId = employeeId,
+                result.Add(
+                    new WeeklyEvaluationDashboardDto
+                    {
+                        EvaluationId =
+                            item.EvaluationId,
 
-                    EmployeeName = employeeName,
-                    KgenCode = item.KgenCode,
-                    LsaCode = item.LsaCode,
-                    BookName = item.BookName,
-                    EmployeeTypeId = item.EmployeeTypeId,
-                    EmployeeTypeCode = item.EmployeeTypeCode,
-                    ShippingDate = item.ShippingDate,
+                        AssignmentId =
+                            item.AssignmentId,
 
-                    MotifYp = motifYp,
-                    MotifWp = motifWp,
-                    InventoryReport = inventory,
-                    ProductShippingFolder = shipping,
-                    TaskMemo = taskMemo,
-                    PercentageAverage = totalAverage,
+                        BookId =
+                            item.BookId,
 
-                    TouchingRule = item.TouchingRule,
-                    PagesSwapped = item.PagesSwapped,
-                    PplpWrongPlace = item.PplpWrongPlace,
-                    CouponsHeading = item.CouponsHeading,
-                    DoubleTruckWrongPlace =
-                        item.DoubleTruckWrongPlace,
-                    FillersOutside = item.FillersOutside,
-                    MissingYspFiller = item.MissingYspFiller,
-                    GradeUnder75 = item.GradeUnder75,
+                        EmployeeId =
+                            employeeId,
 
-                    WhpsNoAnchors = item.WhpsNoAnchors,
-                    WfpsNoAnchors = item.WfpsNoAnchors,
-                    WdqcsNoAnchors = item.WdqcsNoAnchors,
+                        EmployeeName =
+                            employeeName ?? string.Empty,
 
-                    MissingCornerAd = item.MissingCornerAd,
-                    MissingBanner = item.MissingBanner,
-                    MissingRandomTab = item.MissingRandomTab,
-                    MissingForcedTab = item.MissingForcedTab,
+                        KgenCode =
+                            item.KgenCode,
 
-                    FileNamingIssue = item.FileNamingIssue,
-                    OutputWrongDate = item.OutputWrongDate,
-                    WrongPitstop = item.WrongPitstop,
-                    RestaurantBleedIssue =
-                        item.RestaurantBleedIssue,
-                    WrongSigFiller = item.WrongSigFiller,
-                    FobFolder = item.FobFolder,
-                    MissingPaidItem = item.MissingPaidItem,
-                    MissingSelfPromo = item.MissingSelfPromo,
+                        LsaCode =
+                            item.LsaCode,
 
-                    Corrections = item.Corrections,
-                    PendingCorrections = item.PendingCorrections,
-                    TaskMemoWrongComment =
-                        item.TaskMemoWrongComment
-                });
+                        BookName =
+                            item.BookName,
+
+                        EmployeeTypeId =
+                            item.EmployeeTypeId,
+
+                        EmployeeTypeCode =
+                            item.EmployeeTypeCode,
+
+                        ShippingDate =
+                            item.ShippingDate,
+
+                        MotifYp =
+                            motifYp,
+
+                        MotifWp =
+                            motifWp,
+
+                        InventoryReport =
+                            inventory,
+
+                        ProductShippingFolder =
+                            shipping,
+
+                        TaskMemo =
+                            taskMemo,
+
+                        PercentageAverage =
+                            totalAverage,
+
+                        TouchingRule =
+                            item.TouchingRule,
+
+                        PagesSwapped =
+                            item.PagesSwapped,
+
+                        PplpWrongPlace =
+                            item.PplpWrongPlace,
+
+                        CouponsHeading =
+                            item.CouponsHeading,
+
+                        DoubleTruckWrongPlace =
+                            item.DoubleTruckWrongPlace,
+
+                        FillersOutside =
+                            item.FillersOutside,
+
+                        MissingYspFiller =
+                            item.MissingYspFiller,
+
+                        GradeUnder75 =
+                            item.GradeUnder75,
+
+                        WhpsNoAnchors =
+                            item.WhpsNoAnchors,
+
+                        WfpsNoAnchors =
+                            item.WfpsNoAnchors,
+
+                        WdqcsNoAnchors =
+                            item.WdqcsNoAnchors,
+
+                        MissingCornerAd =
+                            item.MissingCornerAd,
+
+                        MissingBanner =
+                            item.MissingBanner,
+
+                        MissingRandomTab =
+                            item.MissingRandomTab,
+
+                        MissingForcedTab =
+                            item.MissingForcedTab,
+
+                        FileNamingIssue =
+                            item.FileNamingIssue,
+
+                        OutputWrongDate =
+                            item.OutputWrongDate,
+
+                        WrongPitstop =
+                            item.WrongPitstop,
+
+                        RestaurantBleedIssue =
+                            item.RestaurantBleedIssue,
+
+                        WrongSigFiller =
+                            item.WrongSigFiller,
+
+                        FobFolder =
+                            item.FobFolder,
+
+                        MissingPaidItem =
+                            item.MissingPaidItem,
+
+                        MissingSelfPromo =
+                            item.MissingSelfPromo,
+
+                        Corrections =
+                            item.Corrections,
+
+                        PendingCorrections =
+                            item.PendingCorrections,
+
+                        TaskMemoWrongComment =
+                            item.TaskMemoWrongComment
+                    });
             }
 
-            return result
-                .OrderBy(x => x.ShippingDate)
-                .ThenBy(x => x.EmployeeName)
-                .ThenBy(x => x.BookName)
-                .ToList();
+            result.Sort(
+                WeeklyEvaluationDashboardComparer.Instance);
+
+            return result;
         }
 
         private static (
             DateOnly Start,
             DateOnly End)
-            ObtenerRangoSemanaAnterior(DateOnly today)
+            ObtenerRangoSemanaAnterior(
+                DateOnly today)
         {
             var diff =
-                ((int)today.DayOfWeek -
-                 (int)DayOfWeek.Monday + 7) % 7;
+                (
+                    (int)today.DayOfWeek -
+                    (int)DayOfWeek.Monday +
+                    7
+                ) % 7;
 
             var inicioSemanaActual =
-                today.AddDays(-diff);
-
-            var inicioSemanaAnterior =
-                inicioSemanaActual.AddDays(-7);
-
-            var finSemanaAnterior =
-                inicioSemanaActual.AddDays(-1);
+                today.AddDays(
+                    -diff);
 
             return (
-                inicioSemanaAnterior,
-                finSemanaAnterior);
+                inicioSemanaActual.AddDays(-7),
+                inicioSemanaActual.AddDays(-1)
+            );
+        }
+
+        private static int CountErrors(
+            bool value1,
+            bool value2,
+            bool value3)
+        {
+            return
+                (value1 ? 1 : 0) +
+                (value2 ? 1 : 0) +
+                (value3 ? 1 : 0);
+        }
+
+        private static int CountErrors(
+            bool value1,
+            bool value2,
+            bool value3,
+            bool value4)
+        {
+            return
+                (value1 ? 1 : 0) +
+                (value2 ? 1 : 0) +
+                (value3 ? 1 : 0) +
+                (value4 ? 1 : 0);
+        }
+
+        private static int CountErrors(
+            bool value1,
+            bool value2,
+            bool value3,
+            bool value4,
+            bool value5,
+            bool value6,
+            bool value7,
+            bool value8)
+        {
+            return
+                (value1 ? 1 : 0) +
+                (value2 ? 1 : 0) +
+                (value3 ? 1 : 0) +
+                (value4 ? 1 : 0) +
+                (value5 ? 1 : 0) +
+                (value6 ? 1 : 0) +
+                (value7 ? 1 : 0) +
+                (value8 ? 1 : 0);
         }
 
         private static decimal CalcularPromedio(
-            params decimal[] valores)
+            decimal value1,
+            decimal value2,
+            decimal value3,
+            decimal value4,
+            decimal value5)
         {
-            if (valores.Length == 0)
-                return 0;
-
             return Math.Round(
-                valores.Average(),
+                (
+                    value1 +
+                    value2 +
+                    value3 +
+                    value4 +
+                    value5
+                ) / 5m,
                 2);
         }
 
@@ -614,70 +1226,64 @@ namespace Pagination_Project.Services
             int total)
         {
             if (total <= 0)
+            {
                 return 0;
+            }
 
             var porcentaje =
-                ((total - errores) * 100m) / total;
+                (
+                    (total - errores) *
+                    100m
+                ) / total;
 
             if (porcentaje < 0)
+            {
                 porcentaje = 0;
+            }
 
             return Math.Round(
                 porcentaje,
                 2);
         }
 
-        private static int CountErrors(
-            params bool[] values)
-        {
-            return values.Count(x => x);
-        }
-
         private static StageDashboardInfo? ObtenerEtapaDelDia(
             RawAssignmentDashboardDto item,
-            DateOnly today)
+            DateOnly today,
+            HashSet<string> bindPlantCodes)
         {
-            var bindPlantName =
-                (item.BindPlantName ?? string.Empty)
-                    .Trim()
-                    .ToUpperInvariant();
+            var esIveau =
+                bindPlantCodes.Contains("IVEAU") ||
+                bindPlantCodes.Contains("WSTR");
 
-            var esIveau = EsBindPlant(
-                bindPlantName,
-                "IVEAU",
-                "WSTR");
+            var esAu =
+                bindPlantCodes.Contains("AU");
 
-            var esAu = EsBindPlant(
-                bindPlantName,
-                "AU");
+            var esNz =
+                bindPlantCodes.Contains("NZ");
 
-            var esNz = EsBindPlant(
-                bindPlantName,
-                "NZ");
-
-            var esNzShipping = EsBindPlant(
-                bindPlantName,
-                "WSTR",
-                "NZ");
+            var esNzShipping =
+                bindPlantCodes.Contains("WSTR") ||
+                bindPlantCodes.Contains("NZ");
 
             var excluirMemoPorBindPlant =
-                EsBindPlant(
-                    bindPlantName,
-                    "PREM",
-                    "DIRX",
-                    "WSTR",
-                    "IVEAU",
-                    "AU",
-                    "NZ");
+                bindPlantCodes.Contains("PREM") ||
+                bindPlantCodes.Contains("DIRX") ||
+                bindPlantCodes.Contains("WSTR") ||
+                bindPlantCodes.Contains("IVEAU") ||
+                bindPlantCodes.Contains("AU") ||
+                bindPlantCodes.Contains("NZ");
 
             var proofDisplayDate =
-                GetNextBusinessDay(item.ProofExtract);
+                GetNextBusinessDay(
+                    item.ProofExtract);
 
             var finalDisplayDate =
-                GetNextBusinessDay(item.FinalExtract);
+                GetNextBusinessDay(
+                    item.FinalExtract);
 
             var memoDisplayDate =
-                GetNextBusinessDay(item.MemoExtract);
+                GetNextBusinessDay(
+                    item.MemoExtract);
 
             var finalPODisplayDate =
                 ObtenerFinalPODisplayDate(
@@ -686,21 +1292,28 @@ namespace Pagination_Project.Services
                     esAu,
                     esNz);
 
-            var shippingDisplayDate = esNzShipping
-                ? GetPreviousWorkDate(
-                    item.ShippingDate,
-                    1)
-                : item.ShippingDate;
+            var shippingDisplayDate =
+                esNzShipping
+                    ? GetPreviousWorkDate(
+                        item.ShippingDate,
+                        1)
+                    : item.ShippingDate;
 
             if (proofDisplayDate == today)
             {
                 return new StageDashboardInfo
                 {
-                    StageKey = "ProofExtract",
-                    StageName = "Proof Extract",
+                    StageKey =
+                        "ProofExtract",
+
+                    StageName =
+                        "Proof Extract",
+
                     CompletionStatus =
                         "Proof Extract Completed",
-                    StageDate = proofDisplayDate
+
+                    StageDate =
+                        proofDisplayDate
                 };
             }
 
@@ -708,11 +1321,17 @@ namespace Pagination_Project.Services
             {
                 return new StageDashboardInfo
                 {
-                    StageKey = "FinalExtract",
-                    StageName = "Final Extract",
+                    StageKey =
+                        "FinalExtract",
+
+                    StageName =
+                        "Final Extract",
+
                     CompletionStatus =
                         "Final Extract Completed",
-                    StageDate = finalDisplayDate
+
+                    StageDate =
+                        finalDisplayDate
                 };
             }
 
@@ -721,11 +1340,17 @@ namespace Pagination_Project.Services
             {
                 return new StageDashboardInfo
                 {
-                    StageKey = "MemoExtract",
-                    StageName = "Memo Extract",
+                    StageKey =
+                        "MemoExtract",
+
+                    StageName =
+                        "Memo Extract",
+
                     CompletionStatus =
                         "Memo Extract Completed",
-                    StageDate = memoDisplayDate
+
+                    StageDate =
+                        memoDisplayDate
                 };
             }
 
@@ -733,13 +1358,18 @@ namespace Pagination_Project.Services
             {
                 return new StageDashboardInfo
                 {
-                    StageKey = "FinalPO",
+                    StageKey =
+                        "FinalPO",
+
                     StageName =
                         ObtenerNombreEtapaFinalPO(
-                            bindPlantName),
+                            bindPlantCodes),
+
                     CompletionStatus =
                         "Final PO Sent",
-                    StageDate = finalPODisplayDate
+
+                    StageDate =
+                        finalPODisplayDate
                 };
             }
 
@@ -747,11 +1377,17 @@ namespace Pagination_Project.Services
             {
                 return new StageDashboardInfo
                 {
-                    StageKey = "Shipping",
-                    StageName = "Shipping Date",
+                    StageKey =
+                        "Shipping",
+
+                    StageName =
+                        "Shipping Date",
+
                     CompletionStatus =
                         "Shipped Pages",
-                    StageDate = shippingDisplayDate
+
+                    StageDate =
+                        shippingDisplayDate
                 };
             }
 
@@ -759,50 +1395,21 @@ namespace Pagination_Project.Services
             {
                 return new StageDashboardInfo
                 {
-                    StageKey = "Dirxion",
-                    StageName = "Dirxion Date",
+                    StageKey =
+                        "Dirxion",
+
+                    StageName =
+                        "Dirxion Date",
+
                     CompletionStatus =
                         "Dirxion Sent",
-                    StageDate = item.DirxionDate
+
+                    StageDate =
+                        item.DirxionDate
                 };
             }
 
             return null;
-        }
-
-        private static string ObtenerNombreEtapaFinalPO(
-            string bindPlantName)
-        {
-            var bindPlantsPermitidos = new[]
-            {
-                "WAUK",
-                "LMRA",
-                "DIRX",
-                "IVEAU",
-                "SUSX",
-                "PREM",
-                "WSTR"
-            };
-
-            var bindPlantNormalizado =
-                (bindPlantName ?? string.Empty)
-                    .Trim()
-                    .ToUpperInvariant();
-
-            var bindPlantEncontrado =
-                bindPlantsPermitidos
-                    .FirstOrDefault(codigo =>
-                        EsBindPlant(
-                            bindPlantNormalizado,
-                            codigo));
-
-            if (!string.IsNullOrWhiteSpace(
-                    bindPlantEncontrado))
-            {
-                return $"Final PO {bindPlantEncontrado}";
-            }
-
-            return "Final PO Date";
         }
 
         private static DateOnly ObtenerFinalPODisplayDate(
@@ -820,7 +1427,9 @@ namespace Pagination_Project.Services
             if (esAu)
             {
                 if (item.MemoExtract == default)
+                {
                     return default;
+                }
 
                 return GetSameOrNextBusinessDay(
                     item.MemoExtract.AddDays(1));
@@ -836,48 +1445,128 @@ namespace Pagination_Project.Services
             return item.FinalPODate;
         }
 
-        private static bool EsBindPlant(
-            string bindPlantName,
-            params string[] codigos)
+        private static string ObtenerNombreEtapaFinalPO(
+            HashSet<string> bindPlantCodes)
         {
-            if (string.IsNullOrWhiteSpace(bindPlantName))
-                return false;
+            foreach (var code in NamedFinalPoBindPlants)
+            {
+                if (bindPlantCodes.Contains(code))
+                {
+                    return $"Final PO {code}";
+                }
+            }
 
-            var normalizado =
+            return "Final PO Date";
+        }
+
+        private static HashSet<string> ObtenerCodigosBindPlant(
+            string? bindPlantName)
+        {
+            var result =
+                new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase);
+
+            if (string.IsNullOrWhiteSpace(
+                    bindPlantName))
+            {
+                return result;
+            }
+
+            var normalized =
                 bindPlantName
                     .Trim()
                     .ToUpperInvariant();
 
-            if (codigos.Any(c =>
-                    normalizado ==
-                    c.Trim().ToUpperInvariant()))
+            result.Add(normalized);
+
+            var parts =
+                normalized.Split(
+                    BindPlantSeparators,
+                    StringSplitOptions.RemoveEmptyEntries |
+                    StringSplitOptions.TrimEntries);
+
+            foreach (var part in parts)
+            {
+                result.Add(part);
+            }
+
+            return result;
+        }
+
+        private static bool EstaEtapaCompletada(
+            AssignmentWorkState? state,
+            string stageKey)
+        {
+            if (state is null)
+            {
+                return false;
+            }
+
+            return stageKey switch
+            {
+                "ProofExtract" =>
+                    state.ProofExtractWorked,
+
+                "FinalExtract" =>
+                    state.FinalExtractWorked,
+
+                "MemoExtract" =>
+                    state.MemoExtractWorked,
+
+                "FinalPO" =>
+                    state.FinalPOWorked,
+
+                "Shipping" =>
+                    state.ShippingWorked,
+
+                "Dirxion" =>
+                    state.DirxionWorked,
+
+                _ =>
+                    false
+            };
+        }
+
+        private static bool EstaListoParaShipping(
+            HashSet<string> bindPlantCodes,
+            AssignmentWorkState? state)
+        {
+            if (state?.FinalPOWorked != true)
+            {
+                return false;
+            }
+
+            if (bindPlantCodes.Contains("IVEAU"))
             {
                 return true;
             }
 
-            var partes = normalizado.Split(
-                new[]
-                {
-                    ' ',
-                    '-',
-                    '_',
-                    '/',
-                    '\\',
-                    ',',
-                    ';',
-                    '.',
-                    '|',
-                    '(',
-                    ')',
-                    '[',
-                    ']'
-                },
-                StringSplitOptions.RemoveEmptyEntries);
+            return
+                state.HasFinalPoVerification &&
+                state.ClosingCorrectionsVerified &&
+                state.LateWorkVerified;
+        }
 
-            return partes.Any(parte =>
-                codigos.Any(c =>
-                    parte ==
-                    c.Trim().ToUpperInvariant()));
+        private static DateOnly GetNextBusinessDay(
+            DateOnly sourceDate)
+        {
+            if (sourceDate == default)
+            {
+                return default;
+            }
+
+            var result =
+                sourceDate.AddDays(1);
+
+            while (result.DayOfWeek is
+                   DayOfWeek.Saturday or
+                   DayOfWeek.Sunday)
+            {
+                result =
+                    result.AddDays(1);
+            }
+
+            return result;
         }
 
         private static DateOnly GetPreviousWorkDate(
@@ -885,16 +1574,20 @@ namespace Pagination_Project.Services
             int daysBefore)
         {
             if (sourceDate == default)
+            {
                 return default;
+            }
 
             var result =
-                sourceDate.AddDays(-daysBefore);
+                sourceDate.AddDays(
+                    -daysBefore);
 
             while (result.DayOfWeek is
                    DayOfWeek.Saturday or
                    DayOfWeek.Sunday)
             {
-                result = result.AddDays(-1);
+                result =
+                    result.AddDays(-1);
             }
 
             return result;
@@ -904,83 +1597,19 @@ namespace Pagination_Project.Services
             DateOnly sourceDate)
         {
             if (sourceDate == default)
+            {
                 return default;
+            }
 
-            var result = sourceDate;
+            var result =
+                sourceDate;
 
             while (result.DayOfWeek is
                    DayOfWeek.Saturday or
                    DayOfWeek.Sunday)
             {
-                result = result.AddDays(1);
-            }
-
-            return result;
-        }
-
-        private static bool EstaListoParaShipping(
-            string bindPlantName,
-            AsignacionTrabajada? registroFinalPO)
-        {
-            if (registroFinalPO?.FinalPOWorked != true)
-                return false;
-
-            if (EsBindPlant(
-                    bindPlantName,
-                    "IVEAU"))
-            {
-                return true;
-            }
-
-            return
-                registroFinalPO.ClosingCorrectionsVerified &&
-                registroFinalPO.LateWorkVerified;
-        }
-
-        private static bool EstaEtapaCompletada(
-            AsignacionTrabajada? registro,
-            string stageKey)
-        {
-            if (registro is null)
-                return false;
-
-            return stageKey switch
-            {
-                "ProofExtract" =>
-                    registro.ProofExtractWorked,
-
-                "FinalExtract" =>
-                    registro.FinalExtractWorked,
-
-                "MemoExtract" =>
-                    registro.MemoExtractWorked,
-
-                "FinalPO" =>
-                    registro.FinalPOWorked,
-
-                "Shipping" =>
-                    registro.ShippingWorked,
-
-                "Dirxion" =>
-                    registro.DirxionWorked,
-
-                _ => false
-            };
-        }
-
-        private static DateOnly GetNextBusinessDay(
-            DateOnly sourceDate)
-        {
-            if (sourceDate == default)
-                return default;
-
-            var result = sourceDate.AddDays(1);
-
-            while (result.DayOfWeek is
-                   DayOfWeek.Saturday or
-                   DayOfWeek.Sunday)
-            {
-                result = result.AddDays(1);
+                result =
+                    result.AddDays(1);
             }
 
             return result;
@@ -988,84 +1617,224 @@ namespace Pagination_Project.Services
 
         private static DateOnly ObtenerFechaHoyRepublicaDominicana()
         {
-            var utcNow = DateTime.UtcNow;
+            var local =
+                TimeZoneInfo.ConvertTimeFromUtc(
+                    DateTime.UtcNow,
+                    DominicanTimeZone);
+
+            return DateOnly.FromDateTime(
+                local);
+        }
+
+        private static TimeZoneInfo ResolveDominicanTimeZone()
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(
+                    "America/Santo_Domingo");
+            }
+            catch (
+                TimeZoneNotFoundException)
+            {
+            }
+            catch (
+                InvalidTimeZoneException)
+            {
+            }
 
             try
             {
-                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(
-                    "America/Santo_Domingo");
-
-                var localDateTime =
-                    TimeZoneInfo.ConvertTimeFromUtc(
-                        utcNow,
-                        timeZone);
-
-                return DateOnly.FromDateTime(localDateTime);
+                return TimeZoneInfo.FindSystemTimeZoneById(
+                    "SA Western Standard Time");
             }
-            catch (TimeZoneNotFoundException)
+            catch (
+                TimeZoneNotFoundException)
             {
-                try
-                {
-                    var windowsTimeZone =
-                        TimeZoneInfo.FindSystemTimeZoneById(
-                            "SA Western Standard Time");
-
-                    var localDateTime =
-                        TimeZoneInfo.ConvertTimeFromUtc(
-                            utcNow,
-                            windowsTimeZone);
-
-                    return DateOnly.FromDateTime(localDateTime);
-                }
-                catch
-                {
-                    return DateOnly.FromDateTime(DateTime.Today);
-                }
             }
-            catch (InvalidTimeZoneException)
+            catch (
+                InvalidTimeZoneException)
             {
-                return DateOnly.FromDateTime(DateTime.Today);
             }
+
+            return TimeZoneInfo.CreateCustomTimeZone(
+                "Dominican Republic Fallback",
+                TimeSpan.FromHours(-4),
+                "Dominican Republic",
+                "Dominican Republic");
         }
 
-        private static async Task
-            ActualizarFinalizadosPorDirxionAsync(
-                AppDbContext db,
-                DateOnly today,
-                UserDataScope scope)
+        private static async Task ActualizarFinalizadosPorDirxionAsync(
+            AppDbContext db,
+            DateOnly today,
+            UserDataScope scope)
         {
-            var librosParaFinalizar = await db.Libros
-                .Include(l => l.Asignaciones)
-                    .ThenInclude(a => a.Evaluaciones)
+            var librosParaFinalizar =
+                db.Libros
+                    .ApplyScope(scope)
+                    .Where(l =>
+                        !l.Finalizado &&
+                        l.DirxionDate < today);
+
+            if (!await librosParaFinalizar.AnyAsync())
+            {
+                return;
+            }
+
+            var libroIds =
+                librosParaFinalizar
+                    .Select(l => l.Id);
+
+            await db.Evaluaciones
+                .Where(ev =>
+                    !ev.Finalizado &&
+                    libroIds.Contains(
+                        ev.Asignacion!.IdLibro))
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(
+                        ev => ev.Finalizado,
+                        true));
+
+            await db.Asignaciones
+                .Where(a =>
+                    !a.Finalizado &&
+                    libroIds.Contains(
+                        a.IdLibro))
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(
+                        a => a.Finalizado,
+                        true));
+
+            await db.Libros
                 .ApplyScope(scope)
                 .Where(l =>
                     !l.Finalizado &&
                     l.DirxionDate < today)
-                .ToListAsync();
-
-            if (!librosParaFinalizar.Any())
-                return;
-
-            foreach (var libro in librosParaFinalizar)
-            {
-                libro.Finalizado = true;
-
-                foreach (var asignacion in libro.Asignaciones)
-                {
-                    asignacion.Finalizado = true;
-
-                    foreach (var evaluacion
-                             in asignacion.Evaluaciones)
-                    {
-                        evaluacion.Finalizado = true;
-                    }
-                }
-            }
-
-            await db.SaveChangesAsync();
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(
+                        l => l.Finalizado,
+                        true));
         }
 
-        private class RawAssignmentDashboardDto
+        private static void ValidarScope(
+            UserDataScope scope)
+        {
+            ArgumentNullException.ThrowIfNull(
+                scope);
+
+            if (!scope.ViewAllEmployeeTypes &&
+                !scope.EmployeeTypeId.HasValue)
+            {
+                throw new UnauthorizedAccessException(
+                    "The current data scope does not contain an employee type.");
+            }
+        }
+
+        private sealed class AssignedBookDashboardComparer
+            : IComparer<AssignedBookDashboardDto>
+        {
+            public static AssignedBookDashboardComparer Instance { get; } =
+                new();
+
+            public int Compare(
+                AssignedBookDashboardDto? x,
+                AssignedBookDashboardDto? y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return 0;
+                }
+
+                if (x is null)
+                {
+                    return -1;
+                }
+
+                if (y is null)
+                {
+                    return 1;
+                }
+
+                var dateComparison =
+                    Nullable.Compare(
+                        x.StageDate,
+                        y.StageDate);
+
+                if (dateComparison != 0)
+                {
+                    return dateComparison;
+                }
+
+                var employeeComparison =
+                    string.Compare(
+                        x.EmployeeName,
+                        y.EmployeeName,
+                        StringComparison.OrdinalIgnoreCase);
+
+                if (employeeComparison != 0)
+                {
+                    return employeeComparison;
+                }
+
+                return string.Compare(
+                    x.BookName,
+                    y.BookName,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private sealed class WeeklyEvaluationDashboardComparer
+            : IComparer<WeeklyEvaluationDashboardDto>
+        {
+            public static WeeklyEvaluationDashboardComparer Instance { get; } =
+                new();
+
+            public int Compare(
+                WeeklyEvaluationDashboardDto? x,
+                WeeklyEvaluationDashboardDto? y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return 0;
+                }
+
+                if (x is null)
+                {
+                    return -1;
+                }
+
+                if (y is null)
+                {
+                    return 1;
+                }
+
+                var dateComparison =
+                    x.ShippingDate.CompareTo(
+                        y.ShippingDate);
+
+                if (dateComparison != 0)
+                {
+                    return dateComparison;
+                }
+
+                var employeeComparison =
+                    string.Compare(
+                        x.EmployeeName,
+                        y.EmployeeName,
+                        StringComparison.OrdinalIgnoreCase);
+
+                if (employeeComparison != 0)
+                {
+                    return employeeComparison;
+                }
+
+                return string.Compare(
+                    x.BookName,
+                    y.BookName,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private sealed class RawAssignmentDashboardDto
         {
             public Guid AssignmentId { get; set; }
 
@@ -1073,28 +1842,28 @@ namespace Pagination_Project.Services
 
             public Guid EmployeeId { get; set; }
 
-            public string EmployeeName { get; set; }
-                = string.Empty;
+            public string EmployeeName { get; set; } =
+                string.Empty;
 
-            public string KgenCode { get; set; }
-                = string.Empty;
+            public string KgenCode { get; set; } =
+                string.Empty;
 
-            public string LsaCode { get; set; }
-                = string.Empty;
+            public string LsaCode { get; set; } =
+                string.Empty;
 
-            public string BookName { get; set; }
-                = string.Empty;
+            public string BookName { get; set; } =
+                string.Empty;
 
-            public string BindPlantName { get; set; }
-                = string.Empty;
+            public string BindPlantName { get; set; } =
+                string.Empty;
 
-            public string Database { get; set; }
-                = string.Empty;
+            public string Database { get; set; } =
+                string.Empty;
 
             public short EmployeeTypeId { get; set; }
 
-            public string EmployeeTypeCode { get; set; }
-                = string.Empty;
+            public string EmployeeTypeCode { get; set; } =
+                string.Empty;
 
             public DateOnly ProofExtract { get; set; }
 
@@ -1109,7 +1878,71 @@ namespace Pagination_Project.Services
             public DateOnly ShippingDate { get; set; }
         }
 
-        private class RawWeeklyEvaluationDashboardDto
+        private sealed class RawAssignmentWorkDto
+        {
+            public Guid AssignmentId { get; set; }
+
+            public bool ProofExtractWorked { get; set; }
+
+            public bool FinalExtractWorked { get; set; }
+
+            public bool MemoExtractWorked { get; set; }
+
+            public bool FinalPOWorked { get; set; }
+
+            public bool ShippingWorked { get; set; }
+
+            public bool DirxionWorked { get; set; }
+
+            public bool ClosingCorrectionsVerified { get; set; }
+
+            public bool LateWorkVerified { get; set; }
+        }
+
+        private sealed class AssignmentWorkState
+        {
+            public bool ProofExtractWorked { get; set; }
+
+            public bool FinalExtractWorked { get; set; }
+
+            public bool MemoExtractWorked { get; set; }
+
+            public bool FinalPOWorked { get; set; }
+
+            public bool ShippingWorked { get; set; }
+
+            public bool DirxionWorked { get; set; }
+
+            public bool HasFinalPoVerification { get; set; }
+
+            public bool ClosingCorrectionsVerified { get; set; }
+
+            public bool LateWorkVerified { get; set; }
+        }
+
+        private sealed class RawTemporaryAssignmentDto
+        {
+            public Guid AssignmentId { get; set; }
+
+            public Guid TemporaryEmployeeId { get; set; }
+
+            public string TemporaryEmployeeName { get; set; } =
+                string.Empty;
+
+            public bool Proof { get; set; }
+
+            public bool Final { get; set; }
+
+            public bool Memo { get; set; }
+
+            public bool FinalPO { get; set; }
+
+            public bool Shipping { get; set; }
+
+            public bool Dirxion { get; set; }
+        }
+
+        private sealed class RawWeeklyEvaluationDashboardDto
         {
             public Guid EvaluationId { get; set; }
 
@@ -1119,22 +1952,22 @@ namespace Pagination_Project.Services
 
             public Guid EmployeeId { get; set; }
 
-            public string EmployeeName { get; set; }
-                = string.Empty;
+            public string EmployeeName { get; set; } =
+                string.Empty;
 
-            public string KgenCode { get; set; }
-                = string.Empty;
+            public string KgenCode { get; set; } =
+                string.Empty;
 
-            public string LsaCode { get; set; }
-                = string.Empty;
+            public string LsaCode { get; set; } =
+                string.Empty;
 
-            public string BookName { get; set; }
-                = string.Empty;
+            public string BookName { get; set; } =
+                string.Empty;
 
             public short EmployeeTypeId { get; set; }
 
-            public string EmployeeTypeCode { get; set; }
-                = string.Empty;
+            public string EmployeeTypeCode { get; set; } =
+                string.Empty;
 
             public DateOnly ShippingDate { get; set; }
 
@@ -1201,16 +2034,16 @@ namespace Pagination_Project.Services
             public bool TaskMemoWrongComment { get; set; }
         }
 
-        private class StageDashboardInfo
+        private sealed class StageDashboardInfo
         {
-            public string StageKey { get; set; }
-                = string.Empty;
+            public string StageKey { get; set; } =
+                string.Empty;
 
-            public string StageName { get; set; }
-                = string.Empty;
+            public string StageName { get; set; } =
+                string.Empty;
 
-            public string CompletionStatus { get; set; }
-                = string.Empty;
+            public string CompletionStatus { get; set; } =
+                string.Empty;
 
             public DateOnly StageDate { get; set; }
         }

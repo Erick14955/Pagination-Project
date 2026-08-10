@@ -2,6 +2,7 @@
 @page "/login"
 
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.WebUtilities
 
 @attribute [AllowAnonymous]
 
@@ -12,22 +13,31 @@
 <PageTitle>Iniciar Sesión</PageTitle>
 
 <div class="thryv-login-page">
+
     <div class="thryv-login-stage">
+
+        <!-- =====================================================
+             SKELETON
+             ===================================================== -->
 
         <div class="thryv-login-card thryv-skeleton-card"
              aria-hidden="true">
 
             <div class="thryv-login-panel">
+
                 <div class="thryv-skeleton-logo-row">
+
                     <div class="thryv-skeleton skeleton-logo"></div>
 
                     <div class="thryv-skeleton-logo-info">
                         <div class="thryv-skeleton skeleton-logo-title"></div>
                         <div class="thryv-skeleton skeleton-logo-subtitle"></div>
                     </div>
+
                 </div>
 
                 <div class="thryv-skeleton skeleton-main-title"></div>
+
                 <div class="thryv-skeleton skeleton-description"></div>
 
                 <div class="thryv-skeleton-form-group">
@@ -41,58 +51,90 @@
                 </div>
 
                 <div class="thryv-skeleton skeleton-checkbox"></div>
+
                 <div class="thryv-skeleton skeleton-button"></div>
+
                 <div class="thryv-skeleton skeleton-footer"></div>
+
             </div>
+
         </div>
 
+
+        <!-- =====================================================
+             LOGIN REAL
+             ===================================================== -->
+
         <div class="thryv-login-card thryv-login-content">
+
             <div class="thryv-login-panel">
 
                 <div class="thryv-logo-row">
-                    <div class="thryv-logo-mark">T</div>
+
+                    <div class="thryv-logo-mark">
+                        T
+                    </div>
 
                     <div class="thryv-logo-text">
                         <strong>Evaluations</strong>
                         <span>Pagination evaluation system</span>
                     </div>
+
                 </div>
 
-                <h2 class="thryv-login-title">Welcome back</h2>
+
+                <h2 class="thryv-login-title">
+                    Welcome back
+                </h2>
 
                 <p class="thryv-login-subtitle">
                     Sign in to continue to your dashboard.
                 </p>
 
+
                 <form method="post"
                       action="/account/login"
                       data-enhance="false"
+                      autocomplete="on"
                       onsubmit="return window.thryvLogin
                           ? window.thryvLogin.startSubmitting(this)
                           : true;">
 
                     <AntiforgeryToken />
 
+
                     <input type="hidden"
                            name="ReturnUrl"
                            value="/dashboard" />
 
+
                     <div class="thryv-form-group">
-                        <label for="login-username">User</label>
+
+                        <label for="login-username">
+                            User
+                        </label>
 
                         <input id="login-username"
                                name="Username"
+                               type="text"
                                class="thryv-input"
                                placeholder="Enter your username"
                                maxlength="50"
                                autocomplete="username"
                                autocapitalize="none"
                                spellcheck="false"
+                               enterkeyhint="next"
+                               autofocus
                                required />
+
                     </div>
 
+
                     <div class="thryv-form-group">
-                        <label for="login-password">Password</label>
+
+                        <label for="login-password">
+                            Password
+                        </label>
 
                         <input id="login-password"
                                name="Password"
@@ -101,32 +143,52 @@
                                placeholder="••••••••"
                                maxlength="100"
                                autocomplete="current-password"
+                               enterkeyhint="go"
                                required />
+
                     </div>
 
+
                     <div class="thryv-remember-row">
+
                         <label class="thryv-remember-option">
+
                             <input type="checkbox"
                                    name="RememberMe"
                                    value="true" />
 
-                            <span>Remember me</span>
+                            <span>
+                                Remember me
+                            </span>
+
                         </label>
+
                     </div>
+
 
                     @if (!string.IsNullOrWhiteSpace(_mensajeError))
                     {
-                        <div class="thryv-error" role="alert">
+                        <div class="thryv-error"
+                             role="alert"
+                             aria-live="assertive">
+
                             @_mensajeError
+
                         </div>
                     }
 
+
                     @if (!string.IsNullOrWhiteSpace(_mensajeExito))
                     {
-                        <div class="thryv-success" role="status">
+                        <div class="thryv-success"
+                             role="status"
+                             aria-live="polite">
+
                             @_mensajeExito
+
                         </div>
                     }
+
 
                     <button type="submit"
                             class="thryv-login-button"
@@ -139,49 +201,81 @@
                         <span class="thryv-login-button-loader"
                               aria-hidden="true">
                         </span>
+
                     </button>
+
                 </form>
+
 
                 <div class="thryv-panel-footer">
                     Secure access to your evaluation workspace
                 </div>
+
             </div>
+
         </div>
 
     </div>
+
 </div>
 
-@code {
+
+@code
+{
     private string? _mensajeError;
     private string? _mensajeExito;
 
+
     protected override void OnInitialized()
     {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var uri =
+            Navigation.ToAbsoluteUri(
+                Navigation.Uri);
+
 
         var query =
-            Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            QueryHelpers.ParseQuery(
+                uri.Query);
 
-        if (query.TryGetValue("changed", out _))
+
+        if (query.ContainsKey("changed"))
         {
             _mensajeExito =
                 "Password changed successfully. Please sign in again.";
         }
 
-        if (query.TryGetValue("error", out var error))
+
+        if (!query.TryGetValue(
+                "error",
+                out var error))
         {
-            _mensajeError = error.ToString() switch
+            return;
+        }
+
+
+        _mensajeError =
+            error.ToString() switch
             {
-                "usuario" => "Incorrect user or password.",
-                "password" => "Incorrect user or password.",
+                "usuario" =>
+                    "Incorrect user or password.",
+
+                "password" =>
+                    "Incorrect user or password.",
+
                 "inactivo" =>
                     "This user is not active. Please contact the administrator.",
+
                 "bloqueado" =>
                     "This account has been locked due to multiple failed login attempts. Please contact the administrator.",
-                "general" => "Incorrect user or password.",
-                "1" => "Incorrect user or password.",
-                _ => "Incorrect user or password."
+
+                "general" =>
+                    "Incorrect user or password.",
+
+                "1" =>
+                    "Incorrect user or password.",
+
+                _ =>
+                    "Incorrect user or password."
             };
-        }
     }
 }

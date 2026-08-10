@@ -1137,12 +1137,9 @@ html[data-theme="liquid glass"] .thryv-remember-option {
         -webkit-backdrop-filter: blur(14px);
     }
 
-/* =========================================================
-   LOGIN SKELETON - CSS ONLY
-   ========================================================= */
-
 .thryv-login-stage {
     width: 100%;
+    min-width: 0;
     display: grid;
     place-items: center;
 }

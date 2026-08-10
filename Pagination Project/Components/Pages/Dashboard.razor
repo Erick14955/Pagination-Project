@@ -1,4 +1,5 @@
 ﻿@page "/dashboard"
+
 @attribute [Authorize]
 
 @using System.Security.Claims
@@ -28,123 +29,146 @@
         <section class="thryv-dashboard-header thryv-dashboard-skeleton-hero">
 
             <div class="thryv-dashboard-hero-content">
+
                 <div class="thryv-dashboard-skeleton-block
-                                    thryv-dashboard-skeleton-title">
+                                thryv-dashboard-skeleton-title">
                 </div>
 
                 <div class="thryv-dashboard-skeleton-block
-                                    thryv-dashboard-skeleton-subtitle">
+                                thryv-dashboard-skeleton-subtitle">
                 </div>
 
                 <div class="thryv-dashboard-skeleton-block
-                                    thryv-dashboard-skeleton-subtitle short">
+                                thryv-dashboard-skeleton-subtitle short">
                 </div>
+
             </div>
 
             <div class="thryv-dashboard-hero-stats">
 
-                @for (var statIndex = 0; statIndex < 6; statIndex++)
+                @for (var statIndex = 0;
+                            statIndex < 6;
+                            statIndex++)
                 {
                     <div class="thryv-hero-stat-card
-                                                thryv-dashboard-skeleton-stat-card">
+                                        thryv-dashboard-skeleton-stat-card">
 
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-stat-label">
+                                            thryv-dashboard-skeleton-stat-label">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-stat-value">
+                                            thryv-dashboard-skeleton-stat-value">
                         </div>
+
                     </div>
                 }
 
             </div>
+
         </section>
 
-        @for (var sectionIndex = 0; sectionIndex < 3; sectionIndex++)
+        @for (var sectionIndex = 0;
+            sectionIndex < 3;
+            sectionIndex++)
         {
             <div class="thryv-section-card
-                                        thryv-dashboard-skeleton-section">
+                                thryv-dashboard-skeleton-section">
 
                 <div class="thryv-section-header">
 
                     <div class="thryv-dashboard-skeleton-section-copy">
+
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-section-title">
+                                            thryv-dashboard-skeleton-section-title">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-section-description">
+                                            thryv-dashboard-skeleton-section-description">
                         </div>
+
                     </div>
 
                     <div class="thryv-dashboard-skeleton-actions">
+
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-filter">
+                                            thryv-dashboard-skeleton-filter">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-filter">
+                                            thryv-dashboard-skeleton-filter">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-badge">
+                                            thryv-dashboard-skeleton-badge">
                         </div>
+
                     </div>
+
                 </div>
 
                 <div class="thryv-dashboard-skeleton-table">
 
                     <div class="thryv-dashboard-skeleton-table-head">
-                        @for (var columnIndex = 0; columnIndex < 7; columnIndex++)
+
+                        @for (var columnIndex = 0;
+                                        columnIndex < 7;
+                                        columnIndex++)
                         {
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-column-title">
+                                                    thryv-dashboard-skeleton-column-title">
                             </div>
                         }
+
                     </div>
 
-                    @for (var rowIndex = 0; rowIndex < 4; rowIndex++)
+                    @for (var rowIndex = 0;
+                                rowIndex < 4;
+                                rowIndex++)
                     {
                         <div class="thryv-dashboard-skeleton-table-row">
 
                             <div class="thryv-dashboard-skeleton-employee">
+
                                 <div class="thryv-dashboard-skeleton-block
-                                                                    thryv-dashboard-skeleton-avatar">
+                                                        thryv-dashboard-skeleton-avatar">
                                 </div>
 
                                 <div class="thryv-dashboard-skeleton-block
-                                                                    thryv-dashboard-skeleton-name">
+                                                        thryv-dashboard-skeleton-name">
                                 </div>
+
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-cell medium">
+                                                    thryv-dashboard-skeleton-cell medium">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-cell small">
+                                                    thryv-dashboard-skeleton-cell small">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-cell large">
+                                                    thryv-dashboard-skeleton-cell large">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-cell small">
+                                                    thryv-dashboard-skeleton-cell small">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-cell medium">
+                                                    thryv-dashboard-skeleton-cell medium">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                                thryv-dashboard-skeleton-cell action">
+                                                    thryv-dashboard-skeleton-cell action">
                             </div>
+
                         </div>
                     }
 
                 </div>
+
             </div>
         }
 
@@ -155,155 +179,231 @@ else
     <div class="thryv-dashboard-page">
 
         <section class="thryv-dashboard-header">
+
             <div class="thryv-dashboard-hero-content">
-                <h2 class="thryv-dashboard-title">General Dashboard</h2>
+
+                <h2 class="thryv-dashboard-title">
+                    General Dashboard
+                </h2>
+
                 <p class="thryv-dashboard-subtitle">
                     Quick system summary and current list of assigned books.
                 </p>
+
             </div>
 
             <div class="thryv-dashboard-hero-stats">
-                @if (loading)
+
+                @if (PuedeVerUsuarios)
                 {
                     <div class="thryv-hero-stat-card">
-                        <span>LOADING</span>
-                        <strong>...</strong>
+                        <span>TOTAL USERS</span>
+                        <strong>@stats.TotalUsers</strong>
                     </div>
                 }
-                else
+
+                @if (PuedeVerEmpleados)
                 {
-                    @if (PuedeVerUsuarios)
-                    {
-                        <div class="thryv-hero-stat-card">
-                            <span>TOTAL USERS</span>
-                            <strong>@stats.TotalUsers</strong>
-                        </div>
-                    }
-
-                    @if (PuedeVerEmpleados)
-                    {
-                        <div class="thryv-hero-stat-card">
-                            <span>EMPLOYEES</span>
-                            <strong>@stats.TotalEmployees</strong>
-                        </div>
-                    }
-
-                    @if (PuedeVerLibros)
-                    {
-                        <div class="thryv-hero-stat-card">
-                            <span>ACTIVE BOOKS</span>
-                            <strong>@stats.TotalBooks</strong>
-                        </div>
-                    }
-
-                    @if (PuedeVerEvaluaciones)
-                    {
-                        <div class="thryv-hero-stat-card">
-                            <span>EVALUATIONS</span>
-                            <strong>@stats.TotalEvaluations</strong>
-                        </div>
-
-                        <div class="thryv-hero-stat-card">
-                            <span>LAST WEEK EVALUATIONS</span>
-                            <strong>@weeklyEvaluations.Count</strong>
-                        </div>
-                    }
-
-                    @if (PuedeVerAsignaciones)
-                    {
-                        <div class="thryv-hero-stat-card thryv-stat-pending">
-                            <span>PENDING TODAY</span>
-                            <strong>@assignedBooks.Count</strong>
-                        </div>
-
-                        <div class="thryv-hero-stat-card thryv-stat-completed">
-                            <span>COMPLETED TODAY</span>
-                            <strong>@completedAssignments.Count</strong>
-                        </div>
-                    }
+                    <div class="thryv-hero-stat-card">
+                        <span>EMPLOYEES</span>
+                        <strong>@stats.TotalEmployees</strong>
+                    </div>
                 }
+
+                @if (PuedeVerLibros)
+                {
+                    <div class="thryv-hero-stat-card">
+                        <span>ACTIVE BOOKS</span>
+                        <strong>@stats.TotalBooks</strong>
+                    </div>
+                }
+
+                @if (PuedeVerEvaluaciones)
+                {
+                    <div class="thryv-hero-stat-card">
+                        <span>EVALUATIONS</span>
+                        <strong>@stats.TotalEvaluations</strong>
+                    </div>
+
+                    <div class="thryv-hero-stat-card">
+                        <span>LAST WEEK EVALUATIONS</span>
+                        <strong>@weeklyEvaluations.Count</strong>
+                    </div>
+                }
+
+                @if (PuedeVerAsignaciones)
+                {
+                    <div class="thryv-hero-stat-card thryv-stat-pending">
+
+                        <span>
+                            PENDING TODAY
+                        </span>
+
+                        <strong>
+                            @assignedBooks.Count
+                        </strong>
+
+                    </div>
+
+                    <div class="thryv-hero-stat-card thryv-stat-completed">
+
+                        <span>
+                            COMPLETED TODAY
+                        </span>
+
+                        <strong>
+                            @completedAssignments.Count
+                        </strong>
+
+                    </div>
+                }
+
             </div>
+
         </section>
 
         @if (PuedeVerAsignaciones)
         {
             <div class="thryv-section-card">
+
                 <div class="thryv-section-header">
+
                     <div>
-                        <h3>Assigned Books</h3>
-                        <p>Live view of pending assignments based on the current stage of the day.</p>
+
+                        <h3>
+                            Assigned Books
+                        </h3>
+
+                        <p>
+                            Live view of pending assignments based on the current stage of the day.
+                        </p>
+
                     </div>
 
                     <div class="thryv-section-actions">
+
                         <div class="thryv-filter-group">
-                            <label>Filter by employee</label>
+
+                            <label>
+                                Filter by employee
+                            </label>
 
                             <select class="thryv-filter-select"
                                     value="@SelectedAssignedEmployeeFilter"
                                     @onchange="OnAssignedEmployeeChanged">
 
-                                <option value="">All Employees</option>
+                                <option value="">
+                                    All Employees
+                                </option>
 
-                                @foreach (var employee in AssignedEmployeeFilterOptions)
+                                @foreach (var employee
+                                                        in AssignedEmployeeFilterOptions)
                                 {
-                                    <option value="@employee">@employee</option>
+                                    <option value="@employee">
+                                        @employee
+                                    </option>
                                 }
+
                             </select>
+
                         </div>
 
                         <div class="thryv-filter-group">
-                            <label>Filter by stage</label>
+
+                            <label>
+                                Filter by stage
+                            </label>
 
                             <select class="thryv-filter-select"
                                     value="@SelectedAssignedStageFilter"
                                     @onchange="OnAssignedStageChanged">
 
-                                <option value="">All Stages</option>
+                                <option value="">
+                                    All Stages
+                                </option>
 
-                                @foreach (var stage in AssignedStageFilterOptions)
+                                @foreach (var stage
+                                                        in AssignedStageFilterOptions)
                                 {
-                                    <option value="@stage.Key">@stage.Label</option>
+                                    <option value="@stage.Key">
+                                        @stage.Label
+                                    </option>
                                 }
+
                             </select>
+
                         </div>
 
-                        @if (!string.IsNullOrWhiteSpace(SelectedAssignedEmployeeFilter) ||
-                                        !string.IsNullOrWhiteSpace(SelectedAssignedStageFilter))
+                        @if (
+                                        !string.IsNullOrWhiteSpace(
+                                        SelectedAssignedEmployeeFilter)
+                                        ||
+                                        !string.IsNullOrWhiteSpace(
+                                        SelectedAssignedStageFilter))
                         {
                             <button type="button"
                                     class="thryv-clear-filter-btn"
                                     @onclick="ClearAssignedFilters">
+
                                 Clear
+
                             </button>
                         }
 
                         <div class="thryv-section-badge">
                             @AssignedBooksFiltered.Count records
                         </div>
+
                     </div>
+
                 </div>
 
                 <div class="thryv-table-wrapper">
+
                     <table class="thryv-custom-table">
+
                         <thead>
+
                             <tr>
-                                <th>Employee</th>
+
+                                <th>
+                                    Employee
+                                </th>
+
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <th>Department</th>
+                                    <th>
+                                        Department
+                                    </th>
                                 }
-                            <th>KGEN Code</th>
-                            <th>LSA Code</th>
-                            <th>Book</th>
-                            <th>Database</th>
+
                             <th>
+                                KGEN Code
+                            </th>
+
+                            <th>
+                                LSA Code
+                            </th>
+
+                            <th>
+                                Book
+                            </th>
+
+                            <th>
+                                Database
+                            </th>
+
+                            <th>
+
                                 <button type="button"
                                         class="thryv-sort-header-btn"
                                         title="Sort assigned books by stage"
                                         aria-label="Sort assigned books by stage"
                                         @onclick="SortAssignedBooksByStage">
 
-                                    <span>Stage</span>
+                                    <span>
+                                        Stage
+                                    </span>
 
                                     <span class="thryv-sort-indicator">
                                         @(AssignedStageSortEnabled
@@ -312,95 +412,152 @@ else
                                                                             : "▲"
                                                                             : "↕")
                                 </span>
-                            </button>
-                        </th>
-                        <th>Stage Date</th>
+
+                                    </button>
+
+                                </th>
+
+                                <th>
+                                    Stage Date
+                                </th>
 
                         @if (ShowReadyToShipColumn)
                                 {
-                                    <th>Ready to Ship</th>
+                                    <th>
+                                        Ready to Ship
+                                    </th>
                                 }
 
                                 @if (ShowChecklistColumn)
                                 {
-                                    <th>Checklist</th>
+                                    <th>
+                                        Checklist
+                                    </th>
                                 }
+
                             </tr>
+
                         </thead>
 
                         <tbody>
-                            @if (loading)
+
+                            @if (AssignedBooksFiltered.Count == 0)
                             {
                                 <tr>
-                                    <td colspan="@AssignedBooksColumnCount" class="thryv-empty-row">
-                                        Loading statistics...
-                                    </td>
-                                </tr>
-                            }
-                            else if (AssignedBooksFiltered.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="@AssignedBooksColumnCount" class="thryv-empty-row">
+
+                                    <td colspan="@AssignedBooksColumnCount"
+                                        class="thryv-empty-row">
+
                                         No pending assignments for today.
+
                                     </td>
+
                                 </tr>
                             }
                             else
                             {
-                                @foreach (var item in AssignedBooksFiltered)
+                                @foreach (var item
+                                                    in AssignedBooksFiltered)
                                 {
-                                    <tr>
+                                    <tr @key="item.AssignmentId">
+
                                         <td>
+
                                             <div class="thryv-employee-cell">
-                                                <div class="thryv-employee-avatar">@GetInitials(item.EmployeeName)</div>
-                                                <div>
-                                                    <div class="thryv-employee-name">@item.EmployeeName</div>
+
+                                                <div class="thryv-employee-avatar">
+                                                    @GetInitials(item.EmployeeName)
                                                 </div>
+
+                                                <div>
+
+                                                    <div class="thryv-employee-name">
+                                                        @item.EmployeeName
+                                                    </div>
+
+                                                </div>
+
                                             </div>
+
                                         </td>
 
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="thryv-code-pill secondary">@item.EmployeeTypeCode</span></td>
+                                            <td>
+
+                                                <span class="thryv-code-pill secondary">
+                                                    @item.EmployeeTypeCode
+                                                </span>
+
+                                            </td>
                                         }
 
                                         <td>
-                                            <span class="thryv-code-pill">@item.KgenCode</span>
+
+                                            <span class="thryv-code-pill">
+                                                @item.KgenCode
+                                            </span>
+
                                         </td>
 
                                         <td>
-                                            <span class="thryv-code-pill secondary">@item.LsaCode</span>
+
+                                            <span class="thryv-code-pill secondary">
+                                                @item.LsaCode
+                                            </span>
+
                                         </td>
 
-                                        <td>@item.BookName</td>
+                                        <td>
+                                            @item.BookName
+                                        </td>
 
                                         <td class="thryv-database-cell">
+
                                             @{
-                                                var databaseCode = GetDatabaseCode(item.Database);
-                                                var databaseFullName = GetDatabaseFullName(item.Database);
+                                                var databaseCode =
+                                                GetDatabaseCode(
+                                                item.Database);
+
+                                                var databaseFullName =
+                                                GetDatabaseFullName(
+                                                item.Database);
                                             }
 
                                             <span class="thryv-database-pill"
                                                   title="@databaseFullName"
                                                   data-db-fullname="@databaseFullName"
                                                   aria-label="@databaseFullName">
-                                                <span class="thryv-database-dot"></span>
-                                                <span class="thryv-database-code">@databaseCode</span>
+
+                                                <span class="thryv-database-dot">
+                                                </span>
+
+                                                <span class="thryv-database-code">
+                                                    @databaseCode
+                                                </span>
+
                                             </span>
+
                                         </td>
 
                                         <td>
+
                                             <span class="@GetStagePillClass(item.StageKey)">
                                                 @item.Stage
                                             </span>
+
                                         </td>
 
-                                        <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                        <td>
+                                            @(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")
+                                        </td>
 
                                         @if (ShowReadyToShipColumn)
                                         {
                                             <td class="thryv-ready-to-ship-cell">
-                                                @if (string.Equals(
+
+                                                @if (
+                                                                            string.Equals(
                                                                             item.StageKey,
                                                                             "Shipping",
                                                                             StringComparison.OrdinalIgnoreCase))
@@ -408,29 +565,44 @@ else
                                                     @if (item.BookReadyToShip)
                                                     {
                                                         <span class="thryv-ready-to-ship-badge ready">
-                                                            <span aria-hidden="true">✓</span>
+
+                                                            <span aria-hidden="true">
+                                                                ✓
+                                                            </span>
+
                                                             Ready
+
                                                         </span>
                                                     }
                                                     else
                                                     {
                                                         <span class="thryv-ready-to-ship-badge pending">
-                                                            <span aria-hidden="true">!</span>
+
+                                                            <span aria-hidden="true">
+                                                                !
+                                                            </span>
+
                                                             Verification pending
+
                                                         </span>
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    <span class="thryv-muted-cell">-</span>
+                                                    <span class="thryv-muted-cell">
+                                                        -
+                                                    </span>
                                                 }
+
                                             </td>
                                         }
 
                                         @if (ShowChecklistColumn)
                                         {
                                             <td>
-                                                @if (string.Equals(
+
+                                                @if (
+                                                                            string.Equals(
                                                                             item.StageKey,
                                                                             "ProofExtract",
                                                                             StringComparison.OrdinalIgnoreCase))
@@ -439,910 +611,1028 @@ else
                                                             class="thryv-download-checklist-btn"
                                                             disabled="@(DownloadingChecklistAssignmentId == item.AssignmentId)"
                                                             @onclick="() => DownloadChecklistDirectAsync(item)">
-                                                        @(DownloadingChecklistAssignmentId == item.AssignmentId ? "..." : "⬇ Download")
-                                                    </button>
-                                                }
+
+                                                        @(DownloadingChecklistAssignmentId == item.AssignmentId
+                                                                                        ? "..."
+                                                                                        : "⬇ Download")
+
+                            </button>
+                                                        }
                                                 else
                                                 {
-                                                    <span class="thryv-muted-cell">-</span>
+                                                    <span class="thryv-muted-cell">
+                                                        -
+                                                    </span>
                                                 }
+
                                             </td>
                                         }
+
                                     </tr>
                                 }
                             }
+
                         </tbody>
+
                     </table>
+
                 </div>
+
             </div>
 
             <div class="thryv-section-card completed-section-card">
+
                 <div class="thryv-section-header">
+
                     <div>
-                        <h3>Completed Assignments</h3>
-                        <p>Assignments completed today by employees, grouped by completion status.</p>
+
+                        <h3>
+                            Completed Assignments
+                        </h3>
+
+                        <p>
+                            Assignments completed today by employees, grouped by completion status.
+                        </p>
+
                     </div>
 
                     <div class="thryv-section-actions">
+
                         <div class="thryv-filter-group">
-                            <label>Filter by employee</label>
+
+                            <label>
+                                Filter by employee
+                            </label>
 
                             <select class="thryv-filter-select"
                                     value="@SelectedCompletedEmployeeFilter"
                                     @onchange="OnCompletedEmployeeChanged">
 
-                                <option value="">All Employees</option>
+                                <option value="">
+                                    All Employees
+                                </option>
 
-                                @foreach (var employee in CompletedEmployeeFilterOptions)
+                                @foreach (var employee
+                                                        in CompletedEmployeeFilterOptions)
                                 {
-                                    <option value="@employee">@employee</option>
+                                    <option value="@employee">
+                                        @employee
+                                    </option>
                                 }
+
                             </select>
+
                         </div>
 
                         <div class="thryv-filter-group">
-                            <label>Filter by completed stage</label>
+
+                            <label>
+                                Filter by completed stage
+                            </label>
 
                             <select class="thryv-filter-select"
                                     value="@SelectedCompletedStageFilter"
                                     @onchange="OnCompletedStageChanged">
 
-                                <option value="">All Completed Stages</option>
+                                <option value="">
+                                    All Completed Stages
+                                </option>
 
-                                @foreach (var stage in CompletedStageFilterOptionsForEmployee)
+                                @foreach (var stage
+                                                        in CompletedStageFilterOptionsForEmployee)
                                 {
-                                    <option value="@stage.Key">@stage.Label</option>
+                                    <option value="@stage.Key">
+                                        @stage.Label
+                                    </option>
                                 }
+
                             </select>
+
                         </div>
 
-                        @if (!string.IsNullOrWhiteSpace(SelectedCompletedEmployeeFilter) ||
-                                        !string.IsNullOrWhiteSpace(SelectedCompletedStageFilter))
+                        @if (
+                                        !string.IsNullOrWhiteSpace(
+                                        SelectedCompletedEmployeeFilter)
+                                        ||
+                                        !string.IsNullOrWhiteSpace(
+                                        SelectedCompletedStageFilter))
                         {
                             <button type="button"
                                     class="thryv-clear-filter-btn"
                                     @onclick="ClearCompletedFilters">
+
                                 Clear
+
                             </button>
                         }
 
                         <div class="thryv-section-badge">
                             @CompletedAssignmentsFiltered.Count records
                         </div>
+
                     </div>
+
                 </div>
 
                 <div class="thryv-table-wrapper">
+
                     <table class="thryv-custom-table">
+
                         <thead>
+
                             <tr>
-                                <th>Employee</th>
+
+                                <th>
+                                    Employee
+                                </th>
+
                                 @if (Scope.ViewAllEmployeeTypes)
                                 {
-                                    <th>Department</th>
+                                    <th>
+                                        Department
+                                    </th>
                                 }
-                                <th>KGEN Code</th>
-                                <th>LSA Code</th>
-                                <th>Book</th>
-                                <th>Completion Status</th>
-                                <th>Stage Date</th>
+
+                                <th>
+                                    KGEN Code
+                                </th>
+
+                                <th>
+                                    LSA Code
+                                </th>
+
+                                <th>
+                                    Book
+                                </th>
+
+                                <th>
+                                    Completion Status
+                                </th>
+
+                                <th>
+                                    Stage Date
+                                </th>
+
                             </tr>
+
                         </thead>
 
                         <tbody>
-                            @if (loading)
+
+                            @if (CompletedAssignmentsFiltered.Count == 0)
                             {
                                 <tr>
-                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
-                                        Loading completed assignments...
-                                    </td>
-                                </tr>
-                            }
-                            else if (CompletedAssignmentsFiltered.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
+
+                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)"
+                                        class="thryv-empty-row">
+
                                         No completed assignments for today.
+
                                     </td>
+
                                 </tr>
                             }
                             else
                             {
-                                @foreach (var item in CompletedAssignmentsFiltered)
+                                @foreach (var item
+                                                    in CompletedAssignmentsFiltered)
                                 {
-                                    <tr>
+                                    <tr @key="item.AssignmentId">
+
                                         <td>
+
                                             <div class="thryv-employee-cell">
-                                                <div class="thryv-employee-avatar completed-avatar">✅</div>
-                                                <div>
-                                                    <div class="thryv-employee-name">@item.EmployeeName</div>
+
+                                                <div class="thryv-employee-avatar completed-avatar">
+                                                    ✅
                                                 </div>
+
+                                                <div>
+
+                                                    <div class="thryv-employee-name">
+                                                        @item.EmployeeName
+                                                    </div>
+
+                                                </div>
+
                                             </div>
+
                                         </td>
 
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td><span class="thryv-code-pill secondary">@item.EmployeeTypeCode</span></td>
+                                            <td>
+
+                                                <span class="thryv-code-pill secondary">
+                                                    @item.EmployeeTypeCode
+                                                </span>
+
+                                            </td>
                                         }
 
                                         <td>
-                                            <span class="thryv-code-pill">@item.KgenCode</span>
+
+                                            <span class="thryv-code-pill">
+                                                @item.KgenCode
+                                            </span>
+
                                         </td>
 
                                         <td>
-                                            <span class="thryv-code-pill secondary">@item.LsaCode</span>
+
+                                            <span class="thryv-code-pill secondary">
+                                                @item.LsaCode
+                                            </span>
+
                                         </td>
 
-                                        <td>@item.BookName</td>
+                                        <td>
+                                            @item.BookName
+                                        </td>
 
                                         <td>
+
                                             <span class="@GetStagePillClass(item.StageKey, true)">
                                                 @item.CompletionStatus
                                             </span>
+
                                         </td>
 
-                                        <td>@(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                        <td>
+                                            @(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")
+                                        </td>
+
                                     </tr>
                                 }
                             }
+
                         </tbody>
+
                     </table>
+
                 </div>
+
             </div>
         }
 
         <div class="thryv-section-card weekly-evaluations-section-card">
+
             <div class="thryv-section-header">
+
                 <div>
-                    <h3>Weekly Evaluations</h3>
-                    <p>Evaluations from last week based on the book shipping date.</p>
+
+                    <h3>
+                        Weekly Evaluations
+                    </h3>
+
+                    <p>
+                        Evaluations from last week based on the book shipping date.
+                    </p>
+
                 </div>
 
                 <div class="thryv-section-actions">
+
                     <div class="thryv-filter-group">
-                        <label>Filter by employee</label>
 
-                        <select class="thryv-filter-select" @bind="SelectedWeeklyEmployeeFilter">
-                            <option value="">All Employees</option>
+                        <label>
+                            Filter by employee
+                        </label>
 
-                            @foreach (var employee in WeeklyEmployeeFilterOptions)
+                        <select class="thryv-filter-select"
+                                value="@SelectedWeeklyEmployeeFilter"
+                                @onchange="OnWeeklyEmployeeChanged">
+
+                            <option value="">
+                                All Employees
+                            </option>
+
+                            @foreach (var employee
+                                                    in WeeklyEmployeeFilterOptions)
                             {
-                                <option value="@employee">@employee</option>
+                                <option value="@employee">
+                                    @employee
+                                </option>
                             }
+
                         </select>
+
                     </div>
 
                     <div class="thryv-search-box">
-                        <span>🔎</span>
+
+                        <span>
+                            🔎
+                        </span>
+
                         <input placeholder="Search by KGEN or book..."
-                               @bind="WeeklySearch"
-                               @bind:event="oninput" />
+                               value="@WeeklySearch"
+                               @oninput="OnWeeklySearchChanged" />
+
                     </div>
 
-                    @if (!string.IsNullOrWhiteSpace(SelectedWeeklyEmployeeFilter) ||
-                                    !string.IsNullOrWhiteSpace(WeeklySearch))
+                    @if (
+                                    !string.IsNullOrWhiteSpace(
+                                    SelectedWeeklyEmployeeFilter)
+                                    ||
+                                    !string.IsNullOrWhiteSpace(
+                                    WeeklySearch))
                     {
                         <button type="button"
                                 class="thryv-clear-filter-btn"
                                 @onclick="ClearWeeklyFilters">
+
                             Clear
+
                         </button>
                     }
 
                     <div class="thryv-section-badge">
                         @WeeklyEvaluationsFiltered.Count records
                     </div>
+
                 </div>
+
             </div>
 
             <div class="thryv-table-wrapper">
+
                 <table class="thryv-custom-table">
+
                     <thead>
+
                         <tr>
-                            <th>Employee</th>
+
+                            <th>
+                                Employee
+                            </th>
+
                             @if (Scope.ViewAllEmployeeTypes)
                             {
-                                <th>Department</th>
+                                <th>
+                                    Department
+                                </th>
                             }
-                            <th>KGEN Code</th>
-                            <th>Book</th>
-                            <th>Shipping Date</th>
-                            <th>Total Accuracy</th>
-                            <th>Details</th>
+
+                            <th>
+                                KGEN Code
+                            </th>
+
+                            <th>
+                                Book
+                            </th>
+
+                            <th>
+                                Shipping Date
+                            </th>
+
+                            <th>
+                                Total Accuracy
+                            </th>
+
+                            <th>
+                                Details
+                            </th>
+
                         </tr>
+
                     </thead>
 
                     <tbody>
-                        @if (loading)
+
+                        @if (WeeklyEvaluationsFiltered.Count == 0)
                         {
                             <tr>
-                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
-                                    Loading weekly evaluations...
-                                </td>
-                            </tr>
-                        }
-                        else if (WeeklyEvaluationsFiltered.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)" class="thryv-empty-row">
+
+                                <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)"
+                                    class="thryv-empty-row">
+
                                     No weekly evaluations to display.
+
                                 </td>
+
                             </tr>
                         }
                         else
                         {
-                            @foreach (var item in WeeklyEvaluationsFiltered)
+                            @foreach (var item
+                                                in WeeklyEvaluationsFiltered)
                             {
-                                <tr>
+                                <tr @key="item.EvaluationId">
+
                                     <td>
+
                                         <div class="thryv-employee-cell">
-                                            <div class="thryv-employee-avatar weekly-avatar">📊</div>
-                                            <div>
-                                                <div class="thryv-employee-name">@item.EmployeeName</div>
+
+                                            <div class="thryv-employee-avatar weekly-avatar">
+                                                📊
                                             </div>
+
+                                            <div>
+
+                                                <div class="thryv-employee-name">
+                                                    @item.EmployeeName
+                                                </div>
+
+                                            </div>
+
                                         </div>
+
                                     </td>
 
                                     @if (Scope.ViewAllEmployeeTypes)
                                     {
-                                        <td><span class="thryv-code-pill secondary">@item.EmployeeTypeCode</span></td>
+                                        <td>
+
+                                            <span class="thryv-code-pill secondary">
+                                                @item.EmployeeTypeCode
+                                            </span>
+
+                                        </td>
                                     }
 
                                     <td>
-                                        <span class="thryv-code-pill">@item.KgenCode</span>
-                                    </td>
 
-                                    <td>@item.BookName</td>
-
-                                    <td>@item.ShippingDate.ToString("dd/MM/yyyy")</td>
-
-                                    <td>
-                                        <span class="thryv-percent-pill @GetAccuracyClass(item.PercentageAverage)">
-                                            @item.PercentageAverage.ToString("0.00")%
+                                        <span class="thryv-code-pill">
+                                            @item.KgenCode
                                         </span>
+
                                     </td>
 
                                     <td>
+                                        @item.BookName
+                                    </td>
+
+                                    <td>
+                                        @item.ShippingDate.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+
+                                        <span class="thryv-percent-pill @GetAccuracyClass(item.PercentageAverage)">
+
+                                            @item.PercentageAverage.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
                                         <button type="button"
                                                 class="thryv-paper-btn"
                                                 title="View evaluation details"
                                                 @onclick="() => OpenWeeklyEvaluationModal(item)">
+
                                             📄
+
                                         </button>
+
                                     </td>
+
                                 </tr>
                             }
                         }
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
+
     </div>
 }
 
-@if (showWeeklyEvaluationModal && selectedWeeklyEvaluation is not null)
+@if (
+    showWeeklyEvaluationModal &&
+    selectedWeeklyEvaluation is not null)
 {
     <div id="weeklyEvaluationModalBackdrop"
          class="weekly-evaluation-modal-backdrop"
          @onclick="CloseWeeklyEvaluationModal">
-        <div class="weekly-evaluation-modal" @onclick:stopPropagation="true">
+
+        <div class="weekly-evaluation-modal"
+             @onclick:stopPropagation="true">
 
             <div class="weekly-evaluation-modal-header">
+
                 <div>
-                    <span class="weekly-modal-eyebrow">Evaluation Details</span>
-                    <h3>@selectedWeeklyEvaluation.BookName</h3>
+
+                    <span class="weekly-modal-eyebrow">
+                        Evaluation Details
+                    </span>
+
+                    <h3>
+                        @selectedWeeklyEvaluation.BookName
+                    </h3>
+
                     <p>
                         @selectedWeeklyEvaluation.EmployeeName · KGEN:
-                        <strong>@selectedWeeklyEvaluation.KgenCode</strong>
+                        <strong>
+                            @selectedWeeklyEvaluation.KgenCode
+                        </strong>
                     </p>
+
                 </div>
 
                 <button type="button"
                         class="weekly-modal-close"
                         @onclick="CloseWeeklyEvaluationModal">
+
                     ✕
+
                 </button>
+
             </div>
 
             <div class="weekly-evaluation-modal-scroll">
 
                 <div class="weekly-evaluation-summary-grid">
+
                     <div class="weekly-summary-card">
-                        <span>Employee</span>
-                        <strong>@selectedWeeklyEvaluation.EmployeeName</strong>
+
+                        <span>
+                            Employee
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.EmployeeName
+                        </strong>
+
                     </div>
 
                     <div class="weekly-summary-card">
-                        <span>KGEN Code</span>
-                        <strong>@selectedWeeklyEvaluation.KgenCode</strong>
+
+                        <span>
+                            KGEN Code
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.KgenCode
+                        </strong>
+
                     </div>
 
                     <div class="weekly-summary-card">
-                        <span>Shipping Date</span>
-                        <strong>@selectedWeeklyEvaluation.ShippingDate.ToString("dd/MM/yyyy")</strong>
+
+                        <span>
+                            Shipping Date
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.ShippingDate.ToString("dd/MM/yyyy")
+                        </strong>
+
                     </div>
 
                     <div class="weekly-summary-card total">
-                        <span>Total Accuracy</span>
-                        <strong>@selectedWeeklyEvaluation.PercentageAverage.ToString("0.00")%</strong>
+
+                        <span>
+                            Total Accuracy
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.PercentageAverage.ToString("0.00")%
+                        </strong>
+
                     </div>
+
                 </div>
 
                 <div class="weekly-evaluation-percent-grid">
+
                     <div class="weekly-percent-mini-card">
-                        <span>Motif YP</span>
-                        <strong>@selectedWeeklyEvaluation.MotifYp.ToString("0.00")%</strong>
+
+                        <span>
+                            Motif YP
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.MotifYp.ToString("0.00")%
+                        </strong>
+
                     </div>
 
                     <div class="weekly-percent-mini-card">
-                        <span>Motif WP</span>
-                        <strong>@selectedWeeklyEvaluation.MotifWp.ToString("0.00")%</strong>
+
+                        <span>
+                            Motif WP
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.MotifWp.ToString("0.00")%
+                        </strong>
+
                     </div>
 
                     <div class="weekly-percent-mini-card">
-                        <span>Inventory</span>
-                        <strong>@selectedWeeklyEvaluation.InventoryReport.ToString("0.00")%</strong>
+
+                        <span>
+                            Inventory
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.InventoryReport.ToString("0.00")%
+                        </strong>
+
                     </div>
 
                     <div class="weekly-percent-mini-card">
-                        <span>Shipping Folder</span>
-                        <strong>@selectedWeeklyEvaluation.ProductShippingFolder.ToString("0.00")%</strong>
+
+                        <span>
+                            Shipping Folder
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.ProductShippingFolder.ToString("0.00")%
+                        </strong>
+
                     </div>
 
                     <div class="weekly-percent-mini-card">
-                        <span>Task Memo</span>
-                        <strong>@selectedWeeklyEvaluation.TaskMemo.ToString("0.00")%</strong>
+
+                        <span>
+                            Task Memo
+                        </span>
+
+                        <strong>
+                            @selectedWeeklyEvaluation.TaskMemo.ToString("0.00")%
+                        </strong>
+
                     </div>
+
                 </div>
 
                 <div class="weekly-evaluation-detail-grid">
 
                     <div class="weekly-detail-card">
+
                         <div class="weekly-detail-card-header">
-                            <h4>📌 Motif YP</h4>
-                            <span>@CountErrors(GetMotifYpOptions(selectedWeeklyEvaluation)) errors</span>
+
+                            <h4>
+                                📌 Motif YP
+                            </h4>
+
+                            <span>
+                                @CountErrors(GetMotifYpOptions(selectedWeeklyEvaluation)) errors
+                            </span>
+
                         </div>
 
-                        @foreach (var option in GetMotifYpOptions(selectedWeeklyEvaluation))
+                        @foreach (var option
+                                            in GetMotifYpOptions(
+                                            selectedWeeklyEvaluation))
                         {
                             <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                                <input type="radio" checked="@option.HasError" disabled />
-                                <span>@option.Label</span>
-                                <small>@(option.HasError ? "Failed" : "OK")</small>
+
+                                <input type="radio"
+                                       checked="@option.HasError"
+                                       disabled />
+
+                                <span>
+                                    @option.Label
+                                </span>
+
+                                <small>
+                                    @(option.HasError ? "Failed" : "OK")
+                                </small>
+
                             </label>
                         }
+
                     </div>
 
                     <div class="weekly-detail-card">
+
                         <div class="weekly-detail-card-header">
-                            <h4>⚙️ Motif WP</h4>
-                            <span>@CountErrors(GetMotifWpOptions(selectedWeeklyEvaluation)) errors</span>
+
+                            <h4>
+                                ⚙️ Motif WP
+                            </h4>
+
+                            <span>
+                                @CountErrors(GetMotifWpOptions(selectedWeeklyEvaluation)) errors
+                            </span>
+
                         </div>
 
-                        @foreach (var option in GetMotifWpOptions(selectedWeeklyEvaluation))
+                        @foreach (var option
+                                            in GetMotifWpOptions(
+                                            selectedWeeklyEvaluation))
                         {
                             <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                                <input type="radio" checked="@option.HasError" disabled />
-                                <span>@option.Label</span>
-                                <small>@(option.HasError ? "Failed" : "OK")</small>
+
+                                <input type="radio"
+                                       checked="@option.HasError"
+                                       disabled />
+
+                                <span>
+                                    @option.Label
+                                </span>
+
+                                <small>
+                                    @(option.HasError ? "Failed" : "OK")
+                                </small>
+
                             </label>
                         }
+
                     </div>
 
                     <div class="weekly-detail-card">
+
                         <div class="weekly-detail-card-header">
-                            <h4>📦 Inventory Report</h4>
-                            <span>@CountErrors(GetInventoryOptions(selectedWeeklyEvaluation)) errors</span>
+
+                            <h4>
+                                📦 Inventory Report
+                            </h4>
+
+                            <span>
+                                @CountErrors(GetInventoryOptions(selectedWeeklyEvaluation)) errors
+                            </span>
+
                         </div>
 
-                        @foreach (var option in GetInventoryOptions(selectedWeeklyEvaluation))
+                        @foreach (var option
+                                            in GetInventoryOptions(
+                                            selectedWeeklyEvaluation))
                         {
                             <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                                <input type="radio" checked="@option.HasError" disabled />
-                                <span>@option.Label</span>
-                                <small>@(option.HasError ? "Failed" : "OK")</small>
+
+                                <input type="radio"
+                                       checked="@option.HasError"
+                                       disabled />
+
+                                <span>
+                                    @option.Label
+                                </span>
+
+                                <small>
+                                    @(option.HasError ? "Failed" : "OK")
+                                </small>
+
                             </label>
                         }
+
                     </div>
 
                     <div class="weekly-detail-card">
+
                         <div class="weekly-detail-card-header">
-                            <h4>📎 Product Shipping Folder</h4>
-                            <span>@CountErrors(GetShippingOptions(selectedWeeklyEvaluation)) errors</span>
+
+                            <h4>
+                                📎 Product Shipping Folder
+                            </h4>
+
+                            <span>
+                                @CountErrors(GetShippingOptions(selectedWeeklyEvaluation)) errors
+                            </span>
+
                         </div>
 
-                        @foreach (var option in GetShippingOptions(selectedWeeklyEvaluation))
+                        @foreach (var option
+                                            in GetShippingOptions(
+                                            selectedWeeklyEvaluation))
                         {
                             <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                                <input type="radio" checked="@option.HasError" disabled />
-                                <span>@option.Label</span>
-                                <small>@(option.HasError ? "Failed" : "OK")</small>
+
+                                <input type="radio"
+                                       checked="@option.HasError"
+                                       disabled />
+
+                                <span>
+                                    @option.Label
+                                </span>
+
+                                <small>
+                                    @(option.HasError ? "Failed" : "OK")
+                                </small>
+
                             </label>
                         }
+
                     </div>
 
                     <div class="weekly-detail-card">
+
                         <div class="weekly-detail-card-header">
-                            <h4>📋 Task Memo</h4>
-                            <span>@CountErrors(GetTaskMemoOptions(selectedWeeklyEvaluation)) errors</span>
+
+                            <h4>
+                                📋 Task Memo
+                            </h4>
+
+                            <span>
+                                @CountErrors(GetTaskMemoOptions(selectedWeeklyEvaluation)) errors
+                            </span>
+
                         </div>
 
-                        @foreach (var option in GetTaskMemoOptions(selectedWeeklyEvaluation))
+                        @foreach (var option
+                                            in GetTaskMemoOptions(
+                                            selectedWeeklyEvaluation))
                         {
                             <label class="weekly-radio-row @(option.HasError ? "failed" : "ok")">
-                                <input type="radio" checked="@option.HasError" disabled />
-                                <span>@option.Label</span>
-                                <small>@(option.HasError ? "Failed" : "OK")</small>
+
+                                <input type="radio"
+                                       checked="@option.HasError"
+                                       disabled />
+
+                                <span>
+                                    @option.Label
+                                </span>
+
+                                <small>
+                                    @(option.HasError ? "Failed" : "OK")
+                                </small>
+
                             </label>
                         }
+
                     </div>
 
                 </div>
+
             </div>
+
         </div>
+
     </div>
 }
 
-@code {
-    private DashboardStatsDto stats = new DashboardStatsDto();
+@code
+{
+    private DashboardStatsDto stats =
+        new();
 
-    private List<AssignedBookDashboardDto> assignedBooks = new();
-    private List<AssignedBookDashboardDto> completedAssignments = new();
-    private List<WeeklyEvaluationDashboardDto> weeklyEvaluations = new();
+    private List<AssignedBookDashboardDto> assignedBooks =
+        new();
 
-    private string SelectedAssignedEmployeeFilter { get; set; } = string.Empty;
-    private string SelectedAssignedStageFilter { get; set; } = string.Empty;
+    private List<AssignedBookDashboardDto> completedAssignments =
+        new();
 
-    private string SelectedCompletedEmployeeFilter { get; set; } = string.Empty;
-    private string SelectedCompletedStageFilter { get; set; } = string.Empty;
+    private List<WeeklyEvaluationDashboardDto> weeklyEvaluations =
+        new();
+
+    private List<AssignedBookDashboardDto> AssignedBooksFiltered { get; set; } =
+        new();
+
+    private List<AssignedBookDashboardDto> CompletedAssignmentsFiltered { get; set; } =
+        new();
+
+    private List<WeeklyEvaluationDashboardDto> WeeklyEvaluationsFiltered { get; set; } =
+        new();
+
+    private List<string> AssignedEmployeeFilterOptions { get; set; } =
+        new();
+
+    private List<string> CompletedEmployeeFilterOptions { get; set; } =
+        new();
+
+    private List<string> WeeklyEmployeeFilterOptions { get; set; } =
+        new();
+
+    private List<StageFilterOption> AssignedStageFilterOptions { get; set; } =
+        new();
+
+    private List<StageFilterOption> CompletedStageFilterOptionsForEmployee { get; set; } =
+        new();
+
+    private string SelectedAssignedEmployeeFilter { get; set; } =
+        string.Empty;
+
+    private string SelectedAssignedStageFilter { get; set; } =
+        string.Empty;
+
+    private string SelectedCompletedEmployeeFilter { get; set; } =
+        string.Empty;
+
+    private string SelectedCompletedStageFilter { get; set; } =
+        string.Empty;
+
+    private string SelectedWeeklyEmployeeFilter { get; set; } =
+        string.Empty;
+
+    private string WeeklySearch { get; set; } =
+        string.Empty;
+
     private bool AssignedStageSortEnabled { get; set; }
-    private bool AssignedStageSortDescending { get; set; } = true;
 
-    private string SelectedWeeklyEmployeeFilter { get; set; } = string.Empty;
-    private string WeeklySearch { get; set; } = string.Empty;
+    private bool AssignedStageSortDescending { get; set; } =
+        true;
 
-    private WeeklyEvaluationDashboardDto? selectedWeeklyEvaluation;
-    private bool showWeeklyEvaluationModal = false;
+    private WeeklyEvaluationDashboardDto?
+        selectedWeeklyEvaluation;
+
+    private bool showWeeklyEvaluationModal;
 
     private ClaimsPrincipal? _user;
-    private UserDataScope Scope { get; set; } = new();
 
-    private bool loading = true;
+    private UserDataScope Scope { get; set; } =
+        new();
+
+    private bool loading =
+        true;
+
     private bool _dashboardLoadStarted;
 
     private Guid? DownloadingChecklistAssignmentId { get; set; }
 
     private bool PuedeVerUsuarios { get; set; }
+
     private bool PuedeVerEmpleados { get; set; }
+
     private bool PuedeVerLibros { get; set; }
+
     private bool PuedeVerEvaluaciones { get; set; }
+
     private bool PuedeVerAsignaciones { get; set; }
 
-    private bool ShowChecklistColumn =>
-        assignedBooks.Any(x =>
-            string.Equals(
-                x.StageKey,
+    private bool ShowChecklistColumn { get; set; }
+
+    private bool ShowReadyToShipColumn { get; set; }
+
+    private int AssignedBooksColumnCount { get; set; } =
+        7;
+
+    private static readonly IReadOnlyList<StageFilterOption>
+        StageFilterOptions =
+        new List<StageFilterOption>
+        {
+            new(
                 "ProofExtract",
-                StringComparison.OrdinalIgnoreCase));
+                "Proof Extract"),
 
-    private bool ShowReadyToShipColumn =>
-        assignedBooks.Any(x =>
-            string.Equals(
-                x.StageKey,
+            new(
+                "FinalExtract",
+                "Final Extract"),
+
+            new(
+                "MemoExtract",
+                "Memo Extract"),
+
+            new(
+                "FinalPO",
+                "Final PO Date"),
+
+            new(
                 "Shipping",
-                StringComparison.OrdinalIgnoreCase));
+                "Shipping Date"),
 
-    private int AssignedBooksColumnCount =>
-        7 +
-        (Scope.ViewAllEmployeeTypes ? 1 : 0) +
-        (ShowReadyToShipColumn ? 1 : 0) +
-        (ShowChecklistColumn ? 1 : 0);
-
-    private static readonly List<StageFilterOption> StageFilterOptions = new()
-    {
-        new("ProofExtract", "Proof Extract"),
-        new("FinalExtract", "Final Extract"),
-        new("MemoExtract", "Memo Extract"),
-        new("FinalPO", "Final PO Date"),
-        new("Shipping", "Shipping Date"),
-        new("Dirxion", "Dirxion Date")
-    };
-
-    private static readonly List<StageFilterOption> CompletedStageFilterOptions = new()
-    {
-        new("ProofExtract", "Proof Extract Completed"),
-        new("FinalExtract", "Final Extract Completed"),
-        new("MemoExtract", "Memo Extract Completed"),
-        new("FinalPO", "Final PO Sent"),
-        new("Shipping", "Shipped Pages"),
-        new("Dirxion", "Dirxion Sent")
-    };
-
-    private List<AssignedBookDashboardDto> AssignedBooksFiltered
-    {
-        get
-        {
-            var query = assignedBooks.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SelectedAssignedEmployeeFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.EmployeeName?.Trim(),
-                    SelectedAssignedEmployeeFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(SelectedAssignedStageFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.StageKey?.Trim(),
-                    SelectedAssignedStageFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (AssignedStageSortEnabled)
-            {
-                if (AssignedStageSortDescending)
-                {
-                    query = query
-                        .OrderBy(x => GetAssignedStageSortOrder(x) == 0 ? 1 : 0)
-                        .ThenByDescending(GetAssignedStageSortOrder)
-                        .ThenBy(x => x.EmployeeName)
-                        .ThenBy(x => x.BookName);
-                }
-                else
-                {
-                    query = query
-                        .OrderBy(x => GetAssignedStageSortOrder(x) == 0 ? 1 : 0)
-                        .ThenBy(GetAssignedStageSortOrder)
-                        .ThenBy(x => x.EmployeeName)
-                        .ThenBy(x => x.BookName);
-                }
-            }
-
-            return query.ToList();
-        }
-    }
-
-    private void SortAssignedBooksByStage()
-    {
-        if (!AssignedStageSortEnabled)
-        {
-            AssignedStageSortEnabled = true;
-            AssignedStageSortDescending = true;
-            return;
-        }
-
-        AssignedStageSortDescending = !AssignedStageSortDescending;
-    }
-
-    private static int GetAssignedStageSortOrder(
-        AssignedBookDashboardDto item)
-    {
-        var stage = !string.IsNullOrWhiteSpace(item.StageKey)
-            ? item.StageKey
-            : item.Stage;
-
-        var normalizedStage = (stage ?? string.Empty)
-            .Trim()
-            .Replace(" ", string.Empty)
-            .Replace("-", string.Empty)
-            .Replace("_", string.Empty)
-            .ToLowerInvariant();
-
-        return normalizedStage switch
-        {
-            "proof" or
-            "proofextract" or
-            "proofextractdate" => 1,
-
-            "final" or
-            "finalextract" or
-            "finalextractdate" => 2,
-
-            "memo" or
-            "memoextract" or
-            "memoextractdate" => 3,
-
-            "finalpo" or
-            "finalpodate" => 4,
-
-            "shipping" or
-            "shippingdate" => 5,
-
-            "dirxion" or
-            "dirxiondate" => 6,
-
-            _ => 0
+            new(
+                "Dirxion",
+                "Dirxion Date")
         };
-    }
 
-    private async Task DownloadChecklistDirectAsync(AssignedBookDashboardDto item)
-    {
-        if (DownloadingChecklistAssignmentId is not null)
-            return;
-
-        try
+    private static readonly IReadOnlyList<StageFilterOption>
+        CompletedStageFilterOptions =
+        new List<StageFilterOption>
         {
-            if (_user is null || _user.Identity?.IsAuthenticated != true)
-            {
-                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-                _user = authState.User;
-            }
+            new(
+                "ProofExtract",
+                "Proof Extract Completed"),
 
-            if (_user is null || _user.Identity?.IsAuthenticated != true)
-                return;
+            new(
+                "FinalExtract",
+                "Final Extract Completed"),
 
-            DownloadingChecklistAssignmentId = item.AssignmentId;
-            await InvokeAsync(StateHasChanged);
+            new(
+                "MemoExtract",
+                "Memo Extract Completed"),
 
-            var result = await ChecklistService.GeneratePaginationChecklistAsync(
-                item.BookId,
-                item.AssignmentId,
-                _user);
+            new(
+                "FinalPO",
+                "Final PO Sent"),
 
-            var base64 = Convert.ToBase64String(result.Content);
+            new(
+                "Shipping",
+                "Shipped Pages"),
 
-            await JS.InvokeVoidAsync(
-                "downloadFileFromBase64",
-                result.FileName,
-                result.ContentType,
-                base64);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-        finally
-        {
-            DownloadingChecklistAssignmentId = null;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private static string GetInitials(string? fullName)
-    {
-        if (string.IsNullOrWhiteSpace(fullName))
-            return "U";
-
-        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-        if (parts.Length == 1)
-            return parts[0][0].ToString().ToUpper();
-
-        return $"{parts[0][0]}{parts[1][0]}".ToUpper();
-    }
-
-    private static string GetStagePillClass(string? stageKey, bool completed = false)
-    {
-        var key = (stageKey ?? string.Empty)
-            .Trim()
-            .ToLowerInvariant();
-
-        var completedClass = completed ? " completed-stage-pill" : string.Empty;
-
-        return $"thryv-stage-pill thryv-stage-{key}{completedClass}";
-    }
-
-    private static string GetDatabaseCode(string? database)
-    {
-        if (string.IsNullOrWhiteSpace(database))
-            return "-";
-
-        return database.Trim().ToUpperInvariant();
-    }
-
-    private static string GetDatabaseFullName(string? database)
-    {
-        if (string.IsNullOrWhiteSpace(database))
-            return "Database not available";
-
-        var code = database.Trim().ToUpperInvariant();
-
-        return code switch
-        {
-            "DW" => "WEST",
-            "SN" => "vNorth",
-            "SW" => "vWest",
-            "SS" => "vSouth",
-            _ => database.Trim()
+            new(
+                "Dirxion",
+                "Dirxion Sent")
         };
-    }
 
-    private List<AssignedBookDashboardDto> CompletedAssignmentsFiltered
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
     {
-        get
-        {
-            var query = completedAssignments.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SelectedCompletedEmployeeFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.EmployeeName?.Trim(),
-                    SelectedCompletedEmployeeFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(SelectedCompletedStageFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.StageKey?.Trim(),
-                    SelectedCompletedStageFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            return query.ToList();
-        }
-    }
-
-    private IEnumerable<StageFilterOption> AssignedStageFilterOptions
-    {
-        get
-        {
-            var query = assignedBooks.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SelectedAssignedEmployeeFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.EmployeeName?.Trim(),
-                    SelectedAssignedEmployeeFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            var availableStageKeys = query
-                .Where(x => !string.IsNullOrWhiteSpace(x.StageKey))
-                .Select(x => x.StageKey!.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            return StageFilterOptions
-                .Where(stage => availableStageKeys.Contains(stage.Key, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-        }
-    }
-
-    private IEnumerable<StageFilterOption> CompletedStageFilterOptionsForEmployee
-    {
-        get
-        {
-            var query = completedAssignments.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SelectedCompletedEmployeeFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.EmployeeName?.Trim(),
-                    SelectedCompletedEmployeeFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            var availableStageKeys = query
-                .Where(x => !string.IsNullOrWhiteSpace(x.StageKey))
-                .Select(x => x.StageKey!.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            return CompletedStageFilterOptions
-                .Where(stage => availableStageKeys.Contains(stage.Key, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-        }
-    }
-
-    private void OnAssignedEmployeeChanged(ChangeEventArgs e)
-    {
-        SelectedAssignedEmployeeFilter = e.Value?.ToString() ?? string.Empty;
-
-        var stageStillAvailable = AssignedStageFilterOptions.Any(stage =>
-            string.Equals(
-                stage.Key,
-                SelectedAssignedStageFilter,
-                StringComparison.OrdinalIgnoreCase));
-
-        if (!stageStillAvailable)
-            SelectedAssignedStageFilter = string.Empty;
-    }
-
-    private void OnAssignedStageChanged(ChangeEventArgs e)
-    {
-        SelectedAssignedStageFilter = e.Value?.ToString() ?? string.Empty;
-    }
-
-    private void OnCompletedEmployeeChanged(ChangeEventArgs e)
-    {
-        SelectedCompletedEmployeeFilter = e.Value?.ToString() ?? string.Empty;
-
-        var stageStillAvailable = CompletedStageFilterOptionsForEmployee.Any(stage =>
-            string.Equals(
-                stage.Key,
-                SelectedCompletedStageFilter,
-                StringComparison.OrdinalIgnoreCase));
-
-        if (!stageStillAvailable)
-            SelectedCompletedStageFilter = string.Empty;
-    }
-
-    private void OnCompletedStageChanged(ChangeEventArgs e)
-    {
-        SelectedCompletedStageFilter = e.Value?.ToString() ?? string.Empty;
-    }
-
-    private List<WeeklyEvaluationDashboardDto> WeeklyEvaluationsFiltered
-    {
-        get
-        {
-            var query = weeklyEvaluations.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SelectedWeeklyEmployeeFilter))
-            {
-                query = query.Where(x => string.Equals(
-                    x.EmployeeName?.Trim(),
-                    SelectedWeeklyEmployeeFilter.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(WeeklySearch))
-            {
-                var filtro = WeeklySearch.Trim().ToUpperInvariant();
-
-                query = query.Where(x =>
-                    (x.KgenCode ?? string.Empty).ToUpperInvariant().Contains(filtro) ||
-                    (x.BookName ?? string.Empty).ToUpperInvariant().Contains(filtro));
-            }
-
-            return query.ToList();
-        }
-    }
-
-    private IEnumerable<string> AssignedEmployeeFilterOptions
-    {
-        get
-        {
-            return assignedBooks
-                .Where(x => !string.IsNullOrWhiteSpace(x.EmployeeName))
-                .Select(x => x.EmployeeName.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(x => x);
-        }
-    }
-
-    private IEnumerable<string> CompletedEmployeeFilterOptions
-    {
-        get
-        {
-            return completedAssignments
-                .Where(x => !string.IsNullOrWhiteSpace(x.EmployeeName))
-                .Select(x => x.EmployeeName.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(x => x);
-        }
-    }
-
-    private IEnumerable<string> WeeklyEmployeeFilterOptions
-    {
-        get
-        {
-            return weeklyEvaluations
-                .Where(x => !string.IsNullOrWhiteSpace(x.EmployeeName))
-                .Select(x => x.EmployeeName.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(x => x);
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender || _dashboardLoadStarted)
+        if (!firstRender ||
+            _dashboardLoadStarted)
         {
             return;
         }
 
-        _dashboardLoadStarted = true;
+        _dashboardLoadStarted =
+            true;
 
         await LoadDashboardAsync();
     }
 
     private async Task LoadDashboardAsync()
     {
-        loading = true;
+        loading =
+            true;
 
         try
         {
@@ -1350,7 +1640,8 @@ else
                 await AuthenticationStateProvider
                     .GetAuthenticationStateAsync();
 
-            _user = authState.User;
+            _user =
+                authState.User;
 
             if (_user.Identity?.IsAuthenticated != true)
             {
@@ -1360,10 +1651,15 @@ else
 
             CargarPermisosDashboard();
 
-            Scope = await UserDataScopeService.GetScopeAsync(_user);
+            Scope =
+                await UserDataScopeService
+                    .GetScopeAsync(
+                        _user);
 
             var result =
-                await DashboardService.GetDashboardSummaryAsync(Scope);
+                await DashboardService
+                    .GetDashboardSummaryAsync(
+                        Scope);
 
             if (result is null)
             {
@@ -1371,192 +1667,1078 @@ else
                 return;
             }
 
-            stats = result.Stats ?? new DashboardStatsDto();
+            stats =
+                result.Stats
+                ?? new DashboardStatsDto();
 
             assignedBooks =
-                result.AssignedBooks ??
-                new List<AssignedBookDashboardDto>();
+                result.AssignedBooks
+                ?? new List<AssignedBookDashboardDto>();
 
             completedAssignments =
-                result.CompletedAssignments ??
-                new List<AssignedBookDashboardDto>();
+                result.CompletedAssignments
+                ?? new List<AssignedBookDashboardDto>();
 
             weeklyEvaluations =
-                result.WeeklyEvaluations ??
-                new List<WeeklyEvaluationDashboardDto>();
+                result.WeeklyEvaluations
+                ?? new List<WeeklyEvaluationDashboardDto>();
+
+            RebuildDashboardDerivedState();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(
+                ex.ToString());
+
             ResetDashboardData();
         }
         finally
         {
-            loading = false;
-            await InvokeAsync(StateHasChanged);
+            loading =
+                false;
+
+            await InvokeAsync(
+                StateHasChanged);
         }
     }
 
-    private void ResetDashboardData()
+    private void RebuildDashboardDerivedState()
     {
-        stats = new DashboardStatsDto();
-        assignedBooks = new List<AssignedBookDashboardDto>();
-        completedAssignments = new List<AssignedBookDashboardDto>();
-        weeklyEvaluations = new List<WeeklyEvaluationDashboardDto>();
+        ShowChecklistColumn =
+            assignedBooks.Any(x =>
+                string.Equals(
+                    x.StageKey,
+                    "ProofExtract",
+                    StringComparison.OrdinalIgnoreCase));
+
+        ShowReadyToShipColumn =
+            assignedBooks.Any(x =>
+                string.Equals(
+                    x.StageKey,
+                    "Shipping",
+                    StringComparison.OrdinalIgnoreCase));
+
+        AssignedBooksColumnCount =
+            7
+            +
+            (Scope.ViewAllEmployeeTypes
+                ? 1
+                : 0)
+            +
+            (ShowReadyToShipColumn
+                ? 1
+                : 0)
+            +
+            (ShowChecklistColumn
+                ? 1
+                : 0);
+
+        AssignedEmployeeFilterOptions =
+            BuildEmployeeOptions(
+                assignedBooks.Select(
+                    x => x.EmployeeName));
+
+        CompletedEmployeeFilterOptions =
+            BuildEmployeeOptions(
+                completedAssignments.Select(
+                    x => x.EmployeeName));
+
+        WeeklyEmployeeFilterOptions =
+            BuildEmployeeOptions(
+                weeklyEvaluations.Select(
+                    x => x.EmployeeName));
+
+        RebuildAssignedStageOptions();
+
+        RebuildCompletedStageOptions();
+
+        RebuildAssignedView();
+
+        RebuildCompletedView();
+
+        RebuildWeeklyView();
     }
 
-    private void CargarPermisosDashboard()
+    private void RebuildAssignedView()
     {
-        PuedeVerUsuarios =
-            HasPermission(_user, "CreateUser") ||
-            HasPermission(_user, "EditUser") ||
-            HasPermission(_user, "DeleteUser");
+        IEnumerable<AssignedBookDashboardDto> query =
+            assignedBooks;
 
-        PuedeVerEmpleados =
-            HasPermission(_user, "CreateEmployees") ||
-            HasPermission(_user, "EditEmployees") ||
-            HasPermission(_user, "DeleteEmployees") ||
-            HasPermission(_user, "ViewEmployees");
+        var employeeFilter =
+            SelectedAssignedEmployeeFilter.Trim();
 
-        PuedeVerLibros =
-            HasPermission(_user, "CreateBook") ||
-            HasPermission(_user, "EditBook") ||
-            HasPermission(_user, "DeleteBook") ||
-            HasPermission(_user, "BooksView");
+        var stageFilter =
+            SelectedAssignedStageFilter.Trim();
 
-        PuedeVerEvaluaciones =
-            HasPermission(_user, "QualifyBook");
+        if (!string.IsNullOrWhiteSpace(
+                employeeFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.EmployeeName?.Trim(),
+                        employeeFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
 
-        PuedeVerAsignaciones =
-            HasPermission(_user, "CreateAssignations") ||
-            HasPermission(_user, "AsignBook") ||
-            HasPermission(_user, "ViewAssignations");
+        if (!string.IsNullOrWhiteSpace(
+                stageFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.StageKey?.Trim(),
+                        stageFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (AssignedStageSortEnabled)
+        {
+            var ranked =
+                query.Select(x =>
+                    new AssignedBookRank(
+                        x,
+                        GetAssignedStageSortOrder(x)));
+
+            if (AssignedStageSortDescending)
+            {
+                query =
+                    ranked
+                        .OrderBy(x =>
+                            x.StageOrder == 0
+                                ? 1
+                                : 0)
+                        .ThenByDescending(x =>
+                            x.StageOrder)
+                        .ThenBy(x =>
+                            x.Item.EmployeeName)
+                        .ThenBy(x =>
+                            x.Item.BookName)
+                        .Select(x =>
+                            x.Item);
+            }
+            else
+            {
+                query =
+                    ranked
+                        .OrderBy(x =>
+                            x.StageOrder == 0
+                                ? 1
+                                : 0)
+                        .ThenBy(x =>
+                            x.StageOrder)
+                        .ThenBy(x =>
+                            x.Item.EmployeeName)
+                        .ThenBy(x =>
+                            x.Item.BookName)
+                        .Select(x =>
+                            x.Item);
+            }
+        }
+
+        AssignedBooksFiltered =
+            query.ToList();
+    }
+
+    private void RebuildAssignedStageOptions()
+    {
+        IEnumerable<AssignedBookDashboardDto> query =
+            assignedBooks;
+
+        var employeeFilter =
+            SelectedAssignedEmployeeFilter.Trim();
+
+        if (!string.IsNullOrWhiteSpace(
+                employeeFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.EmployeeName?.Trim(),
+                        employeeFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        var availableStageKeys =
+            query
+                .Where(x =>
+                    !string.IsNullOrWhiteSpace(
+                        x.StageKey))
+                .Select(x =>
+                    x.StageKey!.Trim())
+                .ToHashSet(
+                    StringComparer.OrdinalIgnoreCase);
+
+        AssignedStageFilterOptions =
+            StageFilterOptions
+                .Where(stage =>
+                    availableStageKeys.Contains(
+                        stage.Key))
+                .ToList();
+    }
+
+    private void OnAssignedEmployeeChanged(
+        ChangeEventArgs e)
+    {
+        SelectedAssignedEmployeeFilter =
+            e.Value?.ToString()?.Trim()
+            ?? string.Empty;
+
+        RebuildAssignedStageOptions();
+
+        if (!string.IsNullOrWhiteSpace(
+                SelectedAssignedStageFilter)
+            &&
+            !AssignedStageFilterOptions.Any(
+                stage =>
+                    string.Equals(
+                        stage.Key,
+                        SelectedAssignedStageFilter,
+                        StringComparison.OrdinalIgnoreCase)))
+        {
+            SelectedAssignedStageFilter =
+                string.Empty;
+        }
+
+        RebuildAssignedView();
+    }
+
+    private void OnAssignedStageChanged(
+        ChangeEventArgs e)
+    {
+        SelectedAssignedStageFilter =
+            e.Value?.ToString()?.Trim()
+            ?? string.Empty;
+
+        RebuildAssignedView();
+    }
+
+    private void SortAssignedBooksByStage()
+    {
+        if (!AssignedStageSortEnabled)
+        {
+            AssignedStageSortEnabled =
+                true;
+
+            AssignedStageSortDescending =
+                true;
+        }
+        else
+        {
+            AssignedStageSortDescending =
+                !AssignedStageSortDescending;
+        }
+
+        RebuildAssignedView();
     }
 
     private void ClearAssignedFilters()
     {
-        SelectedAssignedEmployeeFilter = string.Empty;
-        SelectedAssignedStageFilter = string.Empty;
+        SelectedAssignedEmployeeFilter =
+            string.Empty;
+
+        SelectedAssignedStageFilter =
+            string.Empty;
+
+        RebuildAssignedStageOptions();
+
+        RebuildAssignedView();
+    }
+
+    private void RebuildCompletedView()
+    {
+        IEnumerable<AssignedBookDashboardDto> query =
+            completedAssignments;
+
+        var employeeFilter =
+            SelectedCompletedEmployeeFilter.Trim();
+
+        var stageFilter =
+            SelectedCompletedStageFilter.Trim();
+
+        if (!string.IsNullOrWhiteSpace(
+                employeeFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.EmployeeName?.Trim(),
+                        employeeFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(
+                stageFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.StageKey?.Trim(),
+                        stageFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        CompletedAssignmentsFiltered =
+            query.ToList();
+    }
+
+    private void RebuildCompletedStageOptions()
+    {
+        IEnumerable<AssignedBookDashboardDto> query =
+            completedAssignments;
+
+        var employeeFilter =
+            SelectedCompletedEmployeeFilter.Trim();
+
+        if (!string.IsNullOrWhiteSpace(
+                employeeFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.EmployeeName?.Trim(),
+                        employeeFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        var availableStageKeys =
+            query
+                .Where(x =>
+                    !string.IsNullOrWhiteSpace(
+                        x.StageKey))
+                .Select(x =>
+                    x.StageKey!.Trim())
+                .ToHashSet(
+                    StringComparer.OrdinalIgnoreCase);
+
+        CompletedStageFilterOptionsForEmployee =
+            CompletedStageFilterOptions
+                .Where(stage =>
+                    availableStageKeys.Contains(
+                        stage.Key))
+                .ToList();
+    }
+
+    private void OnCompletedEmployeeChanged(
+        ChangeEventArgs e)
+    {
+        SelectedCompletedEmployeeFilter =
+            e.Value?.ToString()?.Trim()
+            ?? string.Empty;
+
+        RebuildCompletedStageOptions();
+
+        if (!string.IsNullOrWhiteSpace(
+                SelectedCompletedStageFilter)
+            &&
+            !CompletedStageFilterOptionsForEmployee.Any(
+                stage =>
+                    string.Equals(
+                        stage.Key,
+                        SelectedCompletedStageFilter,
+                        StringComparison.OrdinalIgnoreCase)))
+        {
+            SelectedCompletedStageFilter =
+                string.Empty;
+        }
+
+        RebuildCompletedView();
+    }
+
+    private void OnCompletedStageChanged(
+        ChangeEventArgs e)
+    {
+        SelectedCompletedStageFilter =
+            e.Value?.ToString()?.Trim()
+            ?? string.Empty;
+
+        RebuildCompletedView();
     }
 
     private void ClearCompletedFilters()
     {
-        SelectedCompletedEmployeeFilter = string.Empty;
-        SelectedCompletedStageFilter = string.Empty;
+        SelectedCompletedEmployeeFilter =
+            string.Empty;
+
+        SelectedCompletedStageFilter =
+            string.Empty;
+
+        RebuildCompletedStageOptions();
+
+        RebuildCompletedView();
+    }
+
+    private void RebuildWeeklyView()
+    {
+        IEnumerable<WeeklyEvaluationDashboardDto> query =
+            weeklyEvaluations;
+
+        var employeeFilter =
+            SelectedWeeklyEmployeeFilter.Trim();
+
+        var search =
+            WeeklySearch.Trim();
+
+        if (!string.IsNullOrWhiteSpace(
+                employeeFilter))
+        {
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.EmployeeName?.Trim(),
+                        employeeFilter,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(
+                search))
+        {
+            query =
+                query.Where(x =>
+                    (
+                        x.KgenCode?.Contains(
+                            search,
+                            StringComparison.OrdinalIgnoreCase)
+                        ?? false
+                    )
+                    ||
+                    (
+                        x.BookName?.Contains(
+                            search,
+                            StringComparison.OrdinalIgnoreCase)
+                        ?? false
+                    ));
+        }
+
+        WeeklyEvaluationsFiltered =
+            query.ToList();
+    }
+
+    private void OnWeeklyEmployeeChanged(
+        ChangeEventArgs e)
+    {
+        SelectedWeeklyEmployeeFilter =
+            e.Value?.ToString()?.Trim()
+            ?? string.Empty;
+
+        RebuildWeeklyView();
+    }
+
+    private void OnWeeklySearchChanged(
+        ChangeEventArgs e)
+    {
+        WeeklySearch =
+            e.Value?.ToString()
+            ?? string.Empty;
+
+        RebuildWeeklyView();
     }
 
     private void ClearWeeklyFilters()
     {
-        SelectedWeeklyEmployeeFilter = string.Empty;
-        WeeklySearch = string.Empty;
+        SelectedWeeklyEmployeeFilter =
+            string.Empty;
+
+        WeeklySearch =
+            string.Empty;
+
+        RebuildWeeklyView();
     }
 
-    private async Task OpenWeeklyEvaluationModal(WeeklyEvaluationDashboardDto item)
+    private void CargarPermisosDashboard()
     {
-        selectedWeeklyEvaluation = item;
-        showWeeklyEvaluationModal = true;
+        if (_user is null)
+        {
+            PuedeVerUsuarios = false;
+            PuedeVerEmpleados = false;
+            PuedeVerLibros = false;
+            PuedeVerEvaluaciones = false;
+            PuedeVerAsignaciones = false;
 
-        await InvokeAsync(StateHasChanged);
-        await JS.InvokeVoidAsync("thryvModalPortal.open", "weeklyEvaluationModalBackdrop");
+            return;
+        }
+
+        var permissions =
+            _user.Claims
+                .Where(claim =>
+                    string.Equals(
+                        claim.Value,
+                        bool.TrueString,
+                        StringComparison.OrdinalIgnoreCase))
+                .Select(claim =>
+                    claim.Type)
+                .ToHashSet(
+                    StringComparer.OrdinalIgnoreCase);
+
+        PuedeVerUsuarios =
+            permissions.Contains("CreateUser")
+            ||
+            permissions.Contains("EditUser")
+            ||
+            permissions.Contains("DeleteUser");
+
+        PuedeVerEmpleados =
+            permissions.Contains("CreateEmployees")
+            ||
+            permissions.Contains("EditEmployees")
+            ||
+            permissions.Contains("DeleteEmployees")
+            ||
+            permissions.Contains("ViewEmployees");
+
+        PuedeVerLibros =
+            permissions.Contains("CreateBook")
+            ||
+            permissions.Contains("EditBook")
+            ||
+            permissions.Contains("DeleteBook")
+            ||
+            permissions.Contains("BooksView");
+
+        PuedeVerEvaluaciones =
+            permissions.Contains("QualifyBook");
+
+        PuedeVerAsignaciones =
+            permissions.Contains("CreateAssignations")
+            ||
+            permissions.Contains("AsignBook")
+            ||
+            permissions.Contains("ViewAssignations");
+    }
+
+    private async Task DownloadChecklistDirectAsync(
+        AssignedBookDashboardDto item)
+    {
+        if (DownloadingChecklistAssignmentId is not null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (_user is null ||
+                _user.Identity?.IsAuthenticated != true)
+            {
+                var authState =
+                    await AuthenticationStateProvider
+                        .GetAuthenticationStateAsync();
+
+                _user =
+                    authState.User;
+            }
+
+            if (_user is null ||
+                _user.Identity?.IsAuthenticated != true)
+            {
+                return;
+            }
+
+            DownloadingChecklistAssignmentId =
+                item.AssignmentId;
+
+            await InvokeAsync(
+                StateHasChanged);
+
+            var result =
+                await ChecklistService
+                    .GeneratePaginationChecklistAsync(
+                        item.BookId,
+                        item.AssignmentId,
+                        _user);
+
+            var base64 =
+                Convert.ToBase64String(
+                    result.Content);
+
+            await JS.InvokeVoidAsync(
+                "downloadFileFromBase64",
+                result.FileName,
+                result.ContentType,
+                base64);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                ex.ToString());
+        }
+        finally
+        {
+            DownloadingChecklistAssignmentId =
+                null;
+
+            await InvokeAsync(
+                StateHasChanged);
+        }
+    }
+
+    private async Task OpenWeeklyEvaluationModal(
+        WeeklyEvaluationDashboardDto item)
+    {
+        selectedWeeklyEvaluation =
+            item;
+
+        showWeeklyEvaluationModal =
+            true;
+
+        await InvokeAsync(
+            StateHasChanged);
+
+        await JS.InvokeVoidAsync(
+            "thryvModalPortal.open",
+            "weeklyEvaluationModalBackdrop");
     }
 
     private async Task CloseWeeklyEvaluationModal()
     {
-        await JS.InvokeVoidAsync("thryvModalPortal.close", "weeklyEvaluationModalBackdrop");
+        await JS.InvokeVoidAsync(
+            "thryvModalPortal.close",
+            "weeklyEvaluationModalBackdrop");
 
-        showWeeklyEvaluationModal = false;
-        selectedWeeklyEvaluation = null;
+        showWeeklyEvaluationModal =
+            false;
+
+        selectedWeeklyEvaluation =
+            null;
     }
 
-    private static string GetAccuracyClass(decimal value)
+    private void ResetDashboardData()
+    {
+        stats =
+            new DashboardStatsDto();
+
+        assignedBooks =
+            new List<AssignedBookDashboardDto>();
+
+        completedAssignments =
+            new List<AssignedBookDashboardDto>();
+
+        weeklyEvaluations =
+            new List<WeeklyEvaluationDashboardDto>();
+
+        AssignedBooksFiltered =
+            new List<AssignedBookDashboardDto>();
+
+        CompletedAssignmentsFiltered =
+            new List<AssignedBookDashboardDto>();
+
+        WeeklyEvaluationsFiltered =
+            new List<WeeklyEvaluationDashboardDto>();
+
+        AssignedEmployeeFilterOptions =
+            new List<string>();
+
+        CompletedEmployeeFilterOptions =
+            new List<string>();
+
+        WeeklyEmployeeFilterOptions =
+            new List<string>();
+
+        AssignedStageFilterOptions =
+            new List<StageFilterOption>();
+
+        CompletedStageFilterOptionsForEmployee =
+            new List<StageFilterOption>();
+
+        SelectedAssignedEmployeeFilter =
+            string.Empty;
+
+        SelectedAssignedStageFilter =
+            string.Empty;
+
+        SelectedCompletedEmployeeFilter =
+            string.Empty;
+
+        SelectedCompletedStageFilter =
+            string.Empty;
+
+        SelectedWeeklyEmployeeFilter =
+            string.Empty;
+
+        WeeklySearch =
+            string.Empty;
+
+        AssignedStageSortEnabled =
+            false;
+
+        AssignedStageSortDescending =
+            true;
+
+        ShowChecklistColumn =
+            false;
+
+        ShowReadyToShipColumn =
+            false;
+
+        AssignedBooksColumnCount =
+            7;
+
+        Scope =
+            new UserDataScope();
+    }
+
+    private static List<string> BuildEmployeeOptions(
+        IEnumerable<string?> employeeNames)
+    {
+        return employeeNames
+            .Where(name =>
+                !string.IsNullOrWhiteSpace(
+                    name))
+            .Select(name =>
+                name!.Trim())
+            .Distinct(
+                StringComparer.OrdinalIgnoreCase)
+            .OrderBy(
+                name => name,
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static int GetAssignedStageSortOrder(
+        AssignedBookDashboardDto item)
+    {
+        var stage =
+            !string.IsNullOrWhiteSpace(
+                item.StageKey)
+                ? item.StageKey
+                : item.Stage;
+
+        if (string.IsNullOrWhiteSpace(
+                stage))
+        {
+            return 0;
+        }
+
+        var normalizedStage =
+            stage
+                .Trim()
+                .Replace(
+                    " ",
+                    string.Empty,
+                    StringComparison.Ordinal)
+                .Replace(
+                    "-",
+                    string.Empty,
+                    StringComparison.Ordinal)
+                .Replace(
+                    "_",
+                    string.Empty,
+                    StringComparison.Ordinal)
+                .ToUpperInvariant();
+
+        return normalizedStage switch
+        {
+            "PROOF" or
+            "PROOFEXTRACT" or
+            "PROOFEXTRACTDATE"
+                => 1,
+
+            "FINAL" or
+            "FINALEXTRACT" or
+            "FINALEXTRACTDATE"
+                => 2,
+
+            "MEMO" or
+            "MEMOEXTRACT" or
+            "MEMOEXTRACTDATE"
+                => 3,
+
+            "FINALPO" or
+            "FINALPODATE"
+                => 4,
+
+            "SHIPPING" or
+            "SHIPPINGDATE"
+                => 5,
+
+            "DIRXION" or
+            "DIRXIONDATE"
+                => 6,
+
+            _ =>
+                0
+        };
+    }
+
+    private static string GetInitials(
+        string? fullName)
+    {
+        if (string.IsNullOrWhiteSpace(
+                fullName))
+        {
+            return "U";
+        }
+
+        var parts =
+            fullName.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries);
+
+        if (parts.Length == 0)
+        {
+            return "U";
+        }
+
+        if (parts.Length == 1)
+        {
+            return parts[0][0]
+                .ToString()
+                .ToUpperInvariant();
+        }
+
+        return string.Concat(
+                parts[0][0],
+                parts[1][0])
+            .ToUpperInvariant();
+    }
+
+    private static string GetStagePillClass(
+        string? stageKey,
+        bool completed = false)
+    {
+        var key =
+            (stageKey ?? string.Empty)
+                .Trim()
+                .ToLowerInvariant();
+
+        return completed
+            ? $"thryv-stage-pill thryv-stage-{key} completed-stage-pill"
+            : $"thryv-stage-pill thryv-stage-{key}";
+    }
+
+    private static string GetDatabaseCode(
+        string? database)
+    {
+        if (string.IsNullOrWhiteSpace(
+                database))
+        {
+            return "-";
+        }
+
+        return database
+            .Trim()
+            .ToUpperInvariant();
+    }
+
+    private static string GetDatabaseFullName(
+        string? database)
+    {
+        if (string.IsNullOrWhiteSpace(
+                database))
+        {
+            return "Database not available";
+        }
+
+        var normalized =
+            database
+                .Trim()
+                .ToUpperInvariant();
+
+        return normalized switch
+        {
+            "DW" =>
+                "WEST",
+
+            "SN" =>
+                "vNorth",
+
+            "SW" =>
+                "vWest",
+
+            "SS" =>
+                "vSouth",
+
+            _ =>
+                database.Trim()
+        };
+    }
+
+    private static string GetAccuracyClass(
+        decimal value)
     {
         if (value >= 80)
+        {
             return "excellent";
+        }
 
         if (value > 50)
+        {
             return "warning";
+        }
 
         return "danger";
     }
 
-    private static int CountErrors(IEnumerable<EvaluationFailureOption> options)
+    private static int CountErrors(
+        IEnumerable<EvaluationFailureOption> options)
     {
-        return options.Count(x => x.HasError);
+        var count =
+            0;
+
+        foreach (var option in options)
+        {
+            if (option.HasError)
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
-    private static List<EvaluationFailureOption> GetMotifYpOptions(WeeklyEvaluationDashboardDto item)
+    private static List<EvaluationFailureOption>
+        GetMotifYpOptions(
+            WeeklyEvaluationDashboardDto item)
     {
         return new List<EvaluationFailureOption>
         {
-            new("Touching Rule", item.TouchingRule),
-            new("Pages With Swapped", item.PagesSwapped),
-            new("PPLP with wrong place", item.PplpWrongPlace),
-            new("Coupons with heading", item.CouponsHeading),
-            new("Double truck with wrong placement", item.DoubleTruckWrongPlace),
-            new("Fillers outside", item.FillersOutside),
-            new("Missing YSP filler", item.MissingYspFiller),
-            new("Grade of the pages under 75%", item.GradeUnder75)
+            new(
+                "Touching Rule",
+                item.TouchingRule),
+
+            new(
+                "Pages With Swapped",
+                item.PagesSwapped),
+
+            new(
+                "PPLP with wrong place",
+                item.PplpWrongPlace),
+
+            new(
+                "Coupons with heading",
+                item.CouponsHeading),
+
+            new(
+                "Double truck with wrong placement",
+                item.DoubleTruckWrongPlace),
+
+            new(
+                "Fillers outside",
+                item.FillersOutside),
+
+            new(
+                "Missing YSP filler",
+                item.MissingYspFiller),
+
+            new(
+                "Grade of the pages under 75%",
+                item.GradeUnder75)
         };
     }
 
-    private static List<EvaluationFailureOption> GetMotifWpOptions(WeeklyEvaluationDashboardDto item)
+    private static List<EvaluationFailureOption>
+        GetMotifWpOptions(
+            WeeklyEvaluationDashboardDto item)
     {
         return new List<EvaluationFailureOption>
         {
-            new("WDQCS no touching with anchor", item.WdqcsNoAnchors),
-            new("WHPS no touching with anchor", item.WhpsNoAnchors),
-            new("WPFS no touching with anchor", item.WfpsNoAnchors)
+            new(
+                "WDQCS no touching with anchor",
+                item.WdqcsNoAnchors),
+
+            new(
+                "WHPS no touching with anchor",
+                item.WhpsNoAnchors),
+
+            new(
+                "WPFS no touching with anchor",
+                item.WfpsNoAnchors)
         };
     }
 
-    private static List<EvaluationFailureOption> GetInventoryOptions(WeeklyEvaluationDashboardDto item)
+    private static List<EvaluationFailureOption>
+        GetInventoryOptions(
+            WeeklyEvaluationDashboardDto item)
     {
         return new List<EvaluationFailureOption>
         {
-            new("Missing Corner Ad", item.MissingCornerAd),
-            new("Missing Banner", item.MissingBanner),
-            new("Missing Random Tab", item.MissingRandomTab),
-            new("Missing Forced Tab", item.MissingForcedTab)
+            new(
+                "Missing Corner Ad",
+                item.MissingCornerAd),
+
+            new(
+                "Missing Banner",
+                item.MissingBanner),
+
+            new(
+                "Missing Random Tab",
+                item.MissingRandomTab),
+
+            new(
+                "Missing Forced Tab",
+                item.MissingForcedTab)
         };
     }
 
-    private static List<EvaluationFailureOption> GetShippingOptions(WeeklyEvaluationDashboardDto item)
+    private static List<EvaluationFailureOption>
+        GetShippingOptions(
+            WeeklyEvaluationDashboardDto item)
     {
         return new List<EvaluationFailureOption>
         {
-            new("File Naming Issue", item.FileNamingIssue),
-            new("Output with wrong date", item.OutputWrongDate),
-            new("Wrong Pitstop", item.WrongPitstop),
-            new("Restaurant Bleed Bar issue", item.RestaurantBleedIssue),
-            new("Wrong SIG fillers", item.WrongSigFiller),
-            new("FOB folder", item.FobFolder),
-            new("Missing paid item", item.MissingPaidItem),
-            new("Missing self promo", item.MissingSelfPromo)
+            new(
+                "File Naming Issue",
+                item.FileNamingIssue),
+
+            new(
+                "Output with wrong date",
+                item.OutputWrongDate),
+
+            new(
+                "Wrong Pitstop",
+                item.WrongPitstop),
+
+            new(
+                "Restaurant Bleed Bar issue",
+                item.RestaurantBleedIssue),
+
+            new(
+                "Wrong SIG fillers",
+                item.WrongSigFiller),
+
+            new(
+                "FOB folder",
+                item.FobFolder),
+
+            new(
+                "Missing paid item",
+                item.MissingPaidItem),
+
+            new(
+                "Missing self promo",
+                item.MissingSelfPromo)
         };
     }
 
-    private static List<EvaluationFailureOption> GetTaskMemoOptions(WeeklyEvaluationDashboardDto item)
+    private static List<EvaluationFailureOption>
+        GetTaskMemoOptions(
+            WeeklyEvaluationDashboardDto item)
     {
         return new List<EvaluationFailureOption>
         {
-            new("Corrections no properly applied", item.Corrections),
-            new("Pending corrections", item.PendingCorrections),
-            new("Task memo closed with the wrong comment", item.TaskMemoWrongComment)
+            new(
+                "Corrections no properly applied",
+                item.Corrections),
+
+            new(
+                "Pending corrections",
+                item.PendingCorrections),
+
+            new(
+                "Task memo closed with the wrong comment",
+                item.TaskMemoWrongComment)
         };
     }
 
-    private static bool HasPermission(ClaimsPrincipal? user, string claimType)
-    {
-        if (user is null)
-            return false;
+    private sealed record StageFilterOption(
+        string Key,
+        string Label);
 
-        return string.Equals(
-            user.FindFirst(claimType)?.Value,
-            "True",
-            StringComparison.OrdinalIgnoreCase);
-    }
+    private sealed record EvaluationFailureOption(
+        string Label,
+        bool HasError);
 
-    private record StageFilterOption(string Key, string Label);
-
-    private record EvaluationFailureOption(string Label, bool HasError);
+    private sealed record AssignedBookRank(
+        AssignedBookDashboardDto Item,
+        int StageOrder);
 }

@@ -910,97 +910,210 @@ else
     private List<State> States { get; set; } = new();
     private List<Trim_Size> TrimSizes { get; set; } = new();
 
-    private Libros Formulario { get; set; } = new();
+    // Lookups O(1) para render, filtros, exportación e importación.
+    private Dictionary<short, string> _employeeTypeCodeById = new();
+    private Dictionary<string, EmployeeType> _employeeTypeByCode = new(StringComparer.OrdinalIgnoreCase);
 
+    private Dictionary<Guid, string> _bindPlantNameById = new();
+    private Dictionary<string, Guid> _bindPlantIdByName = new(StringComparer.OrdinalIgnoreCase);
+
+    private Dictionary<Guid, string> _databaseNameById = new();
+    private Dictionary<string, Guid> _databaseIdByName = new(StringComparer.OrdinalIgnoreCase);
+
+    private Dictionary<Guid, string> _legacyCodeNameById = new();
+    private Dictionary<string, Guid> _legacyCodeIdByName = new(StringComparer.OrdinalIgnoreCase);
+
+    private Dictionary<Guid, string> _printFootNameById = new();
+    private Dictionary<string, Guid> _printFootIdByName = new(StringComparer.OrdinalIgnoreCase);
+
+    private Dictionary<Guid, string> _stateNameById = new();
+    private Dictionary<string, Guid> _stateIdByName = new(StringComparer.OrdinalIgnoreCase);
+
+    private Dictionary<Guid, string> _trimSizeNameById = new();
+    private Dictionary<string, Guid> _trimSizeIdByName = new(StringComparer.OrdinalIgnoreCase);
+
+    private Libros Formulario { get; set; } = new();
     private Guid? LibroSeleccionadoId { get; set; }
 
-    private string Busqueda { get; set; } = string.Empty;
+    private string _busqueda = string.Empty;
+    private string _selectedPubMonth = string.Empty;
+    private DateOnly? _fechaDesdeFiltro;
+    private DateOnly? _fechaHastaFiltro;
+
+    private string Busqueda
+    {
+        get => _busqueda;
+        set
+        {
+            value ??= string.Empty;
+            if (string.Equals(_busqueda, value, StringComparison.Ordinal))
+                return;
+
+            _busqueda = value;
+            RecalcularVistaLibros();
+        }
+    }
+
+    private string SelectedPubMonth
+    {
+        get => _selectedPubMonth;
+        set
+        {
+            value ??= string.Empty;
+            if (string.Equals(_selectedPubMonth, value, StringComparison.Ordinal))
+                return;
+
+            _selectedPubMonth = value;
+            RecalcularVistaLibros();
+        }
+    }
+
+    private DateOnly? FechaDesdeFiltro
+    {
+        get => _fechaDesdeFiltro;
+        set
+        {
+            if (_fechaDesdeFiltro == value)
+                return;
+
+            _fechaDesdeFiltro = value;
+            RecalcularVistaLibros();
+        }
+    }
+
+    private DateOnly? FechaHastaFiltro
+    {
+        get => _fechaHastaFiltro;
+        set
+        {
+            if (_fechaHastaFiltro == value)
+                return;
+
+            _fechaHastaFiltro = value;
+            RecalcularVistaLibros();
+        }
+    }
+
     private string Mensaje { get; set; } = string.Empty;
     private string TipoMensaje { get; set; } = "success";
-    private bool ExportandoXlsx { get; set; } = false;
-    private bool DescargandoPlantillaXlsx { get; set; } = false;
+    private bool ExportandoXlsx { get; set; }
+    private bool DescargandoPlantillaXlsx { get; set; }
 
     private bool Cargando { get; set; } = true;
     private bool CargandoInicial { get; set; } = true;
     private bool _cargaInicialIniciada;
-    private bool Guardando { get; set; } = false;
-    private bool ImportandoXlsx { get; set; } = false;
+    private bool Guardando { get; set; }
+    private bool ImportandoXlsx { get; set; }
 
-    private int XlsxInputKey { get; set; } = 0;
+    private int XlsxInputKey { get; set; }
 
-    private bool ActualizandoLibrosXlsx { get; set; } = false;
+    private bool ActualizandoLibrosXlsx { get; set; }
     private Guid XlsxUpdateInputKey { get; set; } = Guid.NewGuid();
 
     private const long MaxXlsxSize = 20 * 1024 * 1024;
 
-    private string SelectedPubMonth { get; set; } = string.Empty;
     private string SortColumn { get; set; } = "BookName";
-    private bool SortDescending { get; set; } = false;
-    private DateOnly? FechaDesdeFiltro { get; set; }
-    private DateOnly? FechaHastaFiltro { get; set; }
+    private bool SortDescending { get; set; }
 
-    private bool MostrarModalActualizacionXlsx { get; set; } = false;
+    private bool MostrarModalActualizacionXlsx { get; set; }
     private ActualizacionLibrosResultado? ResultadoActualizacionModal { get; set; }
     private string TituloModalActualizacionXlsx { get; set; } = "XLSX Books Update";
     private string TipoModalActualizacionXlsx { get; set; } = "success";
 
-    private bool MostrarModalResultadoLibro { get; set; } = false;
+    private bool MostrarModalResultadoLibro { get; set; }
     private string TituloModalResultadoLibro { get; set; } = string.Empty;
     private string MensajeModalResultadoLibro { get; set; } = string.Empty;
     private string TipoModalResultadoLibro { get; set; } = "success";
 
-    private IEnumerable<Libros> LibrosFiltrados
+    // Cache de la vista para no repetir filtros y ordenamiento varias veces por render.
+    private List<Libros> _librosFiltradosCache = new();
+    private List<Libros> _librosOrdenadosCache = new();
+    private List<PubMonthOption> _pubDateMonthsCache = new();
+
+    private IReadOnlyList<Libros> LibrosFiltrados => _librosFiltradosCache;
+    private IReadOnlyList<Libros> LibrosOrdenados => _librosOrdenadosCache;
+    private IReadOnlyList<PubMonthOption> PubDateMonths => _pubDateMonthsCache;
+
+    private DateOnly? _ultimaFechaFinalizacionAutomatica;
+
+    private void RecalcularVistaLibros()
     {
-        get
+        IEnumerable<Libros> query = Libros;
+
+        if (!string.IsNullOrWhiteSpace(_busqueda))
         {
-            IEnumerable<Libros> query = Libros;
+            var filtro = _busqueda.Trim();
 
-            if (!string.IsNullOrWhiteSpace(Busqueda))
-            {
-                var filtro = Busqueda.Trim().ToLowerInvariant();
-
-                query = query.Where(l =>
-                    (l.BookName ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                    (l.KGENCode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                    (l.LSACode ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                    (l.ProductIssue ?? string.Empty).ToLowerInvariant().Contains(filtro) ||
-                    GetEmployeeTypeCode(l.EmployeeTypeId).ToLowerInvariant().Contains(filtro) ||
-                    GetStateName(l.StateId).ToLowerInvariant().Contains(filtro) ||
-                    GetDatabaseName(l.DatabaseId).ToLowerInvariant().Contains(filtro) ||
-                    GetLegacyCodeName(l.LegacyCodeId).ToLowerInvariant().Contains(filtro) ||
-                    GetPrintFootName(l.PrintFootId).ToLowerInvariant().Contains(filtro) ||
-                    GetTrimSizeName(l.TrimSizeId).ToLowerInvariant().Contains(filtro) ||
-                    GetBindPlantName(l.BindPlantId).ToLowerInvariant().Contains(filtro));
-            }
-
-            if (!string.IsNullOrWhiteSpace(SelectedPubMonth))
-            {
-                query = query.Where(l => GetPubMonthValue(l.PubDate) == SelectedPubMonth);
-            }
-
-            var fechaDesde = FechaDesdeFiltro;
-            var fechaHasta = FechaHastaFiltro;
-
-            if (fechaDesde.HasValue &&
-                fechaHasta.HasValue &&
-                fechaDesde.Value > fechaHasta.Value)
-            {
-                (fechaDesde, fechaHasta) = (fechaHasta, fechaDesde);
-            }
-
-            if (fechaDesde.HasValue || fechaHasta.HasValue)
-            {
-                query = query.Where(l =>
-                    FechaEtapaDentroDelRango(l.ProofExtract, fechaDesde, fechaHasta) ||
-                    FechaEtapaDentroDelRango(l.FinalExtract, fechaDesde, fechaHasta) ||
-                    FechaEtapaDentroDelRango(l.MemoExtract, fechaDesde, fechaHasta) ||
-                    FechaEtapaDentroDelRango(l.FinalPODate, fechaDesde, fechaHasta) ||
-                    FechaEtapaDentroDelRango(l.ShippingDate, fechaDesde, fechaHasta) ||
-                    FechaEtapaDentroDelRango(l.DirxionDate, fechaDesde, fechaHasta));
-            }
-
-            return query;
+            query = query.Where(l =>
+                Contiene(l.BookName, filtro) ||
+                Contiene(l.KGENCode, filtro) ||
+                Contiene(l.LSACode, filtro) ||
+                Contiene(l.ProductIssue, filtro) ||
+                Contiene(GetEmployeeTypeCode(l.EmployeeTypeId), filtro) ||
+                Contiene(GetStateName(l.StateId), filtro) ||
+                Contiene(GetDatabaseName(l.DatabaseId), filtro) ||
+                Contiene(GetLegacyCodeName(l.LegacyCodeId), filtro) ||
+                Contiene(GetPrintFootName(l.PrintFootId), filtro) ||
+                Contiene(GetTrimSizeName(l.TrimSizeId), filtro) ||
+                Contiene(GetBindPlantName(l.BindPlantId), filtro));
         }
+
+        if (!string.IsNullOrWhiteSpace(_selectedPubMonth))
+        {
+            query = query.Where(l => GetPubMonthValue(l.PubDate) == _selectedPubMonth);
+        }
+
+        var fechaDesde = _fechaDesdeFiltro;
+        var fechaHasta = _fechaHastaFiltro;
+
+        if (fechaDesde.HasValue && fechaHasta.HasValue && fechaDesde.Value > fechaHasta.Value)
+        {
+            (fechaDesde, fechaHasta) = (fechaHasta, fechaDesde);
+        }
+
+        if (fechaDesde.HasValue || fechaHasta.HasValue)
+        {
+            query = query.Where(l =>
+                FechaEtapaDentroDelRango(l.ProofExtract, fechaDesde, fechaHasta) ||
+                FechaEtapaDentroDelRango(l.FinalExtract, fechaDesde, fechaHasta) ||
+                FechaEtapaDentroDelRango(l.MemoExtract, fechaDesde, fechaHasta) ||
+                FechaEtapaDentroDelRango(l.FinalPODate, fechaDesde, fechaHasta) ||
+                FechaEtapaDentroDelRango(l.ShippingDate, fechaDesde, fechaHasta) ||
+                FechaEtapaDentroDelRango(l.DirxionDate, fechaDesde, fechaHasta));
+        }
+
+        _librosFiltradosCache = query.ToList();
+        RecalcularOrdenLibros();
+    }
+
+    private void RecalcularOrdenLibros()
+    {
+        _librosOrdenadosCache = ApplySorting(_librosFiltradosCache).ToList();
+    }
+
+    private void RecalcularMesesPubDate()
+    {
+        _pubDateMonthsCache = Libros
+            .Where(l => l.PubDate != default)
+            .GroupBy(l => GetPubMonthValue(l.PubDate))
+            .Select(g =>
+            {
+                var firstDate = g.First().PubDate;
+                return new PubMonthOption
+                {
+                    Value = g.Key,
+                    Label = GetPubMonthLabel(firstDate),
+                    Count = g.Count()
+                };
+            })
+            .OrderByDescending(x => x.Value)
+            .ToList();
+    }
+
+    private static bool Contiene(string? source, string filtro)
+    {
+        return !string.IsNullOrEmpty(source) &&
+               source.Contains(filtro, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool FechaEtapaDentroDelRango(
@@ -1156,25 +1269,25 @@ else
 
             var widths = new double[]
             {
-                18, 
-                34, 
+                18,
+                34,
                 22,
-                18, 
-                20, 
-                20, 
-                18, 
-                18, 
-                22, 
-                18, 
-                18, 
-                19, 
-                18, 
-                18, 
-                18, 
-                18, 
-                18, 
-                22, 
-                12  
+                18,
+                20,
+                20,
+                18,
+                18,
+                22,
+                18,
+                18,
+                19,
+                18,
+                18,
+                18,
+                18,
+                18,
+                22,
+                12
             };
 
             for (var column = 1; column <= widths.Length; column++)
@@ -1782,6 +1895,10 @@ else
 
             var headerMap = BuildHeaderMap(headerRow);
 
+            var filasDatos = worksheet.RowsUsed()
+                .Where(r => r.RowNumber() > headerRow.RowNumber())
+                .ToList();
+
             if (!HeaderExists(headerMap, "employee_type", "Employee Type"))
             {
                 MostrarMensaje("The XLSX file must contain the 'employee_type' column.", "error");
@@ -1794,13 +1911,36 @@ else
                 return;
             }
 
+            var kgenKeys = filasDatos
+                .Select(row => ReadText(
+                    row,
+                    headerMap,
+                    "KGen Product Code",
+                    "KGEN Product Code",
+                    "KGEN Code"))
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(NormalizarKgen)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            var librosDb = await db.Libros.ToListAsync();
+            var librosDb = kgenKeys.Count == 0
+                ? new List<Libros>()
+                : await db.Libros
+                    .Where(l =>
+                        l.KGENCode != null &&
+                        kgenKeys.Contains(l.KGENCode.Trim().ToUpper()))
+                    .ToListAsync();
+
+            var librosPorKgen = librosDb
+                .Where(x => !string.IsNullOrWhiteSpace(x.KGENCode))
+                .GroupBy(x => NormalizarKgen(x.KGENCode), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
+            foreach (var row in filasDatos)
             {
                 var rowNumber = row.RowNumber();
 
@@ -1840,7 +1980,7 @@ else
                     continue;
                 }
 
-                var libro = BuscarLibroPorCodigos(librosDb, kgenCode, lsaCode);
+                librosPorKgen.TryGetValue(NormalizarKgen(kgenCode), out var libro);
 
                 if (libro is null)
                 {
@@ -2108,16 +2248,7 @@ else
         }
     }
 
-    private static Libros? BuscarLibroPorCodigos(List<Libros> libros, string kgenCode, string lsaCode)
-    {
-        var kgen = kgenCode?.Trim();
 
-        if (string.IsNullOrWhiteSpace(kgen))
-            return null;
-
-        return libros.FirstOrDefault(x =>
-            string.Equals(x.KGENCode?.Trim(), kgen, StringComparison.OrdinalIgnoreCase));
-    }
 
     private static DateOnly? ReadOptionalDateWithValidation(
     IXLRow row,
@@ -2190,30 +2321,6 @@ else
             return;
 
         SeleccionarLibro(libro);
-    }
-
-    private IEnumerable<Libros> LibrosOrdenados => ApplySorting(LibrosFiltrados);
-
-    private IEnumerable<PubMonthOption> PubDateMonths
-    {
-        get
-        {
-            return Libros
-                .Where(l => l.PubDate != default)
-                .GroupBy(l => GetPubMonthValue(l.PubDate))
-                .Select(g =>
-                {
-                    var firstDate = g.First().PubDate;
-
-                    return new PubMonthOption
-                    {
-                        Value = g.Key,
-                        Label = GetPubMonthLabel(firstDate),
-                        Count = g.Count()
-                    };
-                })
-                .OrderByDescending(x => x.Value);
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -2328,12 +2435,73 @@ else
                 .AsNoTracking()
                 .OrderBy(x => x.Trim_Size_Name)
                 .ToListAsync();
+
+            ConstruirLookupsCatalogos();
         }
         catch (Exception ex)
         {
             MostrarMensaje($"Error loading catalogs: {ex.Message}", "error");
         }
     }
+
+    private void ConstruirLookupsCatalogos()
+    {
+        _employeeTypeCodeById = EmployeeTypes
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().Code ?? string.Empty);
+
+        _employeeTypeByCode = EmployeeTypes
+            .Where(x => !string.IsNullOrWhiteSpace(x.Code))
+            .GroupBy(x => x.Code.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        _bindPlantNameById = BindPlants
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().Bind_Plant_Name ?? "-");
+        _bindPlantIdByName = CrearLookupNombreId(BindPlants, x => x.Id, x => x.Bind_Plant_Name);
+
+        _databaseNameById = Databases
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().Database_Name ?? "-");
+        _databaseIdByName = CrearLookupNombreId(Databases, x => x.Id, x => x.Database_Name);
+
+        _legacyCodeNameById = LegacyCodes
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().Legacy_Code_Name ?? "-");
+        _legacyCodeIdByName = CrearLookupNombreId(LegacyCodes, x => x.Id, x => x.Legacy_Code_Name);
+
+        _printFootNameById = PrintFeet
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().Print_Foot_Name ?? "-");
+        _printFootIdByName = CrearLookupNombreId(PrintFeet, x => x.Id, x => x.Print_Foot_Name);
+
+        _stateNameById = States
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().State_Name ?? "-");
+        _stateIdByName = CrearLookupNombreId(States, x => x.Id, x => x.State_Name);
+
+        _trimSizeNameById = TrimSizes
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.First().Trim_Size_Name ?? "-");
+        _trimSizeIdByName = CrearLookupNombreId(TrimSizes, x => x.Id, x => x.Trim_Size_Name);
+    }
+
+    private static Dictionary<string, Guid> CrearLookupNombreId<T>(
+        IEnumerable<T> source,
+        Func<T, Guid> idSelector,
+        Func<T, string?> nameSelector)
+    {
+        return source
+            .Select(x => new
+            {
+                Id = idSelector(x),
+                Name = nameSelector(x)
+            })
+            .Where(x => x.Id != Guid.Empty && !string.IsNullOrWhiteSpace(x.Name))
+            .GroupBy(x => x.Name!.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
+    }
+
 
     private async Task CargarLibrosAsync()
     {
@@ -2347,13 +2515,15 @@ else
 
             Libros = await db.Libros
                 .AsNoTracking()
-                .Include(l => l.EmployeeType)
                 .ApplyScope(Scope)
                 .Where(l => !l.Finalizado)
                 .OrderBy(l => l.BookName)
                 .ToListAsync();
 
             await CargarEtapasTrabajadasAsync(db);
+
+            RecalcularMesesPubDate();
+            RecalcularVistaLibros();
         }
         catch (Exception ex)
         {
@@ -2450,33 +2620,46 @@ else
     {
         var hoy = DateOnly.FromDateTime(DateTime.Today);
 
-        var librosParaFinalizar = await db.Libros
-            .ApplyScope(Scope)
-            .Include(l => l.Asignaciones)
-                .ThenInclude(a => a.Evaluaciones)
-            .Where(l => !l.Finalizado &&
-                        l.DirxionDate < hoy)
-            .ToListAsync();
-
-        if (!librosParaFinalizar.Any())
+        if (_ultimaFechaFinalizacionAutomatica == hoy)
             return;
 
-        foreach (var libro in librosParaFinalizar)
+        var strategy = db.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
         {
-            libro.Finalizado = true;
+            await using var transaction = await db.Database.BeginTransactionAsync();
 
-            foreach (var asignacion in libro.Asignaciones)
-            {
-                asignacion.Finalizado = true;
+            await db.Evaluaciones
+                .ApplyScope(Scope)
+                .Where(e =>
+                    !e.Finalizado &&
+                    e.Asignacion != null &&
+                    e.Asignacion.Libro != null &&
+                    e.Asignacion.Libro.DirxionDate < hoy)
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(e => e.Finalizado, true));
 
-                foreach (var evaluacion in asignacion.Evaluaciones)
-                {
-                    evaluacion.Finalizado = true;
-                }
-            }
-        }
+            await db.Asignaciones
+                .ApplyScope(Scope)
+                .Where(a =>
+                    !a.Finalizado &&
+                    a.Libro != null &&
+                    a.Libro.DirxionDate < hoy)
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(a => a.Finalizado, true));
 
-        await db.SaveChangesAsync();
+            await db.Libros
+                .ApplyScope(Scope)
+                .Where(l =>
+                    !l.Finalizado &&
+                    l.DirxionDate < hoy)
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(l => l.Finalizado, true));
+
+            await transaction.CommitAsync();
+        });
+
+        _ultimaFechaFinalizacionAutomatica = hoy;
     }
 
     private async Task GuardarLibroAsync()
@@ -2524,6 +2707,7 @@ else
 
             Formulario.BookName = Formulario.BookName.Trim();
             Formulario.KGENCode = Formulario.KGENCode.Trim();
+            Formulario.LSACode = Formulario.LSACode?.Trim() ?? string.Empty;
 
             var editando = Formulario.Id != Guid.Empty;
             var nombreLibro = Formulario.BookName;
@@ -2531,9 +2715,13 @@ else
             await using var db = await DbFactory.CreateDbContextAsync();
 
             var normalizedKgen = Formulario.KGENCode.ToUpperInvariant();
-            var duplicatedKgen = await db.Libros.AnyAsync(l =>
-                l.Id != Formulario.Id &&
-                l.KGENCode.Trim().ToUpper() == normalizedKgen);
+
+            var duplicatedKgen = await db.Libros
+                .AsNoTracking()
+                .AnyAsync(l =>
+                    l.Id != Formulario.Id &&
+                    l.KGENCode != null &&
+                    l.KGENCode.Trim().ToUpper() == normalizedKgen);
 
             if (duplicatedKgen)
             {
@@ -2548,8 +2736,14 @@ else
             {
                 Formulario.Id = Guid.NewGuid();
 
-                db.Libros.Add(ClonarLibro(Formulario));
+                var nuevoLibro = ClonarLibro(Formulario);
+                db.Libros.Add(nuevoLibro);
                 await db.SaveChangesAsync();
+
+                if (!nuevoLibro.Finalizado && Scope.CanAccess(nuevoLibro.EmployeeTypeId))
+                {
+                    Libros.Add(ClonarLibro(nuevoLibro));
+                }
             }
             else
             {
@@ -2567,7 +2761,9 @@ else
                 }
 
                 if (libroDb.EmployeeTypeId != Formulario.EmployeeTypeId &&
-                    await db.Asignaciones.AnyAsync(a => a.IdLibro == libroDb.Id))
+                    await db.Asignaciones
+                        .AsNoTracking()
+                        .AnyAsync(a => a.IdLibro == libroDb.Id))
                 {
                     MostrarResultadoLibro(
                         "Department cannot be changed",
@@ -2601,9 +2797,32 @@ else
                 libroDb.NWP = Formulario.NWP;
 
                 await db.SaveChangesAsync();
+
+                var index = Libros.FindIndex(x => x.Id == libroDb.Id);
+
+                if (libroDb.Finalizado)
+                {
+                    if (index >= 0)
+                        Libros.RemoveAt(index);
+                }
+                else
+                {
+                    var copia = ClonarLibro(libroDb);
+
+                    if (index >= 0)
+                        Libros[index] = copia;
+                    else
+                        Libros.Add(copia);
+                }
             }
 
-            await CargarLibrosAsync();
+            Libros = Libros
+                .OrderBy(x => x.BookName)
+                .ToList();
+
+            RecalcularMesesPubDate();
+            RecalcularVistaLibros();
+
             LimpiarFormulario();
 
             MostrarResultadoLibro(
@@ -2651,9 +2870,12 @@ else
             return;
         }
 
+        var idLibro = Formulario.Id;
+        var nombreLibro = Formulario.BookName;
+
         var confirmar = await JS.InvokeAsync<bool>(
             "confirm",
-            $"Are you sure you want to delete '{Formulario.BookName}'?");
+            $"Are you sure you want to delete '{nombreLibro}'?");
 
         if (!confirmar)
             return;
@@ -2666,7 +2888,7 @@ else
 
             var libroDb = await db.Libros
                 .ApplyScope(Scope)
-                .FirstOrDefaultAsync(l => l.Id == Formulario.Id);
+                .FirstOrDefaultAsync(l => l.Id == idLibro);
 
             if (libroDb is null)
             {
@@ -2677,14 +2899,25 @@ else
             db.Libros.Remove(libroDb);
             await db.SaveChangesAsync();
 
-            MostrarMensaje("Book deleted successfully.", "success");
+            Libros.RemoveAll(x => x.Id == idLibro);
+            EtapasTrabajadasPorLibro.Remove(idLibro);
 
-            await CargarLibrosAsync();
+            RecalcularMesesPubDate();
+            RecalcularVistaLibros();
+
             LimpiarFormulario();
+
+            MostrarResultadoLibro(
+                "Book deleted",
+                $"The book '{nombreLibro}' was deleted successfully.",
+                "success");
         }
         catch (Exception ex)
         {
-            MostrarMensaje($"Error deleting book: {ex.Message}", "error");
+            MostrarResultadoLibro(
+                "Error deleting book",
+                $"The book could not be deleted. {ex.Message}",
+                "error");
         }
         finally
         {
@@ -2834,6 +3067,10 @@ else
 
             var headerMap = BuildHeaderMap(headerRow);
 
+            var filasDatos = worksheet.RowsUsed()
+                .Where(r => r.RowNumber() > headerRow.RowNumber())
+                .ToList();
+
             if (!HeaderExists(headerMap, "employee_type", "Employee Type"))
             {
                 MostrarMensaje("The XLSX file must contain the 'employee_type' column.", "error");
@@ -2857,7 +3094,7 @@ else
             var skippedRows = 0;
             var catalogWarnings = new List<string>();
 
-            foreach (var row in worksheet.RowsUsed().Where(r => r.RowNumber() > headerRow.RowNumber()))
+            foreach (var row in filasDatos)
             {
                 var bookName = ReadText(row, headerMap, "Product Name");
                 var kgenCode = ReadText(row, headerMap, "KGen Product Code", "KGEN Product Code");
@@ -2981,12 +3218,23 @@ else
 
             await using var db = await DbFactory.CreateDbContextAsync();
 
-            var existingBooks = await db.Libros
-                .ToListAsync();
+            var importedKgenKeys = importedBooks
+                .Where(x => !string.IsNullOrWhiteSpace(x.KGENCode))
+                .Select(x => NormalizarKgen(x.KGENCode))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var existingBooks = importedKgenKeys.Count == 0
+                ? new List<Libros>()
+                : await db.Libros
+                    .Where(x =>
+                        x.KGENCode != null &&
+                        importedKgenKeys.Contains(x.KGENCode.Trim().ToUpper()))
+                    .ToListAsync();
 
             var existingDictionary = existingBooks
                 .Where(x => !string.IsNullOrWhiteSpace(x.KGENCode))
-                .GroupBy(x => x.KGENCode.Trim(), StringComparer.OrdinalIgnoreCase)
+                .GroupBy(x => NormalizarKgen(x.KGENCode), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             var inserted = 0;
@@ -2995,7 +3243,7 @@ else
             foreach (var imported in importedBooks)
             {
                 if (!string.IsNullOrWhiteSpace(imported.KGENCode) &&
-                    existingDictionary.TryGetValue(imported.KGENCode.Trim(), out var existing))
+                    existingDictionary.TryGetValue(NormalizarKgen(imported.KGENCode), out var existing))
                 {
                     if (existing.EmployeeTypeId != imported.EmployeeTypeId)
                     {
@@ -3078,15 +3326,22 @@ else
 
     private EmployeeType? ResolveEmployeeType(string? code)
     {
-        var normalized = (code ?? string.Empty).Trim().ToUpperInvariant();
-        return EmployeeTypes.FirstOrDefault(x =>
-            string.Equals(x.Code, normalized, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(code))
+            return null;
+
+        return _employeeTypeByCode.TryGetValue(code.Trim(), out var employeeType)
+            ? employeeType
+            : null;
     }
 
     private string GetEmployeeTypeCode(short employeeTypeId)
     {
-        return EmployeeTypes.FirstOrDefault(x => x.Id == employeeTypeId)?.Code
-            ?? (employeeTypeId == Scope.EmployeeTypeId ? Scope.EmployeeTypeCode : string.Empty);
+        if (_employeeTypeCodeById.TryGetValue(employeeTypeId, out var code))
+            return code;
+
+        return employeeTypeId == Scope.EmployeeTypeId
+            ? Scope.EmployeeTypeCode ?? string.Empty
+            : string.Empty;
     }
 
     private static DateOnly CalculateFinalPoDate(DateOnly firstDuePrinter)
@@ -3252,88 +3507,59 @@ else
         }
     }
 
-    private Guid? FindStateId(string name)
+    private Guid? FindStateId(string name) => BuscarCatalogoId(_stateIdByName, name);
+
+    private Guid? FindDatabaseId(string name) => BuscarCatalogoId(_databaseIdByName, name);
+
+    private Guid? FindLegacyCodeId(string name) => BuscarCatalogoId(_legacyCodeIdByName, name);
+
+    private Guid? FindPrintFootId(string name) => BuscarCatalogoId(_printFootIdByName, name);
+
+    private Guid? FindTrimSizeId(string name) => BuscarCatalogoId(_trimSizeIdByName, name);
+
+    private Guid? FindBindPlantId(string name) => BuscarCatalogoId(_bindPlantIdByName, name);
+
+    private string GetStateName(Guid? id) => GetCatalogName(_stateNameById, id);
+
+    private string GetDatabaseName(Guid? id) => GetCatalogName(_databaseNameById, id);
+
+    private string GetLegacyCodeName(Guid? id) => GetCatalogName(_legacyCodeNameById, id);
+
+    private string GetPrintFootName(Guid? id) => GetCatalogName(_printFootNameById, id);
+
+    private string GetTrimSizeName(Guid? id) => GetCatalogName(_trimSizeNameById, id);
+
+    private string GetBindPlantName(Guid? id) => GetCatalogName(_bindPlantNameById, id);
+
+    private static Guid? BuscarCatalogoId(
+        IReadOnlyDictionary<string, Guid> lookup,
+        string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return null;
 
-        return States.FirstOrDefault(x =>
-            string.Equals(x.State_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+        return lookup.TryGetValue(name.Trim(), out var id)
+            ? id
+            : null;
     }
 
-    private Guid? FindDatabaseId(string name)
+    private static string GetCatalogName(
+        IReadOnlyDictionary<Guid, string> lookup,
+        Guid? id)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return null;
+        if (!id.HasValue)
+            return "-";
 
-        return Databases.FirstOrDefault(x =>
-            string.Equals(x.Database_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
+        return lookup.TryGetValue(id.Value, out var value)
+            ? value
+            : "-";
     }
 
-    private Guid? FindLegacyCodeId(string name)
+    private static string NormalizarKgen(string? kgen)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return null;
-
-        return LegacyCodes.FirstOrDefault(x =>
-            string.Equals(x.Legacy_Code_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
-    }
-
-    private Guid? FindPrintFootId(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return null;
-
-        return PrintFeet.FirstOrDefault(x =>
-            string.Equals(x.Print_Foot_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
-    }
-
-    private Guid? FindTrimSizeId(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return null;
-
-        return TrimSizes.FirstOrDefault(x =>
-            string.Equals(x.Trim_Size_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
-    }
-
-    private Guid? FindBindPlantId(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return null;
-
-        return BindPlants.FirstOrDefault(x =>
-            string.Equals(x.Bind_Plant_Name?.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase))?.Id;
-    }
-
-    private string GetStateName(Guid? id)
-    {
-        return States.FirstOrDefault(x => x.Id == id)?.State_Name ?? "-";
-    }
-
-    private string GetDatabaseName(Guid? id)
-    {
-        return Databases.FirstOrDefault(x => x.Id == id)?.Database_Name ?? "-";
-    }
-
-    private string GetLegacyCodeName(Guid? id)
-    {
-        return LegacyCodes.FirstOrDefault(x => x.Id == id)?.Legacy_Code_Name ?? "-";
-    }
-
-    private string GetPrintFootName(Guid? id)
-    {
-        return PrintFeet.FirstOrDefault(x => x.Id == id)?.Print_Foot_Name ?? "-";
-    }
-
-    private string GetTrimSizeName(Guid? id)
-    {
-        return TrimSizes.FirstOrDefault(x => x.Id == id)?.Trim_Size_Name ?? "-";
-    }
-
-    private string GetBindPlantName(Guid? id)
-    {
-        return BindPlants.FirstOrDefault(x => x.Id == id)?.Bind_Plant_Name ?? "-";
+        return string.IsNullOrWhiteSpace(kgen)
+            ? string.Empty
+            : kgen.Trim().ToUpperInvariant();
     }
 
     private static string ToInputDate(DateOnly value)
@@ -3461,12 +3687,14 @@ else
         if (SortColumn == column)
         {
             SortDescending = !SortDescending;
-            return;
+        }
+        else
+        {
+            SortColumn = column;
+            SortDescending = IsDateColumn(column);
         }
 
-        SortColumn = column;
-
-        SortDescending = IsDateColumn(column);
+        RecalcularOrdenLibros();
     }
 
     private static bool IsDateColumn(string column)
@@ -3490,12 +3718,14 @@ else
 
     private void ClearListFilters()
     {
-        Busqueda = string.Empty;
-        SelectedPubMonth = string.Empty;
-        FechaDesdeFiltro = null;
-        FechaHastaFiltro = null;
+        _busqueda = string.Empty;
+        _selectedPubMonth = string.Empty;
+        _fechaDesdeFiltro = null;
+        _fechaHastaFiltro = null;
         SortColumn = "BookName";
         SortDescending = false;
+
+        RecalcularVistaLibros();
     }
 
     private static string GetPubMonthValue(DateOnly date)

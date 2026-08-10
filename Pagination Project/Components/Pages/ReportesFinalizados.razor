@@ -648,7 +648,6 @@ else
 }
 
 @code {
-
     private string TipoReporteSeleccionado { get; set; } = "Libros";
 
     private DateTime? FechaDesde { get; set; }
@@ -661,33 +660,68 @@ else
 
     private bool CargandoInicial { get; set; } = true;
     private bool _cargaInicialIniciada;
+
     private bool Cargando { get; set; }
     private bool DescargandoReporte { get; set; }
 
-    private bool MostrarModalResultadoReporte { get; set; }
-    private string TituloModalResultadoReporte { get; set; } = string.Empty;
-    private string MensajeModalResultadoReporte { get; set; } = string.Empty;
-    private string TipoModalResultadoReporte { get; set; } = "success";
-
     private bool EsEmpleado { get; set; }
+
     private UserDataScope Scope { get; set; } = new();
 
-    private List<EmpleadoFiltroDto> EmpleadosFiltro { get; set; } = new();
+    private bool MostrarModalResultadoReporte { get; set; }
 
-    private List<LibroReporteDto> LibrosReporte { get; set; } = new();
-    private List<AsignacionReporteDto> AsignacionesReporte { get; set; } = new();
-    private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } = new();
-    private List<LateWorkReporteDto> LateWorksReporte { get; set; } = new();
-    private List<AssignedBookDashboardDto> AsignacionesDiaSiguienteReporte { get; set; } = new();
-    private List<AssignedBookDashboardDto>? _asignacionesProgramadasBase;
-    private DateOnly? _fechaAsignacionesProgramadasBase;
-    private List<Database> Databases { get; set; } = new();
-    private List<Legacy_Code> LegacyCodes { get; set; } = new();
-    private List<State> States { get; set; } = new();
+    private string TituloModalResultadoReporte { get; set; } =
+        string.Empty;
+
+    private string MensajeModalResultadoReporte { get; set; } =
+        string.Empty;
+
+    private string TipoModalResultadoReporte { get; set; } =
+        "success";
+
+    private List<EmpleadoFiltroDto> EmpleadosFiltro { get; set; } =
+        new();
+
+    private List<LibroReporteDto> LibrosReporte { get; set; } =
+        new();
+
+    private List<AsignacionReporteDto> AsignacionesReporte { get; set; } =
+        new();
+
+    private List<EvaluacionReporteDto> EvaluacionesReporte { get; set; } =
+        new();
+
+    private List<LateWorkReporteDto> LateWorksReporte { get; set; } =
+        new();
+
+    private List<AssignedBookDashboardDto>
+        AsignacionesDiaSiguienteReporte
+    { get; set; } =
+            new();
+
+    private List<AssignedBookDashboardDto>?
+        _asignacionesProgramadasBase;
+
+    private DateOnly?
+        _fechaAsignacionesProgramadasBase;
+
+    private Dictionary<Guid, string> _databaseNames =
+        new();
+
+    private Dictionary<Guid, string> _legacyCodeNames =
+        new();
+
+    private Dictionary<Guid, string> _stateNames =
+        new();
+
+    private bool _catalogosCargados;
+
+    private DateOnly? _fechaFinalizacionAutomaticaAplicada;
 
     private bool EsReporteAsignacionesProgramadas =>
         TipoReporteSeleccionado == "NextDayAssignments" ||
         TipoReporteSeleccionado == "AssignmentsByDate";
+
 
     private bool PermiteFiltroEmpleado =>
         TipoReporteSeleccionado == "Asignaciones" ||
@@ -695,91 +729,195 @@ else
         TipoReporteSeleccionado == "LateWork" ||
         EsReporteAsignacionesProgramadas;
 
+
     private bool PuedeBuscar =>
         TipoReporteSeleccionado != "AssignmentsByDate" ||
         FechaReporteSeleccionada.HasValue;
 
+
     private DateOnly FechaAsignacionesProgramadasActual =>
         TipoReporteSeleccionado == "AssignmentsByDate"
             ? DateOnly.FromDateTime(
-                FechaReporteSeleccionada?.Date ?? DateTime.Today)
+                FechaReporteSeleccionada?.Date
+                ?? DateTime.Today)
             : FechaAsignacionesDiaSiguiente;
+
 
     private int CantidadEmpleadosProgramados =>
         AsignacionesDiaSiguienteReporte
-            .Where(x => x.EmployeeId != Guid.Empty)
-            .Select(x => x.EmployeeId)
+            .Where(x =>
+                x.EmployeeId != Guid.Empty)
+            .Select(x =>
+                x.EmployeeId)
             .Distinct()
             .Count();
+
 
     private bool TieneDatos =>
         TipoReporteSeleccionado switch
         {
-            "Libros" => LibrosReporte.Any(),
-            "Asignaciones" => AsignacionesReporte.Any(),
-            "Evaluaciones" => EvaluacionesReporte.Any(),
-            "LateWork" => LateWorksReporte.Any(),
-            "NextDayAssignments" => AsignacionesDiaSiguienteReporte.Any(),
-            "AssignmentsByDate" => AsignacionesDiaSiguienteReporte.Any(),
+            "Libros" =>
+                LibrosReporte.Count > 0,
+
+            "Asignaciones" =>
+                AsignacionesReporte.Count > 0,
+
+            "Evaluaciones" =>
+                EvaluacionesReporte.Count > 0,
+
+            "LateWork" =>
+                LateWorksReporte.Count > 0,
+
+            "NextDayAssignments" =>
+                AsignacionesDiaSiguienteReporte.Count > 0,
+
+            "AssignmentsByDate" =>
+                AsignacionesDiaSiguienteReporte.Count > 0,
+
             _ => false
         };
+
 
     private int TotalActual =>
         TipoReporteSeleccionado switch
         {
-            "Libros" => LibrosReporte.Count,
-            "Asignaciones" => AsignacionesReporte.Count,
-            "Evaluaciones" => EvaluacionesReporte.Count,
-            "LateWork" => LateWorksReporte.Count,
-            "NextDayAssignments" => AsignacionesDiaSiguienteReporte.Count,
-            "AssignmentsByDate" => AsignacionesDiaSiguienteReporte.Count,
+            "Libros" =>
+                LibrosReporte.Count,
+
+            "Asignaciones" =>
+                AsignacionesReporte.Count,
+
+            "Evaluaciones" =>
+                EvaluacionesReporte.Count,
+
+            "LateWork" =>
+                LateWorksReporte.Count,
+
+            "NextDayAssignments" =>
+                AsignacionesDiaSiguienteReporte.Count,
+
+            "AssignmentsByDate" =>
+                AsignacionesDiaSiguienteReporte.Count,
+
             _ => 0
         };
+
 
     private string TituloListado =>
         TipoReporteSeleccionado switch
         {
-            "Libros" => "Finished Books List",
-            "Asignaciones" => "Finished Assignments List",
-            "Evaluaciones" => "Finished Evaluations List",
-            "LateWork" => "Finished Late Work List",
-            "NextDayAssignments" => "Next Day Assignments List",
-            "AssignmentsByDate" => "Assignments by Date List",
-            _ => "Finished Report"
+            "Libros" =>
+                "Finished Books List",
+
+            "Asignaciones" =>
+                "Finished Assignments List",
+
+            "Evaluaciones" =>
+                "Finished Evaluations List",
+
+            "LateWork" =>
+                "Finished Late Work List",
+
+            "NextDayAssignments" =>
+                "Next Day Assignments List",
+
+            "AssignmentsByDate" =>
+                "Assignments by Date List",
+
+            _ =>
+                "Finished Report"
         };
+
 
     private string SubtituloListado =>
         TipoReporteSeleccionado switch
         {
-            "Libros" => "Showing only finalized books.",
-            "Asignaciones" => "Showing only finalized assignments.",
-            "Evaluaciones" => "Showing only finalized evaluations.",
-            "LateWork" => "Showing Late Work activities from books already finalized by Dirxion date.",
-            "NextDayAssignments" => $"Assignments scheduled for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}",
-            "AssignmentsByDate" => $"Assignments scheduled for {FechaAsignacionesProgramadasActual:MM/dd/yyyy}",
-            _ => string.Empty
+            "Libros" =>
+                "Showing only finalized books.",
+
+            "Asignaciones" =>
+                "Showing only finalized assignments.",
+
+            "Evaluaciones" =>
+                "Showing only finalized evaluations.",
+
+            "LateWork" =>
+                "Showing Late Work activities from books already finalized by Dirxion date.",
+
+            "NextDayAssignments" =>
+                $"Assignments scheduled for {FechaAsignacionesDiaSiguiente:MM/dd/yyyy}",
+
+            "AssignmentsByDate" =>
+                $"Assignments scheduled for {FechaAsignacionesProgramadasActual:MM/dd/yyyy}",
+
+            _ =>
+                string.Empty
         };
+
 
     private string MensajeSinDatos =>
         EsReporteAsignacionesProgramadas
+
             ? $"No assignments found for {FechaAsignacionesProgramadasActual:MM/dd/yyyy}."
+
             : "No finalized records found with the selected filters.";
+
+
+    private string TituloReporteActual =>
+        TipoReporteSeleccionado switch
+        {
+            "Libros" =>
+                "Finished Books",
+
+            "Asignaciones" =>
+                "Finished Assignments",
+
+            "Evaluaciones" =>
+                "Finished Evaluations",
+
+            "LateWork" =>
+                "Finished Late Work",
+
+            "NextDayAssignments" =>
+                "Next Day Assignments",
+
+            "AssignmentsByDate" =>
+                "Assignments by Date",
+
+            _ =>
+                "Report"
+        };
 
     protected override void OnInitialized()
     {
-        FechaDesde = DateTime.Today.AddMonths(-1);
-        FechaHasta = DateTime.Today;
-        FechaReporteSeleccionada = DateTime.Today;
-        FechaAsignacionesDiaSiguiente = ObtenerSiguienteDiaLaborable(
-            DateOnly.FromDateTime(DateTime.Today));
+        FechaDesde =
+            DateTime.Today.AddMonths(-1);
+
+        FechaHasta =
+            DateTime.Today;
+
+        FechaReporteSeleccionada =
+            DateTime.Today;
+
+        FechaAsignacionesDiaSiguiente =
+            ObtenerSiguienteDiaLaborable(
+                DateOnly.FromDateTime(
+                    DateTime.Today));
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender || _cargaInicialIniciada)
-            return;
 
-        _cargaInicialIniciada = true;
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
+    {
+        if (!firstRender ||
+            _cargaInicialIniciada)
+        {
+            return;
+        }
+
+        _cargaInicialIniciada =
+            true;
+
         await CargarPaginaInicialAsync();
     }
 
@@ -791,35 +929,54 @@ else
         try
         {
             var authState =
-                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                await AuthenticationStateProvider
+                    .GetAuthenticationStateAsync();
 
-            EsEmpleado = EsUsuarioEmpleado(authState.User);
+
+            EsEmpleado =
+                EsUsuarioEmpleado(
+                    authState.User);
+
 
             if (EsEmpleado)
             {
-                TipoReporteSeleccionado = "NextDayAssignments";
+                TipoReporteSeleccionado =
+                    "NextDayAssignments";
             }
 
-            Scope =
-                await UserDataScopeService.GetScopeAsync(authState.User);
 
-            await CargarCatalogosAsync();
+            Scope =
+                await UserDataScopeService
+                    .GetScopeAsync(
+                        authState.User);
+
 
             EmpleadosFiltro.Clear();
-            EmpleadoIdSeleccionado = null;
+
+            EmpleadoIdSeleccionado =
+                null;
+
+            await PrepararFinalizadosSiAplicaAsync();
+
 
             await CargarEmpleadosFiltroAsync();
+
             await CargarReporteDatosAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading finished reports: {ex}");
+            Console.WriteLine(
+                $"Error loading finished reports: {ex}");
+
 
             LimpiarDatosReporte();
 
+
             MostrarResultadoReporte(
                 "Unable to load reports",
+
                 $"The reports page could not be loaded. Details: {ex.Message}",
+
                 "error");
         }
         finally
@@ -827,187 +984,315 @@ else
             Cargando = false;
             CargandoInicial = false;
 
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(
+                StateHasChanged);
         }
     }
-    private string GetStateName(Guid? id)
+
+    private async Task AsegurarCatalogosAsync()
     {
-        return States.FirstOrDefault(x => x.Id == id)?.State_Name ?? "-";
+        if (_catalogosCargados)
+            return;
+
+
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
+
+        _databaseNames =
+            await db.Databases
+                .AsNoTracking()
+
+                .ToDictionaryAsync(
+                    x => x.Id,
+                    x => x.Database_Name ?? "-");
+
+
+        _legacyCodeNames =
+            await db.Legacy_Codes
+                .AsNoTracking()
+
+                .ToDictionaryAsync(
+                    x => x.Id,
+                    x => x.Legacy_Code_Name ?? "-");
+
+
+        _stateNames =
+            await db.States
+                .AsNoTracking()
+
+                .ToDictionaryAsync(
+                    x => x.Id,
+                    x => x.State_Name ?? "-");
+
+
+        _catalogosCargados =
+            true;
     }
 
-    private string GetDatabaseName(Guid? id)
+
+    private string GetStateName(
+        Guid? id)
     {
-        return Databases.FirstOrDefault(x => x.Id == id)?.Database_Name ?? "-";
+        if (!id.HasValue)
+            return "-";
+
+
+        return _stateNames.TryGetValue(
+            id.Value,
+            out var name)
+
+            ? name
+
+            : "-";
     }
 
-    private string GetLegacyCodeName(Guid? id)
+
+    private string GetDatabaseName(
+        Guid? id)
     {
-        return LegacyCodes.FirstOrDefault(x => x.Id == id)?.Legacy_Code_Name ?? "-";
+        if (!id.HasValue)
+            return "-";
+
+
+        return _databaseNames.TryGetValue(
+            id.Value,
+            out var name)
+
+            ? name
+
+            : "-";
     }
 
 
-    private async Task CargarCatalogosAsync()
+    private string GetLegacyCodeName(
+        Guid? id)
     {
-        await using var db = await DbFactory.CreateDbContextAsync();
+        if (!id.HasValue)
+            return "-";
 
-        Databases = await db.Databases
-            .AsNoTracking()
-            .OrderBy(x => x.Database_Name)
-            .ToListAsync();
 
-        LegacyCodes = await db.Legacy_Codes
-            .AsNoTracking()
-            .OrderBy(x => x.Legacy_Code_Name)
-            .ToListAsync();
+        return _legacyCodeNames.TryGetValue(
+            id.Value,
+            out var name)
 
-        States = await db.States
-            .AsNoTracking()
-            .OrderBy(x => x.State_Name)
-            .ToListAsync();
-    }
+            ? name
 
-    private static string FormatDateTime(DateTime? date)
-    {
-        return date.HasValue
-            ? date.Value.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
-            : "";
+            : "-";
     }
 
     private async Task CargarEmpleadosFiltroAsync()
     {
         EmpleadosFiltro.Clear();
 
+
         if (!PermiteFiltroEmpleado)
         {
-            EmpleadoIdSeleccionado = null;
+            EmpleadoIdSeleccionado =
+                null;
+
             return;
         }
 
         if (EsReporteAsignacionesProgramadas)
         {
-            var fechaReporte = FechaAsignacionesProgramadasActual;
+            var fechaReporte =
+                FechaAsignacionesProgramadasActual;
 
-            await AsegurarAsignacionesProgramadasBaseAsync(fechaReporte);
 
-            EmpleadosFiltro = (_asignacionesProgramadasBase ?? new List<AssignedBookDashboardDto>())
-                .Where(x =>
-                    x.EmployeeId != Guid.Empty &&
-                    !string.IsNullOrWhiteSpace(x.EmployeeName))
-                .GroupBy(x => x.EmployeeId)
-                .Select(g => new EmpleadoFiltroDto
-                {
-                    Id = g.Key,
-                    Nombre = g
-                        .Select(x => x.EmployeeName)
-                        .FirstOrDefault(n => !string.IsNullOrWhiteSpace(n))
-                        ?? string.Empty
-                })
-                .Where(x => !string.IsNullOrWhiteSpace(x.Nombre))
-                .OrderBy(x => x.Nombre)
-                .ToList();
+            await AsegurarAsignacionesProgramadasBaseAsync(
+                fechaReporte);
+
+
+            var baseAsignaciones =
+                _asignacionesProgramadasBase;
+
+
+            if (baseAsignaciones is null ||
+                baseAsignaciones.Count == 0)
+            {
+                EmpleadoIdSeleccionado =
+                    null;
+
+                return;
+            }
+
+
+            EmpleadosFiltro =
+                baseAsignaciones
+
+                    .Where(x =>
+                        x.EmployeeId != Guid.Empty &&
+                        !string.IsNullOrWhiteSpace(
+                            x.EmployeeName))
+
+                    .GroupBy(x =>
+                        x.EmployeeId)
+
+                    .Select(g =>
+                        new EmpleadoFiltroDto
+                        {
+                            Id =
+                                g.Key,
+
+                            Nombre =
+                                g.Select(x =>
+                                        x.EmployeeName)
+
+                                    .FirstOrDefault(n =>
+                                        !string.IsNullOrWhiteSpace(n))
+
+                                ?? string.Empty
+                        })
+
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(
+                            x.Nombre))
+
+                    .OrderBy(x =>
+                        x.Nombre)
+
+                    .ToList();
+
 
             ValidarEmpleadoSeleccionado();
+
             return;
         }
 
-        await using var db = await DbFactory.CreateDbContextAsync();
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
 
         if (TipoReporteSeleccionado == "Asignaciones")
         {
-            var empleados = await db.Asignaciones
-                .AsNoTracking()
-                .ApplyScope(Scope)
-                .Where(a =>
-                    a.Finalizado == true &&
-                    a.Empleado != null)
-                .Select(a => new
-                {
-                    Id = a.IdEmpleado,
-                    Nombre = a.Empleado!.Nombre
-                })
-                .Distinct()
-                .OrderBy(x => x.Nombre)
-                .ToListAsync();
+            EmpleadosFiltro =
+                await db.Asignaciones
+                    .AsNoTracking()
+                    .ApplyScope(Scope)
 
-            EmpleadosFiltro = empleados
-                .Select(x => new EmpleadoFiltroDto
-                {
-                    Id = x.Id,
-                    Nombre = x.Nombre
-                })
-                .ToList();
+                    .Where(a =>
+                        a.Finalizado &&
+                        a.Empleado != null)
+
+                    .Select(a =>
+                        new EmpleadoFiltroDto
+                        {
+                            Id =
+                                a.IdEmpleado,
+
+                            Nombre =
+                                a.Empleado!.Nombre
+                                ?? string.Empty
+                        })
+
+                    .Distinct()
+
+                    .OrderBy(x =>
+                        x.Nombre)
+
+                    .ToListAsync();
         }
         else if (TipoReporteSeleccionado == "Evaluaciones")
         {
-            var empleados = await db.Evaluaciones
-                .AsNoTracking()
-                .ApplyScope(Scope)
-                .Where(e =>
-                    e.Finalizado == true &&
-                    e.Asignacion != null &&
-                    e.Asignacion.Empleado != null)
-                .Select(e => new
-                {
-                    Id = e.Asignacion!.IdEmpleado,
-                    Nombre = e.Asignacion.Empleado!.Nombre
-                })
-                .Distinct()
-                .OrderBy(x => x.Nombre)
-                .ToListAsync();
+            EmpleadosFiltro =
+                await db.Evaluaciones
+                    .AsNoTracking()
+                    .ApplyScope(Scope)
 
-            EmpleadosFiltro = empleados
-                .Select(x => new EmpleadoFiltroDto
-                {
-                    Id = x.Id,
-                    Nombre = x.Nombre
-                })
-                .ToList();
+                    .Where(e =>
+                        e.Finalizado &&
+                        e.Asignacion != null &&
+                        e.Asignacion.Empleado != null)
+
+                    .Select(e =>
+                        new EmpleadoFiltroDto
+                        {
+                            Id =
+                                e.Asignacion!.IdEmpleado,
+
+                            Nombre =
+                                e.Asignacion.Empleado!.Nombre
+                                ?? string.Empty
+                        })
+
+                    .Distinct()
+
+                    .OrderBy(x =>
+                        x.Nombre)
+
+                    .ToListAsync();
         }
         else if (TipoReporteSeleccionado == "LateWork")
         {
-            EmpleadosFiltro = await db.Empleados
-                .AsNoTracking()
-                .ApplyScope(Scope)
-                .OrderBy(e => e.Nombre)
-                .Select(e => new EmpleadoFiltroDto
-                {
-                    Id = e.Id,
-                    Nombre = e.Nombre
-                })
-                .ToListAsync();
+            EmpleadosFiltro =
+                await db.Empleados
+                    .AsNoTracking()
+                    .ApplyScope(Scope)
+
+                    .OrderBy(e =>
+                        e.Nombre)
+
+                    .Select(e =>
+                        new EmpleadoFiltroDto
+                        {
+                            Id =
+                                e.Id,
+
+                            Nombre =
+                                e.Nombre
+                                ?? string.Empty
+                        })
+
+                    .ToListAsync();
         }
+
 
         ValidarEmpleadoSeleccionado();
     }
+
 
     private void ValidarEmpleadoSeleccionado()
     {
         if (!EmpleadoIdSeleccionado.HasValue)
             return;
 
-        var existe = EmpleadosFiltro.Any(
-            x => x.Id == EmpleadoIdSeleccionado.Value);
 
-        if (!existe)
-            EmpleadoIdSeleccionado = null;
+        if (!EmpleadosFiltro.Any(
+                x =>
+                    x.Id ==
+                    EmpleadoIdSeleccionado.Value))
+        {
+            EmpleadoIdSeleccionado =
+                null;
+        }
     }
 
     private async Task OnTipoReporteChanged()
     {
         if (EsEmpleado &&
-            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+            !EsReportePermitidoParaEmpleado(
+                TipoReporteSeleccionado))
         {
-            TipoReporteSeleccionado = "NextDayAssignments";
+            TipoReporteSeleccionado =
+                "NextDayAssignments";
         }
+
 
         if (TipoReporteSeleccionado == "AssignmentsByDate" &&
             !FechaReporteSeleccionada.HasValue)
         {
-            FechaReporteSeleccionada = DateTime.Today;
+            FechaReporteSeleccionada =
+                DateTime.Today;
         }
 
-        EmpleadoIdSeleccionado = null;
+
+        EmpleadoIdSeleccionado =
+            null;
+
+
         InvalidarCacheAsignacionesProgramadas();
+
 
         await EjecutarCargaReporteAsync(
             recargarEmpleados: true);
@@ -1015,18 +1300,28 @@ else
 
     private async Task LimpiarFiltrosAsync()
     {
-        FechaDesde = DateTime.Today.AddMonths(-1);
-        FechaHasta = DateTime.Today;
-        FechaReporteSeleccionada = DateTime.Today;
-        EmpleadoIdSeleccionado = null;
+        FechaDesde =
+            DateTime.Today.AddMonths(-1);
+
+        FechaHasta =
+            DateTime.Today;
+
+        FechaReporteSeleccionada =
+            DateTime.Today;
+
+        EmpleadoIdSeleccionado =
+            null;
+
 
         if (EsReporteAsignacionesProgramadas)
         {
             InvalidarCacheAsignacionesProgramadas();
         }
 
+
         await EjecutarCargaReporteAsync(
-            recargarEmpleados: EsReporteAsignacionesProgramadas);
+            recargarEmpleados:
+                EsReporteAsignacionesProgramadas);
     }
 
     private async Task CargarReporteAsync()
@@ -1034,15 +1329,22 @@ else
         if (!PuedeBuscar)
             return;
 
+
         if (EsEmpleado &&
-            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+            !EsReportePermitidoParaEmpleado(
+                TipoReporteSeleccionado))
         {
-            TipoReporteSeleccionado = "NextDayAssignments";
+            TipoReporteSeleccionado =
+                "NextDayAssignments";
         }
 
+
         await EjecutarCargaReporteAsync(
-            recargarEmpleados: EsReporteAsignacionesProgramadas,
-            mostrarResultado: true);
+            recargarEmpleados:
+                EsReporteAsignacionesProgramadas,
+
+            mostrarResultado:
+                true);
     }
 
     private async Task EjecutarCargaReporteAsync(
@@ -1050,19 +1352,30 @@ else
         bool mostrarResultado = false)
     {
         Cargando = true;
+
+
         LimpiarDatosReporte();
 
-        await InvokeAsync(StateHasChanged);
+
+        await InvokeAsync(
+            StateHasChanged);
+
         await Task.Yield();
+
 
         try
         {
+            await PrepararFinalizadosSiAplicaAsync();
+
+
             if (recargarEmpleados)
             {
                 await CargarEmpleadosFiltroAsync();
             }
 
+
             await CargarReporteDatosAsync();
+
 
             if (mostrarResultado)
             {
@@ -1070,14 +1383,18 @@ else
                 {
                     MostrarResultadoReporte(
                         "Report ready",
+
                         $"{TituloReporteActual} loaded successfully with {TotalActual} record{(TotalActual == 1 ? string.Empty : "s")}.",
+
                         "success");
                 }
                 else
                 {
                     MostrarResultadoReporte(
                         "No records found",
+
                         MensajeSinDatos,
+
                         "info");
                 }
             }
@@ -1087,102 +1404,1052 @@ else
             Console.WriteLine(
                 $"Error loading selected report: {ex}");
 
+
             LimpiarDatosReporte();
+
 
             MostrarResultadoReporte(
                 "Unable to load report",
+
                 $"The selected report could not be loaded. Details: {ex.Message}",
+
                 "error");
         }
         finally
         {
             Cargando = false;
-            await InvokeAsync(StateHasChanged);
+
+
+            await InvokeAsync(
+                StateHasChanged);
         }
     }
 
-    private string TituloReporteActual =>
-        TipoReporteSeleccionado switch
+    private async Task PrepararFinalizadosSiAplicaAsync()
+    {
+        if (EsReporteAsignacionesProgramadas)
+            return;
+
+
+        var hoy =
+            DateOnly.FromDateTime(
+                DateTime.Today);
+
+        if (_fechaFinalizacionAutomaticaAplicada ==
+            hoy)
         {
-            "Libros" => "Finished Books",
-            "Asignaciones" => "Finished Assignments",
-            "Evaluaciones" => "Finished Evaluations",
-            "LateWork" => "Finished Late Work",
-            "NextDayAssignments" => "Next Day Assignments",
-            "AssignmentsByDate" => "Assignments by Date",
-            _ => "Report"
-        };
+            return;
+        }
+
+
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
+
+        await MarcarFinalizadosAutomaticamenteAsync(
+            db);
+
+
+        _fechaFinalizacionAutomaticaAplicada =
+            hoy;
+    }
+
+    private async Task CargarReporteDatosAsync()
+    {
+        if (EsEmpleado &&
+            !EsReportePermitidoParaEmpleado(
+                TipoReporteSeleccionado))
+        {
+            TipoReporteSeleccionado =
+                "NextDayAssignments";
+        }
+
+
+        if (EsReporteAsignacionesProgramadas)
+        {
+            await CargarAsignacionesProgramadasAsync();
+
+            return;
+        }
+
+
+        await using var db =
+            await DbFactory.CreateDbContextAsync();
+
+
+        switch (TipoReporteSeleccionado)
+        {
+            case "Libros":
+
+                await CargarLibrosFinalizadosAsync(
+                    db);
+
+                break;
+
+
+            case "Asignaciones":
+
+                await CargarAsignacionesFinalizadasAsync(
+                    db);
+
+                break;
+
+
+            case "Evaluaciones":
+
+                await CargarEvaluacionesFinalizadasAsync(
+                    db);
+
+                break;
+
+
+            case "LateWork":
+
+                await CargarLateWorkFinalizadosAsync(
+                    db);
+
+                break;
+        }
+    }
 
     private void MostrarResultadoReporte(
         string titulo,
         string mensaje,
         string tipo)
     {
-        TituloModalResultadoReporte = titulo;
-        MensajeModalResultadoReporte = mensaje;
+        TituloModalResultadoReporte =
+            titulo;
 
-        TipoModalResultadoReporte = tipo.ToLowerInvariant() switch
-        {
-            "error" => "error",
-            "info" => "info",
-            _ => "success"
-        };
 
-        MostrarModalResultadoReporte = true;
+        MensajeModalResultadoReporte =
+            mensaje;
+
+
+        TipoModalResultadoReporte =
+            tipo.ToLowerInvariant() switch
+            {
+                "error" =>
+                    "error",
+
+                "info" =>
+                    "info",
+
+                _ =>
+                    "success"
+            };
+
+
+        MostrarModalResultadoReporte =
+            true;
     }
+
 
     private void CerrarModalResultadoReporte()
     {
-        MostrarModalResultadoReporte = false;
-        TituloModalResultadoReporte = string.Empty;
-        MensajeModalResultadoReporte = string.Empty;
-        TipoModalResultadoReporte = "success";
+        MostrarModalResultadoReporte =
+            false;
+
+        TituloModalResultadoReporte =
+            string.Empty;
+
+        MensajeModalResultadoReporte =
+            string.Empty;
+
+        TipoModalResultadoReporte =
+            "success";
     }
 
     private void LimpiarDatosReporte()
     {
         LibrosReporte.Clear();
+
         AsignacionesReporte.Clear();
+
         EvaluacionesReporte.Clear();
+
         LateWorksReporte.Clear();
+
         AsignacionesDiaSiguienteReporte.Clear();
     }
 
-    private async Task CargarReporteDatosAsync()
+    private async Task CargarAsignacionesProgramadasAsync()
     {
-        if (EsEmpleado &&
-            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+        var fechaReporte =
+            FechaAsignacionesProgramadasActual;
+
+
+        await AsegurarAsignacionesProgramadasBaseAsync(
+            fechaReporte);
+
+
+        IEnumerable<AssignedBookDashboardDto>
+            asignaciones =
+                _asignacionesProgramadasBase
+                ?? Enumerable.Empty<AssignedBookDashboardDto>();
+
+
+        if (EmpleadoIdSeleccionado.HasValue)
         {
-            TipoReporteSeleccionado = "NextDayAssignments";
+            asignaciones =
+                asignaciones.Where(
+                    x =>
+                        x.EmployeeId ==
+                        EmpleadoIdSeleccionado.Value);
         }
 
-        if (EsReporteAsignacionesProgramadas)
+
+        AsignacionesDiaSiguienteReporte =
+            asignaciones
+
+                .OrderBy(x =>
+                    x.StageDate)
+
+                .ThenBy(x =>
+                    x.EmployeeName)
+
+                .ThenBy(x =>
+                    x.BookName)
+
+                .ToList();
+    }
+
+
+    private async Task AsegurarAsignacionesProgramadasBaseAsync(
+        DateOnly fechaReporte)
+    {
+        if (_asignacionesProgramadasBase is not null &&
+            _fechaAsignacionesProgramadasBase ==
+            fechaReporte)
         {
-            await CargarAsignacionesProgramadasAsync();
             return;
         }
 
-        await using var db =
-            await DbFactory.CreateDbContextAsync();
 
-        await MarcarFinalizadosAutomaticamenteAsync(db);
+        _asignacionesProgramadasBase =
+            await DashboardService
+                .GetAssignedBooksForDateAsync(
+                    fechaReporte,
+                    Scope);
 
-        if (TipoReporteSeleccionado == "Libros")
+
+        _fechaAsignacionesProgramadasBase =
+            fechaReporte;
+    }
+
+
+    private void InvalidarCacheAsignacionesProgramadas()
+    {
+        _asignacionesProgramadasBase =
+            null;
+
+        _fechaAsignacionesProgramadasBase =
+            null;
+    }
+
+    private static bool EsReportePermitidoParaEmpleado(
+        string tipoReporte)
+    {
+        return
+            tipoReporte == "NextDayAssignments" ||
+            tipoReporte == "AssignmentsByDate";
+    }
+
+
+    private static bool EsUsuarioEmpleado(
+        ClaimsPrincipal user)
+    {
+        var lvlId =
+            user.FindFirst("LvlId")
+                ?.Value;
+
+
+        var role =
+            user.FindFirst(
+                    ClaimTypes.Role)
+                ?.Value
+
+            ??
+
+            user.FindFirst("Role")
+                ?.Value
+
+            ??
+
+            user.FindFirst("RoleName")
+                ?.Value
+
+            ??
+
+            user.FindFirst("PermissionLevel")
+                ?.Value
+
+            ??
+
+            string.Empty;
+
+
+        return
+            lvlId == "4"
+
+            ||
+
+            role.Equals(
+                "Employee",
+                StringComparison.OrdinalIgnoreCase)
+
+            ||
+
+            role.Equals(
+                "User",
+                StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static DateOnly ObtenerSiguienteDiaLaborable(
+        DateOnly fechaActual)
+    {
+        var fecha =
+            fechaActual.AddDays(1);
+
+
+        while (fecha.DayOfWeek is
+               DayOfWeek.Saturday or
+               DayOfWeek.Sunday)
         {
-            await CargarLibrosFinalizadosAsync(db);
+            fecha =
+                fecha.AddDays(1);
         }
-        else if (TipoReporteSeleccionado == "Asignaciones")
+
+
+        return fecha;
+    }
+
+    private static string GetDatabaseCode(
+        string? database)
+    {
+        return string.IsNullOrWhiteSpace(database)
+            ? "-"
+            : database
+                .Trim()
+                .ToUpperInvariant();
+    }
+
+
+    private static string GetDatabaseFullName(
+        string? database)
+    {
+        if (string.IsNullOrWhiteSpace(database))
         {
-            await CargarAsignacionesFinalizadasAsync(db);
+            return "Database not available";
         }
-        else if (TipoReporteSeleccionado == "Evaluaciones")
+
+
+        var code =
+            database
+                .Trim()
+                .ToUpperInvariant();
+
+
+        return code switch
         {
-            await CargarEvaluacionesFinalizadasAsync(db);
-        }
-        else if (TipoReporteSeleccionado == "LateWork")
+            "DW" =>
+                "WEST",
+
+            "SN" =>
+                "vNorth",
+
+            "SW" =>
+                "vWest",
+
+            "SS" =>
+                "vSouth",
+
+            _ =>
+                database.Trim()
+        };
+    }
+
+    private static string GetReportStageClass(
+        string? stageKey)
+    {
+        return (stageKey ?? string.Empty)
+            .Trim() switch
         {
-            await CargarLateWorkFinalizadosAsync(db);
+            "ProofExtract" =>
+                "stage-proofextract",
+
+            "FinalExtract" =>
+                "stage-finalextract",
+
+            "MemoExtract" =>
+                "stage-memoextract",
+
+            "FinalPO" =>
+                "stage-finalpo",
+
+            "Shipping" =>
+                "stage-shipping",
+
+            "Dirxion" =>
+                "stage-dirxion",
+
+            _ =>
+                "stage-default"
+        };
+    }
+
+    private async Task MarcarFinalizadosAutomaticamenteAsync(
+        AppDbContext db)
+    {
+        var hoy =
+            DateOnly.FromDateTime(
+                DateTime.Today);
+
+
+        var strategy =
+            db.Database
+                .CreateExecutionStrategy();
+
+
+        await strategy.ExecuteAsync(
+            async () =>
+            {
+                await using var transaction =
+                    await db.Database
+                        .BeginTransactionAsync();
+
+                await db.Evaluaciones
+                    .ApplyScope(Scope)
+
+                    .Where(e =>
+                        !e.Finalizado &&
+                        e.Asignacion != null &&
+                        e.Asignacion.Libro != null &&
+                        e.Asignacion.Libro.DirxionDate <
+                        hoy)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                e => e.Finalizado,
+                                true));
+
+                await db.Asignaciones
+                    .ApplyScope(Scope)
+
+                    .Where(a =>
+                        !a.Finalizado &&
+                        a.Libro != null &&
+                        a.Libro.DirxionDate <
+                        hoy)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                a => a.Finalizado,
+                                true));
+
+                await db.Libros
+                    .ApplyScope(Scope)
+
+                    .Where(l =>
+                        !l.Finalizado &&
+                        l.DirxionDate <
+                        hoy)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                l => l.Finalizado,
+                                true));
+
+
+                await transaction.CommitAsync();
+            });
+    }
+
+    private async Task CargarLibrosFinalizadosAsync(
+        AppDbContext db)
+    {
+        await AsegurarCatalogosAsync();
+
+
+        var query =
+            db.Libros
+                .AsNoTracking()
+                .ApplyScope(Scope)
+
+                .Where(l =>
+                    l.Finalizado);
+
+
+        if (FechaDesde.HasValue)
+        {
+            var desde =
+                DateOnly.FromDateTime(
+                    FechaDesde.Value);
+
+
+            query =
+                query.Where(l =>
+                    l.DirxionDate >=
+                    desde);
         }
+
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta =
+                DateOnly.FromDateTime(
+                    FechaHasta.Value);
+
+
+            query =
+                query.Where(l =>
+                    l.DirxionDate <=
+                    hasta);
+        }
+
+        var libros =
+            await query
+
+                .OrderByDescending(l =>
+                    l.DirxionDate)
+
+                .Select(l =>
+                    new LibroRawDto
+                    {
+                        EmployeeTypeCode =
+                            l.EmployeeType != null
+                                ? l.EmployeeType.Code
+                                    ?? string.Empty
+                                : string.Empty,
+
+                        BookName =
+                            l.BookName
+                            ?? string.Empty,
+
+                        Kgen =
+                            l.KGENCode
+                            ?? string.Empty,
+
+                        Lsa =
+                            l.LSACode
+                            ?? string.Empty,
+
+                        StateId =
+                            l.StateId,
+
+                        DatabaseId =
+                            l.DatabaseId,
+
+                        LegacyCodeId =
+                            l.LegacyCodeId,
+
+                        ProofDate =
+                            l.ProofExtract,
+
+                        FinalDate =
+                            l.FinalExtract,
+
+                        MemoDate =
+                            l.MemoExtract,
+
+                        FinalPoDate =
+                            l.FinalPODate,
+
+                        ShippingDate =
+                            l.ShippingDate,
+
+                        DirxionDate =
+                            l.DirxionDate,
+
+                        PubDate =
+                            l.PubDate
+                    })
+
+                .ToListAsync();
+
+
+        LibrosReporte =
+            new List<LibroReporteDto>(
+                libros.Count);
+
+
+        foreach (var item in libros)
+        {
+            LibrosReporte.Add(
+                new LibroReporteDto
+                {
+                    EmployeeTypeCode =
+                        item.EmployeeTypeCode,
+
+                    BookName =
+                        item.BookName,
+
+                    Kgen =
+                        item.Kgen,
+
+                    Lsa =
+                        item.Lsa,
+
+                    State =
+                        GetStateName(
+                            item.StateId),
+
+                    Database =
+                        GetDatabaseName(
+                            item.DatabaseId),
+
+                    Legacy =
+                        GetLegacyCodeName(
+                            item.LegacyCodeId),
+
+                    ProofDate =
+                        item.ProofDate,
+
+                    FinalDate =
+                        item.FinalDate,
+
+                    MemoDate =
+                        item.MemoDate,
+
+                    FinalPoDate =
+                        item.FinalPoDate,
+
+                    ShippingDate =
+                        item.ShippingDate,
+
+                    DirxionDate =
+                        item.DirxionDate,
+
+                    PubDate =
+                        item.PubDate
+                });
+        }
+    }
+
+    private async Task CargarAsignacionesFinalizadasAsync(
+        AppDbContext db)
+    {
+        var query =
+            db.Asignaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+
+                .Where(a =>
+                    a.Finalizado &&
+                    a.Libro != null);
+
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            query =
+                query.Where(a =>
+                    a.IdEmpleado ==
+                    EmpleadoIdSeleccionado.Value);
+        }
+
+
+        if (FechaDesde.HasValue)
+        {
+            var desde =
+                DateOnly.FromDateTime(
+                    FechaDesde.Value);
+
+
+            query =
+                query.Where(a =>
+                    a.Libro != null &&
+                    a.Libro.PubDate >=
+                    desde);
+        }
+
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta =
+                DateOnly.FromDateTime(
+                    FechaHasta.Value);
+
+
+            query =
+                query.Where(a =>
+                    a.Libro != null &&
+                    a.Libro.PubDate <=
+                    hasta);
+        }
+
+        AsignacionesReporte =
+            await query
+
+                .Select(a =>
+                    new AsignacionReporteDto
+                    {
+                        EmployeeTypeCode =
+                            a.Libro != null &&
+                            a.Libro.EmployeeType != null
+
+                                ? a.Libro.EmployeeType.Code
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        EmployeeName =
+                            a.Empleado != null
+
+                                ? a.Empleado.Nombre
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        BookName =
+                            a.Libro != null
+
+                                ? a.Libro.BookName
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        Kgen =
+                            a.Libro != null
+
+                                ? a.Libro.KGENCode
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        PubDate =
+                            a.Libro != null
+                                ? a.Libro.PubDate
+                                : null,
+
+                        DirectionDate =
+                            a.Libro != null
+                                ? a.Libro.DirxionDate
+                                : null,
+
+                        ProofDate =
+                            a.Libro != null
+                                ? a.Libro.ProofExtract
+                                : null,
+
+                        FinalDate =
+                            a.Libro != null
+                                ? a.Libro.FinalExtract
+                                : null,
+
+                        MemoDate =
+                            a.Libro != null
+                                ? a.Libro.MemoExtract
+                                : null
+                    })
+
+                .Distinct()
+
+                .OrderByDescending(a =>
+                    a.PubDate
+                    ?? DateOnly.MinValue)
+
+                .ToListAsync();
+    }
+
+    private async Task CargarEvaluacionesFinalizadasAsync(
+        AppDbContext db)
+    {
+        var query =
+            db.Evaluaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+
+                .Where(e =>
+                    e.Finalizado &&
+                    e.Asignacion != null &&
+                    e.Asignacion.Libro != null);
+
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            query =
+                query.Where(e =>
+                    e.Asignacion != null &&
+                    e.Asignacion.IdEmpleado ==
+                    EmpleadoIdSeleccionado.Value);
+        }
+
+
+        if (FechaDesde.HasValue)
+        {
+            var desde =
+                DateOnly.FromDateTime(
+                    FechaDesde.Value);
+
+
+            query =
+                query.Where(e =>
+                    e.Asignacion != null &&
+                    e.Asignacion.Libro != null &&
+                    e.Asignacion.Libro.PubDate >=
+                    desde);
+        }
+
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta =
+                DateOnly.FromDateTime(
+                    FechaHasta.Value);
+
+
+            query =
+                query.Where(e =>
+                    e.Asignacion != null &&
+                    e.Asignacion.Libro != null &&
+                    e.Asignacion.Libro.PubDate <=
+                    hasta);
+        }
+
+        EvaluacionesReporte =
+            await query
+
+                .OrderByDescending(e =>
+                    e.Asignacion != null &&
+                    e.Asignacion.Libro != null
+
+                        ? e.Asignacion.Libro.PubDate
+
+                        : DateOnly.MinValue)
+
+                .Select(e =>
+                    new EvaluacionReporteDto
+                    {
+                        EmployeeTypeCode =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null &&
+                            e.Asignacion.Libro.EmployeeType != null
+
+                                ? e.Asignacion.Libro.EmployeeType.Code
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        EmployeeName =
+                            e.Asignacion != null &&
+                            e.Asignacion.Empleado != null
+
+                                ? e.Asignacion.Empleado.Nombre
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        BookName =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null
+
+                                ? e.Asignacion.Libro.BookName
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        Kgen =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null
+
+                                ? e.Asignacion.Libro.KGENCode
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        Lsa =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null
+
+                                ? e.Asignacion.Libro.LSACode
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        PubDate =
+                            e.Asignacion != null &&
+                            e.Asignacion.Libro != null
+
+                                ? e.Asignacion.Libro.PubDate
+
+                                : null,
+
+                        MotifYp =
+                            e.MotifYp,
+
+                        MotifWp =
+                            e.MotifWp,
+
+                        InventoryReport =
+                            e.InventoryReport,
+
+                        ProductShippingFolder =
+                            e.ProductShippingFolder,
+
+                        TaskMemo =
+                            e.TaskMemo
+                    })
+
+                .ToListAsync();
+
+
+        foreach (var item in EvaluacionesReporte)
+        {
+            item.TotalPorcentaje =
+                CalcularPorcentajeGeneralReporte(
+                    item);
+        }
+    }
+
+    private async Task CargarLateWorkFinalizadosAsync(
+        AppDbContext db)
+    {
+        var query =
+            db.LateWorkActivities
+                .AsNoTracking()
+
+                .Where(x =>
+                    x.Assignment != null &&
+                    x.Assignment.Libro != null &&
+                    x.Assignment.Libro.Finalizado &&
+                    (
+                        Scope.ViewAllEmployeeTypes
+
+                        ||
+
+                        x.Assignment.Libro.EmployeeTypeId ==
+                        Scope.EmployeeTypeId
+                    ));
+
+
+        if (EmpleadoIdSeleccionado.HasValue)
+        {
+            query =
+                query.Where(x =>
+                    x.Assignment != null &&
+                    x.Assignment.IdEmpleado ==
+                    EmpleadoIdSeleccionado.Value);
+        }
+
+
+        if (FechaDesde.HasValue)
+        {
+            var desde =
+                DateOnly.FromDateTime(
+                    FechaDesde.Value);
+
+
+            query =
+                query.Where(x =>
+                    x.Assignment != null &&
+                    x.Assignment.Libro != null &&
+                    x.Assignment.Libro.DirxionDate >=
+                    desde);
+        }
+
+
+        if (FechaHasta.HasValue)
+        {
+            var hasta =
+                DateOnly.FromDateTime(
+                    FechaHasta.Value);
+
+
+            query =
+                query.Where(x =>
+                    x.Assignment != null &&
+                    x.Assignment.Libro != null &&
+                    x.Assignment.Libro.DirxionDate <=
+                    hasta);
+        }
+
+        LateWorksReporte =
+            await query
+
+                .OrderByDescending(x =>
+                    x.Assignment != null &&
+                    x.Assignment.Libro != null
+
+                        ? x.Assignment.Libro.DirxionDate
+
+                        : DateOnly.MinValue)
+
+                .Select(x =>
+                    new LateWorkReporteDto
+                    {
+                        EmployeeTypeCode =
+                            x.Assignment != null &&
+                            x.Assignment.Libro != null &&
+                            x.Assignment.Libro.EmployeeType != null
+
+                                ? x.Assignment.Libro.EmployeeType.Code
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        EmployeeName =
+                            x.Assignment != null &&
+                            x.Assignment.Empleado != null
+
+                                ? x.Assignment.Empleado.Nombre
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        BookName =
+                            x.Assignment != null &&
+                            x.Assignment.Libro != null
+
+                                ? x.Assignment.Libro.BookName
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        Kgen =
+                            x.Assignment != null &&
+                            x.Assignment.Libro != null
+
+                                ? x.Assignment.Libro.KGENCode
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        Lsa =
+                            x.Assignment != null &&
+                            x.Assignment.Libro != null
+
+                                ? x.Assignment.Libro.LSACode
+                                    ?? string.Empty
+
+                                : string.Empty,
+
+                        LateWorkId =
+                            x.LateWorkId,
+
+                        ClientId =
+                            x.ClientId,
+
+                        Completed =
+                            x.Completed,
+
+                        CompletedAt =
+                            x.CompletedAt,
+
+                        CreatedAt =
+                            x.CreatedAt,
+
+                        DirxionDate =
+                            x.Assignment != null &&
+                            x.Assignment.Libro != null
+
+                                ? x.Assignment.Libro.DirxionDate
+
+                                : null
+                    })
+
+                .ToListAsync();
     }
 
     private async Task DescargarReporteXlsxAsync()
@@ -1190,69 +2457,137 @@ else
         if (DescargandoReporte)
             return;
 
+
         if (EsEmpleado &&
-            !EsReportePermitidoParaEmpleado(TipoReporteSeleccionado))
+            !EsReportePermitidoParaEmpleado(
+                TipoReporteSeleccionado))
         {
             MostrarResultadoReporte(
                 "Report not available",
+
                 "Your user role does not have access to the selected report.",
+
                 "error");
+
             return;
         }
+
 
         if (!TieneDatos)
         {
             MostrarResultadoReporte(
                 "No data to download",
+
                 "Load a report with records before downloading the XLSX file.",
+
                 "info");
+
             return;
         }
 
+
         try
         {
-            DescargandoReporte = true;
-            await InvokeAsync(StateHasChanged);
+            DescargandoReporte =
+                true;
 
-            using var workbook = new XLWorkbook();
 
-            if (TipoReporteSeleccionado == "Libros")
+            await InvokeAsync(
+                StateHasChanged);
+
+
+            using var workbook =
+                new XLWorkbook();
+
+
+            switch (TipoReporteSeleccionado)
             {
-                GenerarHojaLibros(workbook);
-            }
-            else if (TipoReporteSeleccionado == "Asignaciones")
-            {
-                GenerarHojaAsignaciones(workbook);
-            }
-            else if (TipoReporteSeleccionado == "Evaluaciones")
-            {
-                GenerarHojaEvaluaciones(workbook);
-            }
-            else if (TipoReporteSeleccionado == "LateWork")
-            {
-                GenerarHojaLateWork(workbook);
-            }
-            else if (EsReporteAsignacionesProgramadas)
-            {
-                GenerarHojaAsignacionesProgramadas(workbook);
+                case "Libros":
+
+                    GenerarHojaLibros(
+                        workbook);
+
+                    break;
+
+
+                case "Asignaciones":
+
+                    GenerarHojaAsignaciones(
+                        workbook);
+
+                    break;
+
+
+                case "Evaluaciones":
+
+                    GenerarHojaEvaluaciones(
+                        workbook);
+
+                    break;
+
+
+                case "LateWork":
+
+                    GenerarHojaLateWork(
+                        workbook);
+
+                    break;
+
+
+                default:
+
+                    if (EsReporteAsignacionesProgramadas)
+                    {
+                        GenerarHojaAsignacionesProgramadas(
+                            workbook);
+                    }
+
+                    break;
             }
 
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
 
-            var bytes = stream.ToArray();
-            var base64 = Convert.ToBase64String(bytes);
+            using var stream =
+                new MemoryStream();
 
-            var fileName = TipoReporteSeleccionado switch
-            {
-                "Libros" => $"Finished_Books_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
-                "Asignaciones" => $"Finished_Assignments_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
-                "Evaluaciones" => $"Finished_Evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
-                "LateWork" => $"Finished_Late_Work_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
-                "NextDayAssignments" => $"Next_Day_Assignments_{FechaAsignacionesDiaSiguiente:yyyyMMdd}.xlsx",
-                "AssignmentsByDate" => $"Assignments_By_Date_{FechaAsignacionesProgramadasActual:yyyyMMdd}.xlsx",
-                _ => $"Finished_Report_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
-            };
+
+            workbook.SaveAs(
+                stream);
+
+
+            var bytes =
+                stream.ToArray();
+
+
+            var base64 =
+                Convert.ToBase64String(
+                    bytes);
+
+
+            var fileName =
+                TipoReporteSeleccionado switch
+                {
+                    "Libros" =>
+                        $"Finished_Books_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+
+                    "Asignaciones" =>
+                        $"Finished_Assignments_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+
+                    "Evaluaciones" =>
+                        $"Finished_Evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+
+                    "LateWork" =>
+                        $"Finished_Late_Work_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+
+                    "NextDayAssignments" =>
+                        $"Next_Day_Assignments_{FechaAsignacionesDiaSiguiente:yyyyMMdd}.xlsx",
+
+                    "AssignmentsByDate" =>
+                        $"Assignments_By_Date_{FechaAsignacionesProgramadasActual:yyyyMMdd}.xlsx",
+
+                    _ =>
+                        $"Finished_Report_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+                };
+
 
             await JS.InvokeVoidAsync(
                 "downloadFileFromBase64",
@@ -1260,276 +2595,126 @@ else
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 base64);
 
+
             MostrarResultadoReporte(
                 "Report downloaded",
+
                 $"{TituloReporteActual} was downloaded successfully with {TotalActual} record{(TotalActual == 1 ? string.Empty : "s")}.",
+
                 "success");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error generating XLSX: {ex.Message}");
+            Console.WriteLine(
+                $"Error generating XLSX: {ex}");
+
 
             MostrarResultadoReporte(
                 "Unable to download report",
+
                 $"The XLSX file could not be generated. Details: {ex.Message}",
+
                 "error");
         }
         finally
         {
-            DescargandoReporte = false;
-            await InvokeAsync(StateHasChanged);
+            DescargandoReporte =
+                false;
+
+
+            await InvokeAsync(
+                StateHasChanged);
         }
     }
 
-    private async Task CargarAsignacionesProgramadasAsync()
+    private void GenerarHojaAsignacionesProgramadas(
+        XLWorkbook workbook)
     {
-        var fechaReporte = FechaAsignacionesProgramadasActual;
+        var worksheet =
+            workbook.Worksheets.Add(
+                TipoReporteSeleccionado ==
+                "AssignmentsByDate"
 
-        await AsegurarAsignacionesProgramadasBaseAsync(fechaReporte);
+                    ? "Assignments by Date"
 
-        IEnumerable<AssignedBookDashboardDto> asignaciones =
-            _asignacionesProgramadasBase
-            ?? Enumerable.Empty<AssignedBookDashboardDto>();
+                    : "Next Day Assignments");
 
-        if (EmpleadoIdSeleccionado.HasValue)
-        {
-            asignaciones = asignaciones.Where(
-                x => x.EmployeeId == EmpleadoIdSeleccionado.Value);
-        }
 
-        AsignacionesDiaSiguienteReporte = asignaciones
-            .OrderBy(x => x.StageDate)
-            .ThenBy(x => x.EmployeeName)
-            .ThenBy(x => x.BookName)
-            .ToList();
-    }
+        worksheet.Cell(1, 1).Value =
+            "Employee";
 
-    private async Task AsegurarAsignacionesProgramadasBaseAsync(
-        DateOnly fechaReporte)
-    {
-        if (_asignacionesProgramadasBase is not null &&
-            _fechaAsignacionesProgramadasBase == fechaReporte)
-        {
-            return;
-        }
+        worksheet.Cell(1, 2).Value =
+            "Department";
 
-        _asignacionesProgramadasBase =
-            await DashboardService.GetAssignedBooksForDateAsync(
-                fechaReporte,
-                Scope);
+        worksheet.Cell(1, 3).Value =
+            "KGEN Code";
 
-        _fechaAsignacionesProgramadasBase = fechaReporte;
-    }
+        worksheet.Cell(1, 4).Value =
+            "LSA Code";
 
-    private void InvalidarCacheAsignacionesProgramadas()
-    {
-        _asignacionesProgramadasBase = null;
-        _fechaAsignacionesProgramadasBase = null;
-    }
+        worksheet.Cell(1, 5).Value =
+            "Book";
 
-    private static bool EsReportePermitidoParaEmpleado(string tipoReporte)
-    {
-        return tipoReporte == "NextDayAssignments" ||
-               tipoReporte == "AssignmentsByDate";
-    }
+        worksheet.Cell(1, 6).Value =
+            "Database";
 
-    private static bool EsUsuarioEmpleado(ClaimsPrincipal user)
-    {
-        var lvlId = user.FindFirst("LvlId")?.Value;
+        worksheet.Cell(1, 7).Value =
+            "Stage";
 
-        var role =
-            user.FindFirst(ClaimTypes.Role)?.Value ??
-            user.FindFirst("Role")?.Value ??
-            user.FindFirst("RoleName")?.Value ??
-            user.FindFirst("PermissionLevel")?.Value ??
-            string.Empty;
+        worksheet.Cell(1, 8).Value =
+            "Stage Date";
 
-        return lvlId == "4" ||
-               role.Equals(
-                   "Employee",
-                   StringComparison.OrdinalIgnoreCase) ||
-               role.Equals(
-                   "User",
-                   StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static DateOnly ObtenerSiguienteDiaLaborable(DateOnly fechaActual)
-    {
-        var fecha = fechaActual.AddDays(1);
-
-        while (fecha.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
-        {
-            fecha = fecha.AddDays(1);
-        }
-
-        return fecha;
-    }
-
-    private static string GetDatabaseCode(string? database)
-    {
-        return string.IsNullOrWhiteSpace(database)
-            ? "-"
-            : database.Trim().ToUpperInvariant();
-    }
-
-    private static string GetDatabaseFullName(string? database)
-    {
-        if (string.IsNullOrWhiteSpace(database))
-            return "Database not available";
-
-        var code = database.Trim().ToUpperInvariant();
-
-        return code switch
-        {
-            "DW" => "WEST",
-            "SN" => "vNorth",
-            "SW" => "vWest",
-            "SS" => "vSouth",
-            _ => database.Trim()
-        };
-    }
-
-    private static string GetReportStageClass(string? stageKey)
-    {
-        return (stageKey ?? string.Empty).Trim() switch
-        {
-            "ProofExtract" => "stage-proofextract",
-            "FinalExtract" => "stage-finalextract",
-            "MemoExtract" => "stage-memoextract",
-            "FinalPO" => "stage-finalpo",
-            "Shipping" => "stage-shipping",
-            "Dirxion" => "stage-dirxion",
-            _ => "stage-default"
-        };
-    }
-
-    private async Task CargarLateWorkFinalizadosAsync(AppDbContext db)
-    {
-        var query = db.LateWorkActivities
-            .AsNoTracking()
-            .Include(x => x.Assignment)
-                .ThenInclude(a => a!.Empleado)
-            .Include(x => x.Assignment)
-                .ThenInclude(a => a!.Libro)
-                    .ThenInclude(l => l!.EmployeeType)
-            .Where(x =>
-                x.Assignment != null &&
-                x.Assignment.Libro != null &&
-                x.Assignment.Libro.Finalizado == true &&
-                (Scope.ViewAllEmployeeTypes ||
-                 x.Assignment.Libro.EmployeeTypeId == Scope.EmployeeTypeId));
-
-        if (EmpleadoIdSeleccionado.HasValue)
-        {
-            query = query.Where(x =>
-                x.Assignment != null &&
-                x.Assignment.IdEmpleado == EmpleadoIdSeleccionado.Value);
-        }
-
-        if (FechaDesde.HasValue)
-        {
-            var desde = DateOnly.FromDateTime(FechaDesde.Value);
-
-            query = query.Where(x =>
-                x.Assignment != null &&
-                x.Assignment.Libro != null &&
-                x.Assignment.Libro.DirxionDate >= desde);
-        }
-
-        if (FechaHasta.HasValue)
-        {
-            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
-
-            query = query.Where(x =>
-                x.Assignment != null &&
-                x.Assignment.Libro != null &&
-                x.Assignment.Libro.DirxionDate <= hasta);
-        }
-
-        LateWorksReporte = await query
-            .OrderByDescending(x =>
-                x.Assignment != null && x.Assignment.Libro != null
-                    ? x.Assignment.Libro.DirxionDate
-                    : DateOnly.MinValue)
-            .Select(x => new LateWorkReporteDto
-            {
-                EmployeeTypeCode =
-                    x.Assignment != null && x.Assignment.Libro != null && x.Assignment.Libro.EmployeeType != null
-                        ? x.Assignment.Libro.EmployeeType.Code
-                        : "",
-
-                EmployeeName =
-                    x.Assignment != null && x.Assignment.Empleado != null
-                        ? x.Assignment.Empleado.Nombre
-                        : "",
-
-                BookName =
-                    x.Assignment != null && x.Assignment.Libro != null
-                        ? x.Assignment.Libro.BookName
-                        : "",
-
-                Kgen =
-                    x.Assignment != null && x.Assignment.Libro != null
-                        ? x.Assignment.Libro.KGENCode
-                        : "",
-
-                Lsa =
-                    x.Assignment != null && x.Assignment.Libro != null
-                        ? x.Assignment.Libro.LSACode
-                        : "",
-
-                LateWorkId = x.LateWorkId,
-                ClientId = x.ClientId,
-                Completed = x.Completed,
-                CompletedAt = x.CompletedAt,
-                CreatedAt = x.CreatedAt,
-
-                DirxionDate =
-                    x.Assignment != null && x.Assignment.Libro != null
-                        ? x.Assignment.Libro.DirxionDate
-                        : null
-            })
-            .ToListAsync();
-    }
-
-    private void GenerarHojaAsignacionesProgramadas(XLWorkbook workbook)
-    {
-        var worksheet = workbook.Worksheets.Add(
-            TipoReporteSeleccionado == "AssignmentsByDate"
-                ? "Assignments by Date"
-                : "Next Day Assignments");
-
-        worksheet.Cell(1, 1).Value = "Employee";
-        worksheet.Cell(1, 2).Value = "Department";
-        worksheet.Cell(1, 3).Value = "KGEN Code";
-        worksheet.Cell(1, 4).Value = "LSA Code";
-        worksheet.Cell(1, 5).Value = "Book";
-        worksheet.Cell(1, 6).Value = "Database";
-        worksheet.Cell(1, 7).Value = "Stage";
-        worksheet.Cell(1, 8).Value = "Stage Date";
 
         var row = 2;
 
-        foreach (var item in AsignacionesDiaSiguienteReporte)
+
+        foreach (var item in
+                 AsignacionesDiaSiguienteReporte)
         {
-            worksheet.Cell(row, 1).Value = item.EmployeeName;
-            worksheet.Cell(row, 2).Value = item.EmployeeTypeCode;
-            worksheet.Cell(row, 3).Value = item.KgenCode;
-            worksheet.Cell(row, 4).Value = item.LsaCode;
-            worksheet.Cell(row, 5).Value = item.BookName;
-            worksheet.Cell(row, 6).Value = item.Database;
-            worksheet.Cell(row, 7).Value = item.Stage;
-            EscribirFechaExcel(worksheet.Cell(row, 8), item.StageDate);
+            worksheet.Cell(row, 1).Value =
+                item.EmployeeName;
+
+            worksheet.Cell(row, 2).Value =
+                item.EmployeeTypeCode;
+
+            worksheet.Cell(row, 3).Value =
+                item.KgenCode;
+
+            worksheet.Cell(row, 4).Value =
+                item.LsaCode;
+
+            worksheet.Cell(row, 5).Value =
+                item.BookName;
+
+            worksheet.Cell(row, 6).Value =
+                item.Database;
+
+            worksheet.Cell(row, 7).Value =
+                item.Stage;
+
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 8),
+                item.StageDate);
+
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 8);
+
+        AplicarEstiloExcel(
+            worksheet,
+            row - 1,
+            8);
     }
 
-    private void GenerarHojaLateWork(XLWorkbook workbook)
+    private void GenerarHojaLateWork(
+        XLWorkbook workbook)
     {
-        var worksheet = workbook.Worksheets.Add("Finished Late Work");
+        var worksheet =
+            workbook.Worksheets.Add(
+                "Finished Late Work");
+
 
         worksheet.Cell(1, 1).Value = "Employee";
         worksheet.Cell(1, 2).Value = "Book Name";
@@ -1544,53 +2729,98 @@ else
         worksheet.Cell(1, 11).Value = "Status";
         worksheet.Cell(1, 12).Value = "Department";
 
+
         var row = 2;
+
 
         foreach (var item in LateWorksReporte)
         {
-            worksheet.Cell(row, 1).Value = item.EmployeeName;
-            worksheet.Cell(row, 2).Value = item.BookName;
-            worksheet.Cell(row, 3).Value = item.Kgen;
-            worksheet.Cell(row, 4).Value = item.Lsa;
-            worksheet.Cell(row, 5).Value = item.LateWorkId;
-            worksheet.Cell(row, 6).Value = item.ClientId;
+            worksheet.Cell(row, 1).Value =
+                item.EmployeeName;
 
-            EscribirFechaExcel(worksheet.Cell(row, 7), item.DirxionDate);
+            worksheet.Cell(row, 2).Value =
+                item.BookName;
+
+            worksheet.Cell(row, 3).Value =
+                item.Kgen;
+
+            worksheet.Cell(row, 4).Value =
+                item.Lsa;
+
+            worksheet.Cell(row, 5).Value =
+                item.LateWorkId;
+
+            worksheet.Cell(row, 6).Value =
+                item.ClientId;
+
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 7),
+                item.DirxionDate);
+
 
             if (item.CreatedAt.HasValue)
             {
-                worksheet.Cell(row, 8).Value = item.CreatedAt.Value;
-                worksheet.Cell(row, 8).Style.DateFormat.Format = "MM/dd/yyyy hh:mm AM/PM";
+                worksheet.Cell(row, 8).Value =
+                    item.CreatedAt.Value;
+
+                worksheet.Cell(row, 8)
+                    .Style.DateFormat.Format =
+                    "MM/dd/yyyy hh:mm AM/PM";
             }
             else
             {
-                worksheet.Cell(row, 8).Value = "-";
+                worksheet.Cell(row, 8).Value =
+                    "-";
             }
 
-            worksheet.Cell(row, 9).Value = item.Completed ? "Yes" : "No";
+
+            worksheet.Cell(row, 9).Value =
+                item.Completed
+                    ? "Yes"
+                    : "No";
+
 
             if (item.CompletedAt.HasValue)
             {
-                worksheet.Cell(row, 10).Value = item.CompletedAt.Value;
-                worksheet.Cell(row, 10).Style.DateFormat.Format = "MM/dd/yyyy hh:mm AM/PM";
+                worksheet.Cell(row, 10).Value =
+                    item.CompletedAt.Value;
+
+                worksheet.Cell(row, 10)
+                    .Style.DateFormat.Format =
+                    "MM/dd/yyyy hh:mm AM/PM";
             }
             else
             {
-                worksheet.Cell(row, 10).Value = "-";
+                worksheet.Cell(row, 10).Value =
+                    "-";
             }
 
-            worksheet.Cell(row, 11).Value = "Finished Book";
-            worksheet.Cell(row, 12).Value = item.EmployeeTypeCode;
+
+            worksheet.Cell(row, 11).Value =
+                "Finished Book";
+
+            worksheet.Cell(row, 12).Value =
+                item.EmployeeTypeCode;
+
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 12);
+
+        AplicarEstiloExcel(
+            worksheet,
+            row - 1,
+            12);
     }
 
-    private void GenerarHojaLibros(XLWorkbook workbook)
+    private void GenerarHojaLibros(
+        XLWorkbook workbook)
     {
-        var worksheet = workbook.Worksheets.Add("Finished Books");
+        var worksheet =
+            workbook.Worksheets.Add(
+                "Finished Books");
+
 
         worksheet.Cell(1, 1).Value = "Book Name";
         worksheet.Cell(1, 2).Value = "KGEN";
@@ -1607,35 +2837,81 @@ else
         worksheet.Cell(1, 13).Value = "Pub Date";
         worksheet.Cell(1, 14).Value = "Department";
 
+
         var row = 2;
+
 
         foreach (var item in LibrosReporte)
         {
-            worksheet.Cell(row, 1).Value = item.BookName;
-            worksheet.Cell(row, 2).Value = item.Kgen;
-            worksheet.Cell(row, 3).Value = item.Lsa;
-            worksheet.Cell(row, 4).Value = item.State;
-            worksheet.Cell(row, 5).Value = item.Database;
-            worksheet.Cell(row, 6).Value = item.Legacy;
+            worksheet.Cell(row, 1).Value =
+                item.BookName;
 
-            EscribirFechaExcel(worksheet.Cell(row, 7), item.ProofDate);
-            EscribirFechaExcel(worksheet.Cell(row, 8), item.FinalDate);
-            EscribirFechaExcel(worksheet.Cell(row, 9), item.MemoDate);
-            EscribirFechaExcel(worksheet.Cell(row, 10), item.FinalPoDate);
-            EscribirFechaExcel(worksheet.Cell(row, 11), item.ShippingDate);
-            EscribirFechaExcel(worksheet.Cell(row, 12), item.DirxionDate);
-            EscribirFechaExcel(worksheet.Cell(row, 13), item.PubDate);
-            worksheet.Cell(row, 14).Value = item.EmployeeTypeCode;
+            worksheet.Cell(row, 2).Value =
+                item.Kgen;
+
+            worksheet.Cell(row, 3).Value =
+                item.Lsa;
+
+            worksheet.Cell(row, 4).Value =
+                item.State;
+
+            worksheet.Cell(row, 5).Value =
+                item.Database;
+
+            worksheet.Cell(row, 6).Value =
+                item.Legacy;
+
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 7),
+                item.ProofDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 8),
+                item.FinalDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 9),
+                item.MemoDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 10),
+                item.FinalPoDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 11),
+                item.ShippingDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 12),
+                item.DirxionDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 13),
+                item.PubDate);
+
+
+            worksheet.Cell(row, 14).Value =
+                item.EmployeeTypeCode;
+
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 14);
+
+        AplicarEstiloExcel(
+            worksheet,
+            row - 1,
+            14);
     }
 
-    private void GenerarHojaAsignaciones(XLWorkbook workbook)
+    private void GenerarHojaAsignaciones(
+        XLWorkbook workbook)
     {
-        var worksheet = workbook.Worksheets.Add("Finished Assignments");
+        var worksheet =
+            workbook.Worksheets.Add(
+                "Finished Assignments");
+
 
         worksheet.Cell(1, 1).Value = "Employee";
         worksheet.Cell(1, 2).Value = "Book Name";
@@ -1647,30 +2923,64 @@ else
         worksheet.Cell(1, 8).Value = "Memo";
         worksheet.Cell(1, 9).Value = "Department";
 
+
         var row = 2;
+
 
         foreach (var item in AsignacionesReporte)
         {
-            worksheet.Cell(row, 1).Value = item.EmployeeName;
-            worksheet.Cell(row, 2).Value = item.BookName;
-            worksheet.Cell(row, 3).Value = item.Kgen;
+            worksheet.Cell(row, 1).Value =
+                item.EmployeeName;
 
-            EscribirFechaExcel(worksheet.Cell(row, 4), item.PubDate);
-            EscribirFechaExcel(worksheet.Cell(row, 5), item.DirectionDate);
-            EscribirFechaExcel(worksheet.Cell(row, 6), item.ProofDate);
-            EscribirFechaExcel(worksheet.Cell(row, 7), item.FinalDate);
-            EscribirFechaExcel(worksheet.Cell(row, 8), item.MemoDate);
-            worksheet.Cell(row, 9).Value = item.EmployeeTypeCode;
+            worksheet.Cell(row, 2).Value =
+                item.BookName;
+
+            worksheet.Cell(row, 3).Value =
+                item.Kgen;
+
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 4),
+                item.PubDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 5),
+                item.DirectionDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 6),
+                item.ProofDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 7),
+                item.FinalDate);
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 8),
+                item.MemoDate);
+
+
+            worksheet.Cell(row, 9).Value =
+                item.EmployeeTypeCode;
+
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 9);
+
+        AplicarEstiloExcel(
+            worksheet,
+            row - 1,
+            9);
     }
 
-    private void GenerarHojaEvaluaciones(XLWorkbook workbook)
+    private void GenerarHojaEvaluaciones(
+        XLWorkbook workbook)
     {
-        var worksheet = workbook.Worksheets.Add("Finished Evaluations");
+        var worksheet =
+            workbook.Worksheets.Add(
+                "Finished Evaluations");
+
 
         worksheet.Cell(1, 1).Value = "Employee";
         worksheet.Cell(1, 2).Value = "Book Name";
@@ -1685,581 +2995,485 @@ else
         worksheet.Cell(1, 11).Value = "Total %";
         worksheet.Cell(1, 12).Value = "Department";
 
+
         var row = 2;
+
 
         foreach (var item in EvaluacionesReporte)
         {
-            worksheet.Cell(row, 1).Value = item.EmployeeName;
-            worksheet.Cell(row, 2).Value = item.BookName;
-            worksheet.Cell(row, 3).Value = item.Kgen;
-            worksheet.Cell(row, 4).Value = item.Lsa;
+            worksheet.Cell(row, 1).Value =
+                item.EmployeeName;
 
-            EscribirFechaExcel(worksheet.Cell(row, 5), item.PubDate);
+            worksheet.Cell(row, 2).Value =
+                item.BookName;
 
-            EscribirPorcentajeExcel(worksheet.Cell(row, 6), item.MotifYp);
-            EscribirPorcentajeExcel(worksheet.Cell(row, 7), item.MotifWp);
-            EscribirPorcentajeExcel(worksheet.Cell(row, 8), item.InventoryReport);
-            EscribirPorcentajeExcel(worksheet.Cell(row, 9), item.ProductShippingFolder);
-            EscribirPorcentajeExcel(worksheet.Cell(row, 10), item.TaskMemo);
-            EscribirPorcentajeExcel(worksheet.Cell(row, 11), item.TotalPorcentaje);
-            worksheet.Cell(row, 12).Value = item.EmployeeTypeCode;
+            worksheet.Cell(row, 3).Value =
+                item.Kgen;
+
+            worksheet.Cell(row, 4).Value =
+                item.Lsa;
+
+
+            EscribirFechaExcel(
+                worksheet.Cell(row, 5),
+                item.PubDate);
+
+
+            EscribirPorcentajeExcel(
+                worksheet.Cell(row, 6),
+                item.MotifYp);
+
+            EscribirPorcentajeExcel(
+                worksheet.Cell(row, 7),
+                item.MotifWp);
+
+            EscribirPorcentajeExcel(
+                worksheet.Cell(row, 8),
+                item.InventoryReport);
+
+            EscribirPorcentajeExcel(
+                worksheet.Cell(row, 9),
+                item.ProductShippingFolder);
+
+            EscribirPorcentajeExcel(
+                worksheet.Cell(row, 10),
+                item.TaskMemo);
+
+            EscribirPorcentajeExcel(
+                worksheet.Cell(row, 11),
+                item.TotalPorcentaje);
+
+
+            worksheet.Cell(row, 12).Value =
+                item.EmployeeTypeCode;
+
 
             row++;
         }
 
-        AplicarEstiloExcel(worksheet, row - 1, 12);
+
+        AplicarEstiloExcel(
+            worksheet,
+            row - 1,
+            12);
     }
 
-    private static void EscribirFechaExcel(IXLCell cell, DateOnly? fecha)
+    private static void EscribirFechaExcel(
+        IXLCell cell,
+        DateOnly? fecha)
     {
         if (fecha.HasValue)
         {
-            var dateTime = fecha.Value.ToDateTime(TimeOnly.MinValue);
-            cell.Value = dateTime;
-            cell.Style.DateFormat.Format = "MM/dd/yyyy";
+            cell.Value =
+                fecha.Value.ToDateTime(
+                    TimeOnly.MinValue);
+
+
+            cell.Style.DateFormat.Format =
+                "MM/dd/yyyy";
         }
         else
         {
-            cell.Value = "-";
+            cell.Value =
+                "-";
         }
     }
 
-    private static void EscribirPorcentajeExcel(IXLCell cell, decimal? porcentaje)
+
+    private static void EscribirPorcentajeExcel(
+        IXLCell cell,
+        decimal? porcentaje)
     {
-        if (porcentaje.HasValue)
-        {
-            cell.Value = porcentaje.Value / 100m;
-            cell.Style.NumberFormat.Format = "0.00%";
-        }
-        else
-        {
-            cell.Value = 0;
-            cell.Style.NumberFormat.Format = "0.00%";
-        }
+        cell.Value =
+            (porcentaje ?? 0m)
+            / 100m;
+
+
+        cell.Style.NumberFormat.Format =
+            "0.00%";
     }
 
-    private static void AplicarEstiloExcel(IXLWorksheet worksheet, int lastRow, int lastColumn)
+
+    private static void AplicarEstiloExcel(
+        IXLWorksheet worksheet,
+        int lastRow,
+        int lastColumn)
     {
         if (lastRow < 1)
+        {
             lastRow = 1;
+        }
 
-        var header = worksheet.Range(1, 1, 1, lastColumn);
 
-        header.Style.Font.Bold = true;
-        header.Style.Font.FontColor = XLColor.White;
-        header.Style.Fill.BackgroundColor = XLColor.FromHtml("#111827");
-        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-        header.Style.Alignment.WrapText = false;
+        var header =
+            worksheet.Range(
+                1,
+                1,
+                1,
+                lastColumn);
 
-        worksheet.Row(1).Height = 24;
 
-        var range = worksheet.Range(1, 1, lastRow, lastColumn);
-        range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-        range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-        range.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Font.Bold =
+            true;
+
+        header.Style.Font.FontColor =
+            XLColor.White;
+
+        header.Style.Fill.BackgroundColor =
+            XLColor.FromHtml(
+                "#111827");
+
+        header.Style.Alignment.Horizontal =
+            XLAlignmentHorizontalValues.Center;
+
+        header.Style.Alignment.Vertical =
+            XLAlignmentVerticalValues.Center;
+
+        header.Style.Alignment.WrapText =
+            false;
+
+
+        worksheet.Row(1).Height =
+            24;
+
+
+        var range =
+            worksheet.Range(
+                1,
+                1,
+                lastRow,
+                lastColumn);
+
+
+        range.Style.Border.OutsideBorder =
+            XLBorderStyleValues.Thin;
+
+        range.Style.Border.InsideBorder =
+            XLBorderStyleValues.Thin;
+
+        range.Style.Alignment.Vertical =
+            XLAlignmentVerticalValues.Center;
+
 
         if (lastRow >= 2)
         {
-            var dataRange = worksheet.Range(2, 1, lastRow, lastColumn);
-            dataRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
-            dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            var dataRange =
+                worksheet.Range(
+                    2,
+                    1,
+                    lastRow,
+                    lastColumn);
+
+
+            dataRange.Style.Alignment.Horizontal =
+                XLAlignmentHorizontalValues.Left;
+
+            dataRange.Style.Alignment.Vertical =
+                XLAlignmentVerticalValues.Center;
         }
 
-        worksheet.Columns(1, lastColumn).AdjustToContents();
 
-        for (int col = 1; col <= lastColumn; col++)
+        worksheet
+            .Columns(
+                1,
+                lastColumn)
+            .AdjustToContents();
+
+
+        for (var col = 1;
+             col <= lastColumn;
+             col++)
         {
-            var heading = worksheet.Cell(1, col).GetString();
-            var minWidth = Math.Max(heading.Length + 4, 12);
+            var heading =
+                worksheet.Cell(
+                        1,
+                        col)
+                    .GetString();
 
-            if (worksheet.Column(col).Width < minWidth)
-                worksheet.Column(col).Width = minWidth;
 
-            if (worksheet.Column(col).Width > 45)
+            var minWidth =
+                Math.Max(
+                    heading.Length + 4,
+                    12);
+
+
+            if (worksheet.Column(col).Width <
+                minWidth)
             {
-                worksheet.Column(col).Width = 45;
-                worksheet.Column(col).Style.Alignment.WrapText = true;
+                worksheet.Column(col).Width =
+                    minWidth;
+            }
+
+
+            if (worksheet.Column(col).Width >
+                45)
+            {
+                worksheet.Column(col).Width =
+                    45;
+
+
+                worksheet.Column(col)
+                    .Style.Alignment.WrapText =
+                    true;
             }
         }
 
-        worksheet.SheetView.FreezeRows(1);
 
-        worksheet.Range(1, 1, lastRow, lastColumn).SetAutoFilter();
+        worksheet.SheetView
+            .FreezeRows(1);
+
+
+        worksheet.Range(
+                1,
+                1,
+                lastRow,
+                lastColumn)
+            .SetAutoFilter();
     }
 
-    private async Task MarcarFinalizadosAutomaticamenteAsync(AppDbContext db)
-    {
-        var hoy = DateOnly.FromDateTime(DateTime.Today);
-
-        var librosPendientes = await db.Libros
-            .ApplyScope(Scope)
-            .Where(l => !l.Finalizado && l.DirxionDate < hoy)
-            .ToListAsync();
-
-        foreach (var libro in librosPendientes)
-        {
-            libro.Finalizado = true;
-        }
-
-        var asignacionesPendientes = await db.Asignaciones
-            .Include(a => a.Libro)
-            .ApplyScope(Scope)
-            .Where(a => a.Finalizado == false)
-            .ToListAsync();
-
-        foreach (var asignacion in asignacionesPendientes)
-        {
-            if (asignacion.Libro is not null && asignacion.Libro.Finalizado)
-                asignacion.Finalizado = true;
-        }
-
-        var evaluacionesPendientes = await db.Evaluaciones
-            .Include(e => e.Asignacion)
-                .ThenInclude(a => a!.Libro)
-            .ApplyScope(Scope)
-            .Where(e => e.Finalizado == false)
-            .ToListAsync();
-
-        foreach (var evaluacion in evaluacionesPendientes)
-        {
-            if (evaluacion.Asignacion is not null && evaluacion.Asignacion.Finalizado)
-                evaluacion.Finalizado = true;
-        }
-
-        await db.SaveChangesAsync();
-    }
-
-    private async Task CargarLibrosFinalizadosAsync(AppDbContext db)
-    {
-        var query = db.Libros
-            .AsNoTracking()
-            .Include(l => l.EmployeeType)
-            .ApplyScope(Scope)
-            .Where(l => l.Finalizado == true);
-
-        if (FechaDesde.HasValue)
-        {
-            var desde = DateOnly.FromDateTime(FechaDesde.Value);
-
-            query = query.Where(l =>
-                l.DirxionDate >= desde);
-        }
-
-        if (FechaHasta.HasValue)
-        {
-            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
-
-            query = query.Where(l =>
-                l.DirxionDate <= hasta);
-        }
-
-        var librosDb = await query
-            .OrderByDescending(l => l.DirxionDate)
-            .ToListAsync();
-
-        LibrosReporte = librosDb
-            .Select(l => new LibroReporteDto
-            {
-                EmployeeTypeCode = l.EmployeeType != null ? l.EmployeeType.Code : "",
-                BookName = l.BookName,
-                Kgen = l.KGENCode,
-                Lsa = l.LSACode,
-
-                State = GetStateName(l.StateId),
-                Database = GetDatabaseName(l.DatabaseId),
-                Legacy = GetLegacyCodeName(l.LegacyCodeId),
-
-                ProofDate = l.ProofExtract,
-                FinalDate = l.FinalExtract,
-                MemoDate = l.MemoExtract,
-                FinalPoDate = l.FinalPODate,
-                ShippingDate = l.ShippingDate,
-                DirxionDate = l.DirxionDate,
-                PubDate = l.PubDate
-            })
-            .ToList();
-    }
-
-    private async Task CargarAsignacionesFinalizadasAsync(AppDbContext db)
-    {
-        var query = db.Asignaciones
-            .AsNoTracking()
-            .Include(a => a.Empleado)
-            .Include(a => a.Libro)
-                .ThenInclude(l => l!.EmployeeType)
-            .ApplyScope(Scope)
-            .Where(a => a.Finalizado == true);
-
-        if (EmpleadoIdSeleccionado.HasValue)
-        {
-            query = query.Where(a => a.IdEmpleado == EmpleadoIdSeleccionado.Value);
-        }
-
-        if (FechaDesde.HasValue)
-        {
-            var desde = DateOnly.FromDateTime(FechaDesde.Value);
-
-            query = query.Where(a =>
-                a.Libro != null &&
-                a.Libro.PubDate >= desde);
-        }
-
-        if (FechaHasta.HasValue)
-        {
-            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
-
-            query = query.Where(a =>
-                a.Libro != null &&
-                a.Libro.PubDate <= hasta);
-        }
-
-        var asignacionesDb = await query
-            .OrderByDescending(a => a.Libro != null ? a.Libro.PubDate : DateOnly.MinValue)
-            .ToListAsync();
-
-        AsignacionesReporte = asignacionesDb
-            .GroupBy(a => new
-            {
-                a.IdEmpleado,
-                BookName = a.Libro != null ? a.Libro.BookName : "",
-                Kgen = a.Libro != null ? a.Libro.KGENCode : "",
-                Lsa = a.Libro != null ? a.Libro.LSACode : "",
-                PubDate = a.Libro != null ? (DateOnly?)a.Libro.PubDate : null,
-                DirxionDate = a.Libro != null ? (DateOnly?)a.Libro.DirxionDate : null
-            })
-            .Select(g => g.First())
-            .Select(a => new AsignacionReporteDto
-            {
-                EmployeeTypeCode = a.Libro != null && a.Libro.EmployeeType != null
-                    ? a.Libro.EmployeeType.Code
-                    : "",
-                EmployeeName = a.Empleado != null ? a.Empleado.Nombre : "",
-                BookName = a.Libro != null ? a.Libro.BookName : "",
-                Kgen = a.Libro != null ? a.Libro.KGENCode : "",
-                PubDate = a.Libro != null ? a.Libro.PubDate : null,
-                DirectionDate = a.Libro != null ? a.Libro.DirxionDate : null,
-                ProofDate = a.Libro != null ? a.Libro.ProofExtract : null,
-                FinalDate = a.Libro != null ? a.Libro.FinalExtract : null,
-                MemoDate = a.Libro != null ? a.Libro.MemoExtract : null
-            })
-            .OrderByDescending(a => a.PubDate ?? DateOnly.MinValue)
-            .ToList();
-    }
-
-    private async Task CargarEvaluacionesFinalizadasAsync(AppDbContext db)
-    {
-        var query = db.Evaluaciones
-            .AsNoTracking()
-            .Include(e => e.Asignacion)
-                .ThenInclude(a => a.Empleado)
-            .Include(e => e.Asignacion)
-                .ThenInclude(a => a.Libro)
-                    .ThenInclude(l => l!.EmployeeType)
-            .ApplyScope(Scope)
-            .Where(e => e.Finalizado == true);
-
-        if (EmpleadoIdSeleccionado.HasValue)
-        {
-            query = query.Where(e =>
-                e.Asignacion != null &&
-                e.Asignacion.IdEmpleado == EmpleadoIdSeleccionado.Value);
-        }
-
-        if (FechaDesde.HasValue)
-        {
-            var desde = DateOnly.FromDateTime(FechaDesde.Value);
-
-            query = query.Where(e =>
-                e.Asignacion != null &&
-                e.Asignacion.Libro != null &&
-                e.Asignacion.Libro.PubDate >= desde);
-        }
-
-        if (FechaHasta.HasValue)
-        {
-            var hasta = DateOnly.FromDateTime(FechaHasta.Value);
-
-            query = query.Where(e =>
-                e.Asignacion != null &&
-                e.Asignacion.Libro != null &&
-                e.Asignacion.Libro.PubDate <= hasta);
-        }
-
-        EvaluacionesReporte = await query
-            .OrderByDescending(e =>
-                e.Asignacion != null && e.Asignacion.Libro != null
-                    ? e.Asignacion.Libro.PubDate
-                    : DateOnly.MinValue)
-            .Select(e => new EvaluacionReporteDto
-            {
-                EmployeeTypeCode = e.Asignacion != null && e.Asignacion.Libro != null && e.Asignacion.Libro.EmployeeType != null
-                    ? e.Asignacion.Libro.EmployeeType.Code
-                    : "",
-
-                EmployeeName = e.Asignacion != null && e.Asignacion.Empleado != null
-                    ? e.Asignacion.Empleado.Nombre
-                    : "",
-
-                BookName = e.Asignacion != null && e.Asignacion.Libro != null
-                    ? e.Asignacion.Libro.BookName
-                    : "",
-
-                Kgen = e.Asignacion != null && e.Asignacion.Libro != null
-                    ? e.Asignacion.Libro.KGENCode
-                    : "",
-
-                Lsa = e.Asignacion != null && e.Asignacion.Libro != null
-                    ? e.Asignacion.Libro.LSACode
-                    : "",
-
-                PubDate = e.Asignacion != null && e.Asignacion.Libro != null
-                    ? e.Asignacion.Libro.PubDate
-                    : null,
-
-                MotifYp = e.MotifYp,
-                MotifWp = e.MotifWp,
-                InventoryReport = e.InventoryReport,
-                ProductShippingFolder = e.ProductShippingFolder,
-                TaskMemo = e.TaskMemo
-            })
-            .ToListAsync();
-
-        foreach (var item in EvaluacionesReporte)
-        {
-            item.TotalPorcentaje = CalcularPorcentajeGeneralReporte(item);
-        }
-    }
-
-    private async Task DescargarReporteAsync()
-    {
-        if (!TieneDatos)
-            return;
-
-        var csv = TipoReporteSeleccionado switch
-        {
-            "Libros" => GenerarCsvLibros(),
-            "Asignaciones" => GenerarCsvAsignaciones(),
-            "Evaluaciones" => GenerarCsvEvaluaciones(),
-            _ => string.Empty
-        };
-
-        if (string.IsNullOrWhiteSpace(csv))
-            return;
-
-        var bytes = Encoding.UTF8.GetBytes(csv);
-        var base64 = Convert.ToBase64String(bytes);
-
-        var fileName = TipoReporteSeleccionado switch
-        {
-            "Libros" => $"finished_books_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
-            "Asignaciones" => $"finished_assignments_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
-            "Evaluaciones" => $"finished_evaluations_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
-            _ => $"finished_report_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
-        };
-
-        await JS.InvokeVoidAsync(
-            "downloadFileFromBase64",
-            fileName,
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            base64);
-    }
-
-    private string GenerarCsvLibros()
-    {
-        var sb = new StringBuilder();
-
-        sb.AppendLine("Book Name,KGEN,LSA,State,Database,Legacy,Proof,Final,Memo,Final PO,Shipping,Dirxion,Pub Date,Department,Status");
-
-        foreach (var item in LibrosReporte)
-        {
-            sb.AppendLine(string.Join(",",
-                Csv(item.BookName),
-                Csv(item.Kgen),
-                Csv(item.Lsa),
-                Csv(item.State),
-                Csv(item.Database),
-                Csv(item.Legacy),
-                Csv(FormatDate(item.ProofDate)),
-                Csv(FormatDate(item.FinalDate)),
-                Csv(FormatDate(item.MemoDate)),
-                Csv(FormatDate(item.FinalPoDate)),
-                Csv(FormatDate(item.ShippingDate)),
-                Csv(FormatDate(item.DirxionDate)),
-                Csv(FormatDate(item.PubDate)),
-                Csv(item.EmployeeTypeCode),
-                Csv("Finished")
-            ));
-        }
-
-        return sb.ToString();
-    }
-
-    private string GenerarCsvAsignaciones()
-    {
-        var sb = new StringBuilder();
-
-        sb.AppendLine("Employee,Book Name,KGEN,Pub Date,Direction Date,Proof,Final,Memo,Department,Status");
-
-        foreach (var item in AsignacionesReporte)
-        {
-            sb.AppendLine(string.Join(",",
-                Csv(item.EmployeeName),
-                Csv(item.BookName),
-                Csv(item.Kgen),
-                Csv(FormatDate(item.PubDate)),
-                Csv(FormatDate(item.DirectionDate)),
-                Csv(FormatDate(item.ProofDate)),
-                Csv(FormatDate(item.FinalDate)),
-                Csv(FormatDate(item.MemoDate)),
-                Csv(item.EmployeeTypeCode),
-                Csv("Finished")
-            ));
-        }
-
-        return sb.ToString();
-    }
-
-    private string GenerarCsvEvaluaciones()
-    {
-        var sb = new StringBuilder();
-
-        sb.AppendLine("Employee,Book Name,KGEN,LSA,Pub Date,Motif YP,Motif WP,Inventory Report,Shipping Folder,Task Memo,Total %,Department,Status");
-
-        foreach (var item in EvaluacionesReporte)
-        {
-            sb.AppendLine(string.Join(",",
-                Csv(item.EmployeeName),
-                Csv(item.BookName),
-                Csv(item.Kgen),
-                Csv(item.Lsa),
-                Csv(FormatDate(item.PubDate)),
-                Csv(FormatPercent(item.MotifYp)),
-                Csv(FormatPercent(item.MotifWp)),
-                Csv(FormatPercent(item.InventoryReport)),
-                Csv(FormatPercent(item.ProductShippingFolder)),
-                Csv(FormatPercent(item.TaskMemo)),
-                Csv(FormatPercent(item.TotalPorcentaje)),
-                Csv(item.EmployeeTypeCode),
-                Csv("Finished")
-            ));
-        }
-
-        return sb.ToString();
-    }
-
-    private static string Csv(string? value)
-    {
-        value ??= string.Empty;
-        value = value.Replace("\"", "\"\"");
-        return $"\"{value}\"";
-    }
-
-    private static string FormatDate(DateOnly? date)
+    private static string FormatDate(
+        DateOnly? date)
     {
         return date.HasValue
-            ? date.Value.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)
-            : "";
+            ? date.Value.ToString(
+                "MM/dd/yyyy",
+                CultureInfo.InvariantCulture)
+            : string.Empty;
     }
 
-    private static string FormatPercent(decimal? value)
+
+    private static string FormatDateTime(
+        DateTime? date)
+    {
+        return date.HasValue
+            ? date.Value.ToString(
+                "MM/dd/yyyy",
+                CultureInfo.InvariantCulture)
+            : string.Empty;
+    }
+
+
+    private static string FormatPercent(
+        decimal? value)
     {
         return value.HasValue
-            ? value.Value.ToString("0.00", CultureInfo.InvariantCulture) + "%"
+
+            ? value.Value.ToString(
+                  "0.00",
+                  CultureInfo.InvariantCulture)
+              + "%"
+
             : "0.00%";
+    }
+
+    private static decimal CalcularPorcentajeGeneralReporte(
+        EvaluacionReporteDto item)
+    {
+        decimal suma = 0m;
+        var cantidad = 0;
+
+
+        if (item.MotifYp.HasValue)
+        {
+            suma += item.MotifYp.Value;
+            cantidad++;
+        }
+
+
+        if (item.MotifWp.HasValue)
+        {
+            suma += item.MotifWp.Value;
+            cantidad++;
+        }
+
+
+        if (item.InventoryReport.HasValue)
+        {
+            suma += item.InventoryReport.Value;
+            cantidad++;
+        }
+
+
+        if (item.ProductShippingFolder.HasValue)
+        {
+            suma += item.ProductShippingFolder.Value;
+            cantidad++;
+        }
+
+
+        if (item.TaskMemo.HasValue)
+        {
+            suma += item.TaskMemo.Value;
+            cantidad++;
+        }
+
+
+        return cantidad == 0
+            ? 0m
+            : Math.Round(
+                suma / cantidad,
+                2);
     }
 
     private sealed class EmpleadoFiltroDto
     {
         public Guid Id { get; set; }
-        public string Nombre { get; set; } = string.Empty;
+
+        public string Nombre { get; set; } =
+            string.Empty;
     }
+
+
+    private sealed class LibroRawDto
+    {
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string Kgen { get; set; } =
+            string.Empty;
+
+        public string Lsa { get; set; } =
+            string.Empty;
+
+        public Guid? StateId { get; set; }
+
+        public Guid? DatabaseId { get; set; }
+
+        public Guid? LegacyCodeId { get; set; }
+
+        public DateOnly? ProofDate { get; set; }
+
+        public DateOnly? FinalDate { get; set; }
+
+        public DateOnly? MemoDate { get; set; }
+
+        public DateOnly? FinalPoDate { get; set; }
+
+        public DateOnly? ShippingDate { get; set; }
+
+        public DateOnly? DirxionDate { get; set; }
+
+        public DateOnly? PubDate { get; set; }
+    }
+
 
     private sealed class LibroReporteDto
     {
-        public string EmployeeTypeCode { get; set; } = string.Empty;
-        public string BookName { get; set; } = string.Empty;
-        public string Kgen { get; set; } = string.Empty;
-        public string Lsa { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string Database { get; set; } = string.Empty;
-        public string Legacy { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string Kgen { get; set; } =
+            string.Empty;
+
+        public string Lsa { get; set; } =
+            string.Empty;
+
+        public string State { get; set; } =
+            string.Empty;
+
+        public string Database { get; set; } =
+            string.Empty;
+
+        public string Legacy { get; set; } =
+            string.Empty;
+
         public DateOnly? ProofDate { get; set; }
+
         public DateOnly? FinalDate { get; set; }
+
         public DateOnly? MemoDate { get; set; }
+
         public DateOnly? FinalPoDate { get; set; }
+
         public DateOnly? ShippingDate { get; set; }
+
         public DateOnly? DirxionDate { get; set; }
+
         public DateOnly? PubDate { get; set; }
     }
+
 
     private sealed class AsignacionReporteDto
     {
-        public string EmployeeTypeCode { get; set; } = string.Empty;
-        public string EmployeeName { get; set; } = string.Empty;
-        public string BookName { get; set; } = string.Empty;
-        public string Kgen { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public string EmployeeName { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string Kgen { get; set; } =
+            string.Empty;
+
         public DateOnly? PubDate { get; set; }
+
         public DateOnly? DirectionDate { get; set; }
+
         public DateOnly? ProofDate { get; set; }
+
         public DateOnly? FinalDate { get; set; }
+
         public DateOnly? MemoDate { get; set; }
     }
 
-    private static decimal CalcularPorcentajeGeneralReporte(EvaluacionReporteDto item)
-    {
-        var valores = new List<decimal>();
-
-        if (item.MotifYp.HasValue)
-            valores.Add(item.MotifYp.Value);
-
-        if (item.MotifWp.HasValue)
-            valores.Add(item.MotifWp.Value);
-
-        if (item.InventoryReport.HasValue)
-            valores.Add(item.InventoryReport.Value);
-
-        if (item.ProductShippingFolder.HasValue)
-            valores.Add(item.ProductShippingFolder.Value);
-
-        if (item.TaskMemo.HasValue)
-            valores.Add(item.TaskMemo.Value);
-
-        if (valores.Count == 0)
-            return 0;
-
-        return Math.Round(valores.Average(), 2);
-    }
 
     private sealed class EvaluacionReporteDto
     {
-        public string EmployeeTypeCode { get; set; } = string.Empty;
-        public string EmployeeName { get; set; } = string.Empty;
-        public string BookName { get; set; } = string.Empty;
-        public string Kgen { get; set; } = string.Empty;
-        public string Lsa { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
+
+        public string EmployeeName { get; set; } =
+            string.Empty;
+
+        public string BookName { get; set; } =
+            string.Empty;
+
+        public string Kgen { get; set; } =
+            string.Empty;
+
+        public string Lsa { get; set; } =
+            string.Empty;
 
         public DateOnly? PubDate { get; set; }
 
         public decimal? MotifYp { get; set; }
+
         public decimal? MotifWp { get; set; }
+
         public decimal? InventoryReport { get; set; }
+
         public decimal? ProductShippingFolder { get; set; }
+
         public decimal? TaskMemo { get; set; }
 
         public decimal TotalPorcentaje { get; set; }
     }
 
+
     private sealed class LateWorkReporteDto
     {
-        public string EmployeeTypeCode { get; set; } = string.Empty;
-        public string EmployeeName { get; set; } = string.Empty;
+        public string EmployeeTypeCode { get; set; } =
+            string.Empty;
 
-        public string BookName { get; set; } = string.Empty;
+        public string EmployeeName { get; set; } =
+            string.Empty;
 
-        public string Kgen { get; set; } = string.Empty;
+        public string BookName { get; set; } =
+            string.Empty;
 
-        public string Lsa { get; set; } = string.Empty;
+        public string Kgen { get; set; } =
+            string.Empty;
+
+        public string Lsa { get; set; } =
+            string.Empty;
 
         public long LateWorkId { get; set; }
 

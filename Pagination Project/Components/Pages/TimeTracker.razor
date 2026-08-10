@@ -694,20 +694,21 @@
     private static readonly TimeZoneInfo ZonaHorariaRepublicaDominicana =
         ObtenerZonaHorariaRepublicaDominicana();
 
+
     private static TimeZoneInfo ObtenerZonaHorariaRepublicaDominicana()
     {
-        var timezoneIds = new[]
+        string[] timezoneIds =
         {
-        "America/Santo_Domingo",
-
-        "SA Western Standard Time"
-    };
+            "America/Santo_Domingo",
+            "SA Western Standard Time"
+        };
 
         foreach (var timezoneId in timezoneIds)
         {
             try
             {
-                return TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+                return TimeZoneInfo.FindSystemTimeZoneById(
+                    timezoneId);
             }
             catch (TimeZoneNotFoundException)
             {
@@ -724,12 +725,14 @@
             standardDisplayName: "Dominican Republic Time");
     }
 
+
     private static DateTimeOffset ObtenerAhoraRepublicaDominicana()
     {
         return TimeZoneInfo.ConvertTime(
             DateTimeOffset.UtcNow,
             ZonaHorariaRepublicaDominicana);
     }
+
 
     private static DateOnly ObtenerFechaRepublicaDominicana()
     {
@@ -738,6 +741,7 @@
     }
 
     private bool Cargando = true;
+
     private bool CacheCargado;
     private bool CacheDisponible;
 
@@ -753,56 +757,107 @@
 
     private bool ClosingCorrectionsConfirmed;
     private bool LateWorkConfirmed;
-    private string MensajeVerificacionFinalPO = string.Empty;
 
-    private string TituloModalResultado = string.Empty;
-    private string MensajeModalResultado = string.Empty;
-    private string TipoModalResultado = "success";
+    private string MensajeVerificacionFinalPO =
+        string.Empty;
 
-    private AsignacionTrackerVm? AsignacionPendienteFinalizar;
-    private AsignacionTrackerVm? UltimoResultadoAsignacion;
+    private string TituloModalResultado =
+        string.Empty;
+
+    private string MensajeModalResultado =
+        string.Empty;
+
+    private string TipoModalResultado =
+        "success";
+
+    private AsignacionTrackerVm?
+        AsignacionPendienteFinalizar;
+
+    private AsignacionTrackerVm?
+        UltimoResultadoAsignacion;
 
     private string? GuardandoRowKey;
 
-    private string NombreUsuarioActual = "Current user";
-    private string CurrentUserStorageKey = string.Empty;
+    private string NombreUsuarioActual =
+        "Current user";
+
+    private string CurrentUserStorageKey =
+        string.Empty;
 
     private Guid? CurrentEmployeeId;
 
-    private UserDataScope Scope { get; set; } = new();
+    private UserDataScope Scope { get; set; } =
+        new();
 
     private DateOnly FechaTrabajo =
         ObtenerFechaRepublicaDominicana();
 
-    private List<AsignacionTrackerVm> AsignacionesDia = new();
-    private List<AsignacionTrackerVm> AsignacionesFiltradas = new();
+    private List<AsignacionTrackerVm> AsignacionesDia =
+        new();
+
+    private List<AsignacionTrackerVm> AsignacionesFiltradas =
+        new();
 
     private CancellationTokenSource? ClockCancellation;
+
     private Task? ClockTask;
+
+    private DateOnly?
+        _fechaFinalizacionAutomaticaAplicada;
 
     private string StorageKey =>
         $"pagination-project:time-tracker:{CurrentUserStorageKey}";
 
+
     private AsignacionTrackerVm? AsignacionActiva =>
-        AsignacionesDia.FirstOrDefault(x => x.IsRunning);
+        AsignacionesDia.FirstOrDefault(
+            x => x.IsRunning);
+
 
     private int TotalCompletadas =>
-        AsignacionesDia.Count(x => x.YaCompletada);
+        AsignacionesDia.Count(
+            x => x.YaCompletada);
+
 
     private bool PuedeConfirmarFinalPO =>
         ClosingCorrectionsConfirmed &&
         LateWorkConfirmed &&
         GuardandoRowKey is null;
 
-    private long TotalSegundosDelDia =>
-        AsignacionesDia.Sum(ObtenerSegundosTranscurridos);
+
+    private long TotalSegundosDelDia
+    {
+        get
+        {
+            if (AsignacionesDia.Count == 0)
+                return 0;
+
+            var ahora =
+                DateTimeOffset.UtcNow;
+
+            long total = 0;
+
+            foreach (var item in AsignacionesDia)
+            {
+                total +=
+                    ObtenerSegundosTranscurridos(
+                        item,
+                        ahora);
+            }
+
+            return total;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         var authState =
-            await AuthStateProvider.GetAuthenticationStateAsync();
+            await AuthStateProvider
+                .GetAuthenticationStateAsync();
 
-        var user = authState.User;
+        var user =
+            authState.User;
+
 
         if (!PuedeAccederAlTimeTracker(user))
         {
@@ -813,10 +868,15 @@
             return;
         }
 
-        Scope =
-            await UserDataScopeService.GetScopeAsync(user);
 
-        ResolverUsuarioActual(user);
+        Scope =
+            await UserDataScopeService
+                .GetScopeAsync(user);
+
+
+        ResolverUsuarioActual(
+            user);
+
 
         await CargarDatosAsync();
     }
@@ -824,7 +884,9 @@
     private static bool PuedeAccederAlTimeTracker(
         ClaimsPrincipal user)
     {
-        var lvlId = user.FindFirst("LvlId")?.Value;
+        var lvlId =
+            user.FindFirst("LvlId")?.Value;
+
 
         var role =
             user.FindFirst(ClaimTypes.Role)?.Value ??
@@ -833,23 +895,30 @@
             user.FindFirst("PermissionLevel")?.Value ??
             string.Empty;
 
+
         return lvlId is "3" or "4" ||
+
                role.Equals(
                    "Assistant",
                    StringComparison.OrdinalIgnoreCase) ||
+
                role.Equals(
                    "Employee",
                    StringComparison.OrdinalIgnoreCase);
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
     {
         if (!firstRender)
             return;
 
+
         try
         {
-            CacheDisponible = await VerificarLocalStorageAsync();
+            CacheDisponible =
+                await VerificarLocalStorageAsync();
+
 
             if (CacheDisponible)
             {
@@ -858,25 +927,38 @@
         }
         finally
         {
-            CacheCargado = true;
+            CacheCargado =
+                true;
 
-            if (AsignacionesDia.Any(x => x.IsRunning))
+
+            if (AsignacionesDia.Any(
+                    x => x.IsRunning))
             {
                 AsegurarRelojActivo();
             }
 
-            await InvokeAsync(StateHasChanged);
+
+            await InvokeAsync(
+                StateHasChanged);
         }
     }
 
     private async Task<bool> VerificarLocalStorageAsync()
     {
-        if (string.IsNullOrWhiteSpace(CurrentUserStorageKey))
+        if (string.IsNullOrWhiteSpace(
+                CurrentUserStorageKey))
+        {
             return false;
+        }
 
-        var testKey = $"{StorageKey}:availability-test";
 
-        for (var intento = 1; intento <= 3; intento++)
+        var testKey =
+            $"{StorageKey}:availability-test";
+
+
+        for (var intento = 1;
+             intento <= 3;
+             intento++)
         {
             try
             {
@@ -885,37 +967,52 @@
                     testKey,
                     "available");
 
-                var resultado = await JS.InvokeAsync<string?>(
-                    "localStorage.getItem",
-                    testKey);
+
+                var resultado =
+                    await JS.InvokeAsync<string?>(
+                        "localStorage.getItem",
+                        testKey);
+
 
                 await JS.InvokeVoidAsync(
                     "localStorage.removeItem",
                     testKey);
 
+
                 if (resultado == "available")
+                {
                     return true;
+                }
             }
             catch
             {
                 if (intento == 3)
+                {
                     return false;
+                }
 
-                await Task.Delay(200 * intento);
+
+                await Task.Delay(
+                    200 * intento);
             }
         }
+
 
         return false;
     }
 
-    private void ResolverUsuarioActual(ClaimsPrincipal user)
+    private void ResolverUsuarioActual(
+        ClaimsPrincipal user)
     {
         NombreUsuarioActual =
             user.Identity?.Name ??
             user.FindFirst(ClaimTypes.Name)?.Value ??
             "Current user";
 
-        CurrentEmployeeId = Scope.EmployeeId;
+
+        CurrentEmployeeId =
+            Scope.EmployeeId;
+
 
         if (!CurrentEmployeeId.HasValue ||
             CurrentEmployeeId.Value == Guid.Empty)
@@ -926,37 +1023,85 @@
                 user.FindFirst("EmpleadoId")?.Value ??
                 user.FindFirst("IdEmpleado")?.Value;
 
-            if (Guid.TryParse(employeeClaim, out var employeeId) &&
+
+            if (Guid.TryParse(
+                    employeeClaim,
+                    out var employeeId)
+
+                &&
+
                 employeeId != Guid.Empty)
             {
-                CurrentEmployeeId = employeeId;
+                CurrentEmployeeId =
+                    employeeId;
             }
         }
 
+
         var rawUserId =
             Scope.UserId != Guid.Empty
+
                 ? Scope.UserId.ToString()
-                : user.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-                  user.FindFirst("sub")?.Value ??
-                  user.FindFirst("UserId")?.Value ??
-                  user.FindFirst("User_Id")?.Value ??
-                  user.Identity?.Name ??
+
+                : user.FindFirst(
+                        ClaimTypes.NameIdentifier)
+                    ?.Value
+
+                  ??
+
+                  user.FindFirst("sub")
+                      ?.Value
+
+                  ??
+
+                  user.FindFirst("UserId")
+                      ?.Value
+
+                  ??
+
+                  user.FindFirst("User_Id")
+                      ?.Value
+
+                  ??
+
+                  user.Identity?.Name
+
+                  ??
+
                   string.Empty;
 
-        if (string.IsNullOrWhiteSpace(rawUserId))
+
+        if (string.IsNullOrWhiteSpace(
+                rawUserId))
         {
-            CacheDisponible = false;
-            CurrentUserStorageKey = string.Empty;
+            CacheDisponible =
+                false;
+
+            CurrentUserStorageKey =
+                string.Empty;
+
             return;
         }
 
-        CurrentUserStorageKey = CrearHashUsuario(rawUserId);
+
+        CurrentUserStorageKey =
+            CrearHashUsuario(
+                rawUserId);
     }
 
-    private static string CrearHashUsuario(string value)
+
+    private static string CrearHashUsuario(
+        string value)
     {
-        var bytes = Encoding.UTF8.GetBytes(value);
-        var hash = SHA256.HashData(bytes);
+        var bytes =
+            Encoding.UTF8.GetBytes(
+                value);
+
+
+        var hash =
+            SHA256.HashData(
+                bytes);
+
 
         return Convert
             .ToHexString(hash)
@@ -966,153 +1111,358 @@
     private async Task CargarDatosAsync()
     {
         Cargando = true;
-        Mensaje = string.Empty;
+
+        Mensaje =
+            string.Empty;
+
+        MensajeEsError =
+            false;
+
 
         try
         {
             AsignacionesDia.Clear();
 
+
             if (!CurrentEmployeeId.HasValue ||
                 CurrentEmployeeId.Value == Guid.Empty)
             {
                 AplicarFiltros();
+
                 return;
             }
 
+
+            var currentEmployeeId =
+                CurrentEmployeeId.Value;
+
+
             await using var db =
-                await DbFactory.CreateDbContextAsync();
+                await DbFactory
+                    .CreateDbContextAsync();
 
             await ActualizarFinalizadosPorDirxionAsync(
                 db,
                 FechaTrabajo);
 
-            var data = await (
-                from a in db.Asignaciones.AsNoTracking()
-                join l in db.Libros.AsNoTracking()
-                    on a.IdLibro equals l.Id
-                join e in db.Empleados.AsNoTracking()
-                    on a.IdEmpleado equals e.Id
-                join et in db.EmployeeTypes.AsNoTracking()
-                    on l.EmployeeTypeId equals et.Id
+            var data =
+                await (
+                    from a in db.Asignaciones.AsNoTracking()
 
-                join bpJoin in db.Bind_Plants.AsNoTracking()
-                    on l.BindPlantId equals bpJoin.Id
-                    into bindPlantGroup
+                    join l in db.Libros.AsNoTracking()
+                        on a.IdLibro equals l.Id
 
-                from bp in bindPlantGroup.DefaultIfEmpty()
+                    join e in db.Empleados.AsNoTracking()
+                        on a.IdEmpleado equals e.Id
 
-                where !a.Finalizado &&
-                      !l.Finalizado &&
-                      l.DirxionDate >= FechaTrabajo &&
-                      (
-                          Scope.ViewAllEmployeeTypes ||
-                          l.EmployeeTypeId == Scope.EmployeeTypeId
-                      )
+                    join et in db.EmployeeTypes.AsNoTracking()
+                        on l.EmployeeTypeId equals et.Id
 
-                select new RawAssignmentVm
-                {
-                    AssignmentId = a.Id,
-                    EmployeeId = e.Id,
-                    BookId = l.Id,
+                    join bpJoin in db.Bind_Plants.AsNoTracking()
+                        on l.BindPlantId equals bpJoin.Id
+                        into bindPlantGroup
 
-                    EmployeeName = e.Nombre ?? string.Empty,
-                    EmployeeTypeId = l.EmployeeTypeId,
-                    EmployeeTypeCode = et.Code ?? string.Empty,
+                    from bp in bindPlantGroup.DefaultIfEmpty()
 
-                    KgenCode = l.KGENCode ?? string.Empty,
-                    LsaCode = l.LSACode ?? string.Empty,
-                    BookName = l.BookName ?? string.Empty,
+                    where
+                        !a.Finalizado &&
+                        !l.Finalizado &&
+                        l.DirxionDate >= FechaTrabajo &&
 
-                    ProofExtract = l.ProofExtract,
-                    FinalExtract = l.FinalExtract,
-                    MemoExtract = l.MemoExtract,
-                    DirxionDate = l.DirxionDate,
-                    FinalPODate = l.FinalPODate,
-                    ShippingDate = l.ShippingDate,
+                        (
+                            Scope.ViewAllEmployeeTypes ||
+                            l.EmployeeTypeId ==
+                            Scope.EmployeeTypeId
+                        )
 
-                    BindPlantName =
-                        bp != null
-                            ? bp.Bind_Plant_Name ?? string.Empty
-                            : string.Empty
-                }
-            ).ToListAsync();
+                        &&
 
-            var assignmentIds = data
-                .Select(x => x.AssignmentId)
-                .Distinct()
-                .ToList();
+                        (
+                            a.IdEmpleado ==
+                            currentEmployeeId
 
-            var temporalesActivas = assignmentIds.Count == 0
-                ? new List<TemporaryAssignment>()
-                : await db.TemporaryAssignments
+                            ||
+
+                            db.TemporaryAssignments.Any(t =>
+                                t.Active &&
+                                t.AssignmentId == a.Id &&
+                                t.TemporaryEmployeeId ==
+                                currentEmployeeId)
+                        )
+
+                    select new RawAssignmentVm
+                    {
+                        AssignmentId =
+                            a.Id,
+
+                        EmployeeId =
+                            e.Id,
+
+                        BookId =
+                            l.Id,
+
+                        EmployeeName =
+                            e.Nombre
+                            ?? string.Empty,
+
+                        EmployeeTypeId =
+                            l.EmployeeTypeId,
+
+                        EmployeeTypeCode =
+                            et.Code
+                            ?? string.Empty,
+
+                        KgenCode =
+                            l.KGENCode
+                            ?? string.Empty,
+
+                        LsaCode =
+                            l.LSACode
+                            ?? string.Empty,
+
+                        BookName =
+                            l.BookName
+                            ?? string.Empty,
+
+                        ProofExtract =
+                            l.ProofExtract,
+
+                        FinalExtract =
+                            l.FinalExtract,
+
+                        MemoExtract =
+                            l.MemoExtract,
+
+                        DirxionDate =
+                            l.DirxionDate,
+
+                        FinalPODate =
+                            l.FinalPODate,
+
+                        ShippingDate =
+                            l.ShippingDate,
+
+                        BindPlantName =
+                            bp != null
+                                ? bp.Bind_Plant_Name
+                                  ?? string.Empty
+                                : string.Empty
+                    })
+                .ToListAsync();
+
+
+            if (data.Count == 0)
+            {
+                AplicarFiltros();
+
+                return;
+            }
+
+
+            var assignmentIds =
+                data
+                    .Select(x =>
+                        x.AssignmentId)
+
+                    .Distinct()
+
+                    .ToList();
+
+            var temporalesActivas =
+                await db.TemporaryAssignments
                     .AsNoTracking()
-                    .Include(x => x.TemporaryEmployee)
+
                     .Where(x =>
                         x.Active &&
-                        assignmentIds.Contains(x.AssignmentId))
-                    .OrderByDescending(x => x.CreatedAt)
+                        assignmentIds.Contains(
+                            x.AssignmentId))
+
+                    .OrderByDescending(
+                        x => x.CreatedAt)
+
+                    .Select(x =>
+                        new TemporaryAssignmentTrackerVm
+                        {
+                            AssignmentId =
+                                x.AssignmentId,
+
+                            TemporaryEmployeeId =
+                                x.TemporaryEmployeeId,
+
+                            TemporaryEmployeeName =
+                                x.TemporaryEmployee != null
+
+                                    ? x.TemporaryEmployee.Nombre
+                                      ?? string.Empty
+
+                                    : string.Empty,
+
+                            Proof =
+                                x.Proof,
+
+                            Final =
+                                x.Final,
+
+                            Memo =
+                                x.Memo,
+
+                            FinalPO =
+                                x.FinalPO,
+
+                            Shipping =
+                                x.Shipping,
+
+                            Dirxion =
+                                x.Dirxion
+                        })
+
                     .ToListAsync();
 
-            /*
-             * Assignments_Worked conserva una sola fila por asignación.
-             * Por eso se cargan todos los registros de esas asignaciones,
-             * sin limitar por Work_Date.
-             */
-            var registrosTrabajados = assignmentIds.Count == 0
-                ? new List<AsignacionTrabajada>()
-                : await db.AsignacionesTrabajadas
+            var temporalesPorAsignacion =
+                temporalesActivas
+
+                    .GroupBy(x =>
+                        x.AssignmentId)
+
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.ToList());
+
+            var registrosTrabajadosRaw =
+                await db.AsignacionesTrabajadas
                     .AsNoTracking()
+
                     .Where(x =>
-                        assignmentIds.Contains(x.IdAsignacion))
+                        assignmentIds.Contains(
+                            x.IdAsignacion))
+
+                    .Select(x =>
+                        new WorkedTrackerStateVm
+                        {
+                            AssignmentId =
+                                x.IdAsignacion,
+
+                            ProofExtractWorked =
+                                x.ProofExtractWorked,
+
+                            FinalExtractWorked =
+                                x.FinalExtractWorked,
+
+                            MemoExtractWorked =
+                                x.MemoExtractWorked,
+
+                            FinalPOWorked =
+                                x.FinalPOWorked,
+
+                            ShippingWorked =
+                                x.ShippingWorked,
+
+                            DirxionWorked =
+                                x.DirxionWorked
+                        })
+
                     .ToListAsync();
 
-            var trabajadasPorAsignacion = registrosTrabajados
-                .ToLookup(x => x.IdAsignacion);
+            var trabajadasPorAsignacion =
+                registrosTrabajadosRaw
+
+                    .GroupBy(x =>
+                        x.AssignmentId)
+
+                    .ToDictionary(
+                        g => g.Key,
+
+                        g => new WorkedTrackerStateVm
+                        {
+                            AssignmentId =
+                                g.Key,
+
+                            ProofExtractWorked =
+                                g.Any(x =>
+                                    x.ProofExtractWorked),
+
+                            FinalExtractWorked =
+                                g.Any(x =>
+                                    x.FinalExtractWorked),
+
+                            MemoExtractWorked =
+                                g.Any(x =>
+                                    x.MemoExtractWorked),
+
+                            FinalPOWorked =
+                                g.Any(x =>
+                                    x.FinalPOWorked),
+
+                            ShippingWorked =
+                                g.Any(x =>
+                                    x.ShippingWorked),
+
+                            DirxionWorked =
+                                g.Any(x =>
+                                    x.DirxionWorked)
+                        });
 
             foreach (var item in data)
             {
-                var etapa = ObtenerEtapaDelDia(item);
+                var etapa =
+                    ObtenerEtapaDelDia(
+                        item);
+
 
                 if (etapa is null)
                     continue;
 
-                var temporalAplicable = temporalesActivas
-                    .FirstOrDefault(x =>
-                        x.AssignmentId == item.AssignmentId &&
-                        AsignacionTemporalAplicaEtapa(
-                            x,
-                            etapa.Key));
+
+                TemporaryAssignmentTrackerVm?
+                    temporalAplicable =
+                        null;
+
+
+                if (temporalesPorAsignacion.TryGetValue(
+                        item.AssignmentId,
+                        out var temporales))
+                {
+                    temporalAplicable =
+                        temporales.FirstOrDefault(
+                            x =>
+                                AsignacionTemporalAplicaEtapa(
+                                    x,
+                                    etapa.Key));
+                }
+
 
                 var empleadoResponsableId =
-                    temporalAplicable?.TemporaryEmployeeId ??
+                    temporalAplicable
+                        ?.TemporaryEmployeeId
+
+                    ??
+
                     item.EmployeeId;
 
                 if (empleadoResponsableId !=
-                    CurrentEmployeeId.Value)
+                    currentEmployeeId)
                 {
                     continue;
                 }
 
+
                 var empleadoResponsableNombre =
-                    temporalAplicable?
-                        .TemporaryEmployee?
-                        .Nombre;
+                    temporalAplicable
+                        ?.TemporaryEmployeeName;
+
 
                 if (string.IsNullOrWhiteSpace(
-                    empleadoResponsableNombre))
+                        empleadoResponsableNombre))
                 {
                     empleadoResponsableNombre =
                         item.EmployeeName;
                 }
 
-                var registrosDeLaAsignacion =
-                    trabajadasPorAsignacion[item.AssignmentId];
 
-                var etapaYaCompletada =
-                    registrosDeLaAsignacion.Any(registro =>
-                        EstaEtapaCompletada(
-                            registro,
-                            etapa.Key));
+                trabajadasPorAsignacion.TryGetValue(
+                    item.AssignmentId,
+                    out var registroTrabajado);
+
 
                 AsignacionesDia.Add(
                     new AsignacionTrackerVm
@@ -1127,8 +1477,7 @@
                             item.BookId,
 
                         EmployeeName =
-                            empleadoResponsableNombre ??
-                            string.Empty,
+                            empleadoResponsableNombre,
 
                         EmployeeTypeId =
                             item.EmployeeTypeId,
@@ -1158,9 +1507,12 @@
                             etapa.Date,
 
                         YaCompletada =
-                            etapaYaCompletada
+                            EstaEtapaCompletada(
+                                registroTrabajado,
+                                etapa.Key)
                     });
             }
+
 
             AplicarFiltros();
         }
@@ -1172,44 +1524,61 @@
             Mensaje =
                 string.Empty;
 
+
             MostrarResultadoTracker(
                 "Assignments could not be loaded",
+
                 $"Details: {ex.Message}",
+
                 "error");
         }
         finally
         {
-            Cargando = false;
+            Cargando =
+                false;
         }
     }
 
     private async Task CargarCacheAsync()
     {
         if (string.IsNullOrWhiteSpace(
-            CurrentUserStorageKey))
+                CurrentUserStorageKey))
         {
-            CacheDisponible = false;
+            CacheDisponible =
+                false;
+
             return;
         }
 
+
         try
         {
-            var json = await JS.InvokeAsync<string?>(
-                "localStorage.getItem",
-                StorageKey);
+            var json =
+                await JS.InvokeAsync<string?>(
+                    "localStorage.getItem",
+                    StorageKey);
 
-            if (string.IsNullOrWhiteSpace(json))
+
+            if (string.IsNullOrWhiteSpace(
+                    json))
             {
-                CacheDisponible = true;
+                CacheDisponible =
+                    true;
+
                 return;
             }
 
-            var estado = JsonSerializer.Deserialize<TrackerCacheState>(
-                json,
-                JsonOptions);
+
+            var estado =
+                JsonSerializer.Deserialize<TrackerCacheState>(
+                    json,
+                    JsonOptions);
+
 
             var fechaEsperada =
-                FechaTrabajo.ToString("yyyy-MM-dd");
+                FechaTrabajo.ToString(
+                    "yyyy-MM-dd");
+
 
             if (estado is null ||
                 !string.Equals(
@@ -1222,42 +1591,75 @@
                     StringComparison.Ordinal))
             {
                 await EliminarCacheAsync();
+
                 return;
             }
 
-            var cacheFueNormalizado = false;
+            var cachePorFila =
+                (estado.Items ??
+                 new List<TrackerCacheItem>())
 
-            foreach (var item in AsignacionesDia)
+                .Where(x =>
+                    !string.IsNullOrWhiteSpace(
+                        x.RowKey))
+
+                .GroupBy(
+                    x => x.RowKey,
+                    StringComparer.Ordinal)
+
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.First(),
+                    StringComparer.Ordinal);
+
+
+            var cacheFueNormalizado =
+                false;
+
+
+            foreach (var item in
+                     AsignacionesDia)
             {
-                var rowKey = GetRowKey(item);
+                var rowKey =
+                    GetRowKey(item);
 
-                var guardado = estado.Items
-                    .FirstOrDefault(x =>
-                        x.RowKey == rowKey);
 
-                if (guardado is null)
+                if (!cachePorFila.TryGetValue(
+                        rowKey,
+                        out var guardado))
+                {
                     continue;
+                }
+
 
                 item.AccumulatedSeconds =
                     Math.Max(
                         0,
                         guardado.AccumulatedSeconds);
 
+
                 item.IsRunning =
                     guardado.IsRunning;
+
 
                 item.StartedAtUtc =
                     guardado.StartedAtUtc;
 
+
                 item.FinishedAtUtc =
                     guardado.FinishedAtUtc;
+
 
                 if (item.IsRunning &&
                     !item.StartedAtUtc.HasValue)
                 {
-                    item.IsRunning = false;
-                    cacheFueNormalizado = true;
+                    item.IsRunning =
+                        false;
+
+                    cacheFueNormalizado =
+                        true;
                 }
+
 
                 if (item.YaCompletada &&
                     item.IsRunning)
@@ -1266,90 +1668,123 @@
                         item,
                         DateTimeOffset.UtcNow);
 
-                    cacheFueNormalizado = true;
+
+                    cacheFueNormalizado =
+                        true;
                 }
             }
 
-            var cronometrosActivos = AsignacionesDia
-                .Where(x => x.IsRunning)
-                .OrderByDescending(x => x.StartedAtUtc)
-                .ToList();
+            var cronometrosActivos =
+                AsignacionesDia
+
+                    .Where(x =>
+                        x.IsRunning)
+
+                    .OrderByDescending(x =>
+                        x.StartedAtUtc)
+
+                    .ToList();
+
 
             if (cronometrosActivos.Count > 1)
             {
                 var ahora =
                     DateTimeOffset.UtcNow;
 
-                foreach (var extra in cronometrosActivos.Skip(1))
+
+                foreach (var extra in
+                         cronometrosActivos.Skip(1))
                 {
-                    PausarInternamente(extra, ahora);
+                    PausarInternamente(
+                        extra,
+                        ahora);
                 }
 
-                cacheFueNormalizado = true;
+
+                cacheFueNormalizado =
+                    true;
             }
+
 
             if (cacheFueNormalizado)
             {
                 await GuardarCacheAsync();
             }
 
-            CacheDisponible = true;
+
+            CacheDisponible =
+                true;
         }
         catch (JSDisconnectedException)
         {
-            CacheDisponible = false;
+            CacheDisponible =
+                false;
         }
         catch (InvalidOperationException)
         {
-            CacheDisponible = false;
+            CacheDisponible =
+                false;
         }
         catch
         {
-            CacheDisponible = false;
+            CacheDisponible =
+                false;
         }
     }
 
     private async Task GuardarCacheAsync()
     {
         if (string.IsNullOrWhiteSpace(
-            CurrentUserStorageKey))
+                CurrentUserStorageKey))
         {
             return;
         }
 
-        var estado = new TrackerCacheState
+
+        var estado =
+            new TrackerCacheState
+            {
+                UserKey =
+                    CurrentUserStorageKey,
+
+                WorkDate =
+                    FechaTrabajo.ToString(
+                        "yyyy-MM-dd"),
+
+                Items =
+                    new List<TrackerCacheItem>(
+                        AsignacionesDia.Count)
+            };
+
+
+        foreach (var item in AsignacionesDia)
         {
-            UserKey =
-                CurrentUserStorageKey,
+            estado.Items.Add(
+                new TrackerCacheItem
+                {
+                    RowKey =
+                        GetRowKey(item),
 
-            WorkDate =
-                FechaTrabajo.ToString("yyyy-MM-dd"),
+                    AccumulatedSeconds =
+                        item.AccumulatedSeconds,
 
-            Items = AsignacionesDia
-                .Select(item =>
-                    new TrackerCacheItem
-                    {
-                        RowKey =
-                            GetRowKey(item),
+                    IsRunning =
+                        item.IsRunning,
 
-                        AccumulatedSeconds =
-                            item.AccumulatedSeconds,
+                    StartedAtUtc =
+                        item.StartedAtUtc,
 
-                        IsRunning =
-                            item.IsRunning,
+                    FinishedAtUtc =
+                        item.FinishedAtUtc
+                });
+        }
 
-                        StartedAtUtc =
-                            item.StartedAtUtc,
 
-                        FinishedAtUtc =
-                            item.FinishedAtUtc
-                    })
-                .ToList()
-        };
+        var json =
+            JsonSerializer.Serialize(
+                estado,
+                JsonOptions);
 
-        var json = JsonSerializer.Serialize(
-            estado,
-            JsonOptions);
 
         await JS.InvokeVoidAsync(
             "localStorage.setItem",
@@ -1362,24 +1797,40 @@
         if (!CacheDisponible)
             return;
 
-        for (var intento = 1; intento <= 2; intento++)
+
+        for (var intento = 1;
+             intento <= 2;
+             intento++)
         {
             try
             {
                 await GuardarCacheAsync();
-                CacheDisponible = true;
+
+
+                CacheDisponible =
+                    true;
+
+
                 return;
             }
             catch
             {
                 if (intento == 2)
                 {
-                    CacheDisponible = false;
-                    await InvokeAsync(StateHasChanged);
+                    CacheDisponible =
+                        false;
+
+
+                    await InvokeAsync(
+                        StateHasChanged);
+
+
                     return;
                 }
 
-                await Task.Delay(150);
+
+                await Task.Delay(
+                    150);
             }
         }
     }
@@ -1387,10 +1838,11 @@
     private async Task EliminarCacheAsync()
     {
         if (string.IsNullOrWhiteSpace(
-            CurrentUserStorageKey))
+                CurrentUserStorageKey))
         {
             return;
         }
+
 
         try
         {
@@ -1400,7 +1852,8 @@
         }
         catch
         {
-            CacheDisponible = false;
+            CacheDisponible =
+                false;
         }
     }
 
@@ -1414,20 +1867,25 @@
             return;
         }
 
-        Mensaje = string.Empty;
+
+        Mensaje =
+            string.Empty;
+
 
         var ahora =
             DateTimeOffset.UtcNow;
 
-        foreach (var activa in AsignacionesDia
-            .Where(x =>
-                x.IsRunning &&
-                x != item))
+        foreach (var activa in
+                 AsignacionesDia.Where(
+                     x =>
+                         x.IsRunning &&
+                         !ReferenceEquals(x, item)))
         {
             PausarInternamente(
                 activa,
                 ahora);
         }
+
 
         item.StartedAtUtc =
             ahora;
@@ -1438,7 +1896,9 @@
         item.IsRunning =
             true;
 
+
         await PersistirCacheSeguroAsync();
+
 
         AsegurarRelojActivo();
     }
@@ -1452,27 +1912,33 @@
             return;
         }
 
+
         PausarInternamente(
             item,
             DateTimeOffset.UtcNow);
 
+
         await PersistirCacheSeguroAsync();
+
 
         DetenerRelojSiNoEsNecesario();
     }
 
-    private void PausarInternamente(
+
+    private static void PausarInternamente(
         AsignacionTrackerVm item,
         DateTimeOffset momento)
     {
         if (!item.IsRunning)
             return;
 
+
         if (item.StartedAtUtc.HasValue)
         {
             var diferencia =
                 momento -
                 item.StartedAtUtc.Value;
+
 
             if (diferencia.TotalSeconds > 0)
             {
@@ -1482,8 +1948,10 @@
             }
         }
 
+
         item.IsRunning =
             false;
+
 
         item.StartedAtUtc =
             null;
@@ -1498,43 +1966,56 @@
             return;
         }
 
+
         AsignacionPendienteFinalizar =
             item;
+
 
         MensajeVerificacionFinalPO =
             string.Empty;
 
+
         ClosingCorrectionsConfirmed =
             false;
+
 
         LateWorkConfirmed =
             false;
 
-        if (RequiereVerificacionFinalPO(item))
+
+        if (RequiereVerificacionFinalPO(
+                item))
         {
             MostrarModalConfirmacionFinalizacion =
                 false;
 
+
             MostrarModalVerificacionFinalPO =
                 true;
+
 
             return;
         }
 
+
         MostrarModalVerificacionFinalPO =
             false;
+
 
         MostrarModalConfirmacionFinalizacion =
             true;
     }
+
 
     private void CancelarFinalizacion()
     {
         if (GuardandoRowKey is not null)
             return;
 
+
         MostrarModalConfirmacionFinalizacion =
             false;
+
 
         AsignacionPendienteFinalizar =
             null;
@@ -1545,17 +2026,21 @@
         var item =
             AsignacionPendienteFinalizar;
 
+
         if (item is null ||
             GuardandoRowKey is not null)
         {
             return;
         }
 
+
         MostrarModalConfirmacionFinalizacion =
             false;
 
+
         AsignacionPendienteFinalizar =
             null;
+
 
         await FinalizarAsync(
             item,
@@ -1567,14 +2052,17 @@
         var item =
             AsignacionPendienteFinalizar;
 
+
         if (item is null ||
             GuardandoRowKey is not null)
         {
             return;
         }
 
+
         MensajeVerificacionFinalPO =
             string.Empty;
+
 
         if (!ClosingCorrectionsConfirmed ||
             !LateWorkConfirmed)
@@ -1582,8 +2070,10 @@
             MensajeVerificacionFinalPO =
                 "Both confirmations are required before completing Final PO.";
 
+
             return;
         }
+
 
         await FinalizarAsync(
             item,
@@ -1600,41 +2090,45 @@
             return;
         }
 
+
         var requiereVerificacionFinalPO =
-            RequiereVerificacionFinalPO(item);
+            RequiereVerificacionFinalPO(
+                item);
+
 
         var rowKey =
             GetRowKey(item);
 
+
         GuardandoRowKey =
             rowKey;
+
 
         Mensaje =
             string.Empty;
 
+
         MensajeVerificacionFinalPO =
             string.Empty;
 
+
         try
         {
-            if (requiereVerificacionFinalPO)
-            {
-                if (!verificacionesFinalPOConfirmadas ||
+            if (requiereVerificacionFinalPO &&
+                (
+                    !verificacionesFinalPOConfirmadas ||
                     !ClosingCorrectionsConfirmed ||
-                    !LateWorkConfirmed)
-                {
-                    throw new InvalidOperationException(
-                        "Both Final PO confirmations are required.");
-                }
-
-                /*
-                 * La confirmación de Late Work se registra directamente.
-                 * No se consulta la tabla LateWorkActivities.
-                 */
+                    !LateWorkConfirmed
+                ))
+            {
+                throw new InvalidOperationException(
+                    "Both Final PO confirmations are required.");
             }
+
 
             var ahora =
                 DateTimeOffset.UtcNow;
+
 
             if (item.IsRunning)
             {
@@ -1645,35 +2139,49 @@
 
             await PersistirCacheSeguroAsync();
 
+
             await MarcarEtapaCompletadaAsync(
                 item,
                 verificacionesFinalPOConfirmadas);
 
+
             item.YaCompletada =
                 true;
+
 
             item.FinishedAtUtc =
                 ahora;
 
+
             await PersistirCacheSeguroAsync();
+
 
             MensajeEsError =
                 false;
 
+
             Mensaje =
                 string.Empty;
 
+
             UltimoResultadoAsignacion =
                 item;
+
 
             if (requiereVerificacionFinalPO)
             {
                 ResetearVerificacionFinalPO();
             }
 
+
+            AplicarFiltros();
+
+
             MostrarResultadoTracker(
                 "Assignment completed",
+
                 $"{item.BookName} was completed successfully.",
+
                 "success");
         }
         catch (Exception ex)
@@ -1681,19 +2189,24 @@
             MensajeEsError =
                 true;
 
+
             Mensaje =
                 string.Empty;
 
+
             UltimoResultadoAsignacion =
                 null;
+
 
             if (requiereVerificacionFinalPO)
             {
                 MostrarModalVerificacionFinalPO =
                     true;
 
+
                 AsignacionPendienteFinalizar =
                     item;
+
 
                 MensajeVerificacionFinalPO =
                     ex.Message;
@@ -1702,7 +2215,9 @@
             {
                 MostrarResultadoTracker(
                     "Assignment could not be completed",
+
                     $"Details: {ex.Message}",
+
                     "error");
             }
         }
@@ -1711,10 +2226,10 @@
             GuardandoRowKey =
                 null;
 
+
             DetenerRelojSiNoEsNecesario();
         }
     }
-
 
     private void MostrarResultadoTracker(
         string titulo,
@@ -1724,48 +2239,68 @@
         TituloModalResultado =
             titulo;
 
+
         MensajeModalResultado =
             mensaje;
+
 
         TipoModalResultado =
             tipo;
 
+
         MostrarModalResultado =
             true;
     }
+
 
     private void CerrarModalResultado()
     {
         MostrarModalResultado =
             false;
 
+
         TituloModalResultado =
             string.Empty;
+
 
         MensajeModalResultado =
             string.Empty;
 
+
         TipoModalResultado =
             "success";
+
 
         UltimoResultadoAsignacion =
             null;
     }
 
+
     private string ClaseIconoModalResultado =>
         TipoModalResultado switch
         {
-            "success" => "tracker-modal-icon-success",
-            "warning" => "tracker-modal-icon-warning",
-            _ => "tracker-modal-icon-error"
+            "success" =>
+                "tracker-modal-icon-success",
+
+            "warning" =>
+                "tracker-modal-icon-warning",
+
+            _ =>
+                "tracker-modal-icon-error"
         };
+
 
     private string EtiquetaModalResultado =>
         TipoModalResultado switch
         {
-            "success" => "Completed",
-            "warning" => "Attention",
-            _ => "Error"
+            "success" =>
+                "Completed",
+
+            "warning" =>
+                "Attention",
+
+            _ =>
+                "Error"
         };
 
     private async Task MarcarEtapaCompletadaAsync(
@@ -1773,13 +2308,18 @@
         bool verificacionesFinalPOConfirmadas)
     {
         await using var db =
-            await DbFactory.CreateDbContextAsync();
+            await DbFactory
+                .CreateDbContextAsync();
 
-        var tieneAcceso = await db.Asignaciones
-            .AsNoTracking()
-            .ApplyScope(Scope)
-            .AnyAsync(x =>
-                x.Id == item.AssignmentId);
+        var tieneAcceso =
+            await db.Asignaciones
+                .AsNoTracking()
+                .ApplyScope(Scope)
+
+                .AnyAsync(x =>
+                    x.Id ==
+                    item.AssignmentId);
+
 
         if (!tieneAcceso)
         {
@@ -1787,46 +2327,46 @@
                 "The assignment is outside your employee type scope.");
         }
 
-        var requiereVerificacionFinalPO =
-            RequiereVerificacionFinalPO(item);
 
-        if (requiereVerificacionFinalPO)
-        {
-            /*
-             * Se mantienen las dos confirmaciones obligatorias,
-             * pero no se consulta LateWorkActivities.
-             */
-            if (!verificacionesFinalPOConfirmadas ||
+        var requiereVerificacionFinalPO =
+            RequiereVerificacionFinalPO(
+                item);
+
+
+        if (requiereVerificacionFinalPO &&
+            (
+                !verificacionesFinalPOConfirmadas ||
                 !ClosingCorrectionsConfirmed ||
-                !LateWorkConfirmed)
-            {
-                throw new InvalidOperationException(
-                    "Both Final PO confirmations are required.");
-            }
+                !LateWorkConfirmed
+            ))
+        {
+            throw new InvalidOperationException(
+                "Both Final PO confirmations are required.");
         }
 
-        /*
-         * Assignments_Worked conserva una sola fila por asignación.
-         * La fecha no forma parte de la identidad del registro porque
-         * sus etapas pueden completarse en fechas diferentes.
-         */
-        var registro = await db.AsignacionesTrabajadas
-            .FirstOrDefaultAsync(x =>
-                x.IdAsignacion == item.AssignmentId);
+        var registro =
+            await db.AsignacionesTrabajadas
+
+                .FirstOrDefaultAsync(x =>
+                    x.IdAsignacion ==
+                    item.AssignmentId);
+
 
         if (registro is null)
         {
-            registro = new AsignacionTrabajada
-            {
-                Id =
-                    Guid.NewGuid(),
+            registro =
+                new AsignacionTrabajada
+                {
+                    Id =
+                        Guid.NewGuid(),
 
-                IdAsignacion =
-                    item.AssignmentId,
+                    IdAsignacion =
+                        item.AssignmentId,
 
-                FechaTrabajo =
-                    FechaTrabajo
-            };
+                    FechaTrabajo =
+                        FechaTrabajo
+                };
+
 
             db.AsignacionesTrabajadas.Add(
                 registro);
@@ -1835,30 +2375,31 @@
         if (requiereVerificacionFinalPO)
         {
             var userIdVerificador =
-                await ObtenerUserIdVerificadorAsync(db);
+                await ObtenerUserIdVerificadorAsync(
+                    db);
+
 
             registro.ClosingCorrectionsVerified =
                 true;
 
+
             registro.LateWorkVerified =
                 true;
 
+
             registro.FinalPOVerifiedAt =
                 DateTime.UtcNow;
+
 
             registro.FinalPOVerifiedByUserId =
                 userIdVerificador;
         }
 
+
         MarcarEtapa(
             registro,
             item.StageKey);
 
-        /*
-         * Un único SaveChangesAsync ya se ejecuta de forma atómica.
-         * No se abre una transacción manual porque el contexto utiliza
-         * NpgsqlRetryingExecutionStrategy mediante EnableRetryOnFailure.
-         */
         await db.SaveChangesAsync();
     }
 
@@ -1866,22 +2407,34 @@
         AppDbContext db)
     {
         if (Scope.UserId != Guid.Empty)
+        {
             return Scope.UserId;
+        }
+
 
         if (CurrentEmployeeId.HasValue &&
             CurrentEmployeeId.Value != Guid.Empty)
         {
-            var userId = await db.Users
-                .AsNoTracking()
-                .Where(x =>
-                    x.EmployeeId ==
+            var userId =
+                await db.Users
+                    .AsNoTracking()
+
+                    .Where(x =>
+                        x.EmployeeId ==
                         CurrentEmployeeId.Value)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+
+                    .Select(x =>
+                        x.Id)
+
+                    .FirstOrDefaultAsync();
+
 
             if (userId != Guid.Empty)
+            {
                 return userId;
+            }
         }
+
 
         throw new InvalidOperationException(
             "The current user could not be identified for the Final PO verification.");
@@ -1890,33 +2443,41 @@
     private static bool RequiereVerificacionFinalPO(
         AsignacionTrackerVm item)
     {
-        return string.Equals(
-                   item.StageKey,
-                   "FinalPO",
-                   StringComparison.OrdinalIgnoreCase) &&
-               !EsBindPlant(
-                   item.BindPlantName,
-                   "IVEAU");
+        return
+            string.Equals(
+                item.StageKey,
+                "FinalPO",
+                StringComparison.OrdinalIgnoreCase)
+
+            &&
+
+            !EsBindPlant(
+                item.BindPlantName,
+                "IVEAU");
     }
+
 
     private void ResetearVerificacionFinalPO()
     {
         MostrarModalVerificacionFinalPO =
             false;
 
+
         ClosingCorrectionsConfirmed =
             false;
+
 
         LateWorkConfirmed =
             false;
 
+
         MensajeVerificacionFinalPO =
             string.Empty;
+
 
         AsignacionPendienteFinalizar =
             null;
     }
-
 
     private static void MarcarEtapa(
         AsignacionTrabajada registro,
@@ -1925,27 +2486,50 @@
         switch (etapaKey)
         {
             case "ProofExtract":
-                registro.ProofExtractWorked = true;
+
+                registro.ProofExtractWorked =
+                    true;
+
                 break;
+
 
             case "FinalExtract":
-                registro.FinalExtractWorked = true;
+
+                registro.FinalExtractWorked =
+                    true;
+
                 break;
+
 
             case "MemoExtract":
-                registro.MemoExtractWorked = true;
+
+                registro.MemoExtractWorked =
+                    true;
+
                 break;
+
 
             case "FinalPO":
-                registro.FinalPOWorked = true;
+
+                registro.FinalPOWorked =
+                    true;
+
                 break;
+
 
             case "Shipping":
-                registro.ShippingWorked = true;
+
+                registro.ShippingWorked =
+                    true;
+
                 break;
 
+
             case "Dirxion":
-                registro.DirxionWorked = true;
+
+                registro.DirxionWorked =
+                    true;
+
                 break;
         }
     }
@@ -1953,15 +2537,27 @@
     private long ObtenerSegundosTranscurridos(
         AsignacionTrackerVm item)
     {
+        return ObtenerSegundosTranscurridos(
+            item,
+            DateTimeOffset.UtcNow);
+    }
+
+
+    private static long ObtenerSegundosTranscurridos(
+        AsignacionTrackerVm item,
+        DateTimeOffset ahora)
+    {
         var total =
             item.AccumulatedSeconds;
+
 
         if (item.IsRunning &&
             item.StartedAtUtc.HasValue)
         {
             var diferencia =
-                DateTimeOffset.UtcNow -
+                ahora -
                 item.StartedAtUtc.Value;
+
 
             if (diferencia.TotalSeconds > 0)
             {
@@ -1971,71 +2567,103 @@
             }
         }
 
-        return Math.Max(0, total);
+
+        return Math.Max(
+            0,
+            total);
     }
 
-    private static string FormatoDuracion(long seconds)
+
+    private static string FormatoDuracion(
+        long seconds)
     {
         var totalSeconds =
-            Math.Max(0, seconds);
+            Math.Max(
+                0,
+                seconds);
+
 
         var horas =
             totalSeconds / 3600;
 
+
         var minutos =
             totalSeconds % 3600 / 60;
+
 
         var segundos =
             totalSeconds % 60;
 
-        return $"{horas:00}:{minutos:00}:{segundos:00}";
+
+        return
+            $"{horas:00}:{minutos:00}:{segundos:00}";
     }
+
 
     private static string FormatoHorasDecimales(
         long seconds)
     {
         var horas =
-            Math.Max(0, seconds) /
-            3600d;
+            Math.Max(
+                0,
+                seconds)
+            / 3600d;
 
-        return horas.ToString("0.##");
+
+        return horas.ToString(
+            "0.##");
     }
+
 
     private static string FormatoMinutos(
         long seconds)
     {
         var minutos =
-            Math.Max(0, seconds) /
-            60d;
+            Math.Max(
+                0,
+                seconds)
+            / 60d;
 
-        return minutos.ToString("0.#");
+
+        return minutos.ToString(
+            "0.#");
     }
+
 
     private static string FormatoHoraInicio(
         AsignacionTrackerVm item)
     {
         if (!item.StartedAtUtc.HasValue)
+        {
             return "—";
+        }
+
 
         var horaRepublicaDominicana =
             TimeZoneInfo.ConvertTime(
                 item.StartedAtUtc.Value,
                 ZonaHorariaRepublicaDominicana);
 
+
         return horaRepublicaDominicana
             .ToString("hh:mm tt");
     }
+
 
     private static string FormatoHoraFinalizacion(
         AsignacionTrackerVm item)
     {
         if (!item.FinishedAtUtc.HasValue)
+        {
             return "—";
+        }
+
 
         var horaRepublicaDominicana =
             TimeZoneInfo.ConvertTime(
                 item.FinishedAtUtc.Value,
                 ZonaHorariaRepublicaDominicana);
+
 
         return horaRepublicaDominicana
             .ToString("hh:mm tt");
@@ -2044,10 +2672,14 @@
     private static string ValorOPlaceholder(
         string? value)
     {
-        return string.IsNullOrWhiteSpace(value)
+        return string.IsNullOrWhiteSpace(
+            value)
+
             ? "—"
+
             : value;
     }
+
 
     private static string ObtenerNombreEstado(
         AsignacionTrackerVm item)
@@ -2055,113 +2687,182 @@
         if (item.YaCompletada)
             return "Completed";
 
+
         if (item.IsRunning)
             return "Running";
+
 
         if (item.AccumulatedSeconds > 0)
             return "Paused";
 
+
         return "Ready";
     }
+
 
     private static string ObtenerClaseEstado(
         AsignacionTrackerVm item)
     {
         if (item.YaCompletada)
+        {
             return "tracker-status-completed";
+        }
+
 
         if (item.IsRunning)
+        {
             return "tracker-status-running";
+        }
+
 
         if (item.AccumulatedSeconds > 0)
+        {
             return "tracker-status-paused";
+        }
+
 
         return "tracker-status-ready";
     }
 
     private void AplicarFiltros()
     {
-        var query =
-            AsignacionesDia.AsEnumerable();
+        IEnumerable<AsignacionTrackerVm> query =
+            AsignacionesDia;
+
 
         if (!string.IsNullOrWhiteSpace(
-            EtapaFiltro))
+                EtapaFiltro))
         {
-            query = query.Where(x =>
-                x.StageKey == EtapaFiltro);
+            query =
+                query.Where(x =>
+                    string.Equals(
+                        x.StageKey,
+                        EtapaFiltro,
+                        StringComparison.Ordinal));
         }
 
         if (!string.IsNullOrWhiteSpace(
-            Busqueda))
+                Busqueda))
         {
             var term =
-                Busqueda
-                    .Trim()
-                    .ToLowerInvariant();
+                Busqueda.Trim();
 
-            query = query.Where(x =>
-                x.BookName
-                    .ToLowerInvariant()
-                    .Contains(term) ||
 
-                x.KgenCode
-                    .ToLowerInvariant()
-                    .Contains(term) ||
+            query =
+                query.Where(x =>
+                    Contiene(
+                        x.BookName,
+                        term)
 
-                x.LsaCode
-                    .ToLowerInvariant()
-                    .Contains(term) ||
+                    ||
 
-                x.StageName
-                    .ToLowerInvariant()
-                    .Contains(term) ||
+                    Contiene(
+                        x.KgenCode,
+                        term)
 
-                x.EmployeeTypeCode
-                    .ToLowerInvariant()
-                    .Contains(term));
+                    ||
+
+                    Contiene(
+                        x.LsaCode,
+                        term)
+
+                    ||
+
+                    Contiene(
+                        x.StageName,
+                        term)
+
+                    ||
+
+                    Contiene(
+                        x.EmployeeTypeCode,
+                        term));
         }
 
-        AsignacionesFiltradas = query
-            .OrderBy(x => x.YaCompletada)
-            .ThenByDescending(x => x.IsRunning)
-            .ThenBy(x => x.StageDate)
-            .ThenBy(x => x.BookName)
-            .ToList();
+
+        AsignacionesFiltradas =
+            query
+
+                .OrderBy(x =>
+                    x.YaCompletada)
+
+                .ThenByDescending(x =>
+                    x.IsRunning)
+
+                .ThenBy(x =>
+                    x.StageDate)
+
+                .ThenBy(x =>
+                    x.BookName)
+
+                .ToList();
     }
+
+
+    private static bool Contiene(
+        string? source,
+        string term)
+    {
+        return
+            !string.IsNullOrEmpty(source)
+
+            &&
+
+            source.Contains(
+                term,
+                StringComparison.OrdinalIgnoreCase);
+    }
+
 
     private void OnBusquedaChanged(
         ChangeEventArgs e)
     {
         Busqueda =
-            e.Value?.ToString() ??
-            string.Empty;
+            e.Value?.ToString()
+            ?? string.Empty;
+
 
         AplicarFiltros();
     }
+
 
     private void OnEtapaChanged(
         ChangeEventArgs e)
     {
         EtapaFiltro =
-            e.Value?.ToString() ??
-            string.Empty;
+            e.Value?.ToString()
+            ?? string.Empty;
+
 
         AplicarFiltros();
     }
 
     private static bool AsignacionTemporalAplicaEtapa(
-        TemporaryAssignment temporal,
+        TemporaryAssignmentTrackerVm temporal,
         string etapaKey)
     {
         return etapaKey switch
         {
-            "ProofExtract" => temporal.Proof,
-            "FinalExtract" => temporal.Final,
-            "MemoExtract" => temporal.Memo,
-            "FinalPO" => temporal.FinalPO,
-            "Shipping" => temporal.Shipping,
-            "Dirxion" => temporal.Dirxion,
-            _ => false
+            "ProofExtract" =>
+                temporal.Proof,
+
+            "FinalExtract" =>
+                temporal.Final,
+
+            "MemoExtract" =>
+                temporal.Memo,
+
+            "FinalPO" =>
+                temporal.FinalPO,
+
+            "Shipping" =>
+                temporal.Shipping,
+
+            "Dirxion" =>
+                temporal.Dirxion,
+
+            _ =>
+                false
         };
     }
 
@@ -2173,31 +2874,30 @@
                 .Trim()
                 .ToUpperInvariant();
 
-        /*
-         * Mantiene exactamente la misma configuración utilizada
-         * por Finish Assignments y DashboardService.
-         */
-        var esIveau = EsBindPlant(
-            bindPlantName,
-            "IVEAU",
-            "WSTR");
+        var esIveau =
+            EsBindPlant(
+                bindPlantName,
+                "IVEAU",
+                "WSTR");
 
-        var esAu = EsBindPlant(
-            bindPlantName,
-            "AU");
 
-        var esNz = EsBindPlant(
-            bindPlantName,
-            "NZ");
+        var esAu =
+            EsBindPlant(
+                bindPlantName,
+                "AU");
 
-        /*
-         * Shipping especial solamente para NZ/WSTR.
-         * IVEAU/AU utiliza ShippingDate de la base de datos.
-         */
-        var esNzShipping = EsBindPlant(
-            bindPlantName,
-            "WSTR",
-            "NZ");
+
+        var esNz =
+            EsBindPlant(
+                bindPlantName,
+                "NZ");
+
+        var esNzShipping =
+            EsBindPlant(
+                bindPlantName,
+                "WSTR",
+                "NZ");
+
 
         var excluirMemoPorBindPlant =
             EsBindPlant(
@@ -2209,17 +2909,21 @@
                 "AU",
                 "NZ");
 
+
         var proofDisplayDate =
             GetNextBusinessDay(
                 item.ProofExtract);
+
 
         var finalDisplayDate =
             GetNextBusinessDay(
                 item.FinalExtract);
 
+
         var memoDisplayDate =
             GetNextBusinessDay(
                 item.MemoExtract);
+
 
         var finalPODisplayDate =
             ObtenerFinalPODisplayDate(
@@ -2228,14 +2932,19 @@
                 esAu,
                 esNz);
 
+
         var shippingDisplayDate =
             esNzShipping
+
                 ? GetPreviousWorkDate(
                     item.ShippingDate,
                     1)
+
                 : item.ShippingDate;
 
-        if (proofDisplayDate == FechaTrabajo)
+
+        if (proofDisplayDate ==
+            FechaTrabajo)
         {
             return new EtapaDia(
                 "ProofExtract",
@@ -2243,7 +2952,9 @@
                 proofDisplayDate);
         }
 
-        if (finalDisplayDate == FechaTrabajo)
+
+        if (finalDisplayDate ==
+            FechaTrabajo)
         {
             return new EtapaDia(
                 "FinalExtract",
@@ -2251,7 +2962,12 @@
                 finalDisplayDate);
         }
 
-        if (memoDisplayDate == FechaTrabajo &&
+
+        if (memoDisplayDate ==
+                FechaTrabajo
+
+            &&
+
             !excluirMemoPorBindPlant)
         {
             return new EtapaDia(
@@ -2260,16 +2976,22 @@
                 memoDisplayDate);
         }
 
-        if (finalPODisplayDate == FechaTrabajo)
+
+        if (finalPODisplayDate ==
+            FechaTrabajo)
         {
             return new EtapaDia(
                 "FinalPO",
+
                 ObtenerNombreEtapaFinalPO(
                     bindPlantName),
+
                 finalPODisplayDate);
         }
 
-        if (shippingDisplayDate == FechaTrabajo)
+
+        if (shippingDisplayDate ==
+            FechaTrabajo)
         {
             return new EtapaDia(
                 "Shipping",
@@ -2277,13 +2999,16 @@
                 shippingDisplayDate);
         }
 
-        if (item.DirxionDate == FechaTrabajo)
+
+        if (item.DirxionDate ==
+            FechaTrabajo)
         {
             return new EtapaDia(
                 "Dirxion",
                 "Dirxion Date",
                 item.DirxionDate);
         }
+
 
         return null;
     }
@@ -2300,14 +3025,19 @@
                 item.MemoExtract);
         }
 
+
         if (esAu)
         {
             if (item.MemoExtract == default)
+            {
                 return default;
+            }
+
 
             return GetSameOrNextBusinessDay(
                 item.MemoExtract.AddDays(1));
         }
+
 
         if (esIveau)
         {
@@ -2316,13 +3046,14 @@
                 3);
         }
 
+
         return item.FinalPODate;
     }
 
     private static string ObtenerNombreEtapaFinalPO(
         string bindPlantName)
     {
-        var bindPlantsPermitidos = new[]
+        string[] bindPlantsPermitidos =
         {
             "WAUK",
             "LMRA",
@@ -2333,72 +3064,100 @@
             "WSTR"
         };
 
-        var bindPlantEncontrado =
-            bindPlantsPermitidos
-                .FirstOrDefault(codigo =>
-                    EsBindPlant(
-                        bindPlantName,
-                        codigo));
 
-        return string.IsNullOrWhiteSpace(
-                bindPlantEncontrado)
-            ? "Final PO Date"
-            : $"Final PO {bindPlantEncontrado}";
+        foreach (var codigo in
+                 bindPlantsPermitidos)
+        {
+            if (EsBindPlant(
+                    bindPlantName,
+                    codigo))
+            {
+                return $"Final PO {codigo}";
+            }
+        }
+
+
+        return "Final PO Date";
     }
-
 
     private static bool EsBindPlant(
         string? bindPlantName,
         params string[] codigos)
     {
-        if (string.IsNullOrWhiteSpace(bindPlantName))
-            return false;
-
-        var normalizado =
-            bindPlantName
-                .Trim()
-                .ToUpperInvariant();
-
-        if (codigos.Any(codigo =>
-                normalizado ==
-                codigo.Trim().ToUpperInvariant()))
+        if (string.IsNullOrWhiteSpace(
+                bindPlantName))
         {
-            return true;
+            return false;
         }
 
-        var partes = normalizado.Split(
-            new[]
-            {
-                ' ',
-                '-',
-                '_',
-                '/',
-                '\\',
-                ',',
-                ';',
-                '.',
-                '|',
-                '(',
-                ')',
-                '[',
-                ']'
-            },
-            StringSplitOptions.RemoveEmptyEntries);
 
-        return partes.Any(parte =>
-            codigos.Any(codigo =>
-                parte ==
-                codigo.Trim().ToUpperInvariant()));
+        var normalizado =
+            bindPlantName.Trim();
+
+
+        foreach (var codigo in codigos)
+        {
+            if (string.Equals(
+                    normalizado,
+                    codigo.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+
+        var partes =
+            normalizado.Split(
+                new[]
+                {
+                    ' ',
+                    '-',
+                    '_',
+                    '/',
+                    '\\',
+                    ',',
+                    ';',
+                    '.',
+                    '|',
+                    '(',
+                    ')',
+                    '[',
+                    ']'
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+
+
+        foreach (var parte in partes)
+        {
+            foreach (var codigo in codigos)
+            {
+                if (string.Equals(
+                        parte,
+                        codigo.Trim(),
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+
+
+        return false;
     }
 
     private static DateOnly GetNextBusinessDay(
         DateOnly sourceDate)
     {
         if (sourceDate == default)
+        {
             return default;
+        }
+
 
         var result =
             sourceDate.AddDays(1);
+
 
         while (result.DayOfWeek is
                DayOfWeek.Saturday or
@@ -2408,18 +3167,25 @@
                 result.AddDays(1);
         }
 
+
         return result;
     }
+
 
     private static DateOnly GetPreviousWorkDate(
         DateOnly sourceDate,
         int daysBefore)
     {
         if (sourceDate == default)
+        {
             return default;
+        }
+
 
         var result =
-            sourceDate.AddDays(-daysBefore);
+            sourceDate.AddDays(
+                -daysBefore);
+
 
         while (result.DayOfWeek is
                DayOfWeek.Saturday or
@@ -2429,17 +3195,23 @@
                 result.AddDays(-1);
         }
 
+
         return result;
     }
+
 
     private static DateOnly GetSameOrNextBusinessDay(
         DateOnly sourceDate)
     {
         if (sourceDate == default)
+        {
             return default;
+        }
+
 
         var result =
             sourceDate;
+
 
         while (result.DayOfWeek is
                DayOfWeek.Saturday or
@@ -2449,15 +3221,17 @@
                 result.AddDays(1);
         }
 
+
         return result;
     }
 
     private static bool EstaEtapaCompletada(
-        AsignacionTrabajada? registro,
+        WorkedTrackerStateVm? registro,
         string etapaKey)
     {
         if (registro is null)
             return false;
+
 
         return etapaKey switch
         {
@@ -2479,7 +3253,8 @@
             "Dirxion" =>
                 registro.DirxionWorked,
 
-            _ => false
+            _ =>
+                false
         };
     }
 
@@ -2487,43 +3262,90 @@
         AppDbContext db,
         DateOnly today)
     {
-        var librosParaFinalizar = await db.Libros
-            .ApplyScope(Scope)
-            .Include(l => l.Asignaciones)
-                .ThenInclude(a => a.Evaluaciones)
-            .Where(l =>
-                !l.Finalizado &&
-                l.DirxionDate < today)
-            .ToListAsync();
-
-        if (!librosParaFinalizar.Any())
-            return;
-
-        foreach (var libro in librosParaFinalizar)
+        if (_fechaFinalizacionAutomaticaAplicada ==
+            today)
         {
-            libro.Finalizado = true;
-
-            foreach (var asignacion in libro.Asignaciones)
-            {
-                asignacion.Finalizado = true;
-
-                foreach (var evaluacion in asignacion.Evaluaciones)
-                {
-                    evaluacion.Finalizado = true;
-                }
-            }
+            return;
         }
 
-        await db.SaveChangesAsync();
+
+        var strategy =
+            db.Database
+                .CreateExecutionStrategy();
+
+
+        await strategy.ExecuteAsync(
+            async () =>
+            {
+                await using var transaction =
+                    await db.Database
+                        .BeginTransactionAsync();
+
+                await db.Evaluaciones
+                    .ApplyScope(Scope)
+
+                    .Where(e =>
+                        !e.Finalizado &&
+                        e.Asignacion != null &&
+                        e.Asignacion.Libro != null &&
+                        e.Asignacion.Libro.DirxionDate <
+                        today)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                e => e.Finalizado,
+                                true));
+
+                await db.Asignaciones
+                    .ApplyScope(Scope)
+
+                    .Where(a =>
+                        !a.Finalizado &&
+                        a.Libro != null &&
+                        a.Libro.DirxionDate <
+                        today)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                a => a.Finalizado,
+                                true));
+
+                await db.Libros
+                    .ApplyScope(Scope)
+
+                    .Where(l =>
+                        !l.Finalizado &&
+                        l.DirxionDate <
+                        today)
+
+                    .ExecuteUpdateAsync(
+                        setters =>
+                            setters.SetProperty(
+                                l => l.Finalizado,
+                                true));
+
+
+                await transaction
+                    .CommitAsync();
+            });
+
+
+        _fechaFinalizacionAutomaticaAplicada =
+            today;
     }
 
-    private string GetRowKey(
+    private static string GetRowKey(
         AsignacionTrackerVm item)
     {
-        return
-            $"{item.AssignmentId}-" +
-            $"{item.StageKey}-" +
-            $"{item.StageDate:yyyyMMdd}";
+        return string.Concat(
+            item.AssignmentId,
+            "-",
+            item.StageKey,
+            "-",
+            item.StageDate.ToString(
+                "yyyyMMdd"));
     }
 
     private void AsegurarRelojActivo()
@@ -2534,15 +3356,19 @@
             return;
         }
 
+
         ClockCancellation?.Dispose();
+
 
         ClockCancellation =
             new CancellationTokenSource();
+
 
         ClockTask =
             EjecutarRelojAsync(
                 ClockCancellation.Token);
     }
+
 
     private async Task EjecutarRelojAsync(
         CancellationToken cancellationToken)
@@ -2553,26 +3379,33 @@
                 new PeriodicTimer(
                     TimeSpan.FromSeconds(1));
 
+
             while (await timer.WaitForNextTickAsync(
-                cancellationToken))
+                       cancellationToken))
             {
                 var fechaActual =
                     ObtenerFechaRepublicaDominicana();
 
-                if (fechaActual != FechaTrabajo)
+
+                if (fechaActual !=
+                    FechaTrabajo)
                 {
                     await InvokeAsync(
-                        () => CambiarDiaAsync(
-                            fechaActual));
+                        () =>
+                            CambiarDiaAsync(
+                                fechaActual));
+
 
                     return;
                 }
 
+
                 await InvokeAsync(
                     StateHasChanged);
 
+
                 if (!AsignacionesDia.Any(
-                    x => x.IsRunning))
+                        x => x.IsRunning))
                 {
                     return;
                 }
@@ -2583,10 +3416,15 @@
         }
     }
 
+
     private void DetenerRelojSiNoEsNecesario()
     {
-        if (AsignacionesDia.Any(x => x.IsRunning))
+        if (AsignacionesDia.Any(
+                x => x.IsRunning))
+        {
             return;
+        }
+
 
         ClockCancellation?.Cancel();
     }
@@ -2596,34 +3434,48 @@
     {
         ClockCancellation?.Cancel();
 
+
         await EliminarCacheAsync();
+
 
         FechaTrabajo =
             nuevaFecha;
 
+
         Busqueda =
             string.Empty;
+
 
         EtapaFiltro =
             string.Empty;
 
+
         AsignacionesDia.Clear();
+
         AsignacionesFiltradas.Clear();
 
+
         await CargarDatosAsync();
+
 
         MensajeEsError =
             false;
 
+
         Mensaje =
             string.Empty;
 
+
         MostrarResultadoTracker(
             "New workday started",
+
             "The previous local timer history was cleared and today’s assignments were loaded.",
+
             "warning");
 
+
         await PersistirCacheSeguroAsync();
+
 
         StateHasChanged();
     }
@@ -2634,6 +3486,7 @@
         {
             ClockCancellation.Cancel();
         }
+
 
         if (ClockTask is not null)
         {
@@ -2646,6 +3499,7 @@
             }
         }
 
+
         ClockCancellation?.Dispose();
     }
 
@@ -2654,107 +3508,190 @@
         string Name,
         DateOnly Date);
 
+
+    private sealed class TemporaryAssignmentTrackerVm
+    {
+        public Guid AssignmentId { get; set; }
+
+        public Guid TemporaryEmployeeId { get; set; }
+
+        public string TemporaryEmployeeName { get; set; } =
+            string.Empty;
+
+        public bool Proof { get; set; }
+
+        public bool Final { get; set; }
+
+        public bool Memo { get; set; }
+
+        public bool FinalPO { get; set; }
+
+        public bool Shipping { get; set; }
+
+        public bool Dirxion { get; set; }
+    }
+
+
+    private sealed class WorkedTrackerStateVm
+    {
+        public Guid AssignmentId { get; set; }
+
+        public bool ProofExtractWorked { get; set; }
+
+        public bool FinalExtractWorked { get; set; }
+
+        public bool MemoExtractWorked { get; set; }
+
+        public bool FinalPOWorked { get; set; }
+
+        public bool ShippingWorked { get; set; }
+
+        public bool DirxionWorked { get; set; }
+    }
+
+
     private sealed class RawAssignmentVm
     {
         public Guid AssignmentId { get; set; }
+
         public Guid EmployeeId { get; set; }
+
         public Guid BookId { get; set; }
+
 
         public string EmployeeName { get; set; } =
             string.Empty;
 
+
         public short EmployeeTypeId { get; set; }
+
 
         public string EmployeeTypeCode { get; set; } =
             string.Empty;
 
+
         public string KgenCode { get; set; } =
             string.Empty;
+
 
         public string LsaCode { get; set; } =
             string.Empty;
 
+
         public string BookName { get; set; } =
             string.Empty;
+
 
         public string BindPlantName { get; set; } =
             string.Empty;
 
+
         public DateOnly ProofExtract { get; set; }
+
         public DateOnly FinalExtract { get; set; }
+
         public DateOnly MemoExtract { get; set; }
+
         public DateOnly DirxionDate { get; set; }
+
         public DateOnly FinalPODate { get; set; }
+
         public DateOnly ShippingDate { get; set; }
     }
+
 
     private sealed class AsignacionTrackerVm
     {
         public Guid AssignmentId { get; set; }
+
         public Guid EmployeeId { get; set; }
+
         public Guid BookId { get; set; }
+
 
         public string EmployeeName { get; set; } =
             string.Empty;
 
+
         public short EmployeeTypeId { get; set; }
+
 
         public string EmployeeTypeCode { get; set; } =
             string.Empty;
 
+
         public string KgenCode { get; set; } =
             string.Empty;
+
 
         public string LsaCode { get; set; } =
             string.Empty;
 
+
         public string BookName { get; set; } =
             string.Empty;
+
 
         public string BindPlantName { get; set; } =
             string.Empty;
 
+
         public string StageKey { get; set; } =
             string.Empty;
+
 
         public string StageName { get; set; } =
             string.Empty;
 
+
         public DateOnly StageDate { get; set; }
+
 
         public bool YaCompletada { get; set; }
 
+
         public long AccumulatedSeconds { get; set; }
+
 
         public bool IsRunning { get; set; }
 
+
         public DateTimeOffset? StartedAtUtc { get; set; }
+
 
         public DateTimeOffset? FinishedAtUtc { get; set; }
     }
+
 
     private sealed class TrackerCacheState
     {
         public string UserKey { get; set; } =
             string.Empty;
 
+
         public string WorkDate { get; set; } =
             string.Empty;
+
 
         public List<TrackerCacheItem> Items { get; set; } =
             new();
     }
+
 
     private sealed class TrackerCacheItem
     {
         public string RowKey { get; set; } =
             string.Empty;
 
+
         public long AccumulatedSeconds { get; set; }
+
 
         public bool IsRunning { get; set; }
 
+
         public DateTimeOffset? StartedAtUtc { get; set; }
+
 
         public DateTimeOffset? FinishedAtUtc { get; set; }
     }
