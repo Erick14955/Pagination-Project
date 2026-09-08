@@ -10,7 +10,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 {
     private const long MaxFileSize = 250L * 1024L * 1024L;
     private const int MaxFiles = 250;
-    private const string AlgorithmVersion = "transition-aware-2026.09.08.6";
+    private const string AlgorithmVersion = "transition-aware-2026.09.08.7";
 
     private static readonly Regex PageFolioRegex = new(
         @"FOLIO-(\d{4,})",
@@ -472,7 +472,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         {
             if (!IsAtMainListingColumn(
                     ps,
-                    fontMatch.Index))
+                    fontMatch.Index,
+                    fontMatch.Length))
             {
                 continue;
             }
@@ -531,7 +532,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static bool IsAtMainListingColumn(
         string ps,
-        int fontIndex)
+        int fontIndex,
+        int fontLength)
     {
         var contextStart =
             Math.Max(
@@ -567,44 +569,46 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             }
         }
 
-        var forwardLength =
-            Math.Min(
-                1000,
-                ps.Length -
-                fontIndex);
+        var searchStart =
+            fontIndex +
+            fontLength;
 
-        if (forwardLength <= 0)
+        if (searchStart >= ps.Length)
+        {
+            return false;
+        }
+
+        var searchLimit =
+            Math.Min(
+                ps.Length,
+                searchStart + 1200);
+
+        var nextFont =
+            AnyFontRegex.Match(
+                ps,
+                searchStart);
+
+        if (nextFont.Success &&
+            nextFont.Index < searchLimit)
+        {
+            searchLimit =
+                nextFont.Index;
+        }
+
+        if (searchLimit <= searchStart)
         {
             return false;
         }
 
         var forwardContext =
             ps.Substring(
-                fontIndex,
-                forwardLength);
-
-        var nextFont =
-            AnyFontRegex.Match(
-                forwardContext);
-
-        var forwardLimit =
-            nextFont.Success
-                ? nextFont.Index
-                : forwardContext.Length;
-
-        if (forwardLimit <= 0)
-        {
-            return false;
-        }
-
-        var localForwardContext =
-            forwardContext.Substring(
-                0,
-                forwardLimit);
+                searchStart,
+                searchLimit -
+                searchStart);
 
         var forwardWidths =
             ColumnWidthRegex.Matches(
-                localForwardContext);
+                forwardContext);
 
         foreach (Match widthMatch
                  in forwardWidths)
@@ -621,8 +625,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             }
 
             if (Math.Abs(
-                    width - 121.0) < 0.01 ||
-                Math.Abs(
                     width - 126.0) < 0.01)
             {
                 return true;
@@ -948,8 +950,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     private static bool LooksLikeAddressOrContactLine(
         string text)
     {
-        if (string.IsNullOrWhiteSpace(
-                text))
+        if (string.IsNullOrWhiteSpace(text))
         {
             return true;
         }
@@ -1171,8 +1172,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     private static string NormalizeDirectoryConventions(
         string value)
     {
-        var normalized =
-            value;
+        var normalized = value;
 
         if (MountAbbreviationRegex.IsMatch(
                 normalized))
@@ -1330,8 +1330,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             var group =
                 remaining / value;
 
-            remaining %=
-                value;
+            remaining %= value;
 
             parts.Add(
                 $"{NumberBelowOneThousandToWords((int)group)} {name}");
@@ -1552,11 +1551,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             return null;
         }
 
-        var minimum =
-            current;
-
-        var maximum =
-            current;
+        var minimum = current;
+        var maximum = current;
 
         if (pageIndex > 0)
         {
@@ -1568,8 +1564,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     previous) &&
                 previous < current)
             {
-                minimum =
-                    previous;
+                minimum = previous;
             }
         }
 
@@ -1584,8 +1579,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     next) &&
                 next > current)
             {
-                maximum =
-                    next;
+                maximum = next;
             }
         }
         else
@@ -1705,8 +1699,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     break;
                 }
 
-                var previousIsSpike =
-                    false;
+                var previousIsSpike = false;
 
                 if (acceptedIndexes.Count >= 2)
                 {
