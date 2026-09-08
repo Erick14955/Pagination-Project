@@ -76,6 +76,10 @@ builder.Services.AddScoped<
     PaginationChecklistService>();
 
 builder.Services.AddScoped<
+    IPsAlphabeticalCheckerService,
+    PsAlphabeticalCheckerService>();
+
+builder.Services.AddScoped<
     IUserDataScopeService,
     UserDataScopeService>();
 
