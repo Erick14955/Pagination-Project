@@ -10,6 +10,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 {
     private const long MaxFileSize = 250L * 1024L * 1024L;
     private const int MaxFiles = 250;
+    private const string AlgorithmVersion = "transition-aware-2026.09.08.2";
 
     private static readonly Regex PageFolioRegex = new(
         @"FOLIO-(\d{4,})",
@@ -31,6 +32,12 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static readonly Regex FontRegex = new(
         @"/(BellCentennial-NameAndNumber|NewsGothic-Bold)\s+[^/\r\n]{0,160}?\bty\b",
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant |
+        RegexOptions.Compiled);
+
+    private static readonly Regex SectionHeaderFontRegex = new(
+        @"/FranklinGothic-CondensedYP\s+[^/\r\n]{0,160}?\bty\b",
         RegexOptions.IgnoreCase |
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
@@ -67,6 +74,30 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
 
+    private static readonly Regex PhoneOnlyRegex = new(
+        @"^(?:phone|fax|mobile|freecall|local\s+call|enquiries?)?\s*[\d\s()\-/]+(?:[A-Z]{2,8})?$",
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant |
+        RegexOptions.Compiled);
+
+    private static readonly HashSet<string> Honorifics =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "DR",
+            "DR.",
+            "DOCTOR",
+            "MR",
+            "MR.",
+            "MRS",
+            "MRS.",
+            "MS",
+            "MS.",
+            "MISS",
+            "PROF",
+            "PROF.",
+            "PROFESSOR"
+        };
+
     public async Task<PsBookAnalysisResult> AnalyzeBookAsync(
         IReadOnlyList<IBrowserFile> files,
         CancellationToken cancellationToken = default)
@@ -74,20 +105,29 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         ValidateFiles(files);
 
         var pages = new List<ParsedPsPage>();
-        var warnings = new List<string>();
 
-        for (var fileIndex = 0; fileIndex < files.Count; fileIndex++)
+        var warnings = new List<string>
+        {
+            $"Checker engine: {AlgorithmVersion}"
+        };
+
+        for (var fileIndex = 0;
+             fileIndex < files.Count;
+             fileIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var file = files[fileIndex];
+            var file =
+                files[fileIndex];
 
-            var ps = await ReadPostScriptAsync(
-                file,
-                cancellationToken);
+            var ps =
+                await ReadPostScriptAsync(
+                    file,
+                    cancellationToken);
 
             var declaredPages =
-                DetectDeclaredPageCount(ps);
+                DetectDeclaredPageCount(
+                    ps);
 
             if (declaredPages is > 1)
             {
@@ -101,7 +141,13 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     fileIndex + 1);
 
             var names =
-                ExtractListingNames(ps);
+                ExtractListingNames(
+                    ps);
+
+            var sectionLetter =
+                DetectSectionLetter(
+                    ps,
+                    names);
 
             if (names.Count == 0)
             {
@@ -114,11 +160,13 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     FileName: file.Name,
                     FileOrder: fileIndex + 1,
                     PageLabel: pageLabel,
+                    SectionLetter: sectionLetter,
                     ListingNames: names));
         }
 
         var listings =
-            FlattenListings(pages);
+            FlattenListings(
+                pages);
 
         if (listings.Count == 0)
         {
@@ -138,7 +186,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
         var errors =
             FindOutOfOrderListings(
-                listings);
+                listings,
+                pages);
 
         return new PsBookAnalysisResult
         {
@@ -208,7 +257,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         string ps)
     {
         var match =
-            PagesCountRegex.Match(ps);
+            PagesCountRegex.Match(
+                ps);
 
         return
             match.Success &&
@@ -224,7 +274,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         int fallbackPage)
     {
         var folioMatches =
-            PageFolioRegex.Matches(ps);
+            PageFolioRegex.Matches(
+                ps);
 
         if (folioMatches.Count > 0)
         {
@@ -235,7 +286,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         }
 
         var footerMatches =
-            FooterPageRegex.Matches(ps);
+            FooterPageRegex.Matches(
+                ps);
 
         if (footerMatches.Count > 0)
         {
@@ -262,6 +314,110 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 : raw.TrimStart('0');
     }
 
+    private static char DetectSectionLetter(
+        string ps,
+        IReadOnlyList<string> listingNames)
+    {
+        foreach (Match fontMatch
+                 in SectionHeaderFontRegex.Matches(ps))
+        {
+            var start =
+                fontMatch.Index +
+                fontMatch.Length;
+
+            var limit =
+                Math.Min(
+                    ps.Length,
+                    start + 1200);
+
+            var nextFont =
+                AnyFontRegex.Match(
+                    ps,
+                    start);
+
+            if (nextFont.Success &&
+                nextFont.Index < limit)
+            {
+                limit =
+                    nextFont.Index;
+            }
+
+            if (limit <= start)
+            {
+                continue;
+            }
+
+            var source =
+                ps.Substring(
+                    start,
+                    limit - start);
+
+            foreach (Match textMatch
+                     in PsPrintedStringRegex.Matches(source))
+            {
+                var text =
+                    DecodePostScriptString(
+                            textMatch
+                                .Groups["text"]
+                                .Value)
+                        .Trim();
+
+                if (text.Length != 1)
+                {
+                    continue;
+                }
+
+                var letter =
+                    char.ToUpperInvariant(
+                        text[0]);
+
+                if (IsValidLetter(letter))
+                {
+                    return letter;
+                }
+            }
+        }
+
+        var letters =
+            listingNames
+                .Select(
+                    GetAlphabeticalLetter)
+                .Where(
+                    IsValidLetter)
+                .ToList();
+
+        if (letters.Count < 3)
+        {
+            return '\0';
+        }
+
+        var dominant =
+            letters
+                .GroupBy(
+                    x => x)
+                .Select(
+                    group =>
+                        new
+                        {
+                            Letter =
+                                group.Key,
+                            Count =
+                                group.Count()
+                        })
+                .OrderByDescending(
+                    x =>
+                        x.Count)
+                .First();
+
+        var confidence =
+            (double)dominant.Count /
+            letters.Count;
+
+        return confidence >= 0.70
+            ? dominant.Letter
+            : '\0';
+    }
+
     private static List<string> ExtractListingNames(
         string ps)
     {
@@ -269,7 +425,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             new List<string>();
 
         var fontMatches =
-            FontRegex.Matches(ps);
+            FontRegex.Matches(
+                ps);
 
         foreach (Match fontMatch in fontMatches)
         {
@@ -580,7 +737,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                         var octal =
                             new StringBuilder(3);
 
-                        octal.Append(next);
+                        octal.Append(
+                            next);
 
                         for (var j = 0;
                              j < 2 &&
@@ -661,6 +819,12 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
         if (!text.Any(
                 char.IsLetterOrDigit))
+        {
+            return false;
+        }
+
+        if (PhoneOnlyRegex.IsMatch(
+                text))
         {
             return false;
         }
@@ -761,8 +925,12 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         string value)
     {
         var valueForSorting =
-            ReplaceLeadingNumberWithWords(
+            RemoveLeadingHonorificWhenApplicable(
                 value);
+
+        valueForSorting =
+            ReplaceLeadingNumberWithWords(
+                valueForSorting);
 
         var normalized =
             valueForSorting.Normalize(
@@ -806,6 +974,37 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 builder.ToString(),
                 " ")
             .Trim();
+    }
+
+    private static string RemoveLeadingHonorificWhenApplicable(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(
+                value))
+        {
+            return value;
+        }
+
+        var words =
+            value.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries);
+
+        if (words.Length < 3)
+        {
+            return value;
+        }
+
+        if (!Honorifics.Contains(
+                words[0]))
+        {
+            return value;
+        }
+
+        return string.Join(
+            ' ',
+            words.Skip(1));
     }
 
     private static string ReplaceLeadingNumberWithWords(
@@ -1027,7 +1226,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     }
 
     private static List<PsListingOrderError> FindOutOfOrderListings(
-        IReadOnlyList<PsListing> listings)
+        IReadOnlyList<PsListing> listings,
+        IReadOnlyList<ParsedPsPage> pages)
     {
         if (listings.Count < 2)
         {
@@ -1040,12 +1240,13 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var errorIds =
             new HashSet<Guid>();
 
-        DetectForeignLetterRuns(
+        DetectListingsOutsideAllowedPageRange(
             listings,
+            pages,
             errors,
             errorIds);
 
-        DetectBackwardPrefixMovements(
+        DetectImmediatePrefixBacktracking(
             listings,
             errors,
             errorIds);
@@ -1058,157 +1259,213 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             .ThenBy(
                 x =>
                     x.CurrentPositionInPage)
-            .ThenBy(
-                x =>
-                    BuildSortKey(
-                        x.ListingName),
-                StringComparer.Ordinal)
             .ToList();
     }
 
-    private static void DetectForeignLetterRuns(
+    private static void DetectListingsOutsideAllowedPageRange(
         IReadOnlyList<PsListing> listings,
+        IReadOnlyList<ParsedPsPage> pages,
         ICollection<PsListingOrderError> errors,
         ISet<Guid> errorIds)
     {
-        if (listings.Count < 3)
-        {
-            return;
-        }
-
-        var index =
-            0;
-
-        while (index <
-               listings.Count)
-        {
-            var currentLetter =
-                GetAlphabeticalLetter(
-                    listings[index].Name);
-
-            if (currentLetter == '\0')
-            {
-                index++;
-                continue;
-            }
-
-            var runStart =
-                index;
-
-            var runEnd =
-                index;
-
-            while (
-                runEnd + 1 <
-                listings.Count &&
-                GetAlphabeticalLetter(
-                    listings[
-                        runEnd + 1]
-                        .Name) ==
-                currentLetter)
-            {
-                runEnd++;
-            }
-
-            if (runStart > 0 &&
-                runEnd + 1 <
-                listings.Count)
-            {
-                var previousLetter =
-                    GetAlphabeticalLetter(
-                        listings[
-                            runStart - 1]
-                            .Name);
-
-                var nextLetter =
-                    GetAlphabeticalLetter(
-                        listings[
-                            runEnd + 1]
-                            .Name);
-
-                if (previousLetter != '\0' &&
-                    previousLetter ==
-                    nextLetter &&
-                    currentLetter !=
-                    previousLetter)
-                {
-                    for (var i = runStart;
-                         i <= runEnd;
-                         i++)
-                    {
-                        AddStructuralError(
-                            listings,
-                            i,
-                            errors,
-                            errorIds);
-                    }
-                }
-            }
-
-            index =
-                runEnd + 1;
-        }
-    }
-
-    private static void DetectBackwardPrefixMovements(
-        IReadOnlyList<PsListing> listings,
-        ICollection<PsListingOrderError> errors,
-        ISet<Guid> errorIds)
-    {
-        string? highestPrefix =
-            null;
-
-        char activeLetter =
-            '\0';
+        var pagesByFile =
+            pages.ToDictionary(
+                page =>
+                    page.FileOrder);
 
         for (var i = 0;
              i < listings.Count;
              i++)
         {
-            var item =
+            var listing =
+                listings[i];
+
+            if (!pagesByFile.TryGetValue(
+                    listing.FileOrder,
+                    out var page))
+            {
+                continue;
+            }
+
+            var pageIndex =
+                page.FileOrder - 1;
+
+            var allowedRange =
+                GetAllowedSectionRange(
+                    pages,
+                    pageIndex);
+
+            if (allowedRange is null)
+            {
+                continue;
+            }
+
+            var listingLetter =
+                GetAlphabeticalLetter(
+                    listing.Name);
+
+            if (!IsValidLetter(
+                    listingLetter))
+            {
+                continue;
+            }
+
+            if (listingLetter >=
+                    allowedRange.Value.Min &&
+                listingLetter <=
+                    allowedRange.Value.Max)
+            {
+                continue;
+            }
+
+            AddStructuralError(
+                listings,
+                i,
+                errors,
+                errorIds);
+        }
+    }
+
+    private static SectionRange? GetAllowedSectionRange(
+        IReadOnlyList<ParsedPsPage> pages,
+        int pageIndex)
+    {
+        if (pageIndex < 0 ||
+            pageIndex >= pages.Count)
+        {
+            return null;
+        }
+
+        var current =
+            pages[pageIndex]
+                .SectionLetter;
+
+        if (!IsValidLetter(
+                current))
+        {
+            return null;
+        }
+
+        var minimum =
+            current;
+
+        var maximum =
+            current;
+
+        if (pageIndex > 0)
+        {
+            var previous =
+                pages[pageIndex - 1]
+                    .SectionLetter;
+
+            if (IsValidLetter(
+                    previous) &&
+                previous < current)
+            {
+                minimum =
+                    previous;
+            }
+        }
+
+        if (pageIndex <
+            pages.Count - 1)
+        {
+            var next =
+                pages[pageIndex + 1]
+                    .SectionLetter;
+
+            if (IsValidLetter(
+                    next) &&
+                next > current)
+            {
+                maximum =
+                    next;
+            }
+        }
+        else
+        {
+            maximum =
+                'Z';
+        }
+
+        if (minimum >
+            maximum)
+        {
+            minimum =
+                current;
+
+            maximum =
+                current;
+        }
+
+        return new SectionRange(
+            minimum,
+            maximum);
+    }
+
+    private static void DetectImmediatePrefixBacktracking(
+        IReadOnlyList<PsListing> listings,
+        ICollection<PsListingOrderError> errors,
+        ISet<Guid> errorIds)
+    {
+        char activeLetter =
+            '\0';
+
+        string? previousPrefix =
+            null;
+
+        for (var i = 0;
+             i < listings.Count;
+             i++)
+        {
+            var current =
                 listings[i];
 
             if (errorIds.Contains(
-                    item.Id))
+                    current.Id))
             {
                 continue;
             }
 
-            var letter =
+            var currentLetter =
                 GetAlphabeticalLetter(
-                    item.Name);
+                    current.Name);
 
-            if (letter == '\0')
-            {
-                continue;
-            }
-
-            var prefix =
-                GetSignificantAlphabeticalPrefix(
-                    item.Name);
-
-            if (string.IsNullOrWhiteSpace(
-                    prefix))
-            {
-                continue;
-            }
-
-            if (activeLetter == '\0' ||
-                letter != activeLetter)
+            if (!IsValidLetter(
+                    currentLetter))
             {
                 activeLetter =
-                    letter;
+                    '\0';
 
-                highestPrefix =
-                    prefix;
+                previousPrefix =
+                    null;
 
                 continue;
             }
 
-            if (highestPrefix is not null &&
+            if (activeLetter !=
+                currentLetter)
+            {
+                activeLetter =
+                    currentLetter;
+
+                previousPrefix =
+                    null;
+            }
+
+            var currentPrefix =
+                GetComparablePrefix(
+                    current.Name);
+
+            if (currentPrefix is null)
+            {
+                continue;
+            }
+
+            if (previousPrefix is not null &&
                 string.Compare(
-                    prefix,
-                    highestPrefix,
+                    currentPrefix,
+                    previousPrefix,
                     StringComparison.Ordinal) < 0)
             {
                 AddStructuralError(
@@ -1217,18 +1474,14 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     errors,
                     errorIds);
 
+                previousPrefix =
+                    currentPrefix;
+
                 continue;
             }
 
-            if (highestPrefix is null ||
-                string.Compare(
-                    prefix,
-                    highestPrefix,
-                    StringComparison.Ordinal) > 0)
-            {
-                highestPrefix =
-                    prefix;
-            }
+            previousPrefix =
+                currentPrefix;
         }
     }
 
@@ -1245,10 +1498,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             BuildSortKey(
                 listingName);
 
-        foreach (var character
-                 in sortKey)
+        foreach (var character in sortKey)
         {
-            if (character is >= 'A' and <= 'Z')
+            if (IsValidLetter(
+                    character))
             {
                 return character;
             }
@@ -1257,28 +1510,53 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         return '\0';
     }
 
-    private static string GetSignificantAlphabeticalPrefix(
+    private static string? GetComparablePrefix(
         string listingName)
     {
+        var value =
+            RemoveLeadingHonorificWhenApplicable(
+                listingName);
+
         var sortKey =
             BuildSortKey(
-                listingName);
+                value);
 
         if (string.IsNullOrWhiteSpace(
                 sortKey))
         {
-            return string.Empty;
+            return null;
         }
 
-        var letters =
+        var words =
+            sortKey.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries);
+
+        if (words.Length == 0)
+        {
+            return null;
+        }
+
+        var firstWordLetters =
             new string(
-                sortKey
+                words[0]
                     .Where(
                         char.IsLetter)
-                    .Take(2)
                     .ToArray());
 
-        return letters;
+        if (firstWordLetters.Length < 2)
+        {
+            return null;
+        }
+
+        return firstWordLetters[..2];
+    }
+
+    private static bool IsValidLetter(
+        char letter)
+    {
+        return letter is >= 'A' and <= 'Z';
     }
 
     private static void AddStructuralError(
@@ -1296,19 +1574,24 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             return;
         }
 
-        var correctPosition =
-            FindRecommendedPosition(
-                listings,
-                item,
-                currentIndex,
-                errorIds);
+        var references =
+            listings
+                .Where(
+                    (listing, index) =>
+                        index != currentIndex &&
+                        !errorIds.Contains(
+                            listing.Id))
+                .OrderBy(
+                    listing =>
+                        listing.SortKey,
+                    StringComparer.Ordinal)
+                .ThenBy(
+                    listing =>
+                        listing.GlobalPosition)
+                .ToList();
 
-        var target =
-            listings[
-                Math.Clamp(
-                    correctPosition,
-                    0,
-                    listings.Count - 1)];
+        var itemKey =
+            item.SortKey;
 
         PsListing? previous =
             null;
@@ -1316,74 +1599,36 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         PsListing? next =
             null;
 
-        var itemSortKey =
-            BuildSortKey(
-                item.Name);
-
-        for (var i = 0;
-             i < listings.Count;
-             i++)
+        foreach (var candidate in references)
         {
-            if (i == currentIndex)
-            {
-                continue;
-            }
-
-            var candidate =
-                listings[i];
-
-            if (errorIds.Contains(
-                    candidate.Id))
-            {
-                continue;
-            }
-
-            var candidateKey =
-                BuildSortKey(
-                    candidate.Name);
-
             var comparison =
                 string.Compare(
-                    candidateKey,
-                    itemSortKey,
+                    candidate.SortKey,
+                    itemKey,
                     StringComparison.Ordinal);
 
             if (comparison <= 0)
             {
-                if (previous is null ||
-                    string.Compare(
-                        candidateKey,
-                        BuildSortKey(
-                            previous.Name),
-                        StringComparison.Ordinal) > 0)
-                {
-                    previous =
-                        candidate;
-                }
+                previous =
+                    candidate;
+
+                continue;
             }
-            else
-            {
-                if (next is null ||
-                    string.Compare(
-                        candidateKey,
-                        BuildSortKey(
-                            next.Name),
-                        StringComparison.Ordinal) < 0)
-                {
-                    next =
-                        candidate;
-                }
-            }
+
+            next =
+                candidate;
+
+            break;
         }
 
         var recommendedFile =
-            target.FileName;
+            item.FileName;
 
         var recommendedPage =
-            target.PageLabel;
+            item.PageLabel;
 
         var recommendedPosition =
-            target.PositionInPage;
+            item.PositionInPage;
 
         if (next is not null)
         {
@@ -1440,51 +1685,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             });
     }
 
-    private static int FindRecommendedPosition(
-        IReadOnlyList<PsListing> listings,
-        PsListing item,
-        int currentIndex,
-        ISet<Guid> ignoredErrorIds)
-    {
-        var itemKey =
-            BuildSortKey(
-                item.Name);
-
-        for (var i = 0;
-             i < listings.Count;
-             i++)
-        {
-            if (i == currentIndex)
-            {
-                continue;
-            }
-
-            var candidate =
-                listings[i];
-
-            if (ignoredErrorIds.Contains(
-                    candidate.Id) &&
-                candidate.Id != item.Id)
-            {
-                continue;
-            }
-
-            var candidateKey =
-                BuildSortKey(
-                    candidate.Name);
-
-            if (string.Compare(
-                    candidateKey,
-                    itemKey,
-                    StringComparison.Ordinal) > 0)
-            {
-                return i;
-            }
-        }
-
-        return listings.Count - 1;
-    }
-
     private static int GetPageNumberForSorting(
         string page)
     {
@@ -1501,5 +1701,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         string FileName,
         int FileOrder,
         string PageLabel,
+        char SectionLetter,
         IReadOnlyList<string> ListingNames);
+
+    private readonly record struct SectionRange(
+        char Min,
+        char Max);
 }
