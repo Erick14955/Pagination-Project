@@ -534,25 +534,71 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             ColumnWidthRegex.Matches(
                 context);
 
-        if (widths.Count == 0)
+        if (widths.Count > 0)
+        {
+            var lastWidth =
+                widths[^1]
+                    .Groups["width"]
+                    .Value;
+
+            if (double.TryParse(
+                    lastWidth,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var width))
+            {
+                if (Math.Abs(
+                        width - 126.0) < 0.01)
+                {
+                    return true;
+                }
+            }
+        }
+
+        var forwardLength =
+            Math.Min(
+                1000,
+                ps.Length -
+                fontIndex);
+
+        if (forwardLength <= 0)
         {
             return false;
         }
 
-        var lastWidth =
-            widths[^1]
-                .Groups["width"]
-                .Value;
+        var forwardContext =
+            ps.Substring(
+                fontIndex,
+                forwardLength);
 
-        return
-            double.TryParse(
-                lastWidth,
-                NumberStyles.Float,
-                CultureInfo.InvariantCulture,
-                out var width)
-            &&
-            Math.Abs(
-                width - 126.0) < 0.01;
+        var forwardWidths =
+            ColumnWidthRegex.Matches(
+                forwardContext);
+
+        foreach (Match widthMatch
+                 in forwardWidths)
+        {
+            if (!double.TryParse(
+                    widthMatch
+                        .Groups["width"]
+                        .Value,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out var width))
+            {
+                continue;
+            }
+
+            if (Math.Abs(
+                    width - 121.0) < 0.01 ||
+                Math.Abs(
+                    width - 126.0) < 0.01)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsPhoneOrNumberBlock(
