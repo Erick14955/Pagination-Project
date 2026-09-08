@@ -43,6 +43,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         @"\s+",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
+    private static readonly Regex LeadingNumberRegex = new(
+        @"^\s*(?<number>\d[\d,]*)",
+        RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
     private static readonly Regex TrailingSeparatorRegex = new(
         @"(?:\s+-\s*|\s+–\s*|\s+—\s*)$",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
@@ -158,10 +162,12 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static string DetectPageLabel(string ps, int fallbackPage)
     {
+        // FOLIO is preferred because it is part of the AMDOCS page metadata.
         var folioMatches = PageFolioRegex.Matches(ps);
         if (folioMatches.Count > 0)
             return NormalizePageNumber(folioMatches[^1].Groups[1].Value);
 
+        // PAGE:0006 appears in the production footer of the supplied files.
         var footerMatches = FooterPageRegex.Matches(ps);
         if (footerMatches.Count > 0)
             return NormalizePageNumber(footerMatches[^1].Groups[1].Value);
@@ -216,6 +222,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static bool IsAtMainListingColumn(string ps, int fontIndex)
     {
+        // In the supplied PS format, a real listing begins at the main text width: 126 cw.
+        // Internal/detail lines are indented and normally use 121 cw.
         var contextStart = Math.Max(0, fontIndex - 650);
         var context = ps.Substring(contextStart, fontIndex - contextStart);
         var widths = ColumnWidthRegex.Matches(context);
@@ -249,6 +257,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         AddIndex(candidates, ps.IndexOf("121.00 cw", start, StringComparison.OrdinalIgnoreCase), start, limit);
         AddIndex(candidates, ps.IndexOf("126.00 cw", start, StringComparison.OrdinalIgnoreCase), start, limit);
 
+        // A font change means the listing name has ended. This is particularly important
+        // when address or phone information appears on the same physical line.
         var nextFont = AnyFontRegex.Match(ps, start);
         if (nextFont.Success)
             AddIndex(candidates, nextFont.Index, start, limit);
@@ -356,19 +366,14 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static bool IsLikelyListingName(string text)
     {
-        if (string.IsNullOrWhiteSpace(text) || text.Length < 2 || text.Length > 220)
+        if (string.IsNullOrWhiteSpace(text) || text.Length < 1 || text.Length > 220)
             return false;
 
-        if (!text.Any(char.IsLetter))
-            return false;
-
-        if (PhoneOnlyRegex.IsMatch(text))
-            return false;
-
-        var letters = text.Count(char.IsLetter);
-        var digits = text.Count(char.IsDigit);
-
-        if (digits > letters * 2)
+        // The PS structure already filters phone/detail blocks before this point.
+        // Listings are therefore allowed to begin with numbers, for example
+        // "1200 ..." or "2 ...". Those values are alphabetized by their
+        // English number words in BuildSortKey.
+        if (!text.Any(char.IsLetterOrDigit))
             return false;
 
         return true;
@@ -418,7 +423,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static string BuildSortKey(string value)
     {
-        var normalized = value.Normalize(NormalizationForm.FormD);
+        var valueForSorting = ReplaceLeadingNumberWithWords(value);
+        var normalized = valueForSorting.Normalize(NormalizationForm.FormD);
         var builder = new StringBuilder(normalized.Length);
 
         foreach (var character in normalized)
@@ -440,6 +446,114 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         return MultipleWhitespaceRegex.Replace(builder.ToString(), " ").Trim();
     }
 
+    private static string ReplaceLeadingNumberWithWords(string value)
+    {
+        var match = LeadingNumberRegex.Match(value);
+        if (!match.Success)
+            return value;
+
+        var rawNumber = match.Groups["number"].Value.Replace(",", string.Empty, StringComparison.Ordinal);
+
+        if (!ulong.TryParse(rawNumber, NumberStyles.None, CultureInfo.InvariantCulture, out var number))
+        {
+            // Extremely large values are still sorted alphabetically by spelling
+            // each digit rather than leaving the numeric prefix in front.
+            var digitWords = string.Join(' ', rawNumber.Select(DigitToWord));
+            return digitWords + value[match.Length..];
+        }
+
+        var words = NumberToEnglishWords(number);
+        return words + value[match.Length..];
+    }
+
+    private static string DigitToWord(char digit) => digit switch
+    {
+        '0' => "zero",
+        '1' => "one",
+        '2' => "two",
+        '3' => "three",
+        '4' => "four",
+        '5' => "five",
+        '6' => "six",
+        '7' => "seven",
+        '8' => "eight",
+        '9' => "nine",
+        _ => string.Empty
+    };
+
+    private static string NumberToEnglishWords(ulong number)
+    {
+        if (number == 0)
+            return "zero";
+
+        var scales = new (ulong Value, string Name)[]
+        {
+            (1_000_000_000_000_000_000UL, "quintillion"),
+            (1_000_000_000_000_000UL, "quadrillion"),
+            (1_000_000_000_000UL, "trillion"),
+            (1_000_000_000UL, "billion"),
+            (1_000_000UL, "million"),
+            (1_000UL, "thousand")
+        };
+
+        var parts = new List<string>();
+        var remaining = number;
+
+        foreach (var (value, name) in scales)
+        {
+            if (remaining < value)
+                continue;
+
+            var group = remaining / value;
+            remaining %= value;
+            parts.Add($"{NumberBelowOneThousandToWords((int)group)} {name}");
+        }
+
+        if (remaining > 0)
+            parts.Add(NumberBelowOneThousandToWords((int)remaining));
+
+        return string.Join(' ', parts);
+    }
+
+    private static string NumberBelowOneThousandToWords(int number)
+    {
+        string[] ones =
+        [
+            "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+            "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+            "seventeen", "eighteen", "nineteen"
+        ];
+
+        string[] tens =
+        [
+            "", "", "twenty", "thirty", "forty", "fifty",
+            "sixty", "seventy", "eighty", "ninety"
+        ];
+
+        var parts = new List<string>();
+
+        if (number >= 100)
+        {
+            parts.Add($"{ones[number / 100]} hundred");
+            number %= 100;
+        }
+
+        if (number >= 20)
+        {
+            parts.Add(tens[number / 10]);
+            number %= 10;
+
+            if (number > 0)
+                parts.Add(ones[number]);
+        }
+        else if (number > 0)
+        {
+            parts.Add(ones[number]);
+        }
+
+        return string.Join(' ', parts);
+    }
+
     private static List<PsListingOrderError> FindOutOfOrderListings(IReadOnlyList<PsListing> original)
     {
         var sorted = original
@@ -456,6 +570,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             .Select(x => sortedIndexById[x.Id])
             .ToArray();
 
+        // LIS prevents one displaced listing from making every subsequent listing look wrong.
         var lisIndexes = LongestIncreasingSubsequenceIndexes(sequence);
         var correctlyPlacedIds = lisIndexes
             .Select(index => original[index].Id)

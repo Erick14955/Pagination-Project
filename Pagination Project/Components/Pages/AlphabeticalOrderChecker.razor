@@ -27,19 +27,37 @@
     else
     {
         <section class="alpha-hero">
-            <div>
+            <div class="alpha-hero-copy">
                 <span class="alpha-kicker">Pagination Quality Tool</span>
                 <h1>Alphabetical Order Checker</h1>
                 <p>
                     Upload one or multiple PostScript files that belong to the same book.
                     The checker reads them as one continuous book and identifies listings
-                    that are not in the correct alphabetical position.
+                    that are not in the correct alphabetical position. Listings that start
+                    with numbers are alphabetized by their English number words.
                 </p>
             </div>
 
-            <div class="alpha-user-pill">
-                <span>Authorized user</span>
-                <strong>efana</strong>
+            <div class="alpha-hero-actions">
+                <div class="alpha-user-pill">
+                    <span>Authorized user</span>
+                    <strong>efana</strong>
+                </div>
+
+                <button type="button"
+                        class="alpha-button alpha-button-primary alpha-analyze-top"
+                        disabled="@(_analyzing || _files.Count == 0)"
+                        @onclick="AnalyzeAsync">
+                    @if (_analyzing)
+                    {
+                        <span class="alpha-inline-spinner"></span>
+                        <span>Analyzing book...</span>
+                    }
+                    else
+                    {
+                        <span>Start analysis</span>
+                    }
+                </button>
             </div>
         </section>
 
@@ -82,59 +100,56 @@
                             <h3>Book sequence</h3>
                             <p>The first file below is treated as the beginning of the book.</p>
                         </div>
-                        <span>@_files.Count file@(_files.Count == 1 ? string.Empty : "s")</span>
+
+                        <div class="alpha-sequence-actions">
+                            <span>@_files.Count file@(_files.Count == 1 ? string.Empty : "s")</span>
+                            <button type="button"
+                                    class="alpha-button alpha-button-ghost alpha-toggle-files"
+                                    disabled="@_analyzing"
+                                    @onclick="ToggleFileList">
+                                @(_showFileList ? "Hide .PS files" : "Show .PS files")
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="alpha-file-list">
-                        @for (var index = 0; index < _files.Count; index++)
-                        {
-                            var currentIndex = index;
-                            var item = _files[index];
+                    @if (_showFileList)
+                    {
+                        <div class="alpha-file-list">
+                            @for (var index = 0; index < _files.Count; index++)
+                            {
+                                var currentIndex = index;
+                                var item = _files[index];
 
-                            <div class="alpha-file-row" @key="item.Id">
-                                <div class="alpha-file-order">@(index + 1)</div>
-                                <div class="alpha-file-info">
-                                    <strong>@item.File.Name</strong>
-                                    <span>@FormatBytes(item.File.Size)</span>
+                                <div class="alpha-file-row" @key="item.Id">
+                                    <div class="alpha-file-order">@(index + 1)</div>
+                                    <div class="alpha-file-info">
+                                        <strong>@item.File.Name</strong>
+                                        <span>@FormatBytes(item.File.Size)</span>
+                                    </div>
+                                    <div class="alpha-file-actions">
+                                        <button type="button"
+                                                title="Move up"
+                                                disabled="@(currentIndex == 0 || _analyzing)"
+                                                @onclick="() => MoveFile(currentIndex, -1)">
+                                            ↑
+                                        </button>
+                                        <button type="button"
+                                                title="Move down"
+                                                disabled="@(currentIndex == _files.Count - 1 || _analyzing)"
+                                                @onclick="() => MoveFile(currentIndex, 1)">
+                                            ↓
+                                        </button>
+                                        <button type="button"
+                                                title="Remove"
+                                                disabled="@_analyzing"
+                                                @onclick="() => RemoveFile(currentIndex)">
+                                            ×
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="alpha-file-actions">
-                                    <button type="button"
-                                            title="Move up"
-                                            disabled="@(currentIndex == 0 || _analyzing)"
-                                            @onclick="() => MoveFile(currentIndex, -1)">
-                                        ↑
-                                    </button>
-                                    <button type="button"
-                                            title="Move down"
-                                            disabled="@(currentIndex == _files.Count - 1 || _analyzing)"
-                                            @onclick="() => MoveFile(currentIndex, 1)">
-                                        ↓
-                                    </button>
-                                    <button type="button"
-                                            title="Remove"
-                                            disabled="@_analyzing"
-                                            @onclick="() => RemoveFile(currentIndex)">
-                                        ×
-                                    </button>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <button type="button"
-                            class="alpha-button alpha-button-primary alpha-analyze-button"
-                            disabled="@(_analyzing || _files.Count == 0)"
-                            @onclick="AnalyzeAsync">
-                        @if (_analyzing)
-                        {
-                            <span class="alpha-inline-spinner"></span>
-                            <span>Analyzing book...</span>
-                        }
-                        else
-                        {
-                            <span>Analyze alphabetical order</span>
-                        }
-                    </button>
+                            }
+                        </div>
+                    }
                 </div>
             }
         </section>
@@ -268,6 +283,55 @@
             </section>
         }
     }
+
+    @if (_showAnalysisModal && _result is not null)
+    {
+        <div class="alpha-modal-backdrop" role="presentation">
+            <section class="alpha-modal" role="dialog" aria-modal="true" aria-labelledby="alpha-analysis-summary-title">
+                <div class="alpha-modal-header">
+                    <div>
+                        <span class="alpha-kicker">Analysis complete</span>
+                        <h2 id="alpha-analysis-summary-title">Book analysis summary</h2>
+                    </div>
+                    <button type="button" class="alpha-modal-close" title="Close" @onclick="CloseAnalysisModal">×</button>
+                </div>
+
+                <div class="alpha-modal-summary-grid">
+                    <div><span>Files</span><strong>@_result.FilesAnalyzed</strong></div>
+                    <div><span>Pages</span><strong>@_result.PagesAnalyzed</strong></div>
+                    <div><span>Listings</span><strong>@_result.ListingsAnalyzed</strong></div>
+                    <div class="@(_result.Errors.Count > 0 ? "alpha-modal-summary-error" : "alpha-modal-summary-success")">
+                        <span>Out of order</span>
+                        <strong>@_result.Errors.Count</strong>
+                    </div>
+                </div>
+
+                @if (_result.Errors.Count == 0)
+                {
+                    <div class="alpha-modal-message alpha-modal-message-success">
+                        <strong>Alphabetical order looks correct.</strong>
+                        <span>No listings were detected outside their expected alphabetical position.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="alpha-modal-message alpha-modal-message-warning">
+                        <strong>@_result.Errors.Count listing@(_result.Errors.Count == 1 ? string.Empty : "s") need review.</strong>
+                        <span>The detailed recommendations are shown below the summary cards.</span>
+                    </div>
+                }
+
+                @if (_result.Warnings.Count > 0)
+                {
+                    <p class="alpha-modal-note">There are also @_result.Warnings.Count processing note@(_result.Warnings.Count == 1 ? string.Empty : "s") to review.</p>
+                }
+
+                <div class="alpha-modal-actions">
+                    <button type="button" class="alpha-button alpha-button-primary" @onclick="CloseAnalysisModal">View results</button>
+                </div>
+            </section>
+        </div>
+    }
 </div>
 
 @code {
@@ -278,6 +342,8 @@
     private PsBookAnalysisResult? _result;
     private bool _accessValidated;
     private bool _analyzing;
+    private bool _showFileList = true;
+    private bool _showAnalysisModal;
     private string? _selectionError;
     private string? _analysisError;
 
@@ -303,6 +369,8 @@
         _selectionError = null;
         _analysisError = null;
         _result = null;
+        _showAnalysisModal = false;
+        _showFileList = true;
 
         IReadOnlyList<IBrowserFile> selected;
 
@@ -344,6 +412,7 @@
 
         (_files[index], _files[destination]) = (_files[destination], _files[index]);
         _result = null;
+        _showAnalysisModal = false;
         _analysisError = null;
     }
 
@@ -354,6 +423,7 @@
 
         _files.RemoveAt(index);
         _result = null;
+        _showAnalysisModal = false;
         _analysisError = null;
     }
 
@@ -361,6 +431,8 @@
     {
         _files.Clear();
         _result = null;
+        _showAnalysisModal = false;
+        _showFileList = true;
         _selectionError = null;
         _analysisError = null;
     }
@@ -373,11 +445,15 @@
         _analyzing = true;
         _analysisError = null;
         _result = null;
+        _showAnalysisModal = false;
 
         try
         {
             _result = await CheckerService.AnalyzeBookAsync(
                 _files.Select(x => x.File).ToList());
+
+            _showFileList = false;
+            _showAnalysisModal = true;
         }
         catch (Exception ex)
         {
@@ -387,6 +463,16 @@
         {
             _analyzing = false;
         }
+    }
+
+    private void ToggleFileList()
+    {
+        _showFileList = !_showFileList;
+    }
+
+    private void CloseAnalysisModal()
+    {
+        _showAnalysisModal = false;
     }
 
     private static string FormatBytes(long bytes)
