@@ -554,58 +554,368 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         return string.Join(' ', parts);
     }
 
-    private static List<PsListingOrderError> FindOutOfOrderListings(IReadOnlyList<PsListing> original)
+    private static List<PsListingOrderError> FindOutOfOrderListings(
+        IReadOnlyList<PsListing> original)
     {
-        var sorted = original
-            .OrderBy(x => x.SortKey, StringComparer.Ordinal)
-            .ThenBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(x => x.GlobalPosition)
-            .ToList();
-
-        var sortedIndexById = sorted
-            .Select((item, index) => new { item.Id, Index = index })
-            .ToDictionary(x => x.Id, x => x.Index);
-
-        var sequence = original
-            .Select(x => sortedIndexById[x.Id])
-            .ToArray();
-
-        // LIS prevents one displaced listing from making every subsequent listing look wrong.
-        var lisIndexes = LongestIncreasingSubsequenceIndexes(sequence);
-        var correctlyPlacedIds = lisIndexes
-            .Select(index => original[index].Id)
-            .ToHashSet();
+        if (original.Count < 2)
+            return [];
 
         var errors = new List<PsListingOrderError>();
+        var errorIds = new HashSet<Guid>();
 
-        for (var sortedIndex = 0; sortedIndex < sorted.Count; sortedIndex++)
-        {
-            var item = sorted[sortedIndex];
-            if (correctlyPlacedIds.Contains(item.Id))
-                continue;
+        DetectForeignLetterRuns(
+            original,
+            errors,
+            errorIds);
 
-            var targetSlot = original[Math.Min(sortedIndex, original.Count - 1)];
-            var previous = sortedIndex > 0 ? sorted[sortedIndex - 1] : null;
-            var next = sortedIndex < sorted.Count - 1 ? sorted[sortedIndex + 1] : null;
-
-            errors.Add(new PsListingOrderError
-            {
-                ListingName = item.Name,
-                CurrentFile = item.FileName,
-                CurrentPage = item.PageLabel,
-                CurrentPositionInPage = item.PositionInPage,
-                RecommendedFile = targetSlot.FileName,
-                RecommendedPage = targetSlot.PageLabel,
-                RecommendedPositionInPage = targetSlot.PositionInPage,
-                ShouldGoAfter = previous?.Name,
-                ShouldGoBefore = next?.Name
-            });
-        }
+        DetectBackwardPrefixMovements(
+            original,
+            errors,
+            errorIds);
 
         return errors
-            .OrderBy(x => BuildSortKey(x.ListingName), StringComparer.Ordinal)
-            .ThenBy(x => x.ListingName, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => GetPageNumberForSorting(x.CurrentPage))
+            .ThenBy(x => x.CurrentPositionInPage)
+            .ThenBy(
+                x => BuildSortKey(x.ListingName),
+                StringComparer.Ordinal)
             .ToList();
+    }
+
+    private static void DetectForeignLetterRuns(
+    IReadOnlyList<PsListing> listings,
+    ICollection<PsListingOrderError> errors,
+    ISet<Guid> errorIds)
+    {
+        if (listings.Count < 3)
+            return;
+
+        var index = 0;
+
+        while (index < listings.Count)
+        {
+            var currentLetter =
+                GetAlphabeticalLetter(
+                    listings[index].Name);
+
+            if (currentLetter == '\0')
+            {
+                index++;
+                continue;
+            }
+
+            var runStart = index;
+            var runEnd = index;
+
+            while (runEnd + 1 < listings.Count &&
+                   GetAlphabeticalLetter(
+                       listings[runEnd + 1].Name) ==
+                   currentLetter)
+            {
+                runEnd++;
+            }
+
+            if (runStart > 0 &&
+                runEnd + 1 < listings.Count)
+            {
+                var previousLetter =
+                    GetAlphabeticalLetter(
+                        listings[runStart - 1].Name);
+
+                var nextLetter =
+                    GetAlphabeticalLetter(
+                        listings[runEnd + 1].Name);
+
+                if (previousLetter != '\0' &&
+                    previousLetter == nextLetter &&
+                    currentLetter != previousLetter)
+                {
+                    for (var i = runStart;
+                         i <= runEnd;
+                         i++)
+                    {
+                        AddStructuralError(
+                            listings,
+                            i,
+                            errors,
+                            errorIds);
+                    }
+                }
+            }
+
+            index = runEnd + 1;
+        }
+    }
+
+    private static void DetectBackwardPrefixMovements(
+    IReadOnlyList<PsListing> listings,
+    ICollection<PsListingOrderError> errors,
+    ISet<Guid> errorIds)
+    {
+        string? highestPrefix = null;
+        char activeLetter = '\0';
+
+        for (var i = 0; i < listings.Count; i++)
+        {
+            var item = listings[i];
+
+            if (errorIds.Contains(item.Id))
+                continue;
+
+            var letter =
+                GetAlphabeticalLetter(
+                    item.Name);
+
+            if (letter == '\0')
+                continue;
+
+            var prefix =
+                GetSignificantAlphabeticalPrefix(
+                    item.Name);
+
+            if (string.IsNullOrWhiteSpace(prefix))
+                continue;
+
+            if (activeLetter == '\0' ||
+                letter != activeLetter)
+            {
+                activeLetter = letter;
+                highestPrefix = prefix;
+                continue;
+            }
+
+            if (highestPrefix is not null &&
+                string.Compare(
+                    prefix,
+                    highestPrefix,
+                    StringComparison.Ordinal) < 0)
+            {
+                AddStructuralError(
+                    listings,
+                    i,
+                    errors,
+                    errorIds);
+                continue;
+            }
+
+            if (highestPrefix is null ||
+                string.Compare(
+                    prefix,
+                    highestPrefix,
+                    StringComparison.Ordinal) > 0)
+            {
+                highestPrefix = prefix;
+            }
+        }
+    }
+
+    private static char GetAlphabeticalLetter(
+    string listingName)
+    {
+        if (string.IsNullOrWhiteSpace(
+                listingName))
+        {
+            return '\0';
+        }
+
+        var sortKey =
+            BuildSortKey(
+                listingName);
+
+        foreach (var character in sortKey)
+        {
+            if (character is >= 'A' and <= 'Z')
+                return character;
+        }
+
+        return '\0';
+    }
+
+    private static string GetSignificantAlphabeticalPrefix(
+    string listingName)
+    {
+        var sortKey =
+            BuildSortKey(
+                listingName);
+
+        if (string.IsNullOrWhiteSpace(
+                sortKey))
+        {
+            return string.Empty;
+        }
+
+        var letters =
+            new string(
+                sortKey
+                    .Where(char.IsLetter)
+                    .Take(2)
+                    .ToArray());
+
+        return letters;
+    }
+
+    private static void AddStructuralError(
+    IReadOnlyList<PsListing> listings,
+    int currentIndex,
+    ICollection<PsListingOrderError> errors,
+    ISet<Guid> errorIds)
+    {
+        var item =
+            listings[currentIndex];
+
+        if (!errorIds.Add(item.Id))
+            return;
+
+        var correctPosition =
+            FindRecommendedPosition(
+                listings,
+                item,
+                currentIndex,
+                errorIds);
+
+        var target =
+            listings[
+                Math.Clamp(
+                    correctPosition,
+                    0,
+                    listings.Count - 1)];
+
+        PsListing? previous = null;
+        PsListing? next = null;
+
+        var itemSortKey =
+            BuildSortKey(
+                item.Name);
+
+        /*
+         * Buscamos el listing inmediatamente anterior
+         * según el orden alfabético real.
+         */
+        for (var i = 0; i < listings.Count; i++)
+        {
+            if (i == currentIndex)
+                continue;
+
+            var candidate =
+                listings[i];
+
+            var candidateKey =
+                BuildSortKey(
+                    candidate.Name);
+
+            if (string.Compare(
+                    candidateKey,
+                    itemSortKey,
+                    StringComparison.Ordinal) <= 0)
+            {
+                if (previous is null ||
+                    string.Compare(
+                        candidateKey,
+                        BuildSortKey(previous.Name),
+                        StringComparison.Ordinal) > 0)
+                {
+                    previous = candidate;
+                }
+            }
+
+            if (string.Compare(
+                    candidateKey,
+                    itemSortKey,
+                    StringComparison.Ordinal) > 0)
+            {
+                if (next is null ||
+                    string.Compare(
+                        candidateKey,
+                        BuildSortKey(next.Name),
+                        StringComparison.Ordinal) < 0)
+                {
+                    next = candidate;
+                }
+            }
+        }
+
+        errors.Add(
+            new PsListingOrderError
+            {
+                ListingName =
+                    item.Name,
+
+                CurrentFile =
+                    item.FileName,
+
+                CurrentPage =
+                    item.PageLabel,
+
+                CurrentPositionInPage =
+                    item.PositionInPage,
+
+                RecommendedFile =
+                    target.FileName,
+
+                RecommendedPage =
+                    target.PageLabel,
+
+                RecommendedPositionInPage =
+                    target.PositionInPage,
+
+                ShouldGoAfter =
+                    previous?.Name,
+
+                ShouldGoBefore =
+                    next?.Name
+            });
+    }
+
+    private static int FindRecommendedPosition(
+    IReadOnlyList<PsListing> listings,
+    PsListing item,
+    int currentIndex,
+    ISet<Guid> ignoredErrorIds)
+    {
+        var itemKey =
+            BuildSortKey(
+                item.Name);
+
+        for (var i = 0; i < listings.Count; i++)
+        {
+            if (i == currentIndex)
+                continue;
+
+            var candidate =
+                listings[i];
+
+            if (ignoredErrorIds.Contains(candidate.Id) &&
+                candidate.Id != item.Id)
+            {
+                continue;
+            }
+
+            var candidateKey =
+                BuildSortKey(
+                    candidate.Name);
+
+            if (string.Compare(
+                    candidateKey,
+                    itemKey,
+                    StringComparison.Ordinal) > 0)
+            {
+                return i;
+            }
+        }
+
+        return listings.Count - 1;
+    }
+
+    private static int GetPageNumberForSorting(
+    string page)
+    {
+        return int.TryParse(
+            page,
+            NumberStyles.Integer,
+            CultureInfo.InvariantCulture,
+            out var value)
+                ? value
+                : int.MaxValue;
     }
 
     private static HashSet<int> LongestIncreasingSubsequenceIndexes(IReadOnlyList<int> values)
