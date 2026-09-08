@@ -406,8 +406,12 @@
             string.Empty;
 
         return lvlId == "4" ||
+               lvlId == "3" ||
                role.Equals(
                    "Employee",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "Assistant",
                    StringComparison.OrdinalIgnoreCase);
     }
 

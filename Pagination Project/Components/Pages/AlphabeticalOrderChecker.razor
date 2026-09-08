@@ -672,7 +672,7 @@
             authState.User;
 
         if (user.Identity?.IsAuthenticated != true ||
-            !IsEmployee(user))
+            !HasAlphabeticalCheckerAccess(user))
         {
             Navigation.NavigateTo(
                 "/dashboard",
@@ -689,7 +689,7 @@
         _accessValidated = true;
     }
 
-    private static bool IsEmployee(
+    private static bool HasAlphabeticalCheckerAccess(
         ClaimsPrincipal user)
     {
         var lvlId =
@@ -703,8 +703,12 @@
             string.Empty;
 
         return lvlId == "4" ||
+               lvlId == "3" ||
                role.Equals(
                    "Employee",
+                   StringComparison.OrdinalIgnoreCase) ||
+               role.Equals(
+                   "Assistant",
                    StringComparison.OrdinalIgnoreCase);
     }
 
