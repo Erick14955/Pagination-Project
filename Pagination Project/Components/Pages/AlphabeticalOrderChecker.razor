@@ -1,0 +1,408 @@
+﻿@page "/alphabetical-order-checker"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Pagination_Project.Models
+@using Pagination_Project.Services
+
+@attribute [Authorize]
+@layout Pagination_Project.Components.Layout.DashboardLayout
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject IPsAlphabeticalCheckerService CheckerService
+
+<PageTitle>Alphabetical Order Checker</PageTitle>
+
+<div class="alpha-checker-page">
+    @if (!_accessValidated)
+    {
+        <section class="alpha-loading-card">
+            <div class="alpha-spinner"></div>
+            <span>Validating access...</span>
+        </section>
+    }
+    else
+    {
+        <section class="alpha-hero">
+            <div>
+                <span class="alpha-kicker">Pagination Quality Tool</span>
+                <h1>Alphabetical Order Checker</h1>
+                <p>
+                    Upload one or multiple PostScript files that belong to the same book.
+                    The checker reads them as one continuous book and identifies listings
+                    that are not in the correct alphabetical position.
+                </p>
+            </div>
+
+            <div class="alpha-user-pill">
+                <span>Authorized user</span>
+                <strong>efana</strong>
+            </div>
+        </section>
+
+        <section class="alpha-card">
+            <div class="alpha-section-heading">
+                <div>
+                    <span class="alpha-step">1</span>
+                    <div>
+                        <h2>Select the book files</h2>
+                        <p>Choose all .ps parts of the same book. You can reorder them before analyzing.</p>
+                    </div>
+                </div>
+
+                @if (_files.Count > 0)
+                {
+                    <button type="button" class="alpha-button alpha-button-ghost" @onclick="ClearFiles" disabled="@_analyzing">
+                        Clear
+                    </button>
+                }
+            </div>
+
+            <label class="alpha-drop-zone @( _analyzing ? "disabled" : string.Empty )">
+                <InputFile OnChange="HandleFilesSelected" multiple accept=".ps,application/postscript" disabled="@_analyzing" />
+                <span class="alpha-drop-icon">PS</span>
+                <strong>Choose .ps files</strong>
+                <span>Select multiple files at once</span>
+                <small>Maximum 100 files, 250 MB per file</small>
+            </label>
+
+            @if (!string.IsNullOrWhiteSpace(_selectionError))
+            {
+                <div class="alpha-alert alpha-alert-error">@_selectionError</div>
+            }
+
+            @if (_files.Count > 0)
+            {
+                <div class="alpha-book-sequence">
+                    <div class="alpha-sequence-header">
+                        <div>
+                            <h3>Book sequence</h3>
+                            <p>The first file below is treated as the beginning of the book.</p>
+                        </div>
+                        <span>@_files.Count file@(_files.Count == 1 ? string.Empty : "s")</span>
+                    </div>
+
+                    <div class="alpha-file-list">
+                        @for (var index = 0; index < _files.Count; index++)
+                        {
+                            var currentIndex = index;
+                            var item = _files[index];
+
+                            <div class="alpha-file-row" @key="item.Id">
+                                <div class="alpha-file-order">@(index + 1)</div>
+                                <div class="alpha-file-info">
+                                    <strong>@item.File.Name</strong>
+                                    <span>@FormatBytes(item.File.Size)</span>
+                                </div>
+                                <div class="alpha-file-actions">
+                                    <button type="button"
+                                            title="Move up"
+                                            disabled="@(currentIndex == 0 || _analyzing)"
+                                            @onclick="() => MoveFile(currentIndex, -1)">
+                                        ↑
+                                    </button>
+                                    <button type="button"
+                                            title="Move down"
+                                            disabled="@(currentIndex == _files.Count - 1 || _analyzing)"
+                                            @onclick="() => MoveFile(currentIndex, 1)">
+                                        ↓
+                                    </button>
+                                    <button type="button"
+                                            title="Remove"
+                                            disabled="@_analyzing"
+                                            @onclick="() => RemoveFile(currentIndex)">
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <button type="button"
+                            class="alpha-button alpha-button-primary alpha-analyze-button"
+                            disabled="@(_analyzing || _files.Count == 0)"
+                            @onclick="AnalyzeAsync">
+                        @if (_analyzing)
+                        {
+                            <span class="alpha-inline-spinner"></span>
+                            <span>Analyzing book...</span>
+                        }
+                        else
+                        {
+                            <span>Analyze alphabetical order</span>
+                        }
+                    </button>
+                </div>
+            }
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(_analysisError))
+        {
+            <section class="alpha-alert alpha-alert-error alpha-result-alert">
+                <strong>Analysis could not be completed.</strong>
+                <span>@_analysisError</span>
+            </section>
+        }
+
+        @if (_result is not null)
+        {
+            <section class="alpha-results-section">
+                <div class="alpha-stats-grid">
+                    <article class="alpha-stat-card">
+                        <span>Files</span>
+                        <strong>@_result.FilesAnalyzed</strong>
+                        <small>book parts analyzed</small>
+                    </article>
+                    <article class="alpha-stat-card">
+                        <span>Pages</span>
+                        <strong>@_result.PagesAnalyzed</strong>
+                        <small>pages processed</small>
+                    </article>
+                    <article class="alpha-stat-card">
+                        <span>Listings</span>
+                        <strong>@_result.ListingsAnalyzed</strong>
+                        <small>listings detected</small>
+                    </article>
+                    <article class="alpha-stat-card @( _result.Errors.Count > 0 ? "alpha-stat-error" : "alpha-stat-success" )">
+                        <span>Out of order</span>
+                        <strong>@_result.Errors.Count</strong>
+                        <small>listings to review</small>
+                    </article>
+                </div>
+
+                @if (_result.Warnings.Count > 0)
+                {
+                    <div class="alpha-warning-box">
+                        <strong>Processing notes</strong>
+                        <ul>
+                            @foreach (var warning in _result.Warnings)
+                            {
+                                <li>@warning</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (_result.IsCorrect && _result.ListingsAnalyzed > 0)
+                {
+                    <div class="alpha-success-panel">
+                        <div class="alpha-success-icon">✓</div>
+                        <div>
+                            <h2>Alphabetical order is correct</h2>
+                            <p>No listings were detected outside their expected alphabetical position.</p>
+                        </div>
+                    </div>
+                }
+                else if (_result.Errors.Count > 0)
+                {
+                    <div class="alpha-errors-heading">
+                        <div>
+                            <span class="alpha-kicker">Corrections recommended</span>
+                            <h2>@_result.Errors.Count listing@(_result.Errors.Count == 1 ? string.Empty : "s") out of order</h2>
+                        </div>
+                    </div>
+
+                    <div class="alpha-error-list">
+                        @foreach (var error in _result.Errors)
+                        {
+                            <article class="alpha-error-card">
+                                <div class="alpha-error-title">
+                                    <span class="alpha-error-badge">OUT OF ORDER</span>
+                                    <h3>@error.ListingName</h3>
+                                </div>
+
+                                <div class="alpha-location-grid">
+                                    <div class="alpha-location-current">
+                                        <span class="alpha-location-label">Current location</span>
+                                        <dl>
+                                            <div><dt>File</dt><dd>@error.CurrentFile</dd></div>
+                                            <div><dt>Page</dt><dd>@error.CurrentPage</dd></div>
+                                            <div><dt>Position on page</dt><dd>@error.CurrentPositionInPage</dd></div>
+                                        </dl>
+                                    </div>
+
+                                    <div class="alpha-location-arrow">→</div>
+
+                                    <div class="alpha-location-recommended">
+                                        <span class="alpha-location-label">Recommended location</span>
+                                        <dl>
+                                            <div><dt>File</dt><dd>@error.RecommendedFile</dd></div>
+                                            <div><dt>Page</dt><dd>@error.RecommendedPage</dd></div>
+                                            <div><dt>Position on page</dt><dd>@error.RecommendedPositionInPage</dd></div>
+                                        </dl>
+                                    </div>
+                                </div>
+
+                                <div class="alpha-placement-box">
+                                    <span>Recommended placement</span>
+                                    @if (!string.IsNullOrWhiteSpace(error.ShouldGoAfter) && !string.IsNullOrWhiteSpace(error.ShouldGoBefore))
+                                    {
+                                        <p>
+                                            Place <strong>@error.ListingName</strong> directly below
+                                            <strong>@error.ShouldGoAfter</strong> and before
+                                            <strong>@error.ShouldGoBefore</strong>.
+                                        </p>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(error.ShouldGoAfter))
+                                    {
+                                        <p>
+                                            Place <strong>@error.ListingName</strong> directly below
+                                            <strong>@error.ShouldGoAfter</strong>.
+                                        </p>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(error.ShouldGoBefore))
+                                    {
+                                        <p>
+                                            Place <strong>@error.ListingName</strong> before
+                                            <strong>@error.ShouldGoBefore</strong> at the beginning of the sequence.
+                                        </p>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        }
+    }
+</div>
+
+@code {
+    private const string AllowedUsername = "efana";
+    private const int MaxFiles = 100;
+
+    private readonly List<SelectedPsFile> _files = [];
+    private PsBookAnalysisResult? _result;
+    private bool _accessValidated;
+    private bool _analyzing;
+    private string? _selectionError;
+    private string? _analysisError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var username = user.FindFirst("Username")?.Value ?? string.Empty;
+
+        if (user.Identity?.IsAuthenticated != true ||
+            !string.Equals(username, AllowedUsername, StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/dashboard", replace: true);
+            return;
+        }
+
+        _accessValidated = true;
+    }
+
+    private void HandleFilesSelected(InputFileChangeEventArgs args)
+    {
+        _selectionError = null;
+        _analysisError = null;
+        _result = null;
+
+        IReadOnlyList<IBrowserFile> selected;
+
+        try
+        {
+            selected = args.GetMultipleFiles(MaxFiles);
+        }
+        catch (InvalidOperationException)
+        {
+            _selectionError = $"You can select a maximum of {MaxFiles} files at once.";
+            return;
+        }
+
+        foreach (var file in selected)
+        {
+            if (!file.Name.EndsWith(".ps", StringComparison.OrdinalIgnoreCase))
+            {
+                _selectionError = $"'{file.Name}' was ignored because it is not a .ps file.";
+                continue;
+            }
+
+            if (_files.Any(x =>
+                    x.File.Name.Equals(file.Name, StringComparison.OrdinalIgnoreCase) &&
+                    x.File.Size == file.Size))
+            {
+                continue;
+            }
+
+            _files.Add(new SelectedPsFile(Guid.NewGuid(), file));
+        }
+    }
+
+    private void MoveFile(int index, int offset)
+    {
+        var destination = index + offset;
+
+        if (index < 0 || index >= _files.Count || destination < 0 || destination >= _files.Count)
+            return;
+
+        (_files[index], _files[destination]) = (_files[destination], _files[index]);
+        _result = null;
+        _analysisError = null;
+    }
+
+    private void RemoveFile(int index)
+    {
+        if (index < 0 || index >= _files.Count)
+            return;
+
+        _files.RemoveAt(index);
+        _result = null;
+        _analysisError = null;
+    }
+
+    private void ClearFiles()
+    {
+        _files.Clear();
+        _result = null;
+        _selectionError = null;
+        _analysisError = null;
+    }
+
+    private async Task AnalyzeAsync()
+    {
+        if (_files.Count == 0 || _analyzing)
+            return;
+
+        _analyzing = true;
+        _analysisError = null;
+        _result = null;
+
+        try
+        {
+            _result = await CheckerService.AnalyzeBookAsync(
+                _files.Select(x => x.File).ToList());
+        }
+        catch (Exception ex)
+        {
+            _analysisError = ex.Message;
+        }
+        finally
+        {
+            _analyzing = false;
+        }
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB"];
+        var size = (double)bytes;
+        var unit = 0;
+
+        while (size >= 1024 && unit < units.Length - 1)
+        {
+            size /= 1024;
+            unit++;
+        }
+
+        return $"{size:0.##} {units[unit]}";
+    }
+
+    private sealed record SelectedPsFile(Guid Id, IBrowserFile File);
+}
