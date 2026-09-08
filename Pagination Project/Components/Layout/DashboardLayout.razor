@@ -56,15 +56,15 @@
                         </NavLink>
                     }
 
-                    @if (PuedeVerAlphabeticalChecker(auth.User))
-                    {
-                        <NavLink href="/alphabetical-order-checker"
-                                 Match="NavLinkMatch.Prefix"
-                                 class="thryv-menu-link">
-                            <span class="thryv-menu-icon">🔤</span>
-                            <span class="thryv-menu-text">Alphabetical Checker</span>
-                        </NavLink>
-                    }
+@if (PuedeVerAlphabeticalChecker(auth.User))
+{
+    <NavLink href="/alphabetical-order-checker"
+             Match="NavLinkMatch.Prefix"
+             class="thryv-menu-link">
+        <span class="thryv-menu-icon">🔤</span>
+        <span class="thryv-menu-text">Alphabetical Checker</span>
+    </NavLink>
+}
 
                     @if (HasPermission(auth.User, "QualifyBook"))
                     {
@@ -395,11 +395,20 @@
 
     private static bool PuedeVerAlphabeticalChecker(ClaimsPrincipal user)
     {
-        var username = user.FindFirst("Username")?.Value ?? string.Empty;
+        var lvlId =
+            user.FindFirst("LvlId")?.Value;
 
-        return username.Equals(
-            "efana",
-            StringComparison.OrdinalIgnoreCase);
+        var role =
+            user.FindFirst(ClaimTypes.Role)?.Value ??
+            user.FindFirst("Role")?.Value ??
+            user.FindFirst("RoleName")?.Value ??
+            user.FindFirst("PermissionLevel")?.Value ??
+            string.Empty;
+
+        return lvlId == "4" ||
+               role.Equals(
+                   "Employee",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ObtenerRol(ClaimsPrincipal user)

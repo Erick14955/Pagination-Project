@@ -43,8 +43,8 @@
 
             <div class="alpha-hero-actions">
                 <div class="alpha-user-pill">
-                    <span>Authorized user</span>
-                    <strong>efana</strong>
+                    <span>Authorized employee</span>
+                    <strong>@_currentUsername</strong>
                 </div>
 
                 <button type="button"
@@ -562,7 +562,6 @@
 </div>
 
 @code {
-    private const string AllowedUsername = "efana";
     private const int MaxFiles = 250;
 
     private readonly List<SelectedPsFile> _files = [];
@@ -578,6 +577,7 @@
     private string? _analysisError;
 
     private string _selectedPage = string.Empty;
+    private string _currentUsername = "Employee";
 
     private IReadOnlyList<string> ErrorPages
     {
@@ -671,15 +671,8 @@
         var user =
             authState.User;
 
-        var username =
-            user.FindFirst("Username")?.Value
-            ?? string.Empty;
-
         if (user.Identity?.IsAuthenticated != true ||
-            !string.Equals(
-                username,
-                AllowedUsername,
-                StringComparison.OrdinalIgnoreCase))
+            !IsEmployee(user))
         {
             Navigation.NavigateTo(
                 "/dashboard",
@@ -688,7 +681,31 @@
             return;
         }
 
+        _currentUsername =
+            user.FindFirst("Username")?.Value ??
+            user.Identity?.Name ??
+            "Employee";
+
         _accessValidated = true;
+    }
+
+    private static bool IsEmployee(
+        ClaimsPrincipal user)
+    {
+        var lvlId =
+            user.FindFirst("LvlId")?.Value;
+
+        var role =
+            user.FindFirst(ClaimTypes.Role)?.Value ??
+            user.FindFirst("Role")?.Value ??
+            user.FindFirst("RoleName")?.Value ??
+            user.FindFirst("PermissionLevel")?.Value ??
+            string.Empty;
+
+        return lvlId == "4" ||
+               role.Equals(
+                   "Employee",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private void HandleFilesSelected(
