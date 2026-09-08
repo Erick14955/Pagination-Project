@@ -10,7 +10,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 {
     private const long MaxFileSize = 250L * 1024L * 1024L;
     private const int MaxFiles = 250;
-    private const string AlgorithmVersion = "transition-aware-2026.09.08.5";
+    private const string AlgorithmVersion = "transition-aware-2026.09.08.6";
 
     private static readonly Regex PageFolioRegex = new(
         @"FOLIO-(\d{4,})",
@@ -70,12 +70,36 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         RegexOptions.Compiled);
 
     private static readonly Regex TrailingSeparatorRegex = new(
-        @"(?:\s+-\s*|\s+–\s*|\s+—\s*)$",
+        @"\s*[-–—]\s*$",
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
 
     private static readonly Regex PhoneOnlyRegex = new(
-        @"^(?:phone|fax|mobile|freecall|local\s+call|enquiries?)?\s*[\d\s()\-/]+(?:[A-Z]{2,8})?$",
+        @"^(?:(?:phone|ph|telephone|tel|fax|facsimile|mobile|mob|freecall|free\s+call|local\s+call|enquiries?|contact)\.?\s*[:\-]?\s*)?[\d\s()+./\-]+(?:[A-Z]{2,8})?$",
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant |
+        RegexOptions.Compiled);
+
+    private static readonly Regex AuxiliaryLabelRegex = new(
+        @"^\s*(?:fax|facsimile|phone|ph|telephone|tel|mobile|mob|freecall|free\s+call|local\s+call|enquiries?|contact|email|e-mail|website|web|address|office|reception|appointments?|after\s+hours|hours|opening\s+hours)\b",
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant |
+        RegexOptions.Compiled);
+
+    private static readonly Regex AddressPrefixRegex = new(
+        @"^\s*(?:unit|un|suite|shop|sh|room|rm|level|lvl|floor|fl|building|bldg|po\s+box|p\.?\s*o\.?\s*box)\b",
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant |
+        RegexOptions.Compiled);
+
+    private static readonly Regex NumericAddressRegex = new(
+        @"^\s*\d{1,6}\s+[A-Za-z]",
+        RegexOptions.IgnoreCase |
+        RegexOptions.CultureInvariant |
+        RegexOptions.Compiled);
+
+    private static readonly Regex AddressRoadRegex = new(
+        @"\b(?:rd|road|st|street|ave|avenue|dr|drive|pl|place|cres|crescent|ct|court|ln|lane|hwy|highway|pde|parade|tce|terrace|cct|circuit|way|close|cl)\b",
         RegexOptions.IgnoreCase |
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
@@ -117,8 +141,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var file =
-                files[fileIndex];
+            var file = files[fileIndex];
 
             var ps =
                 await ReadPostScriptAsync(
@@ -164,12 +187,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         }
 
         var pages =
-            OrderPages(
-                parsedPages);
+            OrderPages(parsedPages);
 
         var listings =
-            FlattenListings(
-                pages);
+            FlattenListings(pages);
 
         if (listings.Count == 0)
         {
@@ -217,8 +238,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 (page, index) =>
                     page with
                     {
-                        FileOrder =
-                            index + 1
+                        FileOrder = index + 1
                     })
             .ToList();
     }
@@ -403,8 +423,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             listingNames
                 .Where(
                     name =>
-                        !IsHonorificListing(
-                            name))
+                        !IsHonorificListing(name))
                 .Select(
                     GetAlphabeticalLetter)
                 .Where(
@@ -418,20 +437,16 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
         var dominant =
             letters
-                .GroupBy(
-                    x => x)
+                .GroupBy(x => x)
                 .Select(
                     group =>
                         new
                         {
-                            Letter =
-                                group.Key,
-                            Count =
-                                group.Count()
+                            Letter = group.Key,
+                            Count = group.Count()
                         })
                 .OrderByDescending(
-                    x =>
-                        x.Count)
+                    x => x.Count)
                 .First();
 
         var confidence =
@@ -508,8 +523,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 continue;
             }
 
-            result.Add(
-                text);
+            result.Add(text);
         }
 
         return result;
@@ -545,13 +559,11 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     lastWidth,
                     NumberStyles.Float,
                     CultureInfo.InvariantCulture,
-                    out var width))
+                    out var width) &&
+                Math.Abs(
+                    width - 126.0) < 0.01)
             {
-                if (Math.Abs(
-                        width - 126.0) < 0.01)
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -571,9 +583,28 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 fontIndex,
                 forwardLength);
 
+        var nextFont =
+            AnyFontRegex.Match(
+                forwardContext);
+
+        var forwardLimit =
+            nextFont.Success
+                ? nextFont.Index
+                : forwardContext.Length;
+
+        if (forwardLimit <= 0)
+        {
+            return false;
+        }
+
+        var localForwardContext =
+            forwardContext.Substring(
+                0,
+                forwardLimit);
+
         var forwardWidths =
             ColumnWidthRegex.Matches(
-                forwardContext);
+                localForwardContext);
 
         foreach (Match widthMatch
                  in forwardWidths)
@@ -608,7 +639,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var contextStart =
             Math.Max(
                 0,
-                fontIndex - 260);
+                fontIndex - 320);
 
         var context =
             ps.Substring(
@@ -696,8 +727,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         if (index > start &&
             index <= limit)
         {
-            values.Add(
-                index);
+            values.Add(index);
         }
     }
 
@@ -716,8 +746,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                         .Groups["text"]
                         .Value);
 
-            builder.Append(
-                decoded);
+            builder.Append(decoded);
         }
 
         return builder.ToString();
@@ -749,14 +778,11 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
             if (c != '\\')
             {
-                builder.Append(
-                    c);
-
+                builder.Append(c);
                 continue;
             }
 
-            if (i + 1 >=
-                source.Length)
+            if (i + 1 >= source.Length)
             {
                 break;
             }
@@ -789,8 +815,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 case '(':
                 case ')':
                 case '\\':
-                    builder.Append(
-                        next);
+                    builder.Append(next);
                     break;
 
                 case '\r':
@@ -812,8 +837,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                         var octal =
                             new StringBuilder(3);
 
-                        octal.Append(
-                            next);
+                        octal.Append(next);
 
                         for (var j = 0;
                              j < 2 &&
@@ -830,9 +854,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                             }
 
                             i++;
-
-                            octal.Append(
-                                digit);
+                            octal.Append(digit);
                         }
 
                         var code =
@@ -845,8 +867,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     }
                     else
                     {
-                        builder.Append(
-                            next);
+                        builder.Append(next);
                     }
 
                     break;
@@ -884,27 +905,126 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     private static bool IsLikelyListingName(
         string text)
     {
-        if (string.IsNullOrWhiteSpace(
-                text) ||
-            text.Length < 1 ||
+        if (string.IsNullOrWhiteSpace(text) ||
+            text.Length < 2 ||
             text.Length > 220)
         {
             return false;
         }
 
-        if (!text.Any(
-                char.IsLetterOrDigit))
+        var normalized =
+            MultipleWhitespaceRegex
+                .Replace(
+                    text.Trim(),
+                    " ");
+
+        if (!normalized.Any(
+                char.IsLetter))
         {
             return false;
         }
 
         if (PhoneOnlyRegex.IsMatch(
-                text))
+                normalized))
+        {
+            return false;
+        }
+
+        if (AuxiliaryLabelRegex.IsMatch(
+                normalized))
+        {
+            return false;
+        }
+
+        if (LooksLikeAddressOrContactLine(
+                normalized))
         {
             return false;
         }
 
         return true;
+    }
+
+    private static bool LooksLikeAddressOrContactLine(
+        string text)
+    {
+        if (string.IsNullOrWhiteSpace(
+                text))
+        {
+            return true;
+        }
+
+        var normalized =
+            MultipleWhitespaceRegex
+                .Replace(
+                    text.Trim(),
+                    " ");
+
+        if (PhoneOnlyRegex.IsMatch(
+                normalized))
+        {
+            return true;
+        }
+
+        if (AuxiliaryLabelRegex.IsMatch(
+                normalized))
+        {
+            return true;
+        }
+
+        var digitCount =
+            normalized.Count(
+                char.IsDigit);
+
+        var letterCount =
+            normalized.Count(
+                char.IsLetter);
+
+        if (digitCount >= 6 &&
+            digitCount >= letterCount)
+        {
+            return true;
+        }
+
+        if (AddressPrefixRegex.IsMatch(
+                normalized) &&
+            digitCount > 0)
+        {
+            return true;
+        }
+
+        if (NumericAddressRegex.IsMatch(
+                normalized) &&
+            AddressRoadRegex.IsMatch(
+                normalized))
+        {
+            return true;
+        }
+
+        if (digitCount > 0 &&
+            AddressRoadRegex.IsMatch(
+                normalized))
+        {
+            var firstToken =
+                normalized.Split(
+                    ' ',
+                    StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(
+                    firstToken) &&
+                (
+                    char.IsDigit(
+                        firstToken[0]) ||
+                    AddressPrefixRegex.IsMatch(
+                        normalized)
+                ))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsMastheadOrFooterText(
@@ -944,14 +1064,12 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var result =
             new List<PsListing>();
 
-        var globalPosition =
-            0;
+        var globalPosition = 0;
 
         foreach (var page in pages)
         {
             for (var index = 0;
-                 index <
-                 page.ListingNames.Count;
+                 index < page.ListingNames.Count;
                  index++)
             {
                 globalPosition++;
@@ -962,12 +1080,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 result.Add(
                     new PsListing
                     {
-                        Name =
-                            name,
+                        Name = name,
 
                         SortKey =
-                            BuildSortKey(
-                                name),
+                            BuildSortKey(name),
 
                         FileName =
                             page.FileName,
@@ -975,8 +1091,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                         FileOrder =
                             page.FileOrder,
 
-                        PageOrderInFile =
-                            1,
+                        PageOrderInFile = 1,
 
                         GlobalPageOrder =
                             page.FileOrder,
@@ -1042,8 +1157,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 character is '-' or '/' or
                     '&' or '\'' or '.' or ',')
             {
-                builder.Append(
-                    ' ');
+                builder.Append(' ');
             }
         }
 
@@ -1214,8 +1328,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             }
 
             var group =
-                remaining /
-                value;
+                remaining / value;
 
             remaining %=
                 value;
@@ -1285,8 +1398,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             parts.Add(
                 $"{ones[number / 100]} hundred");
 
-            number %=
-                100;
+            number %= 100;
         }
 
         if (number >= 20)
@@ -1294,8 +1406,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             parts.Add(
                 tens[number / 10]);
 
-            number %=
-                10;
+            number %= 10;
 
             if (number > 0)
             {
@@ -1479,18 +1590,13 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         }
         else
         {
-            maximum =
-                'Z';
+            maximum = 'Z';
         }
 
-        if (minimum >
-            maximum)
+        if (minimum > maximum)
         {
-            minimum =
-                current;
-
-            maximum =
-                current;
+            minimum = current;
+            maximum = current;
         }
 
         return new SectionRange(
@@ -1503,8 +1609,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         ICollection<PsListingOrderError> errors,
         ISet<Guid> errorIds)
     {
-        char activeLetter =
-            '\0';
+        char activeLetter = '\0';
 
         var acceptedIndexes =
             new List<int>();
@@ -1519,9 +1624,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             if (errorIds.Contains(
                     current.Id))
             {
-                activeLetter =
-                    '\0';
-
+                activeLetter = '\0';
                 acceptedIndexes.Clear();
 
                 continue;
@@ -1540,9 +1643,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             if (!IsValidLetter(
                     currentLetter))
             {
-                activeLetter =
-                    '\0';
-
+                activeLetter = '\0';
                 acceptedIndexes.Clear();
 
                 continue;
@@ -1571,8 +1672,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 continue;
             }
 
-            var currentAccepted =
-                true;
+            var currentAccepted = true;
 
             while (acceptedIndexes.Count > 0)
             {
@@ -1632,8 +1732,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
                         if (beforeVsCurrent <= 0)
                         {
-                            previousIsSpike =
-                                true;
+                            previousIsSpike = true;
                         }
                     }
                 }
@@ -1658,8 +1757,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     errors,
                     errorIds);
 
-                currentAccepted =
-                    false;
+                currentAccepted = false;
 
                 break;
             }
@@ -1779,11 +1877,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var itemKey =
             item.SortKey;
 
-        PsListing? previous =
-            null;
-
-        PsListing? next =
-            null;
+        PsListing? previous = null;
+        PsListing? next = null;
 
         foreach (var candidate
                  in references)
