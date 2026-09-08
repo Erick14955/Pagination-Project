@@ -1,5 +1,6 @@
 ﻿@page "/alphabetical-order-checker"
 
+@using System.Globalization
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -29,7 +30,9 @@
         <section class="alpha-hero">
             <div class="alpha-hero-copy">
                 <span class="alpha-kicker">Pagination Quality Tool</span>
+
                 <h1>Alphabetical Order Checker</h1>
+
                 <p>
                     Upload one or multiple PostScript files that belong to the same book.
                     The checker reads them as one continuous book and identifies listings
@@ -48,6 +51,7 @@
                         class="alpha-button alpha-button-primary alpha-analyze-top"
                         disabled="@(_analyzing || _files.Count == 0)"
                         @onclick="AnalyzeAsync">
+
                     @if (_analyzing)
                     {
                         <span class="alpha-inline-spinner"></span>
@@ -68,6 +72,7 @@
 
                     <div>
                         <h2>Select the book files</h2>
+
                         <p>
                             Choose all .ps parts of the same book.
                             You can reorder them before analyzing.
@@ -93,8 +98,11 @@
                            disabled="@_analyzing" />
 
                 <span class="alpha-drop-icon">PS</span>
+
                 <strong>Choose .ps files</strong>
+
                 <span>Select multiple files at once</span>
+
                 <small>Maximum 250 files, 250 MB per file</small>
             </label>
 
@@ -111,6 +119,7 @@
                     <div class="alpha-sequence-header">
                         <div>
                             <h3>Book sequence</h3>
+
                             <p>
                                 The first file below is treated as the beginning of the book.
                             </p>
@@ -133,15 +142,12 @@
                     @if (_showFileList)
                     {
                         <div class="alpha-file-list">
-                            @for (var index = 0;
-                                            index < _files.Count;
-                                            index++)
+                            @for (var index = 0; index < _files.Count; index++)
                             {
                                 var currentIndex = index;
                                 var item = _files[index];
 
-                                <div class="alpha-file-row"
-                                     @key="item.Id">
+                                <div class="alpha-file-row" @key="item.Id">
                                     <div class="alpha-file-order">
                                         @(index + 1)
                                     </div>
@@ -192,6 +198,7 @@
         @if (_result is not null)
         {
             <section class="alpha-results-section">
+
                 <div class="alpha-stats-grid">
                     <article class="alpha-stat-card">
                         <span>Files</span>
@@ -236,12 +243,11 @@
                         _result.ListingsAnalyzed > 0)
                 {
                     <div class="alpha-success-panel">
-                        <div class="alpha-success-icon">
-                            ✓
-                        </div>
+                        <div class="alpha-success-icon">✓</div>
 
                         <div>
                             <h2>Alphabetical order is correct</h2>
+
                             <p>
                                 No listings were detected breaking the expected alphabetical sequence.
                             </p>
@@ -262,112 +268,196 @@
                         </div>
                     </div>
 
-                    <div class="alpha-error-list">
-                        @foreach (var error in _result.Errors)
+                    <section class="alpha-card" style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+
+                            <div style="display: flex; flex-direction: column; gap: 8px; min-width: 260px;">
+                                <label for="alpha-page-filter"
+                                       style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;">
+                                    Filter by page
+                                </label>
+
+                                <select id="alpha-page-filter"
+                                        @bind="_selectedPage"
+                                        style="min-height: 48px; min-width: 260px; padding: 0 42px 0 14px; border: 1px solid #d7dfeb; border-radius: 12px; background: #ffffff; color: #182235; font-size: 15px; font-weight: 600; cursor: pointer; outline: none;">
+
+                                    <option value="">
+                                        All pages
+                                    </option>
+
+                                    @foreach (var pageNumber in ErrorPages)
+                                    {
+                                        <option value="@pageNumber">
+                                            Page @pageNumber
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div style="min-width: 150px; padding: 12px 16px; border-radius: 12px; background: #f5f7fa; text-align: center;">
+                                <span style="display: block; color: #718096; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                    Showing
+                                </span>
+
+                                <strong style="display: block; margin-top: 3px; font-size: 22px;">
+                                    @FilteredErrors.Count
+                                </strong>
+
+                                <small style="color: #718096;">
+                                    result@(FilteredErrors.Count == 1 ? string.Empty : "s")
+                                </small>
+                            </div>
+                        </div>
+                    </section>
+
+                    @if (FilteredErrors.Count == 0)
+                    {
+                        <div class="alpha-success-panel">
+                            <div class="alpha-success-icon">✓</div>
+
+                            <div>
+                                <h2>No errors on this page</h2>
+
+                                <p>
+                                    No out-of-order listings were detected for the selected page.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var pageGroup in FilteredErrorGroups)
                         {
-                            <article class="alpha-error-card">
-                                <div class="alpha-error-title">
-                                    <span class="alpha-error-badge">
-                                        OUT OF ORDER
-                                    </span>
+                            <section style="margin-bottom: 38px;">
 
-                                    <h3>
-                                        @error.ListingName
-                                    </h3>
-                                </div>
-
-                                <div class="alpha-location-grid">
-                                    <div class="alpha-location-current">
-                                        <span class="alpha-location-label">
-                                            Current location
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px;">
+                                    <div>
+                                        <span class="alpha-kicker">
+                                            Page
                                         </span>
 
-                                        <dl>
-                                            <div>
-                                                <dt>File</dt>
-                                                <dd>@error.CurrentFile</dd>
-                                            </div>
-
-                                            <div>
-                                                <dt>Page</dt>
-                                                <dd>@error.CurrentPage</dd>
-                                            </div>
-
-                                            <div>
-                                                <dt>Position on page</dt>
-                                                <dd>@error.CurrentPositionInPage</dd>
-                                            </div>
-                                        </dl>
+                                        <h2 style="margin: 3px 0 0 0;">
+                                            Page @pageGroup.Page
+                                        </h2>
                                     </div>
 
-                                    <div class="alpha-location-arrow">
-                                        →
-                                    </div>
-
-                                    <div class="alpha-location-recommended">
-                                        <span class="alpha-location-label">
-                                            Recommended location
-                                        </span>
-
-                                        <dl>
-                                            <div>
-                                                <dt>File</dt>
-                                                <dd>@error.RecommendedFile</dd>
-                                            </div>
-
-                                            <div>
-                                                <dt>Page</dt>
-                                                <dd>@error.RecommendedPage</dd>
-                                            </div>
-
-                                            <div>
-                                                <dt>Position on page</dt>
-                                                <dd>@error.RecommendedPositionInPage</dd>
-                                            </div>
-                                        </dl>
-                                    </div>
-                                </div>
-
-                                <div class="alpha-placement-box">
-                                    <span>
-                                        Recommended placement
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 100px; padding: 8px 14px; border: 1px solid #ffd2d2; border-radius: 999px; background: #fff2f2; color: #c62828; font-size: 13px; font-weight: 800;">
+                                        @pageGroup.Errors.Count error@(pageGroup.Errors.Count == 1 ? string.Empty : "s")
                                     </span>
+                                </div>
 
-                                    @if (!string.IsNullOrWhiteSpace(error.ShouldGoAfter) &&
-                                                        !string.IsNullOrWhiteSpace(error.ShouldGoBefore))
+                                <div class="alpha-error-list">
+
+                                    @foreach (var error in pageGroup.Errors)
                                     {
-                                        <p>
-                                            Place
-                                            <strong>@error.ListingName</strong>
-                                            directly below
-                                            <strong>@error.ShouldGoAfter</strong>
-                                            and before
-                                            <strong>@error.ShouldGoBefore</strong>.
-                                        </p>
-                                    }
-                                    else if (!string.IsNullOrWhiteSpace(error.ShouldGoAfter))
-                                    {
-                                        <p>
-                                            Place
-                                            <strong>@error.ListingName</strong>
-                                            directly below
-                                            <strong>@error.ShouldGoAfter</strong>.
-                                        </p>
-                                    }
-                                    else if (!string.IsNullOrWhiteSpace(error.ShouldGoBefore))
-                                    {
-                                        <p>
-                                            Place
-                                            <strong>@error.ListingName</strong>
-                                            before
-                                            <strong>@error.ShouldGoBefore</strong>
-                                            at the beginning of the sequence.
-                                        </p>
+                                        <article class="alpha-error-card">
+
+                                            <div class="alpha-error-title">
+                                                <span class="alpha-error-badge">
+                                                    OUT OF ORDER
+                                                </span>
+
+                                                <h3>
+                                                    @error.ListingName
+                                                </h3>
+                                            </div>
+
+                                            <div class="alpha-location-grid">
+
+                                                <div class="alpha-location-current">
+                                                    <span class="alpha-location-label">
+                                                        Current location
+                                                    </span>
+
+                                                    <dl>
+                                                        <div>
+                                                            <dt>File</dt>
+                                                            <dd>@error.CurrentFile</dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Page</dt>
+                                                            <dd>@error.CurrentPage</dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Position on page</dt>
+                                                            <dd>@error.CurrentPositionInPage</dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
+
+                                                <div class="alpha-location-arrow">
+                                                    →
+                                                </div>
+
+                                                <div class="alpha-location-recommended">
+                                                    <span class="alpha-location-label">
+                                                        Recommended location
+                                                    </span>
+
+                                                    <dl>
+                                                        <div>
+                                                            <dt>File</dt>
+                                                            <dd>@error.RecommendedFile</dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Page</dt>
+                                                            <dd>@error.RecommendedPage</dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Position on page</dt>
+                                                            <dd>@error.RecommendedPositionInPage</dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
+                                            </div>
+
+                                            <div class="alpha-placement-box">
+                                                <span>
+                                                    Recommended placement
+                                                </span>
+
+                                                @if (!string.IsNullOrWhiteSpace(error.ShouldGoAfter) &&
+                                                                        !string.IsNullOrWhiteSpace(error.ShouldGoBefore))
+                                                {
+                                                    <p>
+                                                        Place
+                                                        <strong>@error.ListingName</strong>
+                                                        directly below
+                                                        <strong>@error.ShouldGoAfter</strong>
+                                                        and before
+                                                        <strong>@error.ShouldGoBefore</strong>.
+                                                    </p>
+                                                }
+                                                else if (!string.IsNullOrWhiteSpace(error.ShouldGoAfter))
+                                                {
+                                                    <p>
+                                                        Place
+                                                        <strong>@error.ListingName</strong>
+                                                        directly below
+                                                        <strong>@error.ShouldGoAfter</strong>.
+                                                    </p>
+                                                }
+                                                else if (!string.IsNullOrWhiteSpace(error.ShouldGoBefore))
+                                                {
+                                                    <p>
+                                                        Place
+                                                        <strong>@error.ListingName</strong>
+                                                        before
+                                                        <strong>@error.ShouldGoBefore</strong>
+                                                        at the beginning of the sequence.
+                                                    </p>
+                                                }
+                                            </div>
+                                        </article>
                                     }
                                 </div>
-                            </article>
+                            </section>
                         }
-                    </div>
+                    }
                 }
             </section>
         }
@@ -404,6 +494,7 @@
                 </div>
 
                 <div class="alpha-modal-summary-grid">
+
                     <div>
                         <span>Files</span>
                         <strong>@_result.FilesAnalyzed</strong>
@@ -445,7 +536,7 @@
                         </strong>
 
                         <span>
-                            The detailed recommendations are shown below the summary cards.
+                            Results are grouped by page and can be filtered using the page selector.
                         </span>
                     </div>
                 }
@@ -464,6 +555,7 @@
                         View results
                     </button>
                 </div>
+
             </section>
         </div>
     }
@@ -485,6 +577,91 @@
     private string? _selectionError;
     private string? _analysisError;
 
+    private string _selectedPage = string.Empty;
+
+    private IReadOnlyList<string> ErrorPages
+    {
+        get
+        {
+            if (_result is null)
+            {
+                return [];
+            }
+
+            return _result.Errors
+                .Select(x => x.CurrentPage)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(GetPageNumberForSorting)
+                .ThenBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+    }
+
+    private IReadOnlyList<PsListingOrderError> FilteredErrors
+    {
+        get
+        {
+            if (_result is null)
+            {
+                return [];
+            }
+
+            IEnumerable<PsListingOrderError> query =
+                _result.Errors;
+
+            if (!string.IsNullOrWhiteSpace(_selectedPage))
+            {
+                query =
+                    query.Where(
+                        x =>
+                            string.Equals(
+                                x.CurrentPage,
+                                _selectedPage,
+                                StringComparison.OrdinalIgnoreCase));
+            }
+
+            return query
+                .OrderBy(
+                    x =>
+                        GetPageNumberForSorting(
+                            x.CurrentPage))
+                .ThenBy(
+                    x =>
+                        x.CurrentPositionInPage)
+                .ToList();
+        }
+    }
+
+    private IReadOnlyList<PageErrorGroup> FilteredErrorGroups
+    {
+        get
+        {
+            return FilteredErrors
+                .GroupBy(
+                    x =>
+                        x.CurrentPage)
+                .Select(
+                    group =>
+                        new PageErrorGroup(
+                            group.Key,
+                            group
+                                .OrderBy(
+                                    x =>
+                                        x.CurrentPositionInPage)
+                                .ToList()))
+                .OrderBy(
+                    x =>
+                        GetPageNumberForSorting(
+                            x.Page))
+                .ThenBy(
+                    x =>
+                        x.Page,
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var authState =
@@ -495,9 +672,7 @@
             authState.User;
 
         var username =
-            user.FindFirst(
-                    "Username")?
-                .Value
+            user.FindFirst("Username")?.Value
             ?? string.Empty;
 
         if (user.Identity?.IsAuthenticated != true ||
@@ -513,27 +688,18 @@
             return;
         }
 
-        _accessValidated =
-            true;
+        _accessValidated = true;
     }
 
     private void HandleFilesSelected(
         InputFileChangeEventArgs args)
     {
-        _selectionError =
-            null;
-
-        _analysisError =
-            null;
-
-        _result =
-            null;
-
-        _showAnalysisModal =
-            false;
-
-        _showFileList =
-            true;
+        _selectionError = null;
+        _analysisError = null;
+        _result = null;
+        _selectedPage = string.Empty;
+        _showAnalysisModal = false;
+        _showFileList = true;
 
         IReadOnlyList<IBrowserFile> selected;
 
@@ -614,14 +780,10 @@
             _files[index]
         );
 
-        _result =
-            null;
-
-        _showAnalysisModal =
-            false;
-
-        _analysisError =
-            null;
+        _result = null;
+        _selectedPage = string.Empty;
+        _showAnalysisModal = false;
+        _analysisError = null;
     }
 
     private void RemoveFile(
@@ -633,37 +795,24 @@
             return;
         }
 
-        _files.RemoveAt(
-            index);
+        _files.RemoveAt(index);
 
-        _result =
-            null;
-
-        _showAnalysisModal =
-            false;
-
-        _analysisError =
-            null;
+        _result = null;
+        _selectedPage = string.Empty;
+        _showAnalysisModal = false;
+        _analysisError = null;
     }
 
     private void ClearFiles()
     {
         _files.Clear();
 
-        _result =
-            null;
-
-        _showAnalysisModal =
-            false;
-
-        _showFileList =
-            true;
-
-        _selectionError =
-            null;
-
-        _analysisError =
-            null;
+        _result = null;
+        _selectedPage = string.Empty;
+        _showAnalysisModal = false;
+        _showFileList = true;
+        _selectionError = null;
+        _analysisError = null;
     }
 
     private async Task AnalyzeAsync()
@@ -674,17 +823,11 @@
             return;
         }
 
-        _analyzing =
-            true;
-
-        _analysisError =
-            null;
-
-        _result =
-            null;
-
-        _showAnalysisModal =
-            false;
+        _analyzing = true;
+        _analysisError = null;
+        _result = null;
+        _selectedPage = string.Empty;
+        _showAnalysisModal = false;
 
         try
         {
@@ -692,15 +835,11 @@
                 await CheckerService
                     .AnalyzeBookAsync(
                         _files
-                            .Select(
-                                x => x.File)
+                            .Select(x => x.File)
                             .ToList());
 
-            _showFileList =
-                false;
-
-            _showAnalysisModal =
-                true;
+            _showFileList = false;
+            _showAnalysisModal = true;
         }
         catch (Exception ex)
         {
@@ -709,8 +848,7 @@
         }
         finally
         {
-            _analyzing =
-                false;
+            _analyzing = false;
         }
     }
 
@@ -722,8 +860,19 @@
 
     private void CloseAnalysisModal()
     {
-        _showAnalysisModal =
-            false;
+        _showAnalysisModal = false;
+    }
+
+    private static int GetPageNumberForSorting(
+        string pageNumber)
+    {
+        return int.TryParse(
+            pageNumber,
+            NumberStyles.Integer,
+            CultureInfo.InvariantCulture,
+            out var value)
+                ? value
+                : int.MaxValue;
     }
 
     private static string FormatBytes(
@@ -740,24 +889,23 @@
         var size =
             (double)bytes;
 
-        var unit =
-            0;
+        var unit = 0;
 
         while (size >= 1024 &&
-               unit <
-               units.Length - 1)
+               unit < units.Length - 1)
         {
-            size /=
-                1024;
-
+            size /= 1024;
             unit++;
         }
 
-        return
-            $"{size:0.##} {units[unit]}";
+        return $"{size:0.##} {units[unit]}";
     }
 
     private sealed record SelectedPsFile(
         Guid Id,
         IBrowserFile File);
+
+    private sealed record PageErrorGroup(
+        string Page,
+        IReadOnlyList<PsListingOrderError> Errors);
 }

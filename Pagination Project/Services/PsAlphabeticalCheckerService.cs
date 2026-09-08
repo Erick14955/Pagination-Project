@@ -10,7 +10,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 {
     private const long MaxFileSize = 250L * 1024L * 1024L;
     private const int MaxFiles = 250;
-    private const string AlgorithmVersion = "transition-aware-2026.09.08.2";
+    private const string AlgorithmVersion = "transition-aware-2026.09.08.3";
 
     private static readonly Regex PageFolioRegex = new(
         @"FOLIO-(\d{4,})",
@@ -79,24 +79,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         RegexOptions.IgnoreCase |
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
-
-    private static readonly HashSet<string> Honorifics =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            "DR",
-            "DR.",
-            "DOCTOR",
-            "MR",
-            "MR.",
-            "MRS",
-            "MRS.",
-            "MS",
-            "MS.",
-            "MISS",
-            "PROF",
-            "PROF.",
-            "PROFESSOR"
-        };
 
     public async Task<PsBookAnalysisResult> AnalyzeBookAsync(
         IReadOnlyList<IBrowserFile> files,
@@ -371,7 +353,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     char.ToUpperInvariant(
                         text[0]);
 
-                if (IsValidLetter(letter))
+                if (IsValidLetter(
+                        letter))
                 {
                     return letter;
                 }
@@ -678,11 +661,14 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
             if (c != '\\')
             {
-                builder.Append(c);
+                builder.Append(
+                    c);
+
                 continue;
             }
 
-            if (i + 1 >= source.Length)
+            if (i + 1 >=
+                source.Length)
             {
                 break;
             }
@@ -715,7 +701,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 case '(':
                 case ')':
                 case '\\':
-                    builder.Append(next);
+                    builder.Append(
+                        next);
                     break;
 
                 case '\r':
@@ -925,12 +912,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         string value)
     {
         var valueForSorting =
-            RemoveLeadingHonorificWhenApplicable(
-                value);
-
-        valueForSorting =
             ReplaceLeadingNumberWithWords(
-                valueForSorting);
+                value);
 
         var normalized =
             valueForSorting.Normalize(
@@ -940,7 +923,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             new StringBuilder(
                 normalized.Length);
 
-        foreach (var character in normalized)
+        foreach (var character
+                 in normalized)
         {
             var category =
                 CharUnicodeInfo
@@ -961,11 +945,13 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                         character));
             }
             else if (
-                char.IsWhiteSpace(character) ||
+                char.IsWhiteSpace(
+                    character) ||
                 character is '-' or '/' or
                     '&' or '\'' or '.' or ',')
             {
-                builder.Append(' ');
+                builder.Append(
+                    ' ');
             }
         }
 
@@ -974,37 +960,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 builder.ToString(),
                 " ")
             .Trim();
-    }
-
-    private static string RemoveLeadingHonorificWhenApplicable(
-        string value)
-    {
-        if (string.IsNullOrWhiteSpace(
-                value))
-        {
-            return value;
-        }
-
-        var words =
-            value.Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries |
-                StringSplitOptions.TrimEntries);
-
-        if (words.Length < 3)
-        {
-            return value;
-        }
-
-        if (!Honorifics.Contains(
-                words[0]))
-        {
-            return value;
-        }
-
-        return string.Join(
-            ' ',
-            words.Skip(1));
     }
 
     private static string ReplaceLeadingNumberWithWords(
@@ -1411,7 +1366,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         char activeLetter =
             '\0';
 
-        string? previousPrefix =
+        string? highestPrefix =
             null;
 
         for (var i = 0;
@@ -1437,20 +1392,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 activeLetter =
                     '\0';
 
-                previousPrefix =
+                highestPrefix =
                     null;
 
                 continue;
-            }
-
-            if (activeLetter !=
-                currentLetter)
-            {
-                activeLetter =
-                    currentLetter;
-
-                previousPrefix =
-                    null;
             }
 
             var currentPrefix =
@@ -1462,10 +1407,22 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 continue;
             }
 
-            if (previousPrefix is not null &&
+            if (activeLetter !=
+                currentLetter)
+            {
+                activeLetter =
+                    currentLetter;
+
+                highestPrefix =
+                    currentPrefix;
+
+                continue;
+            }
+
+            if (highestPrefix is not null &&
                 string.Compare(
                     currentPrefix,
-                    previousPrefix,
+                    highestPrefix,
                     StringComparison.Ordinal) < 0)
             {
                 AddStructuralError(
@@ -1474,14 +1431,18 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     errors,
                     errorIds);
 
-                previousPrefix =
-                    currentPrefix;
-
                 continue;
             }
 
-            previousPrefix =
-                currentPrefix;
+            if (highestPrefix is null ||
+                string.Compare(
+                    currentPrefix,
+                    highestPrefix,
+                    StringComparison.Ordinal) > 0)
+            {
+                highestPrefix =
+                    currentPrefix;
+            }
         }
     }
 
@@ -1498,7 +1459,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             BuildSortKey(
                 listingName);
 
-        foreach (var character in sortKey)
+        foreach (var character
+                 in sortKey)
         {
             if (IsValidLetter(
                     character))
@@ -1513,13 +1475,9 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     private static string? GetComparablePrefix(
         string listingName)
     {
-        var value =
-            RemoveLeadingHonorificWhenApplicable(
-                listingName);
-
         var sortKey =
             BuildSortKey(
-                value);
+                listingName);
 
         if (string.IsNullOrWhiteSpace(
                 sortKey))
@@ -1599,7 +1557,8 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         PsListing? next =
             null;
 
-        foreach (var candidate in references)
+        foreach (var candidate
+                 in references)
         {
             var comparison =
                 string.Compare(
