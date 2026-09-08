@@ -10,6 +10,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 {
     private const long MaxFileSize = 250L * 1024L * 1024L;
     private const int MaxFiles = 250;
+    private const int ShortLetterRunThreshold = 2;
 
     private static readonly Regex PageFolioRegex = new(
         @"FOLIO-(\d{4,})",
@@ -31,12 +32,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static readonly Regex FontRegex = new(
         @"/(BellCentennial-NameAndNumber|NewsGothic-Bold)\s+[^/\r\n]{0,160}?\bty\b",
-        RegexOptions.IgnoreCase |
-        RegexOptions.CultureInvariant |
-        RegexOptions.Compiled);
-
-    private static readonly Regex SectionHeaderFontRegex = new(
-        @"/FranklinGothic-CondensedYP\s+[^/\r\n]{0,160}?\bty\b",
         RegexOptions.IgnoreCase |
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
@@ -69,7 +64,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         RegexOptions.Compiled);
 
     private static readonly Regex TrailingSeparatorRegex = new(
-        @"(?:\s+-\s*|\s+–\s*|\s+—\s*)$",
+        @"(?:\s*[-–—]\s*)$",
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
 
@@ -115,11 +110,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             var names =
                 ExtractListingNames(ps);
 
-            var sectionLetter =
-                DetectSectionLetter(
-                    ps,
-                    names);
-
             if (names.Count == 0)
             {
                 warnings.Add(
@@ -131,7 +121,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     FileName: file.Name,
                     FileOrder: fileIndex + 1,
                     PageLabel: pageLabel,
-                    SectionLetter: sectionLetter,
                     ListingNames: names));
         }
 
@@ -156,8 +145,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
         var errors =
             FindOutOfOrderListings(
-                listings,
-                pages);
+                listings);
 
         return new PsBookAnalysisResult
         {
@@ -279,110 +267,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 ? page.ToString(
                     CultureInfo.InvariantCulture)
                 : raw.TrimStart('0');
-    }
-
-    private static char DetectSectionLetter(
-        string ps,
-        IReadOnlyList<string> listingNames)
-    {
-        foreach (Match fontMatch
-                 in SectionHeaderFontRegex.Matches(ps))
-        {
-            var start =
-                fontMatch.Index +
-                fontMatch.Length;
-
-            var limit =
-                Math.Min(
-                    ps.Length,
-                    start + 1200);
-
-            var nextFont =
-                AnyFontRegex.Match(
-                    ps,
-                    start);
-
-            if (nextFont.Success &&
-                nextFont.Index < limit)
-            {
-                limit =
-                    nextFont.Index;
-            }
-
-            if (limit <= start)
-            {
-                continue;
-            }
-
-            var source =
-                ps.Substring(
-                    start,
-                    limit - start);
-
-            foreach (Match textMatch
-                     in PsPrintedStringRegex.Matches(source))
-            {
-                var text =
-                    DecodePostScriptString(
-                            textMatch
-                                .Groups["text"]
-                                .Value)
-                        .Trim();
-
-                if (text.Length != 1)
-                {
-                    continue;
-                }
-
-                var letter =
-                    char.ToUpperInvariant(
-                        text[0]);
-
-                if (letter is >= 'A' and <= 'Z')
-                {
-                    return letter;
-                }
-            }
-        }
-
-        var letters =
-            listingNames
-                .Select(
-                    GetAlphabeticalLetter)
-                .Where(
-                    x =>
-                        x is >= 'A' and <= 'Z')
-                .ToList();
-
-        if (letters.Count < 3)
-        {
-            return '\0';
-        }
-
-        var dominant =
-            letters
-                .GroupBy(
-                    x => x)
-                .Select(
-                    group =>
-                        new
-                        {
-                            Letter =
-                                group.Key,
-                            Count =
-                                group.Count()
-                        })
-                .OrderByDescending(
-                    x => x.Count)
-                .First();
-
-        var confidence =
-            (double)dominant.Count /
-            letters.Count;
-
-        return confidence >= 0.70
-            ? dominant.Letter
-            : '\0';
     }
 
     private static List<string> ExtractListingNames(
@@ -724,6 +608,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                             }
 
                             i++;
+
                             octal.Append(
                                 digit);
                         }
@@ -842,8 +727,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         foreach (var page in pages)
         {
             for (var index = 0;
-                 index <
-                 page.ListingNames.Count;
+                 index < page.ListingNames.Count;
                  index++)
             {
                 globalPosition++;
@@ -1158,8 +1042,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     }
 
     private static List<PsListingOrderError> FindOutOfOrderListings(
-        IReadOnlyList<PsListing> listings,
-        IReadOnlyList<ParsedPsPage> pages)
+        IReadOnlyList<PsListing> listings)
     {
         if (listings.Count < 2)
         {
@@ -1172,15 +1055,13 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var errorIds =
             new HashSet<Guid>();
 
-        DetectListingsInWrongSection(
+        DetectAlphabeticalLetterAnomalies(
             listings,
-            pages,
             errors,
             errorIds);
 
         DetectImmediatePrefixBacktracking(
             listings,
-            pages,
             errors,
             errorIds);
 
@@ -1195,120 +1076,152 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             .ToList();
     }
 
-    private static void DetectListingsInWrongSection(
+    private static void DetectAlphabeticalLetterAnomalies(
         IReadOnlyList<PsListing> listings,
-        IReadOnlyList<ParsedPsPage> pages,
         ICollection<PsListingOrderError> errors,
         ISet<Guid> errorIds)
     {
-        var sectionsByFile =
-            pages.ToDictionary(
-                page => page.FileOrder,
-                page => page.SectionLetter);
+        var runs =
+            BuildAlphabeticalLetterRuns(
+                listings);
 
-        for (var i = 0;
-             i < listings.Count;
-             i++)
+        if (runs.Count < 2)
         {
-            var listing =
-                listings[i];
-
-            if (!sectionsByFile.TryGetValue(
-                    listing.FileOrder,
-                    out var sectionLetter))
-            {
-                continue;
-            }
-
-            if (sectionLetter is < 'A' or > 'Z')
-            {
-                continue;
-            }
-
-            var listingLetter =
-                GetAlphabeticalLetter(
-                    listing.Name);
-
-            if (listingLetter is < 'A' or > 'Z')
-            {
-                continue;
-            }
-
-            if (listingLetter ==
-                sectionLetter)
-            {
-                continue;
-            }
-
-            AddStructuralError(
-                listings,
-                i,
-                errors,
-                errorIds);
+            return;
         }
+
+        var flaggedRuns =
+            new HashSet<int>();
+
+        for (var runIndex = 1;
+             runIndex < runs.Count;
+             runIndex++)
+        {
+            var previousRun =
+                runs[runIndex - 1];
+
+            var currentRun =
+                runs[runIndex];
+
+            if (previousRun.Letter is < 'A' or > 'Z' ||
+                currentRun.Letter is < 'A' or > 'Z')
+            {
+                continue;
+            }
+
+            if (currentRun.Letter >=
+                previousRun.Letter)
+            {
+                continue;
+            }
+
+            var previousLooksLikeTemporaryJump =
+                previousRun.Indices.Count <=
+                ShortLetterRunThreshold
+                &&
+                runIndex >= 2
+                &&
+                runs[runIndex - 2].Letter is >= 'A' and <= 'Z'
+                &&
+                runs[runIndex - 2].Letter <=
+                currentRun.Letter;
+
+            if (previousLooksLikeTemporaryJump)
+            {
+                var previousRunIndex =
+                    runIndex - 1;
+
+                if (flaggedRuns.Add(
+                        previousRunIndex))
+                {
+                    foreach (var listingIndex
+                             in previousRun.Indices)
+                    {
+                        AddStructuralError(
+                            listings,
+                            listingIndex,
+                            errors,
+                            errorIds);
+                    }
+                }
+
+                continue;
+            }
+
+            if (!flaggedRuns.Add(
+                    runIndex))
+            {
+                continue;
+            }
+
+            foreach (var listingIndex
+                     in currentRun.Indices)
+            {
+                AddStructuralError(
+                    listings,
+                    listingIndex,
+                    errors,
+                    errorIds);
+            }
+        }
+    }
+
+    private static List<AlphabeticalLetterRun> BuildAlphabeticalLetterRuns(
+        IReadOnlyList<PsListing> listings)
+    {
+        var runs =
+            new List<AlphabeticalLetterRun>();
+
+        for (var index = 0;
+             index < listings.Count;
+             index++)
+        {
+            var letter =
+                GetAlphabeticalLetter(
+                    listings[index].Name);
+
+            if (letter is < 'A' or > 'Z')
+            {
+                continue;
+            }
+
+            if (runs.Count == 0 ||
+                runs[^1].Letter != letter)
+            {
+                runs.Add(
+                    new AlphabeticalLetterRun(
+                        letter,
+                        [index]));
+
+                continue;
+            }
+
+            runs[^1]
+                .Indices
+                .Add(
+                    index);
+        }
+
+        return runs;
     }
 
     private static void DetectImmediatePrefixBacktracking(
         IReadOnlyList<PsListing> listings,
-        IReadOnlyList<ParsedPsPage> pages,
         ICollection<PsListingOrderError> errors,
         ISet<Guid> errorIds)
     {
-        var sectionsByFile =
-            pages.ToDictionary(
-                page => page.FileOrder,
-                page => page.SectionLetter);
-
-        PsListing? previousListing =
-            null;
-
         string? previousPrefix =
             null;
 
-        char previousSection =
+        char previousLetter =
             '\0';
 
-        for (var i = 0;
-             i < listings.Count;
-             i++)
+        for (var index = 0;
+             index < listings.Count;
+             index++)
         {
             var current =
-                listings[i];
-
-            if (!sectionsByFile.TryGetValue(
-                    current.FileOrder,
-                    out var section))
-            {
-                ResetPrefixTracking(
-                    ref previousListing,
-                    ref previousPrefix,
-                    ref previousSection);
-
-                continue;
-            }
-
-            if (section is < 'A' or > 'Z')
-            {
-                ResetPrefixTracking(
-                    ref previousListing,
-                    ref previousPrefix,
-                    ref previousSection);
-
-                continue;
-            }
-
-            if (previousSection != '\0' &&
-                section != previousSection)
-            {
-                previousListing =
-                    null;
-
-                previousPrefix =
-                    null;
-            }
-
-            previousSection =
-                section;
+                listings[index];
 
             if (errorIds.Contains(
                     current.Id))
@@ -1320,8 +1233,14 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 GetAlphabeticalLetter(
                     current.Name);
 
-            if (currentLetter != section)
+            if (currentLetter is < 'A' or > 'Z')
             {
+                previousPrefix =
+                    null;
+
+                previousLetter =
+                    '\0';
+
                 continue;
             }
 
@@ -1329,13 +1248,22 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 GetComparablePrefix(
                     current.Name);
 
-            if (currentPrefix is null)
+            if (string.IsNullOrWhiteSpace(
+                    currentPrefix))
             {
                 continue;
             }
 
-            if (previousListing is not null &&
-                previousPrefix is not null &&
+            if (previousLetter != '\0' &&
+                currentLetter != previousLetter)
+            {
+                previousPrefix =
+                    null;
+            }
+
+            if (previousPrefix is not null &&
+                currentLetter ==
+                previousLetter &&
                 string.Compare(
                     currentPrefix,
                     previousPrefix,
@@ -1343,40 +1271,25 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             {
                 AddStructuralError(
                     listings,
-                    i,
+                    index,
                     errors,
                     errorIds);
-
-                previousListing =
-                    current;
 
                 previousPrefix =
                     currentPrefix;
 
+                previousLetter =
+                    currentLetter;
+
                 continue;
             }
 
-            previousListing =
-                current;
-
             previousPrefix =
                 currentPrefix;
+
+            previousLetter =
+                currentLetter;
         }
-    }
-
-    private static void ResetPrefixTracking(
-        ref PsListing? previousListing,
-        ref string? previousPrefix,
-        ref char previousSection)
-    {
-        previousListing =
-            null;
-
-        previousPrefix =
-            null;
-
-        previousSection =
-            '\0';
     }
 
     private static char GetAlphabeticalLetter(
@@ -1416,35 +1329,20 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             return null;
         }
 
-        var words =
-            sortKey.Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries |
-                StringSplitOptions.TrimEntries);
-
-        if (words.Length == 0)
-        {
-            return null;
-        }
-
-        if (words[0].Length < 2)
-        {
-            return null;
-        }
-
-        var firstWordLetters =
+        var letters =
             new string(
-                words[0]
+                sortKey
                     .Where(
                         char.IsLetter)
+                    .Take(2)
                     .ToArray());
 
-        if (firstWordLetters.Length < 2)
+        if (letters.Length < 2)
         {
             return null;
         }
 
-        return firstWordLetters[..2];
+        return letters;
     }
 
     private static void AddStructuralError(
@@ -1478,9 +1376,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                         listing.GlobalPosition)
                 .ToList();
 
-        var itemKey =
-            item.SortKey;
-
         PsListing? previous =
             null;
 
@@ -1492,7 +1387,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             var comparison =
                 string.Compare(
                     candidate.SortKey,
-                    itemKey,
+                    item.SortKey,
                     StringComparison.Ordinal);
 
             if (comparison <= 0)
@@ -1509,18 +1404,37 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             break;
         }
 
-        var target =
-            next ??
-            previous ??
-            item;
+        var recommendedFile =
+            item.FileName;
+
+        var recommendedPage =
+            item.PageLabel;
 
         var recommendedPosition =
-            next?.PositionInPage ??
-            (
-                previous is not null
-                    ? previous.PositionInPage + 1
-                    : item.PositionInPage
-            );
+            item.PositionInPage;
+
+        if (next is not null)
+        {
+            recommendedFile =
+                next.FileName;
+
+            recommendedPage =
+                next.PageLabel;
+
+            recommendedPosition =
+                next.PositionInPage;
+        }
+        else if (previous is not null)
+        {
+            recommendedFile =
+                previous.FileName;
+
+            recommendedPage =
+                previous.PageLabel;
+
+            recommendedPosition =
+                previous.PositionInPage + 1;
+        }
 
         errors.Add(
             new PsListingOrderError
@@ -1538,10 +1452,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     item.PositionInPage,
 
                 RecommendedFile =
-                    target.FileName,
+                    recommendedFile,
 
                 RecommendedPage =
-                    target.PageLabel,
+                    recommendedPage,
 
                 RecommendedPositionInPage =
                     recommendedPosition,
@@ -1570,6 +1484,9 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         string FileName,
         int FileOrder,
         string PageLabel,
-        char SectionLetter,
         IReadOnlyList<string> ListingNames);
+
+    private sealed record AlphabeticalLetterRun(
+        char Letter,
+        List<int> Indices);
 }
