@@ -47,6 +47,25 @@
                     <strong>@_currentUsername</strong>
                 </div>
 
+                <div style="display: flex; flex-direction: column; gap: 6px; min-width: 210px;">
+                    <label for="alpha-analysis-mode"
+                           style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;">
+                        Analysis mode
+                    </label>
+
+                    <select id="alpha-analysis-mode"
+                            @bind="_analysisMode"
+                            disabled="@_analyzing"
+                            style="min-height: 44px; padding: 0 40px 0 13px; border: 1px solid #d7dfeb; border-radius: 12px; background: #ffffff; color: #182235; font-size: 14px; font-weight: 700; cursor: pointer; outline: none;">
+                        <option value="@PsAlphabeticalCheckMode.Normal">
+                            Normal mode
+                        </option>
+                        <option value="@PsAlphabeticalCheckMode.SearchByHeader">
+                            Search by header
+                        </option>
+                    </select>
+                </div>
+
                 <button type="button"
                         class="alpha-button alpha-button-primary alpha-analyze-top"
                         disabled="@(_analyzing || _files.Count == 0)"
@@ -426,9 +445,9 @@
                                                     <p>
                                                         Place
                                                         <strong>@error.ListingName</strong>
-                                                        directly below
+                                                        exactly between
                                                         <strong>@error.ShouldGoAfter</strong>
-                                                        and before
+                                                        and
                                                         <strong>@error.ShouldGoBefore</strong>.
                                                     </p>
                                                 }
@@ -578,6 +597,7 @@
 
     private string _selectedPage = string.Empty;
     private string _currentUsername = "Employee";
+    private PsAlphabeticalCheckMode _analysisMode = PsAlphabeticalCheckMode.Normal;
 
     private IReadOnlyList<string> ErrorPages
     {
@@ -857,7 +877,8 @@
                     .AnalyzeBookAsync(
                         _files
                             .Select(x => x.File)
-                            .ToList());
+                            .ToList(),
+                        _analysisMode);
 
             _showFileList = false;
             _showAnalysisModal = true;

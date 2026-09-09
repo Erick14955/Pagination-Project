@@ -10,7 +10,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 {
     private const long MaxFileSize = 250L * 1024L * 1024L;
     private const int MaxFiles = 250;
-    private const string AlgorithmVersion = "transition-aware-2026.09.08.7";
+    private const string AlgorithmVersion = "dual-mode-explicit-header-stream-2026.09.09.5";
 
     private static readonly Regex PageFolioRegex = new(
         @"FOLIO-(\d{4,})",
@@ -37,7 +37,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         RegexOptions.Compiled);
 
     private static readonly Regex SectionHeaderFontRegex = new(
-        @"/FranklinGothic-CondensedYP\s+[^/\r\n]{0,160}?\bty\b",
+        @"/MyriadDex-Bold\s+1\.00\s+ty\s+17\.00\s+sz\b",
         RegexOptions.IgnoreCase |
         RegexOptions.CultureInvariant |
         RegexOptions.Compiled);
@@ -124,6 +124,7 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     public async Task<PsBookAnalysisResult> AnalyzeBookAsync(
         IReadOnlyList<IBrowserFile> files,
+        PsAlphabeticalCheckMode mode = PsAlphabeticalCheckMode.Normal,
         CancellationToken cancellationToken = default)
     {
         ValidateFiles(files);
@@ -162,13 +163,27 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     ps,
                     fileIndex + 1);
 
+            var listingEntries =
+                ExtractListingEntries(ps);
+
             var names =
-                ExtractListingNames(ps);
+                listingEntries
+                    .Select(x => x.Name)
+                    .ToList();
+
+            var sectionHeaders =
+                DetectExplicitSectionHeaders(ps);
+
+            var headerLetter =
+                sectionHeaders.Count > 0
+                    ? sectionHeaders[0].Letter
+                    : '\0';
 
             var sectionLetter =
-                DetectSectionLetter(
-                    ps,
-                    names);
+                IsValidLetter(headerLetter)
+                    ? headerLetter
+                    : DetectSectionLetterFromListings(
+                        names);
 
             if (names.Count == 0)
             {
@@ -182,7 +197,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     OriginalFileOrder: fileIndex + 1,
                     FileOrder: fileIndex + 1,
                     PageLabel: pageLabel,
+                    HeaderLetter: headerLetter,
                     SectionLetter: sectionLetter,
+                    SectionHeaders: sectionHeaders,
+                    ListingEntries: listingEntries,
                     ListingNames: names));
         }
 
@@ -190,7 +208,9 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             OrderPages(parsedPages);
 
         var listings =
-            FlattenListings(pages);
+            FlattenListings(
+                pages,
+                out var headerByListingId);
 
         if (listings.Count == 0)
         {
@@ -211,7 +231,9 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var errors =
             FindOutOfOrderListings(
                 listings,
-                pages);
+                pages,
+                mode,
+                headerByListingId);
 
         return new PsBookAnalysisResult
         {
@@ -355,10 +377,12 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 : raw.TrimStart('0');
     }
 
-    private static char DetectSectionLetter(
-        string ps,
-        IReadOnlyList<string> listingNames)
+    private static List<ParsedSectionHeader> DetectExplicitSectionHeaders(
+        string ps)
     {
+        var result =
+            new List<ParsedSectionHeader>();
+
         foreach (Match fontMatch
                  in SectionHeaderFontRegex.Matches(ps))
         {
@@ -412,13 +436,28 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                     char.ToUpperInvariant(
                         text[0]);
 
-                if (IsValidLetter(letter))
+                if (!IsValidLetter(letter))
                 {
-                    return letter;
+                    continue;
                 }
+
+                result.Add(
+                    new ParsedSectionHeader(
+                        SourceIndex: fontMatch.Index,
+                        Letter: letter));
+
+                break;
             }
         }
 
+        return result
+            .OrderBy(x => x.SourceIndex)
+            .ToList();
+    }
+
+    private static char DetectSectionLetterFromListings(
+        IReadOnlyList<string> listingNames)
+    {
         var letters =
             listingNames
                 .Where(
@@ -458,11 +497,11 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
             : '\0';
     }
 
-    private static List<string> ExtractListingNames(
+    private static List<ParsedListingEntry> ExtractListingEntries(
         string ps)
     {
         var result =
-            new List<string>();
+            new List<ParsedListingEntry>();
 
         var fontMatches =
             FontRegex.Matches(ps);
@@ -524,7 +563,10 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 continue;
             }
 
-            result.Add(text);
+            result.Add(
+                new ParsedListingEntry(
+                    Name: text,
+                    SourceIndex: fontMatch.Index));
         }
 
         return result;
@@ -1060,31 +1102,63 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
     }
 
     private static List<PsListing> FlattenListings(
-        IReadOnlyList<ParsedPsPage> pages)
+        IReadOnlyList<ParsedPsPage> pages,
+        out Dictionary<Guid, char> headerByListingId)
     {
         var result =
             new List<PsListing>();
 
+        headerByListingId =
+            new Dictionary<Guid, char>();
+
         var globalPosition = 0;
+        char activeHeader = '\0';
 
         foreach (var page in pages)
         {
+            var headers =
+                page.SectionHeaders
+                    .OrderBy(x => x.SourceIndex)
+                    .ToList();
+
+            var entries =
+                page.ListingEntries
+                    .OrderBy(x => x.SourceIndex)
+                    .ToList();
+
+            var headerIndex = 0;
+
             for (var index = 0;
-                 index < page.ListingNames.Count;
+                 index < entries.Count;
                  index++)
             {
+                var entry =
+                    entries[index];
+
+                while (headerIndex < headers.Count &&
+                       headers[headerIndex].SourceIndex <= entry.SourceIndex)
+                {
+                    var detectedHeader =
+                        headers[headerIndex].Letter;
+
+                    if (IsValidLetter(detectedHeader))
+                    {
+                        activeHeader =
+                            detectedHeader;
+                    }
+
+                    headerIndex++;
+                }
+
                 globalPosition++;
 
-                var name =
-                    page.ListingNames[index];
-
-                result.Add(
+                var listing =
                     new PsListing
                     {
-                        Name = name,
+                        Name = entry.Name,
 
                         SortKey =
-                            BuildSortKey(name),
+                            BuildSortKey(entry.Name),
 
                         FileName =
                             page.FileName,
@@ -1105,7 +1179,26 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
                         GlobalPosition =
                             globalPosition
-                    });
+                    };
+
+                result.Add(listing);
+
+                headerByListingId[listing.Id] =
+                    activeHeader;
+            }
+
+            while (headerIndex < headers.Count)
+            {
+                var detectedHeader =
+                    headers[headerIndex].Letter;
+
+                if (IsValidLetter(detectedHeader))
+                {
+                    activeHeader =
+                        detectedHeader;
+                }
+
+                headerIndex++;
             }
         }
 
@@ -1426,7 +1519,9 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
 
     private static List<PsListingOrderError> FindOutOfOrderListings(
         IReadOnlyList<PsListing> listings,
-        IReadOnlyList<ParsedPsPage> pages)
+        IReadOnlyList<ParsedPsPage> pages,
+        PsAlphabeticalCheckMode mode,
+        IReadOnlyDictionary<Guid, char> headerByListingId)
     {
         if (listings.Count < 2)
         {
@@ -1439,16 +1534,27 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         var errorIds =
             new HashSet<Guid>();
 
-        DetectListingsOutsideAllowedPageRange(
-            listings,
-            pages,
-            errors,
-            errorIds);
+        if (mode == PsAlphabeticalCheckMode.SearchByHeader)
+        {
+            DetectListingsOutsideHeaderSection(
+                listings,
+                headerByListingId,
+                errors,
+                errorIds);
+        }
+        else
+        {
+            DetectListingsOutsideAllowedPageRange(
+                listings,
+                pages,
+                errors,
+                errorIds);
 
-        DetectPrefixBacktracking(
-            listings,
-            errors,
-            errorIds);
+            DetectPrefixBacktracking(
+                listings,
+                errors,
+                errorIds);
+        }
 
         return errors
             .OrderBy(
@@ -1459,6 +1565,91 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 x =>
                     x.CurrentPositionInPage)
             .ToList();
+    }
+
+    private static void DetectListingsOutsideHeaderSection(
+        IReadOnlyList<PsListing> listings,
+        IReadOnlyDictionary<Guid, char> headerByListingId,
+        ICollection<PsListingOrderError> errors,
+        ISet<Guid> errorIds)
+    {
+        for (var i = 0;
+             i < listings.Count;
+             i++)
+        {
+            var listing =
+                listings[i];
+
+            if (IsHonorificListing(
+                    listing.Name))
+            {
+                continue;
+            }
+
+            if (!headerByListingId.TryGetValue(
+                    listing.Id,
+                    out var headerLetter) ||
+                !IsValidLetter(
+                    headerLetter))
+            {
+                continue;
+            }
+
+            if (BelongsToHeaderSection(
+                    listing.Name,
+                    headerLetter))
+            {
+                continue;
+            }
+
+            AddStructuralError(
+                listings,
+                i,
+                errors,
+                errorIds);
+        }
+    }
+
+
+    private static bool BelongsToHeaderSection(
+        string listingName,
+        char headerLetter)
+    {
+        if (string.IsNullOrWhiteSpace(listingName) ||
+            !IsValidLetter(headerLetter))
+        {
+            return false;
+        }
+
+        var trimmed =
+            listingName.TrimStart();
+
+        if (trimmed.Length == 0)
+        {
+            return false;
+        }
+
+        if (char.IsDigit(trimmed[0]))
+        {
+            return GetAlphabeticalLetter(listingName) ==
+                   headerLetter;
+        }
+
+        foreach (var character in trimmed)
+        {
+            if (!char.IsLetter(character))
+            {
+                continue;
+            }
+
+            var visibleLetter =
+                char.ToUpperInvariant(character);
+
+            return visibleLetter ==
+                   headerLetter;
+        }
+
+        return false;
     }
 
     private static void DetectListingsOutsideAllowedPageRange(
@@ -1854,8 +2045,6 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
                 .Where(
                     (listing, index) =>
                         index != currentIndex &&
-                        !errorIds.Contains(
-                            listing.Id) &&
                         !IsHonorificListing(
                             listing.Name))
                 .OrderBy(
@@ -1977,8 +2166,19 @@ public sealed class PsAlphabeticalCheckerService : IPsAlphabeticalCheckerService
         int OriginalFileOrder,
         int FileOrder,
         string PageLabel,
+        char HeaderLetter,
         char SectionLetter,
+        IReadOnlyList<ParsedSectionHeader> SectionHeaders,
+        IReadOnlyList<ParsedListingEntry> ListingEntries,
         IReadOnlyList<string> ListingNames);
+
+    private sealed record ParsedSectionHeader(
+        int SourceIndex,
+        char Letter);
+
+    private sealed record ParsedListingEntry(
+        string Name,
+        int SourceIndex);
 
     private readonly record struct SectionRange(
         char Min,
