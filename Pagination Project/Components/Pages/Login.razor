@@ -14,201 +14,380 @@
 
 <div class="thryv-login-page">
 
-    <div class="thryv-login-stage">
+    <div class="thryv-login-shell">
 
-        <!-- =====================================================
-             SKELETON
-             ===================================================== -->
+        <section class="thryv-brand-panel">
 
-        <div class="thryv-login-card thryv-skeleton-card"
-             aria-hidden="true">
+            <div class="thryv-brand-top">
 
-            <div class="thryv-login-panel">
-
-                <div class="thryv-skeleton-logo-row">
-
-                    <div class="thryv-skeleton skeleton-logo"></div>
-
-                    <div class="thryv-skeleton-logo-info">
-                        <div class="thryv-skeleton skeleton-logo-title"></div>
-                        <div class="thryv-skeleton skeleton-logo-subtitle"></div>
-                    </div>
-
+                <div class="thryv-brand-logo-mark">
+                    T
                 </div>
 
-                <div class="thryv-skeleton skeleton-main-title"></div>
+                <div class="thryv-brand-logo-text">
 
-                <div class="thryv-skeleton skeleton-description"></div>
+                    <strong>
+                        Thryv
+                        <span>Evaluations</span>
+                    </strong>
 
-                <div class="thryv-skeleton-form-group">
-                    <div class="thryv-skeleton skeleton-label"></div>
-                    <div class="thryv-skeleton skeleton-input"></div>
+                    <small>
+                        Pagination evaluation system
+                    </small>
+
                 </div>
-
-                <div class="thryv-skeleton-form-group">
-                    <div class="thryv-skeleton skeleton-label"></div>
-                    <div class="thryv-skeleton skeleton-input"></div>
-                </div>
-
-                <div class="thryv-skeleton skeleton-checkbox"></div>
-
-                <div class="thryv-skeleton skeleton-button"></div>
-
-                <div class="thryv-skeleton skeleton-footer"></div>
 
             </div>
 
-        </div>
+
+            <div class="thryv-brand-message">
+
+                <h1>
+                    Performance today,<br />
+                    a stronger tomorrow.
+                </h1>
+
+            </div>
 
 
-        <!-- =====================================================
-             LOGIN REAL
-             ===================================================== -->
+            <div class="thryv-brand-footer">
 
-        <div class="thryv-login-card thryv-login-content">
+                <span class="thryv-brand-line"></span>
 
-            <div class="thryv-login-panel">
+                <p>
+                    Efficiency<br />
+                    in every step.
+                </p>
 
-                <div class="thryv-logo-row">
+            </div>
 
-                    <div class="thryv-logo-mark">
-                        T
+        </section>
+
+
+        <div class="thryv-login-stage">
+
+            <div class="thryv-login-card thryv-skeleton-card"
+                 aria-hidden="true">
+
+                <div class="thryv-login-panel">
+
+                    <div class="thryv-skeleton-logo-row">
+
+                        <div class="thryv-skeleton skeleton-logo"></div>
+
+                        <div class="thryv-skeleton-logo-info">
+
+                            <div class="thryv-skeleton skeleton-logo-title"></div>
+
+                            <div class="thryv-skeleton skeleton-logo-subtitle"></div>
+
+                        </div>
+
                     </div>
 
-                    <div class="thryv-logo-text">
-                        <strong>Evaluations</strong>
-                        <span>Pagination evaluation system</span>
+
+                    <div class="thryv-skeleton skeleton-main-title"></div>
+
+                    <div class="thryv-skeleton skeleton-description"></div>
+
+
+                    <div class="thryv-skeleton-form-group">
+                        <div class="thryv-skeleton skeleton-input"></div>
                     </div>
+
+
+                    <div class="thryv-skeleton-form-group">
+                        <div class="thryv-skeleton skeleton-input"></div>
+                    </div>
+
+
+                    <div class="thryv-skeleton skeleton-checkbox"></div>
+
+                    <div class="thryv-skeleton skeleton-button"></div>
+
+                    <div class="thryv-skeleton skeleton-footer"></div>
 
                 </div>
 
-
-                <h2 class="thryv-login-title">
-                    Welcome back
-                </h2>
-
-                <p class="thryv-login-subtitle">
-                    Sign in to continue to your dashboard.
-                </p>
+            </div>
 
 
-                <form method="post"
-                      action="/account/login"
-                      data-enhance="false"
-                      autocomplete="on"
-                      onsubmit="return window.thryvLogin
-                          ? window.thryvLogin.startSubmitting(this)
-                          : true;">
+            <div class="thryv-login-card thryv-login-content">
 
-                    <AntiforgeryToken />
+                <div class="thryv-login-panel">
 
+                    <div class="thryv-card-logo-row">
 
-                    <input type="hidden"
-                           name="ReturnUrl"
-                           value="/dashboard" />
+                        <div class="thryv-logo-mark">
+                            T
+                        </div>
 
+                        <div class="thryv-logo-text">
 
-                    <div class="thryv-form-group">
-
-                        <label for="login-username">
-                            User
-                        </label>
-
-                        <input id="login-username"
-                               name="Username"
-                               type="text"
-                               class="thryv-input"
-                               placeholder="Enter your username"
-                               maxlength="50"
-                               autocomplete="username"
-                               autocapitalize="none"
-                               spellcheck="false"
-                               enterkeyhint="next"
-                               autofocus
-                               required />
-
-                    </div>
-
-
-                    <div class="thryv-form-group">
-
-                        <label for="login-password">
-                            Password
-                        </label>
-
-                        <input id="login-password"
-                               name="Password"
-                               type="password"
-                               class="thryv-input"
-                               placeholder="••••••••"
-                               maxlength="100"
-                               autocomplete="current-password"
-                               enterkeyhint="go"
-                               required />
-
-                    </div>
-
-
-                    <div class="thryv-remember-row">
-
-                        <label class="thryv-remember-option">
-
-                            <input type="checkbox"
-                                   name="RememberMe"
-                                   value="true" />
+                            <strong>
+                                Thryv Evaluations
+                            </strong>
 
                             <span>
-                                Remember me
+                                Pagination evaluation system
                             </span>
 
-                        </label>
+                        </div>
 
                     </div>
 
 
-                    @if (!string.IsNullOrWhiteSpace(_mensajeError))
-                    {
-                        <div class="thryv-error"
-                             role="alert"
-                             aria-live="assertive">
+                    <div class="thryv-heading">
 
-                            @_mensajeError
+                        <h2 class="thryv-login-title">
+                            Welcome back
+                        </h2>
+
+                        <p class="thryv-login-subtitle">
+                            Sign in to continue to your dashboard.
+                        </p>
+
+                    </div>
+
+
+                    <form method="post"
+                          action="/account/login"
+                          data-enhance="false"
+                          autocomplete="on"
+                          onsubmit="return window.thryvLogin
+                              ? window.thryvLogin.startSubmitting(this)
+                              : true;">
+
+                        <AntiforgeryToken />
+
+                        <input type="hidden"
+                               name="ReturnUrl"
+                               value="/dashboard" />
+
+
+                        <div class="thryv-form-group">
+
+                            <div class="thryv-input-wrapper">
+
+                                <span class="thryv-input-icon"
+                                      aria-hidden="true">
+
+                                    <svg viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="1.8"
+                                         stroke-linecap="round"
+                                         stroke-linejoin="round">
+
+                                        <path d="M20 21a8 8 0 0 0-16 0" />
+
+                                        <circle cx="12"
+                                                cy="7"
+                                                r="4" />
+
+                                    </svg>
+
+                                </span>
+
+
+                                <input id="login-username"
+                                       name="Username"
+                                       type="text"
+                                       class="thryv-input"
+                                       placeholder="Enter your username"
+                                       maxlength="50"
+                                       autocomplete="username"
+                                       autocapitalize="none"
+                                       spellcheck="false"
+                                       enterkeyhint="next"
+                                       aria-label="Username"
+                                       autofocus
+                                       required />
+
+                            </div>
 
                         </div>
-                    }
 
 
-                    @if (!string.IsNullOrWhiteSpace(_mensajeExito))
-                    {
-                        <div class="thryv-success"
-                             role="status"
-                             aria-live="polite">
+                        <div class="thryv-form-group">
 
-                            @_mensajeExito
+                            <div class="thryv-input-wrapper">
+
+                                <span class="thryv-input-icon"
+                                      aria-hidden="true">
+
+                                    <svg viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="1.8"
+                                         stroke-linecap="round"
+                                         stroke-linejoin="round">
+
+                                        <rect x="5"
+                                              y="10"
+                                              width="14"
+                                              height="11"
+                                              rx="2" />
+
+                                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+
+                                    </svg>
+
+                                </span>
+
+
+                                <input id="login-password"
+                                       name="Password"
+                                       type="password"
+                                       class="thryv-input thryv-password-input"
+                                       placeholder="Enter your password"
+                                       maxlength="100"
+                                       autocomplete="current-password"
+                                       enterkeyhint="go"
+                                       required />
+
+
+                                <button type="button"
+                                        class="thryv-password-toggle"
+                                        aria-label="Show password"
+                                        aria-pressed="false"
+                                        onclick="window.thryvLogin.togglePassword(this)">
+
+                                    <svg viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="1.8"
+                                         stroke-linecap="round"
+                                         stroke-linejoin="round">
+
+                                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+
+                                        <circle cx="12"
+                                                cy="12"
+                                                r="3" />
+
+                                    </svg>
+
+                                </button>
+
+                            </div>
 
                         </div>
-                    }
 
 
-                    <button type="submit"
-                            class="thryv-login-button"
-                            id="thryv-login-submit">
+                        <div class="thryv-login-options">
 
-                        <span class="thryv-login-button-text">
-                            Login
+                            <label class="thryv-remember-option">
+
+                                <input type="checkbox"
+                                       name="RememberMe"
+                                       value="true" />
+
+                                <span>
+                                    Remember me
+                                </span>
+
+                            </label>
+
+
+                            <a href="/forgot-password"
+                               class="thryv-forgot-link">
+
+                                Forgot password?
+
+                            </a>
+
+                        </div>
+
+
+                        @if (!string.IsNullOrWhiteSpace(_mensajeError))
+                        {
+                            <div class="thryv-error"
+                                 role="alert"
+                                 aria-live="assertive">
+
+                                <span class="thryv-message-icon">
+                                    !
+                                </span>
+
+                                @_mensajeError
+
+                            </div>
+                        }
+
+
+                        @if (!string.IsNullOrWhiteSpace(_mensajeExito))
+                        {
+                            <div class="thryv-success"
+                                 role="status"
+                                 aria-live="polite">
+
+                                <span class="thryv-message-icon">
+                                    ✓
+                                </span>
+
+                                @_mensajeExito
+
+                            </div>
+                        }
+
+
+                        <button type="submit"
+                                class="thryv-login-button"
+                                id="thryv-login-submit">
+
+                            <span class="thryv-login-button-text">
+
+                                <span>
+                                    Login
+                                </span>
+
+                                <svg viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="2"
+                                     stroke-linecap="round"
+                                     stroke-linejoin="round">
+
+                                    <path d="M5 12h14" />
+
+                                    <path d="m14 7 5 5-5 5" />
+
+                                </svg>
+
+                            </span>
+
+
+                            <span class="thryv-login-button-loader"
+                                  aria-hidden="true">
+                            </span>
+
+                        </button>
+
+                    </form>
+
+
+                    <div class="thryv-panel-footer">
+
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8"
+                             stroke-linecap="round"
+                             stroke-linejoin="round">
+
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+
+                            <path d="m9 12 2 2 4-4" />
+
+                        </svg>
+
+                        <span>
+                            Secure access to your evaluation workspace
                         </span>
 
-                        <span class="thryv-login-button-loader"
-                              aria-hidden="true">
-                        </span>
+                    </div>
 
-                    </button>
-
-                </form>
-
-
-                <div class="thryv-panel-footer">
-                    Secure access to your evaluation workspace
                 </div>
 
             </div>
