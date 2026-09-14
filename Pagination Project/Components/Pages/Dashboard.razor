@@ -31,15 +31,15 @@
             <div class="thryv-dashboard-hero-content">
 
                 <div class="thryv-dashboard-skeleton-block
-                                thryv-dashboard-skeleton-title">
+                                    thryv-dashboard-skeleton-title">
                 </div>
 
                 <div class="thryv-dashboard-skeleton-block
-                                thryv-dashboard-skeleton-subtitle">
+                                    thryv-dashboard-skeleton-subtitle">
                 </div>
 
                 <div class="thryv-dashboard-skeleton-block
-                                thryv-dashboard-skeleton-subtitle short">
+                                    thryv-dashboard-skeleton-subtitle short">
                 </div>
 
             </div>
@@ -51,14 +51,14 @@
                             statIndex++)
                 {
                     <div class="thryv-hero-stat-card
-                                        thryv-dashboard-skeleton-stat-card">
+                                                thryv-dashboard-skeleton-stat-card">
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-stat-label">
+                                                    thryv-dashboard-skeleton-stat-label">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-stat-value">
+                                                    thryv-dashboard-skeleton-stat-value">
                         </div>
 
                     </div>
@@ -73,18 +73,18 @@
             sectionIndex++)
         {
             <div class="thryv-section-card
-                                thryv-dashboard-skeleton-section">
+                                        thryv-dashboard-skeleton-section">
 
                 <div class="thryv-section-header">
 
                     <div class="thryv-dashboard-skeleton-section-copy">
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-section-title">
+                                                    thryv-dashboard-skeleton-section-title">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-section-description">
+                                                    thryv-dashboard-skeleton-section-description">
                         </div>
 
                     </div>
@@ -92,15 +92,15 @@
                     <div class="thryv-dashboard-skeleton-actions">
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-filter">
+                                                    thryv-dashboard-skeleton-filter">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-filter">
+                                                    thryv-dashboard-skeleton-filter">
                         </div>
 
                         <div class="thryv-dashboard-skeleton-block
-                                            thryv-dashboard-skeleton-badge">
+                                                    thryv-dashboard-skeleton-badge">
                         </div>
 
                     </div>
@@ -116,7 +116,7 @@
                                         columnIndex++)
                         {
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-column-title">
+                                                                thryv-dashboard-skeleton-column-title">
                             </div>
                         }
 
@@ -131,37 +131,37 @@
                             <div class="thryv-dashboard-skeleton-employee">
 
                                 <div class="thryv-dashboard-skeleton-block
-                                                        thryv-dashboard-skeleton-avatar">
+                                                                    thryv-dashboard-skeleton-avatar">
                                 </div>
 
                                 <div class="thryv-dashboard-skeleton-block
-                                                        thryv-dashboard-skeleton-name">
+                                                                    thryv-dashboard-skeleton-name">
                                 </div>
 
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell medium">
+                                                                thryv-dashboard-skeleton-cell medium">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell small">
+                                                                thryv-dashboard-skeleton-cell small">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell large">
+                                                                thryv-dashboard-skeleton-cell large">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell small">
+                                                                thryv-dashboard-skeleton-cell small">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell medium">
+                                                                thryv-dashboard-skeleton-cell medium">
                             </div>
 
                             <div class="thryv-dashboard-skeleton-block
-                                                    thryv-dashboard-skeleton-cell action">
+                                                                thryv-dashboard-skeleton-cell action">
                             </div>
 
                         </div>
@@ -179,105 +179,128 @@ else
     <div class="thryv-dashboard-page">
 
         <section class="thryv-dashboard-header">
-
             <div class="thryv-dashboard-hero-content">
+                <div class="thryv-dashboard-eyebrow">
+                    <span class="thryv-dashboard-eyebrow-line"></span>
+                    WELCOME BACK, @DashboardUserName.ToUpperInvariant()
+                </div>
 
-                <h2 class="thryv-dashboard-title">
-                    General Dashboard
-                </h2>
+                <h2 class="thryv-dashboard-title">General Dashboard</h2>
 
                 <p class="thryv-dashboard-subtitle">
                     Quick system summary and current list of assigned books.
                 </p>
-
             </div>
 
-            <div class="thryv-dashboard-hero-stats">
+            <div class="thryv-dashboard-book-art" aria-hidden="true">
+                <div class="thryv-book-light"></div>
+                <div class="thryv-book-page thryv-book-page-left"></div>
+                <div class="thryv-book-page thryv-book-page-right"></div>
+                <div class="thryv-book-spine"></div>
+            </div>
 
-                @if (PuedeVerUsuarios)
-                {
-                    <div class="thryv-hero-stat-card">
-                        <span>TOTAL USERS</span>
+            <div class="thryv-dashboard-hero-quote">
+                <span>“Quality Today</span>
+                <strong>Better Books Tomorrow”</strong>
+            </div>
+
+            <div class="thryv-dashboard-date-card">
+                <span>@DateTime.Now.ToString("dddd, MMM dd, yyyy")</span>
+                <strong>@DateTime.Now.ToString("h:mm tt")</strong>
+                <i></i>
+                <small>Keep up the great work!</small>
+            </div>
+        </section>
+
+        <section class="thryv-dashboard-metrics">
+            @if (PuedeVerUsuarios)
+            {
+                <div class="thryv-metric-card thryv-metric-blue">
+                    <div class="thryv-metric-icon">👥</div>
+                    <div class="thryv-metric-content">
+                        <span>Total Users</span>
                         <strong>@stats.TotalUsers</strong>
+                        <small>System users</small>
                     </div>
-                }
+                    <div class="thryv-mini-bars" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
+            }
 
-                @if (PuedeVerEmpleados)
-                {
-                    <div class="thryv-hero-stat-card">
-                        <span>EMPLOYEES</span>
+            @if (PuedeVerEmpleados)
+            {
+                <div class="thryv-metric-card thryv-metric-violet">
+                    <div class="thryv-metric-icon">♙</div>
+                    <div class="thryv-metric-content">
+                        <span>Employees</span>
                         <strong>@stats.TotalEmployees</strong>
+                        <small>Active employees</small>
                     </div>
-                }
+                    <div class="thryv-mini-bars" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
+            }
 
-                @if (PuedeVerLibros)
-                {
-                    <div class="thryv-hero-stat-card">
-                        <span>ACTIVE BOOKS</span>
+            @if (PuedeVerLibros)
+            {
+                <div class="thryv-metric-card thryv-metric-cyan">
+                    <div class="thryv-metric-icon">📖</div>
+                    <div class="thryv-metric-content">
+                        <span>Active Books</span>
                         <strong>@stats.TotalBooks</strong>
+                        <small>Books assigned</small>
                     </div>
-                }
+                    <div class="thryv-mini-bars" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
+            }
 
-                @if (PuedeVerEvaluaciones)
-                {
-                    <div class="thryv-hero-stat-card">
-                        <span>EVALUATIONS</span>
-                        <strong>@stats.TotalEvaluations</strong>
-                    </div>
-
-                    <div class="thryv-hero-stat-card">
-                        <span>LAST WEEK EVALUATIONS</span>
+            @if (PuedeVerEvaluaciones)
+            {
+                <div class="thryv-metric-card thryv-metric-purple">
+                    <div class="thryv-metric-icon">▤</div>
+                    <div class="thryv-metric-content">
+                        <span>Evaluations<br />(Last Week)</span>
                         <strong>@weeklyEvaluations.Count</strong>
+                        <small>Completed</small>
                     </div>
-                }
+                    <div class="thryv-mini-bars" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
+            }
 
-                @if (PuedeVerAsignaciones)
-                {
-                    <div class="thryv-hero-stat-card thryv-stat-pending">
-
-                        <span>
-                            PENDING TODAY
-                        </span>
-
-                        <strong>
-                            @assignedBooks.Count
-                        </strong>
-
+            @if (PuedeVerAsignaciones)
+            {
+                <div class="thryv-metric-card thryv-metric-completed">
+                    <div class="thryv-metric-icon">✓</div>
+                    <div class="thryv-metric-content">
+                        <span>Completed Today</span>
+                        <strong>@completedAssignments.Count</strong>
+                        <small>Assignments finished</small>
                     </div>
+                    <div class="thryv-mini-bars" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
 
-                    <div class="thryv-hero-stat-card thryv-stat-completed">
-
-                        <span>
-                            COMPLETED TODAY
-                        </span>
-
-                        <strong>
-                            @completedAssignments.Count
-                        </strong>
-
+                <div class="thryv-metric-card thryv-metric-pending">
+                    <div class="thryv-metric-icon">◷</div>
+                    <div class="thryv-metric-content">
+                        <span>Pending Today</span>
+                        <strong>@assignedBooks.Count</strong>
+                        <small>Assignments pending</small>
                     </div>
-                }
-
-            </div>
-
+                    <div class="thryv-mini-bars" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
+            }
         </section>
 
         @if (PuedeVerAsignaciones)
         {
-            <div class="thryv-section-card">
+            <div class="thryv-section-card assigned-section-card">
 
                 <div class="thryv-section-header">
 
-                    <div>
-
-                        <h3>
-                            Assigned Books
-                        </h3>
-
-                        <p>
-                            Live view of pending assignments based on the current stage of the day.
-                        </p>
-
+                    <div class="thryv-section-heading">
+                        <div class="thryv-section-icon thryv-section-icon-assigned">▣</div>
+                        <div>
+                            <h3>Assigned Books</h3>
+                            <p>Live view of pending assignments based on the current stage of the day.</p>
+                        </div>
                     </div>
 
                     <div class="thryv-section-actions">
@@ -350,8 +373,15 @@ else
                             </button>
                         }
 
-                        <div class="thryv-section-badge">
-                            @AssignedBooksFiltered.Count records
+                        <button type="button"
+                                class="thryv-panel-icon-btn"
+                                title="Refresh filters"
+                                @onclick="ClearAssignedFilters">
+                            ↻
+                        </button>
+
+                        <div class="thryv-view-all-btn assigned">
+                            View All <span>→</span>
                         </div>
 
                     </div>
@@ -435,6 +465,10 @@ else
                                     </th>
                                 }
 
+                                <th>
+                                    Actions
+                                </th>
+
                             </tr>
 
                         </thead>
@@ -445,10 +479,14 @@ else
                             {
                                 <tr>
 
-                                    <td colspan="@AssignedBooksColumnCount"
+                                    <td colspan="@(AssignedBooksColumnCount + 1)"
                                         class="thryv-empty-row">
 
-                                        No pending assignments for today.
+                                        <div class="thryv-empty-state">
+                                            <span class="thryv-empty-icon">✓</span>
+                                            <strong>No pending assignments for today.</strong>
+                                            <small>All assigned books for today have been completed or are not yet assigned.</small>
+                                        </div>
 
                                     </td>
 
@@ -461,7 +499,7 @@ else
                                 {
                                     <tr @key="item.AssignmentId">
 
-                                        <td>
+                                        <td data-label="Employee">
 
                                             <div class="thryv-employee-cell">
 
@@ -483,7 +521,7 @@ else
 
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td>
+                                            <td data-label="Department">
 
                                                 <span class="thryv-code-pill secondary">
                                                     @item.EmployeeTypeCode
@@ -492,7 +530,7 @@ else
                                             </td>
                                         }
 
-                                        <td>
+                                        <td data-label="KGEN Code">
 
                                             <span class="thryv-code-pill">
                                                 @item.KgenCode
@@ -500,7 +538,7 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="LSA Code">
 
                                             <span class="thryv-code-pill secondary">
                                                 @item.LsaCode
@@ -508,11 +546,11 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="Book">
                                             @item.BookName
                                         </td>
 
-                                        <td class="thryv-database-cell">
+                                        <td class="thryv-database-cell" data-label="Database">
 
                                             @{
                                                 var databaseCode =
@@ -540,7 +578,7 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="Stage">
 
                                             <span class="@GetStagePillClass(item.StageKey)">
                                                 @item.Stage
@@ -548,13 +586,13 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="Stage Date">
                                             @(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")
                                         </td>
 
                                         @if (ShowReadyToShipColumn)
                                         {
-                                            <td class="thryv-ready-to-ship-cell">
+                                            <td class="thryv-ready-to-ship-cell" data-label="Ready to Ship">
 
                                                 @if (
                                                                             string.Equals(
@@ -628,6 +666,10 @@ else
                                             </td>
                                         }
 
+                                        <td class="thryv-actions-cell" data-label="Actions">
+                                            <button type="button" class="thryv-row-action-btn" title="View details">→</button>
+                                        </td>
+
                                     </tr>
                                 }
                             }
@@ -644,16 +686,12 @@ else
 
                 <div class="thryv-section-header">
 
-                    <div>
-
-                        <h3>
-                            Completed Assignments
-                        </h3>
-
-                        <p>
-                            Assignments completed today by employees, grouped by completion status.
-                        </p>
-
+                    <div class="thryv-section-heading">
+                        <div class="thryv-section-icon thryv-section-icon-completed">✓</div>
+                        <div>
+                            <h3>Completed Assignments</h3>
+                            <p>Assignments completed today by employees, grouped by completion status.</p>
+                        </div>
                     </div>
 
                     <div class="thryv-section-actions">
@@ -726,8 +764,15 @@ else
                             </button>
                         }
 
-                        <div class="thryv-section-badge">
-                            @CompletedAssignmentsFiltered.Count records
+                        <button type="button"
+                                class="thryv-panel-icon-btn completed"
+                                title="Refresh filters"
+                                @onclick="ClearCompletedFilters">
+                            ↻
+                        </button>
+
+                        <div class="thryv-view-all-btn completed">
+                            View All <span>→</span>
                         </div>
 
                     </div>
@@ -773,6 +818,10 @@ else
                                     Stage Date
                                 </th>
 
+                                <th>
+                                    Actions
+                                </th>
+
                             </tr>
 
                         </thead>
@@ -783,10 +832,14 @@ else
                             {
                                 <tr>
 
-                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)"
+                                    <td colspan="@(Scope.ViewAllEmployeeTypes ? 8 : 7)"
                                         class="thryv-empty-row">
 
-                                        No completed assignments for today.
+                                        <div class="thryv-empty-state">
+                                            <span class="thryv-empty-icon completed">✓</span>
+                                            <strong>No completed assignments for today.</strong>
+                                            <small>Completed assignments will appear here once available.</small>
+                                        </div>
 
                                     </td>
 
@@ -799,7 +852,7 @@ else
                                 {
                                     <tr @key="item.AssignmentId">
 
-                                        <td>
+                                        <td data-label="Employee">
 
                                             <div class="thryv-employee-cell">
 
@@ -821,7 +874,7 @@ else
 
                                         @if (Scope.ViewAllEmployeeTypes)
                                         {
-                                            <td>
+                                            <td data-label="Department">
 
                                                 <span class="thryv-code-pill secondary">
                                                     @item.EmployeeTypeCode
@@ -830,7 +883,7 @@ else
                                             </td>
                                         }
 
-                                        <td>
+                                        <td data-label="KGEN Code">
 
                                             <span class="thryv-code-pill">
                                                 @item.KgenCode
@@ -838,7 +891,7 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="LSA Code">
 
                                             <span class="thryv-code-pill secondary">
                                                 @item.LsaCode
@@ -846,7 +899,7 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="Book">
                                             @item.BookName
                                         </td>
 
@@ -858,8 +911,12 @@ else
 
                                         </td>
 
-                                        <td>
+                                        <td data-label="Stage Date">
                                             @(item.StageDate?.ToString("dd/MM/yyyy") ?? "-")
+                                        </td>
+
+                                        <td class="thryv-actions-cell" data-label="Actions">
+                                            <button type="button" class="thryv-row-action-btn completed" title="View details">→</button>
                                         </td>
 
                                     </tr>
@@ -879,16 +936,12 @@ else
 
             <div class="thryv-section-header">
 
-                <div>
-
-                    <h3>
-                        Weekly Evaluations
-                    </h3>
-
-                    <p>
-                        Evaluations from last week based on the book shipping date.
-                    </p>
-
+                <div class="thryv-section-heading">
+                    <div class="thryv-section-icon thryv-section-icon-weekly">▥</div>
+                    <div>
+                        <h3>Weekly Evaluations</h3>
+                        <p>Evaluations from last week based on the book shipping date.</p>
+                    </div>
                 </div>
 
                 <div class="thryv-section-actions">
@@ -947,8 +1000,15 @@ else
                         </button>
                     }
 
-                    <div class="thryv-section-badge">
-                        @WeeklyEvaluationsFiltered.Count records
+                    <button type="button"
+                            class="thryv-panel-icon-btn weekly"
+                            title="Refresh filters"
+                            @onclick="ClearWeeklyFilters">
+                        ↻
+                    </button>
+
+                    <div class="thryv-view-all-btn weekly">
+                        View All <span>→</span>
                     </div>
 
                 </div>
@@ -1007,7 +1067,11 @@ else
                                 <td colspan="@(Scope.ViewAllEmployeeTypes ? 7 : 6)"
                                     class="thryv-empty-row">
 
-                                    No weekly evaluations to display.
+                                    <div class="thryv-empty-state">
+                                        <span class="thryv-empty-icon weekly">W</span>
+                                        <strong>No weekly evaluations to display.</strong>
+                                        <small>Evaluations will appear here once data is available.</small>
+                                    </div>
 
                                 </td>
 
@@ -2737,6 +2801,33 @@ else
     private sealed record EvaluationFailureOption(
         string Label,
         bool HasError);
+
+    private string DashboardUserName
+    {
+        get
+        {
+            if (_user is null)
+            {
+                return "User";
+            }
+
+            var name =
+                _user.Identity?.Name
+                ?? _user.FindFirst(ClaimTypes.Name)?.Value
+                ?? _user.FindFirst("Username")?.Value
+                ?? "User";
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return "User";
+            }
+
+            return name.Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries |
+                StringSplitOptions.TrimEntries)[0];
+        }
+    }
 
     private sealed record AssignedBookRank(
         AssignedBookDashboardDto Item,

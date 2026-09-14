@@ -2,9 +2,12 @@
 @implements IDisposable
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Pagination_Project.Models
+@using Pagination_Project.Services
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUsuarioService UsuarioService
 
 <div class="thryv-dashboard-layout">
     <div class="thryv-sidebar-overlay @(sidebarOpen ? "show" : "")" @onclick="CloseSidebar"></div>
@@ -12,77 +15,105 @@
     <aside class="thryv-sidebar @(sidebarOpen ? "open" : "closed")">
         <div class="thryv-sidebar-header">
             <div class="thryv-brand-block">
-                <div class="thryv-brand-mark">T</div>
+                <div class="thryv-brand-mark" aria-hidden="true">
+                    <span class="thryv-brand-page left"></span>
+                    <span class="thryv-brand-page right"></span>
+                </div>
+
                 <div class="thryv-brand-text">
-                    <h3>Evaluations</h3>
-                    <p>Pagination evaluation system</p>
+                    <h3>Thryv</h3>
+                    <p>Evaluations</p>
                 </div>
             </div>
 
-            <button type="button" class="thryv-sidebar-close" @onclick="CloseSidebar" title="Close menu">
+            <button type="button"
+                    class="thryv-sidebar-close"
+                    @onclick="CloseSidebar"
+                    title="Close menu">
                 ✕
             </button>
         </div>
 
         <AuthorizeView>
             <Authorized Context="auth">
-                <nav class="thryv-sidebar-menu" @onclick="CloseSidebarOnCompactAsync">
-                    <NavLink href="/dashboard" Match="NavLinkMatch.All" class="thryv-menu-link">
+                <nav class="thryv-sidebar-menu"
+                     @onclick="CloseSidebarOnCompactAsync">
+
+                    <NavLink href="/dashboard"
+                             Match="NavLinkMatch.All"
+                             class="thryv-menu-link">
                         <span class="thryv-menu-icon">📊</span>
                         <span class="thryv-menu-text">Dashboard</span>
                     </NavLink>
 
-                    @if (HasPermission(auth.User, "CreateUser") || HasPermission(auth.User, "EditUser") || HasPermission(auth.User, "DeleteUser"))
+                    @if (HasPermission(auth.User, "CreateUser") ||
+                                        HasPermission(auth.User, "EditUser") ||
+                                        HasPermission(auth.User, "DeleteUser"))
                     {
-                        <NavLink href="/registro-usuarios" class="thryv-menu-link">
+                        <NavLink href="/registro-usuarios"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">👥</span>
                             <span class="thryv-menu-text">Users</span>
                         </NavLink>
                     }
 
-                    @if (HasPermission(auth.User, "CreateEmployees") || HasPermission(auth.User, "EditEmployees") || HasPermission(auth.User, "DeleteEmployees") || HasPermission(auth.User, "ViewEmployees"))
+                    @if (HasPermission(auth.User, "CreateEmployees") ||
+                                        HasPermission(auth.User, "EditEmployees") ||
+                                        HasPermission(auth.User, "DeleteEmployees") ||
+                                        HasPermission(auth.User, "ViewEmployees"))
                     {
-                        <NavLink href="/registro-empleados" class="thryv-menu-link">
+                        <NavLink href="/registro-empleados"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">👤</span>
                             <span class="thryv-menu-text">Employees</span>
                         </NavLink>
                     }
 
-                    @if (HasPermission(auth.User, "CreateBook") || HasPermission(auth.User, "EditBook") || HasPermission(auth.User, "DeleteBook") || HasPermission(auth.User, "BooksView"))
+                    @if (HasPermission(auth.User, "CreateBook") ||
+                                        HasPermission(auth.User, "EditBook") ||
+                                        HasPermission(auth.User, "DeleteBook") ||
+                                        HasPermission(auth.User, "BooksView"))
                     {
-                        <NavLink href="/books" Match="NavLinkMatch.Prefix" class="thryv-menu-link">
+                        <NavLink href="/books"
+                                 Match="NavLinkMatch.Prefix"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">📖</span>
                             <span class="thryv-menu-text">Books</span>
                         </NavLink>
                     }
 
-@if (PuedeVerAlphabeticalChecker(auth.User))
-{
-    <NavLink href="/alphabetical-order-checker"
-             Match="NavLinkMatch.Prefix"
-             class="thryv-menu-link">
-        <span class="thryv-menu-icon">🔤</span>
-        <span class="thryv-menu-text">Alphabetical Checker</span>
-    </NavLink>
-}
+                    @if (PuedeVerAlphabeticalChecker(auth.User))
+                    {
+                        <NavLink href="/alphabetical-order-checker"
+                                 Match="NavLinkMatch.Prefix"
+                                 class="thryv-menu-link">
+                            <span class="thryv-menu-icon">🔤</span>
+                            <span class="thryv-menu-text">Alphabetical Checker</span>
+                        </NavLink>
+                    }
 
                     @if (HasPermission(auth.User, "QualifyBook"))
                     {
-                        <NavLink href="/evaluaciones" class="thryv-menu-link">
+                        <NavLink href="/evaluaciones"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">⭐</span>
                             <span class="thryv-menu-text">Evaluations</span>
                         </NavLink>
                     }
 
-                    @if (HasPermission(auth.User, "AsignBook") || HasPermission(auth.User, "ViewAssignations") || HasPermission(auth.User, "CreateAssignations"))
+                    @if (HasPermission(auth.User, "AsignBook") ||
+                                        HasPermission(auth.User, "ViewAssignations") ||
+                                        HasPermission(auth.User, "CreateAssignations"))
                     {
-                        <NavLink href="/asignaciones" class="thryv-menu-link">
+                        <NavLink href="/asignaciones"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">📌</span>
                             <span class="thryv-menu-text">Assignments</span>
                         </NavLink>
                     }
 
-                    <NavLink href="/finalizar-asignaciones" class="thryv-menu-link">
+                    <NavLink href="/finalizar-asignaciones"
+                             class="thryv-menu-link">
                         <span class="thryv-menu-icon">✅</span>
                         <span class="thryv-menu-text">Finish Assignments</span>
                     </NavLink>
@@ -99,7 +130,8 @@
 
                     @if (PuedeVerReportes(auth.User))
                     {
-                        <NavLink href="/reportes-finalizados" class="thryv-menu-link">
+                        <NavLink href="/reportes-finalizados"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">📄</span>
                             <span class="thryv-menu-text">Reports</span>
                         </NavLink>
@@ -107,7 +139,8 @@
 
                     @if (HasPermission(auth.User, "EditPermissionLevels"))
                     {
-                        <NavLink href="/permisos" class="thryv-menu-link">
+                        <NavLink href="/permisos"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">🛡️</span>
                             <span class="thryv-menu-text">Permissions</span>
                         </NavLink>
@@ -115,7 +148,8 @@
 
                     @if (HasPermission(auth.User, "LateWork"))
                     {
-                        <NavLink href="/late-work-activities" class="thryv-menu-link">
+                        <NavLink href="/late-work-activities"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">⏱️</span>
                             <span class="thryv-menu-text">Late Work Activities</span>
                         </NavLink>
@@ -123,12 +157,21 @@
 
                     @if (PuedeVerEmployeeTimeOff(auth.User))
                     {
-                        <NavLink href="/employee-time-off" class="thryv-menu-link">
+                        <NavLink href="/employee-time-off"
+                                 class="thryv-menu-link">
                             <span class="thryv-menu-icon">🌴</span>
                             <span class="thryv-menu-text">Employee Time Off</span>
                         </NavLink>
                     }
                 </nav>
+
+                <div class="thryv-sidebar-footer-card">
+                    <div class="thryv-sidebar-footer-icon">≋</div>
+                    <div>
+                        <strong>Quality Today</strong>
+                        <span>Better Books Tomorrow</span>
+                    </div>
+                </div>
             </Authorized>
         </AuthorizeView>
     </aside>
@@ -138,12 +181,15 @@
             <div class="thryv-header-left">
                 @if (sidebarOpen == false)
                 {
-                    <button type="button" class="thryv-menu-toggle" @onclick="ToggleSidebar" title="Show or hide menu">
+                    <button type="button"
+                            class="thryv-menu-toggle"
+                            @onclick="ToggleSidebar"
+                            title="Show or hide menu">
                         ☰
                     </button>
                 }
 
-                <div class="thryv-header-title">
+                <div class="thryv-header-title thryv-header-title-mobile">
                     <h1>Evaluations</h1>
                     <span>Dashboard workspace</span>
                 </div>
@@ -151,20 +197,44 @@
 
             <AuthorizeView>
                 <Authorized Context="auth">
+                    <div class="thryv-header-tools">
+                        <button type="button"
+                                class="thryv-header-tool thryv-theme-cycle-btn"
+                                title="@ThemeButtonTitle"
+                                aria-label="@ThemeButtonTitle"
+                                disabled="@_changingTheme"
+                                @onclick="CambiarTemaAsync">
+                            @ThemeButtonIcon
+                        </button>
+                    </div>
+
                     <div class="thryv-user-info">
                         <NavLink href="/perfil"
                                  class="thryv-user-badge thryv-user-profile-link"
                                  title="My Profile">
-                            <div class="thryv-user-avatar">@InicialesUsuarioHeader</div>
+                            <div class="thryv-user-avatar">
+                                @InicialesUsuarioHeader
+                            </div>
+
                             <div class="thryv-user-details">
-                                <span class="thryv-user-label">@ObtenerRol(auth.User)</span>
-                                <span class="thryv-user-name">@GetDisplayName(auth.User)</span>
+                                <span class="thryv-user-label">
+                                    @ObtenerRol(auth.User)
+                                </span>
+
+                                <span class="thryv-user-name">
+                                    @GetDisplayName(auth.User)
+                                </span>
                             </div>
                         </NavLink>
 
                         <form method="post" action="/account/logout">
                             <AntiforgeryToken />
-                            <button type="submit" class="thryv-logout-btn">Sign Out</button>
+
+                            <button type="submit"
+                                    class="thryv-logout-btn"
+                                    title="Sign Out">
+                                ↪
+                            </button>
                         </form>
                     </div>
                 </Authorized>
@@ -180,8 +250,13 @@
 @code {
     private bool sidebarOpen = false;
     private ClaimsPrincipal? _user;
+    private PerfilUsuarioDto? _perfilActual;
+
     private bool _themeApplied = false;
     private bool _sidebarInitialized = false;
+    private bool _changingTheme = false;
+
+    private string _currentTheme = "light";
 
     private static readonly string[] TemasPermitidos =
     [
@@ -191,29 +266,120 @@
         "dark glass"
     ];
 
+    private string ThemeButtonIcon =>
+        _currentTheme switch
+        {
+            "light" => "☼",
+            "dark" => "☾",
+            "liquid glass" => "◈",
+            "dark glass" => "◐",
+            _ => "☼"
+        };
+
+    private string ThemeButtonTitle =>
+        _currentTheme switch
+        {
+            "light" => "Light theme - click for Dark",
+            "dark" => "Dark theme - click for Liquid Glass",
+            "liquid glass" => "Liquid Glass - click for Dark Glass",
+            "dark glass" => "Dark Glass - click for Light",
+            _ => "Change theme"
+        };
+
     protected override async Task OnInitializedAsync()
     {
         Navigation.LocationChanged += HandleLocationChanged;
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        _user = authState.User;
+        var authState =
+            await AuthenticationStateProvider
+                .GetAuthenticationStateAsync();
+
+        _user =
+            authState.User;
+
+        await CargarPerfilActualAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender)
         {
-            if (!_sidebarInitialized)
+            return;
+        }
+
+        if (!_sidebarInitialized)
+        {
+            _sidebarInitialized = true;
+            await InicializarSidebarAsync();
+        }
+
+        if (!_themeApplied)
+        {
+            _themeApplied = true;
+            await AplicarTemaLayoutAsync();
+        }
+    }
+
+    private async Task CargarPerfilActualAsync()
+    {
+        if (_user?.Identity?.IsAuthenticated != true)
+        {
+            _perfilActual = null;
+            return;
+        }
+
+        try
+        {
+            var userIdClaim =
+                _user.FindFirst(
+                    ClaimTypes.NameIdentifier)
+                    ?.Value;
+
+            var username =
+                _user.Identity?.Name
+                ??
+                _user.FindFirst(
+                    ClaimTypes.Name)
+                    ?.Value;
+
+            PerfilUsuarioDto? resultado =
+                null;
+
+            if (Guid.TryParse(
+                    userIdClaim,
+                    out var usuarioId))
             {
-                _sidebarInitialized = true;
-                await InicializarSidebarAsync();
+                resultado =
+                    await UsuarioService
+                        .ObtenerPerfilActualAsync(
+                            usuarioId);
             }
 
-            if (!_themeApplied)
+            if (resultado is null &&
+                !string.IsNullOrWhiteSpace(
+                    username))
             {
-                _themeApplied = true;
-                await AplicarTemaLayoutAsync();
+                resultado =
+                    await UsuarioService
+                        .ObtenerPerfilActualPorUsernameAsync(
+                            username);
             }
+
+            _perfilActual =
+                resultado;
+
+            if (_perfilActual is not null &&
+                TemasPermitidos.Contains(
+                    _perfilActual.ThemePreference))
+            {
+                _currentTheme =
+                    _perfilActual.ThemePreference;
+            }
+        }
+        catch
+        {
+            _perfilActual = null;
         }
     }
 
@@ -221,38 +387,285 @@
     {
         try
         {
-            var isCompact = await JS.InvokeAsync<bool>("thryvLayout.isCompact");
+            var isCompact =
+                await JS.InvokeAsync<bool>(
+                    "thryvLayout.isCompact");
 
-            sidebarOpen = !isCompact;
+            sidebarOpen =
+                !isCompact;
 
-            await InvokeAsync(StateHasChanged);
+            await InvokeAsync(
+                StateHasChanged);
         }
         catch
         {
             sidebarOpen = false;
-            await InvokeAsync(StateHasChanged);
+
+            await InvokeAsync(
+                StateHasChanged);
         }
     }
 
     private void ToggleSidebar()
     {
-        sidebarOpen = !sidebarOpen;
+        sidebarOpen =
+            !sidebarOpen;
     }
 
     private void CloseSidebar()
     {
-        sidebarOpen = false;
+        sidebarOpen =
+            false;
     }
 
-    private static bool PuedeVerTimeTracker(ClaimsPrincipal user)
+    private async Task CambiarTemaAsync()
     {
-        var lvlId = user.FindFirst("LvlId")?.Value;
+        if (_changingTheme)
+        {
+            return;
+        }
+
+        _changingTheme =
+            true;
+
+        try
+        {
+            var themeActual =
+                await JS.InvokeAsync<string>(
+                    "thryvTheme.getCurrentTheme");
+
+            if (!TemasPermitidos.Contains(
+                    themeActual))
+            {
+                themeActual =
+                    _currentTheme;
+            }
+
+            var indiceActual =
+                Array.IndexOf(
+                    TemasPermitidos,
+                    themeActual);
+
+            if (indiceActual < 0)
+            {
+                indiceActual = 0;
+            }
+
+            var siguienteTema =
+                TemasPermitidos[
+                    (indiceActual + 1) %
+                    TemasPermitidos.Length];
+
+            var temaAnterior =
+                themeActual;
+
+            _currentTheme =
+                siguienteTema;
+
+            await JS.InvokeVoidAsync(
+                "thryvTheme.applyTheme",
+                siguienteTema);
+
+            var guardado =
+                await GuardarTemaEnBaseDeDatosAsync(
+                    siguienteTema);
+
+            if (!guardado)
+            {
+                _currentTheme =
+                    temaAnterior;
+
+                await JS.InvokeVoidAsync(
+                    "thryvTheme.applyTheme",
+                    temaAnterior);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Error changing theme: {ex}");
+        }
+        finally
+        {
+            _changingTheme =
+                false;
+
+            await InvokeAsync(
+                StateHasChanged);
+        }
+    }
+
+    private async Task<bool> GuardarTemaEnBaseDeDatosAsync(
+        string theme)
+    {
+        if (!TemasPermitidos.Contains(
+                theme))
+        {
+            return false;
+        }
+
+        if (_perfilActual is null ||
+            _perfilActual.Id == Guid.Empty)
+        {
+            await CargarPerfilActualAsync();
+        }
+
+        if (_perfilActual is null ||
+            _perfilActual.Id == Guid.Empty)
+        {
+            return false;
+        }
+
+        var actualizado =
+            await UsuarioService
+                .ActualizarThemePreferenceAsync(
+                    _perfilActual.Id,
+                    theme);
+
+        if (actualizado)
+        {
+            _perfilActual.ThemePreference =
+                theme;
+        }
+
+        return actualizado;
+    }
+
+    private async Task AplicarTemaLayoutAsync()
+    {
+        try
+        {
+            var theme =
+                _perfilActual?.ThemePreference;
+
+            if (string.IsNullOrWhiteSpace(
+                    theme) ||
+                !TemasPermitidos.Contains(
+                    theme))
+            {
+                theme =
+                    await JS.InvokeAsync<string?>(
+                        "localStorage.getItem",
+                        "theme");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                    theme) ||
+                !TemasPermitidos.Contains(
+                    theme))
+            {
+                theme =
+                    "light";
+            }
+
+            _currentTheme =
+                theme;
+
+            await JS.InvokeVoidAsync(
+                "thryvTheme.applyTheme",
+                theme);
+
+            await InvokeAsync(
+                StateHasChanged);
+        }
+        catch
+        {
+            _currentTheme =
+                "light";
+
+            await JS.InvokeVoidAsync(
+                "thryvTheme.applyTheme",
+                "light");
+        }
+    }
+
+    private async Task CloseSidebarOnCompactAsync()
+    {
+        try
+        {
+            var isCompact =
+                await JS.InvokeAsync<bool>(
+                    "thryvLayout.isCompact");
+
+            if (isCompact &&
+                sidebarOpen)
+            {
+                sidebarOpen =
+                    false;
+
+                await InvokeAsync(
+                    StateHasChanged);
+            }
+        }
+        catch
+        {
+        }
+    }
+
+    private async void HandleLocationChanged(
+        object? sender,
+        LocationChangedEventArgs e)
+    {
+        await CloseSidebarOnCompactAsync();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -=
+            HandleLocationChanged;
+    }
+
+    private static bool HasPermission(
+        ClaimsPrincipal user,
+        string claimType)
+    {
+        return string.Equals(
+            user.FindFirst(claimType)?.Value,
+            "True",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetDisplayName(
+        ClaimsPrincipal user)
+    {
+        return user.Identity?.Name
+               ??
+               user.FindFirst(
+                   ClaimTypes.Name)
+                   ?.Value
+               ??
+               user.FindFirst(
+                   "Username")
+                   ?.Value
+               ??
+               "User";
+    }
+
+    private static bool PuedeVerTimeTracker(
+        ClaimsPrincipal user)
+    {
+        var lvlId =
+            user.FindFirst(
+                "LvlId")
+                ?.Value;
 
         var role =
-            user.FindFirst(ClaimTypes.Role)?.Value ??
-            user.FindFirst("Role")?.Value ??
-            user.FindFirst("RoleName")?.Value ??
-            user.FindFirst("PermissionLevel")?.Value ??
+            user.FindFirst(
+                ClaimTypes.Role)
+                ?.Value
+            ??
+            user.FindFirst(
+                "Role")
+                ?.Value
+            ??
+            user.FindFirst(
+                "RoleName")
+                ?.Value
+            ??
+            user.FindFirst(
+                "PermissionLevel")
+                ?.Value
+            ??
             string.Empty;
 
         return lvlId is "3" or "4" ||
@@ -264,55 +677,31 @@
                    StringComparison.OrdinalIgnoreCase);
     }
 
-    private async Task CloseSidebarOnCompactAsync()
+    private static bool PuedeVerReportes(
+        ClaimsPrincipal user)
     {
-        try
-        {
-            var isCompact = await JS.InvokeAsync<bool>("thryvLayout.isCompact");
-
-            if (isCompact && sidebarOpen)
-            {
-                sidebarOpen = false;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch
-        {
-        }
-    }
-
-    private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        await CloseSidebarOnCompactAsync();
-    }
-
-    public void Dispose()
-    {
-        Navigation.LocationChanged -= HandleLocationChanged;
-    }
-
-    private static bool HasPermission(ClaimsPrincipal user, string claimType)
-    {
-        return string.Equals(user.FindFirst(claimType)?.Value, "True", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string GetDisplayName(ClaimsPrincipal user)
-    {
-        return user.Identity?.Name
-               ?? user.FindFirst(ClaimTypes.Name)?.Value
-               ?? user.FindFirst("Username")?.Value
-               ?? "User";
-    }
-
-    private static bool PuedeVerReportes(ClaimsPrincipal user)
-    {
-        var lvlId = user.FindFirst("LvlId")?.Value;
+        var lvlId =
+            user.FindFirst(
+                "LvlId")
+                ?.Value;
 
         var role =
-            user.FindFirst(ClaimTypes.Role)?.Value ??
-            user.FindFirst("Role")?.Value ??
-            user.FindFirst("RoleName")?.Value ??
-            user.FindFirst("PermissionLevel")?.Value ??
+            user.FindFirst(
+                ClaimTypes.Role)
+                ?.Value
+            ??
+            user.FindFirst(
+                "Role")
+                ?.Value
+            ??
+            user.FindFirst(
+                "RoleName")
+                ?.Value
+            ??
+            user.FindFirst(
+                "PermissionLevel")
+                ?.Value
+            ??
             string.Empty;
 
         return lvlId is "1" or "2" or "3" or "4" ||
@@ -333,76 +722,43 @@
                    StringComparison.OrdinalIgnoreCase);
     }
 
-    private async Task AplicarTemaLayoutAsync()
+    private static bool PuedeVerEmployeeTimeOff(
+        ClaimsPrincipal user)
     {
-        try
-        {
-            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
-
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            var theme = user.FindFirst("ThemePreference")?.Value;
-
-            if (string.IsNullOrWhiteSpace(theme) || !TemasPermitidos.Contains(theme))
-            {
-                theme = await JS.InvokeAsync<string>("localStorage.getItem", "theme");
-            }
-
-            if (string.IsNullOrWhiteSpace(theme) || !TemasPermitidos.Contains(theme))
-            {
-                theme = "light";
-            }
-
-            await JS.InvokeVoidAsync("thryvTheme.applyTheme", theme);
-        }
-        catch
-        {
-            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
-        }
-    }
-
-    private async Task AplicarTemaDesdeSesionAsync()
-    {
-        try
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            var theme = user.FindFirst("ThemePreference")?.Value;
-
-            if (string.IsNullOrWhiteSpace(theme) || !TemasPermitidos.Contains(theme))
-            {
-                theme = "light";
-            }
-
-            await JS.InvokeVoidAsync("thryvTheme.applyTheme", theme);
-        }
-        catch
-        {
-            await JS.InvokeVoidAsync("thryvTheme.applySavedTheme");
-        }
-    }
-
-    private static bool PuedeVerEmployeeTimeOff(ClaimsPrincipal user)
-    {
-        var rol = ObtenerRol(user);
+        var rol =
+            ObtenerRol(
+                user);
 
         return rol == "Administrator" ||
                rol == "Supervisor" ||
                rol == "Assistant";
     }
 
-    private static bool PuedeVerAlphabeticalChecker(ClaimsPrincipal user)
+    private static bool PuedeVerAlphabeticalChecker(
+        ClaimsPrincipal user)
     {
         var lvlId =
-            user.FindFirst("LvlId")?.Value;
+            user.FindFirst(
+                "LvlId")
+                ?.Value;
 
         var role =
-            user.FindFirst(ClaimTypes.Role)?.Value ??
-            user.FindFirst("Role")?.Value ??
-            user.FindFirst("RoleName")?.Value ??
-            user.FindFirst("PermissionLevel")?.Value ??
+            user.FindFirst(
+                ClaimTypes.Role)
+                ?.Value
+            ??
+            user.FindFirst(
+                "Role")
+                ?.Value
+            ??
+            user.FindFirst(
+                "RoleName")
+                ?.Value
+            ??
+            user.FindFirst(
+                "PermissionLevel")
+                ?.Value
+            ??
             string.Empty;
 
         return lvlId == "4" ||
@@ -415,9 +771,13 @@
                    StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string ObtenerRol(ClaimsPrincipal user)
+    private static string ObtenerRol(
+        ClaimsPrincipal user)
     {
-        var lvlId = user.FindFirst("LvlId")?.Value;
+        var lvlId =
+            user.FindFirst(
+                "LvlId")
+                ?.Value;
 
         return lvlId switch
         {
@@ -433,20 +793,35 @@
     {
         get
         {
-            if (_user == null)
+            if (_user is null)
+            {
                 return "U";
+            }
 
-            var nombre = GetDisplayName(_user);
+            var nombre =
+                GetDisplayName(
+                    _user);
 
-            if (string.IsNullOrWhiteSpace(nombre))
+            if (string.IsNullOrWhiteSpace(
+                    nombre))
+            {
                 return "U";
+            }
 
-            var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var partes =
+                nombre.Split(
+                    ' ',
+                    StringSplitOptions.RemoveEmptyEntries);
 
             if (partes.Length == 1)
-                return partes[0].Substring(0, 1).ToUpper();
+            {
+                return partes[0]
+                    .Substring(0, 1)
+                    .ToUpper();
+            }
 
-            return $"{partes[0][0]}{partes[1][0]}".ToUpper();
+            return $"{partes[0][0]}{partes[1][0]}"
+                .ToUpper();
         }
     }
 }

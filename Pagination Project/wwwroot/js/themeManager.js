@@ -27,6 +27,40 @@
     },
 
 
+    getCurrentTheme: function () {
+
+        const currentTheme =
+            document.documentElement.getAttribute(
+                "data-theme"
+            );
+
+        return this.normalizeTheme(
+            currentTheme ||
+            this.getSavedTheme()
+        );
+    },
+
+
+    getNextTheme: function () {
+
+        const currentTheme =
+            this.getCurrentTheme();
+
+        const currentIndex =
+            this.allowedThemes.indexOf(
+                currentTheme
+            );
+
+        const nextIndex =
+            (currentIndex + 1) %
+            this.allowedThemes.length;
+
+        return this.allowedThemes[
+            nextIndex
+        ];
+    },
+
+
     applyTheme: function (theme) {
 
         const selectedTheme =

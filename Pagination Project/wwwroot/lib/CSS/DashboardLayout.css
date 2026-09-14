@@ -1,190 +1,302 @@
-﻿.thryv-dashboard-layout,
+﻿
+/* ============================================================
+   THRYV DASHBOARD LAYOUT
+   Ajustado para replicar las proporciones de la referencia.
+   Reemplaza completamente DashboardLayout.razor.css
+   ============================================================ */
+
+.thryv-dashboard-layout,
 .thryv-dashboard-layout * {
     box-sizing: border-box;
 }
 
 .thryv-dashboard-layout {
+    --orange: #ff5a13;
+    --orange-2: #ff7a1a;
+    --sidebar-width: 226px;
     position: fixed;
     inset: 0;
-    display: flex;
     width: 100vw;
     height: 100vh;
-    background: radial-gradient(circle at top left, rgba(255,80,0,0.08), transparent 26%), radial-gradient(circle at bottom right, rgba(255,80,0,0.06), transparent 22%), linear-gradient(135deg, #f8f8f8 0%, #ffffff 45%, #f3f4f6 100%);
+    display: flex;
     overflow: hidden;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #e8eef7;
+    font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(circle at 6% 3%, rgba(255, 90, 19, .08), transparent 25%), radial-gradient(circle at 88% 12%, rgba(37, 99, 235, .10), transparent 30%), linear-gradient(135deg, #020812 0%, #06111f 46%, #091a2e 100%);
 }
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
 
 .thryv-sidebar {
-    width: 290px;
+    position: relative;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    flex: 0 0 var(--sidebar-width);
     height: 100vh;
-    background: linear-gradient(180deg, #111111 0%, #1f1f1f 100%);
-    color: #ffffff;
-    transition: width 0.3s ease, transform 0.3s ease;
-    overflow: hidden;
-    flex-shrink: 0;
-    z-index: 1200;
-    box-shadow: 16px 0 40px rgba(0, 0, 0, 0.12);
-    border-right: 1px solid rgba(255,255,255,0.06);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    z-index: 1200;
+    color: #fff;
+    background: radial-gradient(circle at 0 0, rgba(255, 90, 19, .13), transparent 30%), linear-gradient(180deg, #09131f 0%, #07111d 58%, #071525 100%);
+    border-right: 1px solid rgba(148, 163, 184, .11);
+    box-shadow: 16px 0 42px rgba(2, 6, 23, .26);
+    transition: width .25s ease, flex-basis .25s ease, transform .25s ease;
 }
 
-.thryv-user-profile-link {
-    text-decoration: none;
-    color: inherit;
-    cursor: pointer;
-}
-
-    .thryv-user-profile-link:hover {
-        transform: translateY(-1px);
-        opacity: 0.9;
+    .thryv-sidebar.open {
+        width: var(--sidebar-width);
+        min-width: var(--sidebar-width);
+        flex-basis: var(--sidebar-width);
     }
 
-    .thryv-user-profile-link.active {
-        box-shadow: 0 0 0 3px rgba(255, 80, 0, 0.18);
+    .thryv-sidebar.closed {
+        width: 0;
+        min-width: 0;
+        flex-basis: 0;
+        border-right: 0;
+        box-shadow: none;
     }
-
-.thryv-sidebar.open {
-    width: 290px;
-}
-
-.thryv-sidebar.closed {
-    width: 0;
-    min-width: 0;
-    border-right: none;
-    box-shadow: none;
-}
 
 .thryv-sidebar-header {
+    min-height: 76px;
+    padding: 14px 18px;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 10px;
     flex-shrink: 0;
 }
 
 .thryv-brand-block {
+    min-width: 0;
     display: flex;
     align-items: center;
-    gap: 14px;
-    min-width: 0;
+    gap: 12px;
 }
 
 .thryv-brand-mark {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
-    color: #ff5000;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    font-weight: 800;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.28);
-    border: 1px solid rgba(255,255,255,0.08);
-    flex-shrink: 0;
+    position: relative;
+    width: 37px;
+    height: 39px;
+    flex: 0 0 37px;
 }
+
+.thryv-brand-page {
+    position: absolute;
+    top: 5px;
+    width: 17px;
+    height: 27px;
+    background: linear-gradient(180deg, #5ca8ff, #286df0);
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 7px 16px rgba(37,99,235,.30);
+}
+
+    .thryv-brand-page.left {
+        left: 1px;
+        transform: skewY(8deg);
+        border-radius: 5px 2px 8px 4px;
+    }
+
+    .thryv-brand-page.right {
+        right: 1px;
+        transform: skewY(-8deg);
+        border-radius: 2px 5px 4px 8px;
+    }
 
 .thryv-brand-text h3 {
     margin: 0;
-    font-size: 22px;
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
     font-weight: 800;
-    color: #ffffff;
-    letter-spacing: -0.02em;
+    letter-spacing: -.04em;
 }
 
 .thryv-brand-text p {
-    margin: 6px 0 0;
-    font-size: 13px;
-    color: rgba(255,255,255,0.68);
-    line-height: 1.4;
+    margin: 5px 0 0;
+    color: #a3b1c2;
+    font-size: 11px;
+    line-height: 1;
 }
 
 .thryv-sidebar-close {
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.10);
-    color: #ffffff;
-    font-size: 18px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.2s ease, transform 0.2s ease;
+    display: none;
 }
 
-    .thryv-sidebar-close:hover {
-        background: rgba(255,255,255,0.18);
-        transform: translateY(-1px);
-    }
-
 .thryv-sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    padding: 18px 14px 28px;
-    gap: 10px;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px 14px;
 }
 
     .thryv-sidebar-menu::-webkit-scrollbar {
-        width: 6px;
+        width: 4px;
     }
 
     .thryv-sidebar-menu::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.18);
+        background: rgba(148,163,184,.16);
         border-radius: 999px;
     }
 
-    .thryv-sidebar-menu::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
 .thryv-menu-link {
+    min-height: 47px;
+    padding: 0 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 14px;
-    border-radius: 16px;
+    gap: 14px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    color: #bec9d7;
     text-decoration: none;
-    color: rgba(255,255,255,0.82);
-    font-size: 15px;
+    font-size: 13px;
+    line-height: 1;
     font-weight: 600;
     white-space: nowrap;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-    flex-shrink: 0;
+    transition: .16s ease;
 }
 
     .thryv-menu-link:hover {
-        background: rgba(255,255,255,0.08);
-        color: #ffffff;
-        border-color: rgba(255,255,255,0.06);
+        color: #fff;
+        background: rgba(255,255,255,.035);
     }
 
     .thryv-menu-link.active {
-        background: linear-gradient(135deg, #ff5000 0%, #ff6a1f 100%);
-        color: #ffffff;
-        font-weight: 700;
-        box-shadow: 0 12px 24px rgba(255,80,0,0.22);
+        color: #fff;
+        background: radial-gradient(circle at 8% 50%, rgba(255,177,82,.16), transparent 32%), linear-gradient(135deg, rgba(255,90,19,.30), rgba(255,90,19,.10));
+        border-color: rgba(255,106,16,.72);
+        box-shadow: 0 10px 26px rgba(255,90,19,.12), inset 0 0 18px rgba(255,90,19,.08);
     }
 
 .thryv-menu-icon {
     width: 22px;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 18px;
+    flex: 0 0 22px;
+    display: inline-flex;
+    justify-content: center;
+    color: #c4cfdb;
+    font-size: 17px;
+    opacity: .92;
+}
+
+.thryv-menu-link.active .thryv-menu-icon {
+    color: #ffab3c;
 }
 
 .thryv-menu-text {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Orden visual */
+.thryv-sidebar-menu a[href="/dashboard"] {
+    order: 1;
+}
+
+.thryv-sidebar-menu a[href="/asignaciones"] {
+    order: 2;
+}
+
+.thryv-sidebar-menu a[href="/evaluaciones"] {
+    order: 3;
+}
+
+.thryv-sidebar-menu a[href="/registro-empleados"] {
+    order: 4;
+}
+
+.thryv-sidebar-menu a[href="/books"] {
+    order: 5;
+}
+
+.thryv-sidebar-menu a[href="/reportes-finalizados"] {
+    order: 6;
+}
+
+.thryv-sidebar-menu::after {
+    content: "Settings";
+    order: 7;
+    min-height: 47px;
+    padding: 0 14px 0 48px;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    color: #bec9d7;
+    font-size: 13px;
+    font-weight: 600;
+    background: radial-gradient(circle at 25px 50%, transparent 0 6px, #aebdce 6px 7.5px, transparent 7.5px);
+}
+
+.thryv-sidebar-menu a[href="/registro-usuarios"],
+.thryv-sidebar-menu a[href="/alphabetical-order-checker"],
+.thryv-sidebar-menu a[href="/finalizar-asignaciones"],
+.thryv-sidebar-menu a[href="/time-tracker"],
+.thryv-sidebar-menu a[href="/permisos"],
+.thryv-sidebar-menu a[href="/late-work-activities"],
+.thryv-sidebar-menu a[href="/employee-time-off"] {
+    order: 20;
+}
+
+.thryv-sidebar-footer-card {
+    position: relative;
+    margin: 10px 12px 12px;
+    padding: 13px 12px 19px;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 9px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.022);
+    border: 1px solid rgba(148,163,184,.10);
+}
+
+.thryv-sidebar-footer-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #a9c9ff;
+    font-size: 15px;
+}
+
+.thryv-sidebar-footer-card strong,
+.thryv-sidebar-footer-card span {
+    display: block;
+}
+
+.thryv-sidebar-footer-card strong {
+    color: #9eacbd;
+    font-size: 10px;
+}
+
+.thryv-sidebar-footer-card span {
+    margin-top: 3px;
+    color: #d5dde7;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.thryv-sidebar-footer-card::after {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 8px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff5a13 0 38%, rgba(148,163,184,.14) 38%);
+}
+
+/* ============================================================
+   MAIN + TOPBAR
+   ============================================================ */
 
 .thryv-main-content {
     flex: 1;
@@ -196,98 +308,156 @@
 }
 
 .thryv-top-header {
-    height: 88px;
-    min-height: 88px;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    height: 64px;
+    min-height: 64px;
+    padding: 0 16px 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 26px;
-    border-bottom: 1px solid rgba(17,17,17,0.06);
-    z-index: 1000;
+    gap: 16px;
     flex-shrink: 0;
+    z-index: 1000;
+    background: rgba(5,14,27,.88);
+    border-bottom: 1px solid rgba(148,163,184,.12);
+    box-shadow: 0 8px 28px rgba(2,6,23,.18);
+    backdrop-filter: blur(20px) saturate(145%);
+    -webkit-backdrop-filter: blur(20px) saturate(145%);
 }
 
 .thryv-header-left {
+    flex: 1;
+    min-width: 0;
+    max-width: 660px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    min-width: 0;
+    gap: 10px;
 }
 
 .thryv-menu-toggle {
-    width: 46px;
-    height: 46px;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #ff5000 0%, #ff6a1f 100%);
-    color: white;
-    font-size: 22px;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#d85209,#ff7015);
+    color: #fff;
+    font-size: 18px;
     cursor: pointer;
-    flex-shrink: 0;
-    box-shadow: 0 10px 22px rgba(255,80,0,0.22);
-    transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+    box-shadow: 0 8px 18px rgba(255,90,19,.18);
 }
 
-    .thryv-menu-toggle:hover {
-        transform: translateY(-1px);
-        filter: brightness(1.02);
-        box-shadow: 0 14px 28px rgba(255,80,0,0.26);
-    }
-
-.thryv-header-title {
+.thryv-global-search {
+    width: 560px;
+    max-width: 100%;
+    height: 42px;
     display: flex;
-    flex-direction: column;
-    min-width: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 0 13px;
+    border-radius: 12px;
+    background: #071220;
+    border: 1px solid rgba(148,163,184,.17);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
 }
 
-    .thryv-header-title h1 {
-        margin: 0;
-        font-size: 28px;
-        font-weight: 800;
-        color: #141414;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
+.thryv-global-search-icon {
+    color: #97a8bb;
+    font-size: 17px;
+}
+
+.thryv-global-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #e7edf4;
+    font-size: 12px;
+}
+
+    .thryv-global-search input::placeholder {
+        color: #738399;
     }
 
-    .thryv-header-title span {
-        margin-top: 4px;
-        font-size: 13px;
-        color: #6b7280;
-    }
+.thryv-global-search-shortcut {
+    padding: 5px 8px;
+    border-radius: 7px;
+    color: #8c9caf;
+    background: rgba(148,163,184,.06);
+    border: 1px solid rgba(148,163,184,.08);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.thryv-header-title,
+.thryv-header-title-mobile {
+    display: none;
+}
+
+.thryv-header-tools {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.thryv-header-tool {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(7,17,31,.62);
+    border: 1px solid rgba(148,163,184,.12);
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.thryv-notification-tool span {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ff5a13;
+    box-shadow: 0 0 0 2px #07111f;
+}
 
 .thryv-user-info {
     display: flex;
     align-items: center;
-    gap: 14px;
-    min-width: 0;
+    gap: 7px;
+}
+
+.thryv-user-profile-link {
+    text-decoration: none;
+    color: inherit;
 }
 
 .thryv-user-badge {
+    min-width: 190px;
+    min-height: 46px;
+    padding: 4px 12px 4px 5px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: #ffffff;
-    border: 1px solid rgba(17,17,17,0.06);
-    border-radius: 18px;
-    padding: 8px 14px 8px 8px;
-    box-shadow: 0 8px 22px rgba(15,23,42,0.05);
+    gap: 9px;
+    border-radius: 12px;
+    background: #07111f;
+    border: 1px solid rgba(148,163,184,.14);
 }
 
 .thryv-user-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
-    color: #ff5000;
+    width: 37px;
+    height: 37px;
+    flex: 0 0 37px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 19px;
-    font-weight: 800;
-    flex-shrink: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#312e81,#1f2937);
+    color: #ff7137;
+    font-size: 12px;
+    font-weight: 900;
 }
 
 .thryv-user-details {
@@ -297,1414 +467,297 @@
 }
 
 .thryv-user-label {
-    font-size: 12px;
-    color: #6b7280;
+    color: #97a5b7;
+    font-size: 9px;
     line-height: 1.1;
 }
 
 .thryv-user-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: #111827;
-    line-height: 1.2;
-    margin-top: 3px;
+    margin-top: 2px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
 }
 
 .thryv-logout-btn {
-    border: none;
-    border-radius: 14px;
-    background: #111111;
-    color: #ffffff;
-    padding: 12px 18px;
-    font-size: 14px;
-    font-weight: 700;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #07111f;
+    color: #cbd5e1;
+    border: 1px solid rgba(148,163,184,.14);
     cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s ease;
+    font-size: 15px;
 }
-
-    .thryv-logout-btn:hover {
-        background: #242424;
-        transform: translateY(-1px);
-    }
 
 .thryv-page-content {
     flex: 1;
     min-height: 0;
-    padding: 24px;
+    padding: 14px 16px 16px;
     overflow-y: auto;
     overflow-x: hidden;
+    background: radial-gradient(circle at 0 0, rgba(255,90,19,.04), transparent 22%), radial-gradient(circle at 100% 100%, rgba(37,99,235,.05), transparent 28%);
 }
 
     .thryv-page-content::-webkit-scrollbar {
-        width: 8px;
+        width: 7px;
     }
 
     .thryv-page-content::-webkit-scrollbar-thumb {
-        background: rgba(17,17,17,0.22);
+        background: rgba(148,163,184,.22);
         border-radius: 999px;
-    }
-
-    .thryv-page-content::-webkit-scrollbar-track {
-        background: rgba(17,17,17,0.04);
     }
 
 .thryv-sidebar-overlay {
     display: none;
 }
 
-html[data-theme="dark"] .thryv-dashboard-layout {
-    background: radial-gradient(circle at top left, rgba(255, 80, 0, 0.12), transparent 28%), radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 30%), linear-gradient(135deg, #020617 0%, #0f172a 100%);
-    color: #e5e7eb;
-}
+/* ============================================================
+   THEMES
+   ============================================================ */
 
-html[data-theme="dark"] .thryv-sidebar {
-    background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
-    border-right-color: rgba(148, 163, 184, 0.16);
-    box-shadow: 16px 0 42px rgba(0, 0, 0, 0.42);
-}
-
-html[data-theme="dark"] .thryv-top-header {
-    background: rgba(15, 23, 42, 0.92);
-    border-bottom-color: rgba(148, 163, 184, 0.16);
-}
-
-html[data-theme="dark"] .thryv-header-title h1 {
-    color: #f9fafb;
-}
-
-html[data-theme="dark"] .thryv-header-title span,
-html[data-theme="dark"] .thryv-user-label {
-    color: #94a3b8;
-}
-
-html[data-theme="dark"] .thryv-user-badge {
-    background: #111827;
-    border-color: rgba(148, 163, 184, 0.18);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
-}
-
-html[data-theme="dark"] .thryv-user-name {
-    color: #f9fafb;
-}
-
-html[data-theme="dark"] .thryv-logout-btn {
-    background: #1e293b;
-    color: #f9fafb;
-    border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-    html[data-theme="dark"] .thryv-logout-btn:hover {
-        background: #334155;
-    }
-
-html[data-theme="dark"] .thryv-page-content::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.34);
-}
-
-html[data-theme="dark"] .thryv-page-content::-webkit-scrollbar-track {
-    background: rgba(148, 163, 184, 0.08);
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-layout {
-    position: fixed;
+html[data-theme="light"] .thryv-dashboard-layout {
     color: #0f172a;
-    background: radial-gradient(circle at 8% 12%, rgba(255, 80, 0, 0.28), transparent 24%), radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.95), transparent 25%), radial-gradient(circle at 80% 88%, rgba(37, 99, 235, 0.16), transparent 34%), linear-gradient(135deg, #fff4ed 0%, #f8fafc 42%, #eaf0ff 100%);
+    background: radial-gradient(circle at 0 0,rgba(255,90,19,.08),transparent 24%), radial-gradient(circle at 90% 8%,rgba(37,99,235,.09),transparent 30%), linear-gradient(135deg,#f8fafc,#fff 48%,#edf2f7);
 }
 
-    html[data-theme="liquid glass"] .thryv-dashboard-layout::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.70) 18%, transparent 34%), linear-gradient(290deg, transparent 0%, rgba(255,255,255,.42) 28%, transparent 46%);
-        opacity: .75;
-        z-index: 0;
+html[data-theme="light"] .thryv-sidebar {
+    background: radial-gradient(circle at 0 0,rgba(255,90,19,.12),transparent 30%), linear-gradient(180deg,#0a1220,#111827);
+}
+
+html[data-theme="light"] .thryv-top-header {
+    background: rgba(255,255,255,.90);
+    border-bottom-color: rgba(100,116,139,.13);
+}
+
+html[data-theme="light"] .thryv-global-search,
+html[data-theme="light"] .thryv-header-tool,
+html[data-theme="light"] .thryv-user-badge,
+html[data-theme="light"] .thryv-logout-btn {
+    background: #fff;
+    border-color: rgba(100,116,139,.16);
+    color: #475569;
+}
+
+    html[data-theme="light"] .thryv-global-search input,
+    html[data-theme="light"] .thryv-user-name {
+        color: #0f172a;
     }
 
-html[data-theme="liquid glass"] .thryv-sidebar,
-html[data-theme="liquid glass"] .thryv-main-content {
-    position: relative;
-    z-index: 1;
-}
-
-html[data-theme="liquid glass"] .thryv-sidebar {
-    background: rgba(17, 17, 17, 0.54);
-    backdrop-filter: blur(34px) saturate(190%) brightness(1.05);
-    -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.05);
-    border-right: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 18px 0 58px rgba(15, 23, 42, 0.28), inset 1px 0 1px rgba(255, 255, 255, 0.16);
-}
-
-    html[data-theme="liquid glass"] .thryv-sidebar::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.03) 42%, rgba(255,80,0,.12)), radial-gradient(circle at 20% 0%, rgba(255,255,255,.22), transparent 28%);
-        z-index: 0;
-    }
-
-html[data-theme="liquid glass"] .thryv-sidebar-header,
-html[data-theme="liquid glass"] .thryv-sidebar-menu {
-    position: relative;
-    z-index: 1;
-}
-
-html[data-theme="liquid glass"] .thryv-top-header {
-    background: rgba(255, 255, 255, 0.34);
-    backdrop-filter: blur(34px) saturate(190%) brightness(1.08);
-    -webkit-backdrop-filter: blur(34px) saturate(190%) brightness(1.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.66);
-    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.90);
-}
-
-html[data-theme="liquid glass"] .thryv-header-title h1 {
-    color: #111111;
-    text-shadow: 0 1px 1px rgba(255,255,255,.86);
-}
-
-html[data-theme="liquid glass"] .thryv-header-title span {
+html[data-theme="light"] .thryv-user-label {
     color: #64748b;
 }
 
-html[data-theme="liquid glass"] .thryv-brand-mark,
-html[data-theme="liquid glass"] .thryv-user-avatar {
-    background: linear-gradient(145deg, rgba(17,17,17,.92), rgba(45,45,45,.74));
-    border: 1px solid rgba(255,255,255,.30);
-    backdrop-filter: blur(22px) saturate(180%);
-    -webkit-backdrop-filter: blur(22px) saturate(180%);
-    box-shadow: 0 18px 36px rgba(15,23,42,.24), inset 0 1px 1px rgba(255,255,255,.24);
+html[data-theme="light"] .thryv-page-content {
+    background: radial-gradient(circle at 0 0,rgba(255,90,19,.035),transparent 20%), radial-gradient(circle at 100% 100%,rgba(37,99,235,.04),transparent 27%), linear-gradient(180deg,rgba(255,255,255,.66),rgba(248,250,252,.88));
 }
 
-html[data-theme="liquid glass"] .thryv-user-badge {
-    background: rgba(255, 255, 255, 0.42);
-    backdrop-filter: blur(22px) saturate(180%);
-    -webkit-backdrop-filter: blur(22px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.70);
-    box-shadow: 0 14px 34px rgba(15,23,42,.08), inset 0 1px 1px rgba(255,255,255,.86);
+html[data-theme="liquid glass"] .thryv-dashboard-layout {
+    color: #0f172a;
+    background: radial-gradient(circle at 5% 7%,rgba(255,90,19,.18),transparent 24%), radial-gradient(circle at 88% 10%,rgba(37,99,235,.13),transparent 30%), linear-gradient(135deg,#fff4ed,#f8fafc 46%,#eaf0ff);
 }
 
-html[data-theme="liquid glass"] .thryv-user-name {
-    color: #111827;
+html[data-theme="liquid glass"] .thryv-sidebar {
+    background: rgba(7,17,31,.56);
+    border-right-color: rgba(255,255,255,.16);
+    backdrop-filter: blur(28px) saturate(175%);
+    -webkit-backdrop-filter: blur(28px) saturate(175%);
+}
+
+html[data-theme="liquid glass"] .thryv-top-header,
+html[data-theme="liquid glass"] .thryv-global-search,
+html[data-theme="liquid glass"] .thryv-header-tool,
+html[data-theme="liquid glass"] .thryv-user-badge,
+html[data-theme="liquid glass"] .thryv-logout-btn {
+    background: rgba(255,255,255,.40);
+    border-color: rgba(255,255,255,.60);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+}
+
+    html[data-theme="liquid glass"] .thryv-global-search input,
+    html[data-theme="liquid glass"] .thryv-user-name {
+        color: #0f172a;
+    }
+
+html[data-theme="liquid glass"] .thryv-header-tool,
+html[data-theme="liquid glass"] .thryv-logout-btn {
+    color: #334155;
 }
 
 html[data-theme="liquid glass"] .thryv-user-label {
     color: #64748b;
 }
 
-html[data-theme="liquid glass"] .thryv-menu-link {
-    color: rgba(255,255,255,0.86);
-    border-color: rgba(255,255,255,0.06);
-}
-
-    html[data-theme="liquid glass"] .thryv-menu-link:hover {
-        background: rgba(255,255,255,0.14);
-        border-color: rgba(255,255,255,0.16);
-    }
-
-    html[data-theme="liquid glass"] .thryv-menu-link.active {
-        background: linear-gradient(135deg, rgba(255,80,0,.98), rgba(255,122,47,.92));
-        box-shadow: 0 18px 38px rgba(255,80,0,.30), inset 0 1px 1px rgba(255,255,255,.34);
-    }
-
-html[data-theme="liquid glass"] .thryv-menu-toggle,
-html[data-theme="liquid glass"] .thryv-logout-btn {
-    background: linear-gradient(135deg, #ff5000, #ff7a2f);
-    box-shadow: 0 18px 38px rgba(255,80,0,.30), inset 0 1px 1px rgba(255,255,255,.34);
-}
-
-    html[data-theme="liquid glass"] .thryv-logout-btn:hover {
-        background: linear-gradient(135deg, #ff5c12, #ff8542);
-    }
-
 html[data-theme="liquid glass"] .thryv-page-content {
-    position: relative;
-    z-index: 1;
-}
-
-html[data-theme="liquid glass"] .thryv-sidebar-overlay.show {
-    background: rgba(15, 23, 42, 0.28);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: transparent;
 }
 
 html[data-theme="dark glass"] .thryv-dashboard-layout {
     color: #e5e7eb;
-    background: radial-gradient(circle at 10% 12%, rgba(255, 80, 0, 0.22), transparent 26%), radial-gradient(circle at 84% 14%, rgba(59, 130, 246, 0.14), transparent 30%), radial-gradient(circle at 70% 90%, rgba(255, 255, 255, 0.06), transparent 34%), linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    background: radial-gradient(circle at 8% 10%,rgba(255,90,19,.20),transparent 26%), radial-gradient(circle at 84% 14%,rgba(59,130,246,.15),transparent 30%), linear-gradient(135deg,#020617,#0f172a);
 }
-
-    html[data-theme="dark glass"] .thryv-dashboard-layout::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.08) 18%, transparent 34%), linear-gradient(290deg, transparent 0%, rgba(255,255,255,.05) 28%, transparent 46%);
-        opacity: .8;
-        z-index: 0;
-    }
 
 html[data-theme="dark glass"] .thryv-sidebar,
-html[data-theme="dark glass"] .thryv-main-content {
-    position: relative;
-    z-index: 1;
-}
-
-html[data-theme="dark glass"] .thryv-sidebar {
-    background: rgba(2, 6, 23, 0.62);
-    backdrop-filter: blur(30px) saturate(170%);
-    -webkit-backdrop-filter: blur(30px) saturate(170%);
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 18px 0 62px rgba(0, 0, 0, 0.48), inset 1px 0 1px rgba(255,255,255,0.08);
-}
-
-html[data-theme="dark glass"] .thryv-top-header {
-    background: rgba(15, 23, 42, 0.58);
-    backdrop-filter: blur(28px) saturate(170%);
-    -webkit-backdrop-filter: blur(28px) saturate(170%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255,255,255,0.08);
-}
-
-html[data-theme="dark glass"] .thryv-header-title h1,
-html[data-theme="dark glass"] .thryv-user-name {
-    color: #f9fafb;
-}
-
-html[data-theme="dark glass"] .thryv-header-title span,
-html[data-theme="dark glass"] .thryv-user-label {
-    color: #cbd5e1;
-}
-
-html[data-theme="dark glass"] .thryv-user-badge {
-    background: rgba(15, 23, 42, 0.56);
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255,255,255,0.08);
-}
-
-html[data-theme="dark glass"] .thryv-brand-mark,
-html[data-theme="dark glass"] .thryv-user-avatar {
-    background: linear-gradient(145deg, rgba(17,17,17,.94), rgba(45,45,45,.68));
-    border: 1px solid rgba(255,255,255,.14);
-    box-shadow: 0 18px 38px rgba(0,0,0,.34), inset 0 1px 1px rgba(255,255,255,.10);
-}
-
-html[data-theme="dark glass"] .thryv-menu-link:hover {
-    background: rgba(255,255,255,0.10);
-    border-color: rgba(255,255,255,0.10);
-}
-
-html[data-theme="dark glass"] .thryv-menu-link.active,
-html[data-theme="dark glass"] .thryv-menu-toggle {
-    background: linear-gradient(135deg, #ff5000, #ff7a2f);
-    box-shadow: 0 18px 38px rgba(255,80,0,.28), inset 0 1px 1px rgba(255,255,255,.22);
-}
-
+html[data-theme="dark glass"] .thryv-top-header,
+html[data-theme="dark glass"] .thryv-global-search,
+html[data-theme="dark glass"] .thryv-header-tool,
+html[data-theme="dark glass"] .thryv-user-badge,
 html[data-theme="dark glass"] .thryv-logout-btn {
-    background: rgba(15, 23, 42, 0.62);
-    color: #f9fafb;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    background: rgba(15,23,42,.48);
+    border-color: rgba(255,255,255,.10);
+    backdrop-filter: blur(20px) saturate(165%);
+    -webkit-backdrop-filter: blur(20px) saturate(165%);
 }
 
-    html[data-theme="dark glass"] .thryv-logout-btn:hover {
-        background: rgba(30, 41, 59, 0.78);
+html[data-theme="dark glass"] .thryv-page-content {
+    background: transparent;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1180px) {
+    .thryv-sidebar {
+        --sidebar-width: 205px;
     }
 
-html[data-theme="dark glass"] .thryv-page-content::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.28);
-}
+    .thryv-global-search {
+        width: 430px;
+    }
 
-html[data-theme="dark glass"] .thryv-page-content::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.06);
-}
-
-html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
-    background: rgba(2, 6, 23, 0.48);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    .thryv-user-badge {
+        min-width: 160px;
+    }
 }
 
 @media (max-width: 992px) {
-    .thryv-sidebar {
-        width: 270px;
-    }
-
-        .thryv-sidebar.open {
-            width: 270px;
-        }
-
-    .thryv-header-title h1 {
-        font-size: 24px;
-    }
-}
-
-@media (max-width: 768px) {
-    .thryv-dashboard-layout {
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .thryv-sidebar {
+    .thryv-sidebar,
+    .thryv-sidebar.open,
+    .thryv-sidebar.closed {
         position: fixed;
         top: 0;
         left: 0;
-        width: 270px;
-        min-width: 270px;
-        max-width: 82vw;
+        width: min(290px, 84vw);
+        min-width: min(290px, 84vw);
+        max-width: 84vw;
         height: 100vh;
-        transform: translateX(-100%);
-        z-index: 1200;
+        flex-basis: auto;
+        z-index: 3000;
+        transform: translateX(-105%);
+        transition: transform .25s ease;
     }
 
         .thryv-sidebar.open {
-            width: 270px;
-            min-width: 270px;
             transform: translateX(0);
         }
 
         .thryv-sidebar.closed {
-            width: 270px;
-            min-width: 270px;
-            transform: translateX(-100%);
+            transform: translateX(-105%);
         }
+
+    .thryv-sidebar-close {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 9px;
+        background: rgba(255,255,255,.07);
+        color: #fff;
+        cursor: pointer;
+    }
 
     .thryv-sidebar-overlay.show {
         display: block;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.36);
-        z-index: 1100;
+        z-index: 2500;
+        background: rgba(2,6,23,.56);
     }
 
     .thryv-main-content {
         width: 100%;
         max-width: 100%;
-        height: 100vh;
-        overflow: hidden;
     }
+}
 
+@media (max-width: 700px) {
     .thryv-top-header {
-        height: auto;
-        min-height: 78px;
-        padding: 14px 16px;
-        flex-wrap: wrap;
-        gap: 12px;
-        flex-shrink: 0;
+        height: 56px;
+        min-height: 56px;
+        padding: 0 9px;
     }
 
-    .thryv-header-left {
-        width: 100%;
+    .thryv-global-search {
+        display: none;
     }
 
-    .thryv-header-title h1 {
-        font-size: 22px;
-        line-height: 1.2;
-    }
-
-    .thryv-user-info {
-        width: 100%;
-        justify-content: space-between;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .thryv-user-badge {
-        flex: 1;
+    .thryv-header-title-mobile {
+        display: flex;
+        flex-direction: column;
         min-width: 0;
     }
 
-    .thryv-user-name {
-        font-size: 14px;
+        .thryv-header-title-mobile h1 {
+            margin: 0;
+            color: #f8fafc;
+            font-size: 15px;
+            line-height: 1;
+        }
+
+        .thryv-header-title-mobile span {
+            margin-top: 3px;
+            color: #94a3b8;
+            font-size: 8px;
+        }
+
+    .thryv-header-tools {
+        display: none;
     }
 
-    .thryv-logout-btn {
-        padding: 10px 14px;
-        font-size: 14px;
-    }
-
-    .thryv-page-content {
-        padding: 18px 14px;
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-}
-
-@media (max-width: 520px) {
-    .thryv-sidebar-header {
-        padding: 20px 16px 16px;
-    }
-
-    .thryv-brand-mark {
-        width: 42px;
-        height: 42px;
-        font-size: 22px;
-        border-radius: 12px;
-    }
-
-    .thryv-brand-text h3 {
-        font-size: 18px;
-    }
-
-    .thryv-brand-text p {
-        font-size: 12px;
-    }
-
-    .thryv-menu-link {
-        padding: 13px 12px;
-        font-size: 14px;
-    }
-
-    .thryv-top-header {
-        padding: 12px 14px;
-    }
-
-    .thryv-menu-toggle {
-        width: 42px;
-        height: 42px;
-        font-size: 20px;
-    }
-
-    .thryv-header-title h1 {
-        font-size: 20px;
-    }
-
-    .thryv-header-title span {
-        font-size: 12px;
+    .thryv-user-details {
+        display: none;
     }
 
     .thryv-user-badge {
-        padding: 8px 10px 8px 8px;
-    }
-
-    .thryv-user-avatar {
-        width: 38px;
-        height: 38px;
-        font-size: 17px;
-        border-radius: 12px;
+        min-width: auto;
+        padding: 4px;
     }
 
     .thryv-logout-btn {
-        width: 100%;
+        display: none;
     }
-}
 
-.thryv-dashboard-layout,
-.thryv-dashboard-layout * {
-    box-sizing: border-box;
-}
-
-.thryv-dashboard-layout {
-    max-width: 100vw;
-    overflow: hidden;
-}
-
-.thryv-main-content,
-.thryv-page-content,
-.thryv-top-header {
-    min-width: 0;
+    .thryv-page-content {
+        padding: 8px;
+    }
 }
 
 @supports (height: 100dvh) {
     .thryv-dashboard-layout,
-    .thryv-main-content,
-    .thryv-sidebar {
+    .thryv-sidebar,
+    .thryv-main-content {
         height: 100dvh;
     }
 }
 
-@media (max-width: 1200px) {
-    .thryv-sidebar {
-        width: 270px;
-    }
-
-        .thryv-sidebar.open {
-            width: 270px;
-        }
-
-    .thryv-top-header {
-        padding: 0 22px;
-    }
-
-    .thryv-header-title h1 {
-        font-size: 25px;
-    }
-
-    .thryv-user-badge {
-        max-width: 260px;
-    }
-
-    .thryv-user-name {
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+.thryv-theme-cycle-btn {
+    transition: transform .16s ease, background .16s ease, border-color .16s ease, opacity .16s ease;
 }
 
-@media (max-width: 992px) {
-    .thryv-sidebar {
-        width: 260px;
+    .thryv-theme-cycle-btn:hover:not(:disabled) {
+        transform: rotate(12deg) scale(1.05);
+        border-color: rgba(255, 90, 19, .45);
     }
 
-        .thryv-sidebar.open {
-            width: 260px;
-        }
-
-    .thryv-top-header {
-        height: 78px;
-        min-height: 78px;
-        padding: 0 18px;
-    }
-
-    .thryv-menu-toggle {
-        width: 44px;
-        height: 44px;
-        border-radius: 13px;
-    }
-
-    .thryv-header-title h1 {
-        font-size: 22px;
-    }
-
-    .thryv-header-title span {
-        font-size: 12px;
-    }
-
-    .thryv-user-info {
-        gap: 10px;
-    }
-
-    .thryv-user-badge {
-        padding: 7px 12px 7px 7px;
-        border-radius: 16px;
-    }
-
-    .thryv-user-avatar {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        font-size: 17px;
-    }
-
-    .thryv-user-name {
-        font-size: 14px;
-    }
-
-    .thryv-logout-btn {
-        padding: 11px 14px;
-        font-size: 13px;
-    }
-
-    .thryv-page-content {
-        padding: 20px;
-    }
-}
-
-@media (max-width: 768px) {
-    .thryv-dashboard-layout {
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    @supports (height: 100dvh) {
-        .thryv-dashboard-layout {
-            height: 100dvh;
-        }
-    }
-
-    .thryv-sidebar {
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        width: 290px !important;
-        min-width: 290px !important;
-        max-width: 84vw !important;
-        height: 100vh;
-        transform: translate3d(-105%, 0, 0);
-        transition: transform 0.28s ease;
-        z-index: 1200;
-    }
-
-    @supports (height: 100dvh) {
-        .thryv-sidebar {
-            height: 100dvh;
-        }
-    }
-
-    .thryv-sidebar.open {
-        width: min(290px, 84vw) !important;
-        min-width: min(290px, 84vw) !important;
-        transform: translateX(0);
-    }
-
-    .thryv-sidebar.closed {
-        width: min(290px, 84vw) !important;
-        min-width: min(290px, 84vw) !important;
-        transform: translateX(-105%);
-        border-right: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .thryv-sidebar-overlay {
-        display: none;
-    }
-
-        .thryv-sidebar-overlay.show {
-            display: block !important;
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.46);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 1100;
-        }
-
-    @supports (height: 100dvh) {
-        .thryv-sidebar-overlay.show {
-            height: 100dvh;
-        }
-    }
-
-    .thryv-main-content {
-        width: 100%;
-        max-width: 100%;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    @supports (height: 100dvh) {
-        .thryv-main-content {
-            height: 100dvh;
-        }
-    }
-
-    .thryv-top-header {
-        height: auto;
-        min-height: 74px;
-        padding: 12px 14px;
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: flex-start;
-        gap: 10px;
-    }
-
-    .thryv-header-left {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 44px minmax(0, 1fr);
-        gap: 12px;
-        align-items: center;
-    }
-
-    .thryv-menu-toggle {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        border-radius: 14px;
-        font-size: 21px;
-    }
-
-    .thryv-header-title {
-        min-width: 0;
-    }
-
-        .thryv-header-title h1 {
-            font-size: 20px;
-            line-height: 1.16;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .thryv-header-title span {
-            font-size: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-    .thryv-user-info {
-        width: 100%;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .thryv-user-badge {
-        width: 100%;
-        min-width: 0;
-        padding: 7px 10px 7px 7px;
-        border-radius: 15px;
-    }
-
-    .thryv-user-avatar {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        border-radius: 12px;
-        font-size: 16px;
-    }
-
-    .thryv-user-details {
-        min-width: 0;
-    }
-
-    .thryv-user-label {
-        font-size: 11px;
-    }
-
-    .thryv-user-name {
-        font-size: 13px;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .thryv-logout-btn {
-        height: 42px;
-        padding: 0 14px;
-        border-radius: 13px;
-        font-size: 13px;
-    }
-
-    .thryv-page-content {
-        flex: 1;
-        min-height: 0;
-        padding: 16px 12px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .thryv-sidebar-header {
-        padding: 20px 16px 16px;
-    }
-
-    .thryv-brand-block {
-        gap: 12px;
-    }
-
-    .thryv-brand-mark {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
-        border-radius: 13px;
-        font-size: 22px;
-    }
-
-    .thryv-brand-text h3 {
-        font-size: 18px;
-    }
-
-    .thryv-brand-text p {
-        font-size: 12px;
-        line-height: 1.3;
-    }
-
-    .thryv-sidebar-close {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        border-radius: 12px;
-    }
-
-    .thryv-sidebar-menu {
-        padding: 14px 12px 22px;
-        gap: 8px;
-    }
-
-    .thryv-menu-link {
-        padding: 13px 12px;
-        border-radius: 14px;
-        font-size: 14px;
-        gap: 10px;
-    }
-
-    .thryv-menu-icon {
-        width: 20px;
-        font-size: 17px;
-    }
-
-    .thryv-menu-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-}
-
-@media (max-width: 520px) {
-    .thryv-top-header {
-        padding: 10px 12px;
-        gap: 9px;
-    }
-
-    .thryv-header-left {
-        grid-template-columns: 42px minmax(0, 1fr);
-        gap: 10px;
-    }
-
-    .thryv-menu-toggle {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
-        font-size: 20px;
-    }
-
-    .thryv-header-title h1 {
-        font-size: 18px;
-    }
-
-    .thryv-header-title span {
-        font-size: 11px;
-    }
-
-    .thryv-user-info {
-        grid-template-columns: 1fr;
-    }
-
-    .thryv-user-badge {
-        min-height: 50px;
-    }
-
-    .thryv-logout-btn {
-        width: 100%;
-        height: 42px;
-    }
-
-    .thryv-page-content {
-        padding: 12px 10px;
-    }
-
-    .thryv-sidebar {
-        width: min(280px, 86vw) !important;
-        min-width: min(280px, 86vw) !important;
-        max-width: 86vw !important;
-    }
-
-        .thryv-sidebar.open,
-        .thryv-sidebar.closed {
-            width: min(280px, 86vw) !important;
-            min-width: min(280px, 86vw) !important;
-            max-width: 86vw !important;
-        }
-
-    .thryv-sidebar-header {
-        padding: 18px 14px 14px;
-    }
-
-    .thryv-brand-mark {
-        width: 40px;
-        height: 40px;
-        min-width: 40px;
-        font-size: 21px;
-    }
-
-    .thryv-brand-text h3 {
-        font-size: 17px;
-    }
-
-    .thryv-brand-text p {
-        font-size: 11px;
-    }
-
-    .thryv-sidebar-close {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-    }
-
-    .thryv-menu-link {
-        padding: 12px;
-        font-size: 13.5px;
-    }
-}
-
-@media (max-width: 390px) {
-    .thryv-header-title h1 {
-        font-size: 17px;
-    }
-
-    .thryv-header-title span {
-        display: none;
-    }
-
-    .thryv-user-avatar {
-        width: 34px;
-        height: 34px;
-        min-width: 34px;
-        font-size: 15px;
-    }
-
-    .thryv-user-label {
-        display: none;
-    }
-
-    .thryv-user-name {
-        font-size: 13px;
-    }
-
-    .thryv-page-content {
-        padding: 10px 8px;
-    }
-}
-
-@media (max-width: 900px) and (orientation: landscape) {
-    .thryv-top-header {
-        min-height: 64px;
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .thryv-header-left {
-        width: auto;
-        flex: 1;
-        display: grid;
-        grid-template-columns: 42px minmax(0, 1fr);
-    }
-
-    .thryv-user-info {
-        width: auto;
-        max-width: 360px;
-        grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .thryv-user-badge {
-        min-width: 0;
-    }
-
-    .thryv-page-content {
-        padding: 12px;
-    }
-
-    .thryv-sidebar-header {
-        padding: 14px;
-    }
-
-    .thryv-sidebar-menu {
-        padding: 10px 12px 16px;
-    }
-
-    .thryv-menu-link {
-        padding: 10px 12px;
-    }
-}
-
-html[data-theme="dark"] .thryv-sidebar-overlay.show {
-    background: rgba(2, 6, 23, 0.58);
-}
-
-html[data-theme="liquid glass"] .thryv-sidebar-overlay.show {
-    background: rgba(15, 23, 42, 0.28);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-html[data-theme="dark glass"] .thryv-sidebar-overlay.show {
-    background: rgba(2, 6, 23, 0.52);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-@media (max-width: 768px) {
-    html[data-theme="liquid glass"] .thryv-sidebar,
-    html[data-theme="dark glass"] .thryv-sidebar {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-    }
-
-    html[data-theme="liquid glass"] .thryv-sidebar {
-        background: rgba(17, 17, 17, 0.98) !important;
-    }
-
-    html[data-theme="dark glass"] .thryv-sidebar {
-        background: rgba(2, 6, 23, 0.98) !important;
-    }
-
-    html[data-theme="liquid glass"] .thryv-sidebar::before,
-    html[data-theme="dark glass"] .thryv-dashboard-layout::before,
-    html[data-theme="liquid glass"] .thryv-dashboard-layout::before {
-        display: none !important;
-    }
-
-    html[data-theme="liquid glass"] .thryv-sidebar-overlay.show,
-    html[data-theme="dark glass"] .thryv-sidebar-overlay.show,
-    .thryv-sidebar-overlay.show {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        background: rgba(15, 23, 42, 0.55) !important;
-    }
-
-    .thryv-sidebar,
-    .thryv-sidebar.open,
-    .thryv-sidebar.closed {
-        transform: translate3d(-105%, 0, 0);
-        backface-visibility: hidden;
-        -webkit-font-smoothing: antialiased;
-    }
-
-        .thryv-sidebar.open {
-            transform: translate3d(0, 0, 0);
-        }
-}
-
-@media (max-width: 768px) {
-    .thryv-sidebar,
-    .thryv-sidebar.open,
-    .thryv-sidebar.closed {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 290px !important;
-        min-width: 290px !important;
-        max-width: 84vw !important;
-        height: 100vh !important;
-        z-index: 3000 !important;
-        overflow: hidden !important;
-        background: #020617 !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        transform: translate3d(-105%, 0, 0);
-        transition: transform 0.28s ease;
-        box-shadow: 18px 0 46px rgba(0, 0, 0, 0.45) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.10) !important;
-    }
-
-        .thryv-sidebar.open {
-            transform: translate3d(0, 0, 0) !important;
-        }
-
-        .thryv-sidebar.closed {
-            transform: translate3d(-105%, 0, 0) !important;
-        }
-
-    html[data-theme="dark"] .thryv-sidebar,
-    html[data-theme="dark"] .thryv-sidebar.open,
-    html[data-theme="dark glass"] .thryv-sidebar,
-    html[data-theme="dark glass"] .thryv-sidebar.open {
-        background: #020617 !important;
-    }
-
-    html[data-theme="liquid glass"] .thryv-sidebar,
-    html[data-theme="liquid glass"] .thryv-sidebar.open {
-        background: #111111 !important;
-    }
-
-        .thryv-sidebar::before,
-        html[data-theme="liquid glass"] .thryv-sidebar::before,
-        html[data-theme="dark glass"] .thryv-sidebar::before {
-            display: none !important;
-            content: none !important;
-        }
-
-    .thryv-sidebar-overlay {
-        display: none;
-    }
-
-        .thryv-sidebar-overlay.show {
-            display: block !important;
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 2500 !important;
-            background: rgba(2, 6, 23, 0.58) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-
-    .thryv-main-content {
-        position: relative !important;
-        z-index: 1 !important;
-    }
-}
-
-@supports (height: 100dvh) {
-    @media (max-width: 768px) {
-        .thryv-sidebar,
-        .thryv-sidebar-overlay.show {
-            height: 100dvh !important;
-        }
-    }
-}
-
-@media (max-width: 992px) {
-    .thryv-sidebar,
-    .thryv-sidebar.open,
-    .thryv-sidebar.closed {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: min(290px, 84vw) !important;
-        min-width: min(290px, 84vw) !important;
-        max-width: 84vw !important;
-        height: 100vh !important;
-        z-index: 3000 !important;
-        overflow: hidden !important;
-        transform: translate3d(-105%, 0, 0) !important;
-        transition: transform 0.28s ease !important;
-        box-shadow: 18px 0 46px rgba(0, 0, 0, 0.45) !important;
-    }
-
-        .thryv-sidebar.open {
-            transform: translate3d(0, 0, 0) !important;
-        }
-
-        .thryv-sidebar.closed {
-            transform: translate3d(-105%, 0, 0) !important;
-        }
-
-    .thryv-sidebar-overlay {
-        display: none;
-    }
-
-        .thryv-sidebar-overlay.show {
-            display: block !important;
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 2500 !important;
-            background: rgba(2, 6, 23, 0.58) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-
-    .thryv-main-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        position: relative !important;
-        z-index: 1 !important;
-    }
-}
-
-@supports (height: 100dvh) {
-    @media (max-width: 992px) {
-        .thryv-sidebar,
-        .thryv-sidebar-overlay.show {
-            height: 100dvh !important;
-        }
-    }
-}
-
-html.thryv-modal-open,
-body.thryv-modal-open,
-html:has(.weekly-evaluation-modal-backdrop),
-body:has(.weekly-evaluation-modal-backdrop) {
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-}
-
-    html.thryv-modal-open .thryv-top-header,
-    body.thryv-modal-open .thryv-top-header,
-    html:has(.weekly-evaluation-modal-backdrop) .thryv-top-header,
-    body:has(.weekly-evaluation-modal-backdrop) .thryv-top-header,
-    html.thryv-modal-open .thryv-sidebar,
-    body.thryv-modal-open .thryv-sidebar,
-    html:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar,
-    body:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar,
-    html.thryv-modal-open .thryv-sidebar-overlay,
-    body.thryv-modal-open .thryv-sidebar-overlay,
-    html:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar-overlay,
-    body:has(.weekly-evaluation-modal-backdrop) .thryv-sidebar-overlay {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
-
-    .thryv-dashboard-layout:has(.weekly-evaluation-modal-backdrop) .thryv-page-content,
-    html.thryv-modal-open .thryv-page-content,
-    body.thryv-modal-open .thryv-page-content {
-        position: fixed !important;
-        inset: 0 !important;
-        z-index: 2147483646 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100svh !important;
-        height: 100dvh !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: hidden !important;
-        background: transparent !important;
-    }
-
-    .thryv-dashboard-layout:has(.weekly-evaluation-modal-backdrop) .thryv-main-content,
-    html.thryv-modal-open .thryv-main-content,
-    body.thryv-modal-open .thryv-main-content {
-        position: fixed !important;
-        inset: 0 !important;
-        z-index: 2147483645 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100svh !important;
-        height: 100dvh !important;
-        overflow: hidden !important;
-    }
-
-.weekly-evaluation-modal-backdrop,
-body > .weekly-evaluation-modal-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    display: flex !important;
-    align-items: stretch !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: rgba(2, 6, 23, 0.82) !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-}
-
-.weekly-evaluation-modal {
-    position: relative !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    max-width: none !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    max-height: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden !important;
-    background: #f8fafc !important;
-}
-
-.weekly-evaluation-modal-header {
-    position: relative !important;
-    top: auto !important;
-    z-index: 30 !important;
-    flex: 0 0 auto !important;
-    padding-top: calc(20px + env(safe-area-inset-top)) !important;
-    padding-right: calc(14px + env(safe-area-inset-right)) !important;
-    padding-bottom: 16px !important;
-    padding-left: calc(14px + env(safe-area-inset-left)) !important;
-    border-radius: 0 !important;
-    background: linear-gradient(135deg, #020617, #0f172a) !important;
-    color: #ffffff !important;
-}
-
-.weekly-evaluation-modal-scroll {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
-    touch-action: pan-y !important;
-    padding-bottom: calc(110px + env(safe-area-inset-bottom)) !important;
-}
-
-.weekly-evaluation-modal-header h3 {
-    max-width: 100% !important;
-    font-size: 1.08rem !important;
-    line-height: 1.25 !important;
-    word-break: break-word !important;
-}
-
-.weekly-evaluation-modal-header p {
-    font-size: 0.84rem !important;
-    line-height: 1.35 !important;
-    word-break: break-word !important;
-}
-
-.weekly-modal-close {
-    flex-shrink: 0 !important;
-}
-
-@media (min-width: 769px) {
-    html:not(:has(.weekly-evaluation-modal-backdrop)) .weekly-evaluation-modal {
-        width: min(1180px, calc(100vw - 48px)) !important;
-        height: min(920px, calc(100dvh - 48px)) !important;
-        border-radius: 28px !important;
-        border: 1px solid rgba(226, 232, 240, 0.9) !important;
-        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
-    }
-
-    .weekly-evaluation-modal-backdrop {
-        align-items: center !important;
-        padding: 24px !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: min(1180px, calc(100vw - 48px)) !important;
-        height: min(920px, calc(100dvh - 48px)) !important;
-        border-radius: 28px !important;
-        border: 1px solid rgba(226, 232, 240, 0.9) !important;
-        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        border-radius: 28px 28px 0 0 !important;
-        padding: 24px 28px !important;
-    }
-
-    .weekly-evaluation-modal-scroll {
-        padding-bottom: 28px !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .weekly-evaluation-modal-backdrop {
-        padding: 0 !important;
-        align-items: stretch !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100svh !important;
-        height: 100dvh !important;
-        border-radius: 0 !important;
-    }
-
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px 14px 0 !important;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        padding: 12px 14px 0 !important;
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px !important;
-    }
-}
-
-@media (max-width: 390px) {
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: 1fr !important;
+    .thryv-theme-cycle-btn:disabled {
+        cursor: wait;
+        opacity: .55;
     }
-}

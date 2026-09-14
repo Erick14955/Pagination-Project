@@ -4,318 +4,750 @@
 }
 
 .thryv-dashboard-page {
+    --orange: #ff5a13;
+    --orange-2: #ff7b22;
+    --blue: #2668f6;
+    --violet: #7b3fe4;
+    --cyan: #0aa7e8;
+    --green: #08ad78;
+    --amber: #ef9700;
+    width: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
+    gap: 13px;
+    color: #f8fafc;
 }
 
 .thryv-dashboard-header {
-    width: 100%;
-    max-width: 100%;
-    min-height: 230px;
-    padding: 34px 44px;
-    border-radius: 24px;
-    display: grid;
-    grid-template-columns: minmax(320px, 1fr) minmax(520px, 740px);
-    gap: 36px;
-    align-items: start;
-    background: linear-gradient(115deg, #081827 0%, #08263a 42%, #006452 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.18);
+    position: relative;
+    min-height: 140px;
+    padding: 24px 30px;
+    overflow: hidden;
+    border-radius: 17px;
+    border: 1px solid rgba(67,127,255,.38);
+    background: radial-gradient(circle at 72% 112%, rgba(29,78,216,.18), transparent 34%), radial-gradient(circle at 74% -4%, rgba(255,94,25,.30), transparent 24%), linear-gradient(108deg, #071321 0%, #09192c 55%, #0a2340 100%);
+    box-shadow: 0 18px 42px rgba(2,6,23,.28), inset 0 1px 0 rgba(255,255,255,.04);
 }
 
+    .thryv-dashboard-header::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(119deg, transparent 0 58%, rgba(255,255,255,.032) 58% 59%, transparent 59%), linear-gradient(70deg, transparent 0 79%, rgba(255,90,19,.09) 79% 80%, transparent 80%);
+    }
+
 .thryv-dashboard-hero-content {
-    padding-top: 10px;
+    position: relative;
+    z-index: 4;
+    width: 46%;
+    padding-top: 2px;
+}
+
+.thryv-dashboard-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 8px;
+    color: #89a5c7;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .17em;
+}
+
+.thryv-dashboard-eyebrow-line {
+    width: 3px;
+    height: 18px;
+    border-radius: 999px;
+    background: #2b72ff;
+    box-shadow: 0 0 12px rgba(43,114,255,.5);
 }
 
 .thryv-dashboard-title {
     margin: 0;
-    color: #ffffff;
-    font-size: 38px;
-    font-weight: 900;
-    line-height: 1.08;
-    letter-spacing: -0.6px;
+    color: #fff;
+    font-size: 35px;
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: -.035em;
 }
 
 .thryv-dashboard-subtitle {
-    margin: 18px 0 0;
-    max-width: 760px;
-    color: #f1f5f9;
-    font-size: 18px;
-    line-height: 1.45;
+    margin: 8px 0 0;
+    color: #c9d6e4;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
-.thryv-dashboard-hero-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(160px, 1fr));
-    gap: 18px 20px;
+.thryv-dashboard-book-art {
+    position: absolute;
+    z-index: 1;
+    left: 40.5%;
+    bottom: -48px;
+    width: 47%;
+    height: 188px;
+    pointer-events: none;
 }
 
-.thryv-hero-stat-card {
-    min-height: 112px;
-    padding: 22px 26px;
-    border-radius: 22px;
+.thryv-book-light {
+    position: absolute;
+    inset: -4% 4% 0;
+    background: radial-gradient(circle, rgba(255,108,33,.40), transparent 54%);
+    filter: blur(25px);
+}
+
+.thryv-book-page {
+    position: absolute;
+    bottom: 18px;
+    width: 50%;
+    height: 133px;
+    border: 1px solid rgba(255,255,255,.07);
+    box-shadow: inset 0 0 45px rgba(255,255,255,.025);
+}
+
+.thryv-book-page-left {
+    left: 0;
+    transform: perspective(900px) rotateY(19deg) rotateZ(2deg);
+    transform-origin: right bottom;
+    border-radius: 70% 8% 8% 14% / 24% 8% 12% 18%;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,.042) 0 1px, transparent 1px 7px), linear-gradient(160deg, rgba(31,44,61,.98), rgba(7,16,29,.98));
+}
+
+.thryv-book-page-right {
+    right: 0;
+    transform: perspective(900px) rotateY(-19deg) rotateZ(-2deg);
+    transform-origin: left bottom;
+    border-radius: 8% 70% 14% 8% / 8% 24% 18% 12%;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,.042) 0 1px, transparent 1px 7px), linear-gradient(205deg, rgba(85,45,26,.76), rgba(7,16,29,.98));
+}
+
+.thryv-book-spine {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    width: 2px;
+    height: 131px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,90,19,.5), transparent);
+    box-shadow: 0 0 18px rgba(255,90,19,.28);
+}
+
+.thryv-dashboard-hero-quote {
+    position: absolute;
+    z-index: 4;
+    top: 48px;
+    right: 16%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    text-align: right;
+    color: #c8d4e2;
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.25;
 }
 
-    .thryv-hero-stat-card span {
-        display: block;
-        margin-bottom: 14px;
-        color: #cbd5e1;
-        font-size: 14px;
-        font-weight: 900;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
+    .thryv-dashboard-hero-quote strong {
+        color: #edf3fa;
+        font-weight: 500;
     }
 
-    .thryv-hero-stat-card strong {
+.thryv-dashboard-date-card {
+    position: absolute;
+    z-index: 4;
+    top: 25px;
+    right: 23px;
+    width: 150px;
+    padding-left: 18px;
+    border-left: 1px solid rgba(148,163,184,.24);
+}
+
+    .thryv-dashboard-date-card span,
+    .thryv-dashboard-date-card small {
         display: block;
-        color: #ffffff;
-        font-size: 34px;
-        font-weight: 900;
+        color: #96a8bc;
+        font-size: 9px;
+    }
+
+    .thryv-dashboard-date-card strong {
+        display: block;
+        margin: 7px 0;
+        color: #fff;
+        font-size: 22px;
         line-height: 1;
-        letter-spacing: 4px;
+        font-weight: 900;
+    }
+
+    .thryv-dashboard-date-card i {
+        display: block;
+        width: 38px;
+        height: 3px;
+        margin: 7px 0 8px;
+        border-radius: 999px;
+        background: var(--orange);
+    }
+
+.thryv-dashboard-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.thryv-metric-card {
+    position: relative;
+    min-width: 0;
+    min-height: 118px;
+    padding: 15px 14px;
+    display: grid;
+    grid-template-columns: 48px minmax(0,1fr) 16px;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    border-radius: 15px;
+    border: 1px solid rgba(148,163,184,.18);
+    background: linear-gradient(145deg, rgba(13,28,49,.98), rgba(7,17,31,.98));
+    box-shadow: 0 14px 28px rgba(2,6,23,.18), inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+    .thryv-metric-card::after {
+        content: "›";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 20px;
+        height: 20px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255,255,255,.045);
+        color: rgba(255,255,255,.58);
+        font-size: 15px;
+    }
+
+.thryv-metric-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 900;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 18px rgba(0,0,0,.20);
+}
+
+.thryv-metric-content {
+    min-width: 0;
+}
+
+    .thryv-metric-content span {
+        display: block;
+        min-height: 27px;
+        color: #cbd6e3;
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .thryv-metric-content strong {
+        display: block;
+        margin: 5px 0;
+        color: #fff;
+        font-size: 26px;
+        line-height: 1;
+        font-weight: 900;
+    }
+
+    .thryv-metric-content small {
+        display: block;
+        color: #8292a7;
+        font-size: 9px;
+        line-height: 1.2;
+    }
+
+.thryv-mini-bars {
+    height: 33px;
+    align-self: end;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+}
+
+    .thryv-mini-bars i {
+        width: 4px;
+        border-radius: 999px;
+        background: currentColor;
+    }
+
+        .thryv-mini-bars i:nth-child(1) {
+            height: 10px;
+        }
+
+        .thryv-mini-bars i:nth-child(2) {
+            height: 20px;
+        }
+
+        .thryv-mini-bars i:nth-child(3) {
+            height: 30px;
+        }
+
+.thryv-metric-blue {
+    color: #2f77ff;
+    border-color: rgba(47,119,255,.50);
+    background: linear-gradient(145deg,rgba(4,41,107,.92),rgba(7,17,31,.98));
+}
+
+    .thryv-metric-blue .thryv-metric-icon {
+        background: linear-gradient(135deg,#1254d8,#2f77ff);
+    }
+
+.thryv-metric-violet {
+    color: #8c63ff;
+    border-color: rgba(124,58,237,.47);
+    background: linear-gradient(145deg,rgba(65,37,101,.80),rgba(16,20,45,.98));
+}
+
+    .thryv-metric-violet .thryv-metric-icon {
+        background: linear-gradient(135deg,#6d28d9,#9b6cff);
+    }
+
+.thryv-metric-cyan {
+    color: #19b9ff;
+    border-color: rgba(14,165,233,.47);
+    background: linear-gradient(145deg,rgba(2,75,109,.76),rgba(7,22,37,.98));
+}
+
+    .thryv-metric-cyan .thryv-metric-icon {
+        background: linear-gradient(135deg,#0369a1,#1dbbff);
+    }
+
+.thryv-metric-purple {
+    color: #9169ff;
+    border-color: rgba(109,40,217,.47);
+    background: linear-gradient(145deg,rgba(55,35,108,.80),rgba(17,20,49,.98));
+}
+
+    .thryv-metric-purple .thryv-metric-icon {
+        background: linear-gradient(135deg,#5b21b6,#8b5cf6);
+    }
+
+.thryv-metric-completed {
+    color: #16d98b;
+    border-color: rgba(16,185,129,.52);
+    background: linear-gradient(145deg,rgba(4,89,68,.72),rgba(4,39,34,.96));
+}
+
+    .thryv-metric-completed .thryv-metric-icon {
+        background: linear-gradient(135deg,#047857,#12c98a);
+    }
+
+    .thryv-metric-completed .thryv-metric-content strong {
+        color: #31df9c;
+    }
+
+.thryv-metric-pending {
+    color: #f8a900;
+    border-color: rgba(245,158,11,.58);
+    background: linear-gradient(145deg,rgba(112,62,8,.72),rgba(42,24,8,.96));
+}
+
+    .thryv-metric-pending .thryv-metric-icon {
+        background: linear-gradient(135deg,#bd6900,#ffb313);
+    }
+
+    .thryv-metric-pending .thryv-metric-content strong {
+        color: #ffbd1f;
     }
 
 .thryv-section-card {
+    position: relative;
     width: 100%;
-    max-width: 100%;
     overflow: hidden;
-    background: #ffffff;
-    border-radius: 26px;
-    border: 1px solid rgba(17, 17, 17, 0.06);
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+    border-radius: 17px;
+    border: 1px solid rgba(65, 113, 183, .40);
+    background: radial-gradient(circle at 100% 0%, rgba(37,99,235,.055), transparent 34%), linear-gradient(180deg, rgba(12,29,51,.98) 0%, rgba(8,22,40,.98) 100%);
+    box-shadow: 0 15px 36px rgba(2,6,23,.22), inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.assigned-section-card {
+    border-color: rgba(64, 117, 196, .48);
+    background: radial-gradient(circle at 92% 0%, rgba(37,99,235,.09), transparent 34%), linear-gradient(180deg,#0b1c33 0%,#09182b 100%);
 }
 
 .completed-section-card {
-    margin-top: 24px;
+    border-color: rgba(16,185,129,.42);
+    background: radial-gradient(circle at 7% 0%, rgba(16,185,129,.10), transparent 28%), linear-gradient(180deg,#082a31 0%,#081c2c 100%);
 }
 
 .weekly-evaluations-section-card {
-    border: 1px solid rgba(37, 99, 235, 0.14);
+    border-color: rgba(124,58,237,.48);
+    background: radial-gradient(circle at 8% 0%, rgba(124,58,237,.13), transparent 29%), linear-gradient(180deg,#17183e 0%,#0b1930 100%);
 }
 
 .thryv-section-header {
-    padding: 24px;
-    border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+    position: relative;
+    min-height: 82px;
+    padding: 14px 16px 12px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    background: linear-gradient(180deg, rgba(255, 80, 0, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+    justify-content: space-between;
+    gap: 18px;
+    border-bottom: 0;
+    background: transparent;
 }
 
-    .thryv-section-header h3 {
-        margin: 0;
-        color: #111111;
-        font-size: 24px;
-        font-weight: 800;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-    }
+.thryv-section-heading {
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
 
-    .thryv-section-header p {
-        margin: 8px 0 0;
-        color: #6b7280;
-        font-size: 14px;
-        line-height: 1.55;
-    }
+.thryv-section-icon {
+    width: 47px;
+    height: 47px;
+    flex: 0 0 47px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 900;
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 9px 20px rgba(0,0,0,.22);
+}
+
+.thryv-section-icon-assigned {
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 36%), linear-gradient(135deg,#0d54d8,#1674ff);
+    box-shadow: 0 9px 22px rgba(22,116,255,.24);
+}
+
+.thryv-section-icon-completed {
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 36%), linear-gradient(135deg,#047857,#10c98b);
+    box-shadow: 0 9px 22px rgba(16,185,129,.23);
+}
+
+.thryv-section-icon-weekly {
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 36%), linear-gradient(135deg,#5621bb,#8650f5);
+    box-shadow: 0 9px 22px rgba(124,58,237,.24);
+}
+
+.thryv-section-header h3 {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 18px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -.015em;
+}
+
+.thryv-section-header p {
+    margin: 5px 0 0;
+    color: #9baabd;
+    font-size: 10px;
+    line-height: 1.3;
+}
 
 .thryv-section-actions {
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 10px;
+    flex-wrap: nowrap;
 }
 
 .thryv-filter-group {
+    min-width: 190px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-width: 240px;
+    gap: 5px;
 }
 
     .thryv-filter-group label {
-        color: #6b7280;
-        font-size: 12px;
+        padding-left: 2px;
+        color: #9aa9bc;
+        font-size: 9px;
+        line-height: 1;
         font-weight: 800;
     }
 
 .thryv-filter-select,
 .thryv-search-box {
-    width: 100%;
-    height: 42px;
-    border: 1px solid rgba(17, 17, 17, 0.12);
-    border-radius: 14px;
-    background: #ffffff;
-    color: #111827;
+    height: 40px;
+    border: 1px solid rgba(93,119,157,.34);
+    border-radius: 10px;
+    background: rgba(4,15,29,.72);
+    color: #e6edf5;
     outline: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
 }
 
 .thryv-filter-select {
-    padding: 0 14px;
-    font-size: 14px;
+    width: 100%;
+    padding: 0 12px;
+    font-size: 10px;
     font-weight: 700;
 }
 
     .thryv-filter-select:focus,
     .thryv-search-box:focus-within {
-        border-color: #006452;
-        box-shadow: 0 0 0 4px rgba(0, 100, 82, 0.14);
+        border-color: rgba(72,130,220,.68);
+        box-shadow: 0 0 0 3px rgba(37,99,235,.10);
     }
 
 .thryv-search-box {
-    min-width: 220px;
+    min-width: 260px;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 0 12px;
+    padding: 0 11px;
 }
 
     .thryv-search-box input {
         width: 100%;
+        min-width: 0;
         border: 0;
-        outline: none;
+        outline: 0;
         background: transparent;
-        color: #0f172a;
-        font-size: 0.9rem;
+        color: #e2e8f0;
+        font-size: 10px;
     }
+
+        .thryv-search-box input::placeholder {
+            color: #718298;
+        }
 
 .thryv-clear-filter-btn {
-    height: 42px;
-    border: none;
-    border-radius: 14px;
-    padding: 0 16px;
-    background: rgba(17, 17, 17, 0.08);
-    color: #111111;
-    font-size: 13px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid rgba(148,163,184,.16);
+    border-radius: 10px;
+    background: rgba(255,255,255,.04);
+    color: #cbd5e1;
+    font-size: 10px;
     font-weight: 800;
     cursor: pointer;
-    transition: all 0.18s ease;
 }
 
-    .thryv-clear-filter-btn:hover {
-        background: rgba(17, 17, 17, 0.12);
-        transform: translateY(-1px);
-    }
-
-.thryv-section-badge {
-    height: 42px;
+.thryv-panel-icon-btn {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    padding: 10px 14px;
+    border-radius: 11px;
+    border: 1px solid rgba(56,113,202,.42);
+    background: linear-gradient(180deg, rgba(27,83,164,.23), rgba(14,50,107,.20));
+    color: #b7d2ff;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+    .thryv-panel-icon-btn.completed {
+        border-color: rgba(16,185,129,.34);
+        background: linear-gradient(180deg,rgba(16,185,129,.13),rgba(5,95,72,.15));
+        color: #8bedc8;
+    }
+
+    .thryv-panel-icon-btn.weekly {
+        border-color: rgba(124,58,237,.36);
+        background: linear-gradient(180deg,rgba(124,58,237,.15),rgba(75,26,160,.16));
+        color: #cfbdff;
+    }
+
+.thryv-view-all-btn {
+    height: 40px;
+    min-width: 102px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 17px;
+    border: 1px solid rgba(255,255,255,.07);
     border-radius: 999px;
-    background: rgba(0, 100, 82, 0.95);
-    color: #ffffff !important;
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    font-size: 13px;
+    color: #fff;
+    font-size: 10px;
     font-weight: 900;
     white-space: nowrap;
+    text-decoration: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 18px rgba(0,0,0,.18);
+}
+
+    .thryv-view-all-btn.assigned {
+        background: linear-gradient(135deg,#db5709,#ff7415);
+        box-shadow: 0 8px 22px rgba(255,90,19,.24);
+    }
+
+    .thryv-view-all-btn.completed {
+        background: linear-gradient(135deg,#05805d,#10c98b);
+        box-shadow: 0 8px 22px rgba(16,185,129,.20);
+    }
+
+    .thryv-view-all-btn.weekly {
+        background: linear-gradient(135deg,#6323cf,#8243f3);
+        box-shadow: 0 8px 22px rgba(124,58,237,.22);
+    }
+
+.thryv-section-card .thryv-table-wrapper {
+    padding: 0 14px 14px;
 }
 
 .thryv-table-wrapper {
     width: 100%;
-    max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+}
+
+.thryv-section-card .thryv-table-wrapper {
+    border-radius: 12px;
 }
 
 .thryv-custom-table {
     width: 100%;
     min-width: 980px;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid rgba(78,105,141,.28);
+    border-radius: 11px;
+    background: rgba(3,12,24,.15);
 }
 
     .thryv-custom-table thead th {
-        padding: 16px 18px;
-        background: #fafafa;
-        border-bottom: 1px solid rgba(17, 17, 17, 0.06);
-        color: #4b5563;
-        font-size: 13px;
-        font-weight: 800;
+        padding: 12px 13px;
+        background: rgba(5,16,31,.88);
+        color: #cbd6e3;
+        border-bottom: 1px solid rgba(92,117,151,.25);
         text-align: left;
         white-space: nowrap;
-        letter-spacing: 0.01em;
+        font-size: 9px;
+        font-weight: 850;
+        letter-spacing: .02em;
+        text-transform: uppercase;
     }
 
     .thryv-custom-table tbody td {
-        padding: 16px 18px;
-        border-bottom: 1px solid rgba(17, 17, 17, 0.05);
-        color: #1f2937;
+        padding: 11px 13px;
+        color: #dce5ef;
+        border-bottom: 1px solid rgba(148,163,184,.07);
         vertical-align: middle;
-        font-size: 14px;
-        overflow-wrap: anywhere;
+        font-size: 10px;
     }
 
     .thryv-custom-table tbody tr:hover {
-        background: rgba(0, 100, 82, 0.03);
+        background: rgba(255,255,255,.025);
     }
 
-    .thryv-custom-table thead th:last-child,
-    .thryv-custom-table tbody td:last-child {
-        text-align: center;
-    }
+.thryv-sort-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    cursor: pointer;
+    text-transform: uppercase;
+}
 
 .thryv-empty-row {
+    padding: 20px !important;
     text-align: center !important;
-    color: #6b7280 !important;
-    padding: 30px !important;
-    font-weight: 700;
+}
+
+.thryv-empty-state {
+    min-height: 82px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.thryv-empty-icon {
+    width: 31px;
+    height: 31px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #93c5fd;
+    border: 1px solid rgba(59,130,246,.24);
+    background: rgba(37,99,235,.08);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+    .thryv-empty-icon.completed {
+        color: #6ee7b7;
+        border-color: rgba(16,185,129,.24);
+        background: rgba(16,185,129,.08);
+    }
+
+    .thryv-empty-icon.weekly {
+        color: #c4b5fd;
+        border-color: rgba(124,58,237,.24);
+        background: rgba(124,58,237,.08);
+    }
+
+.thryv-empty-state strong {
+    color: #d5deea;
+    font-size: 10px;
+}
+
+.thryv-empty-state small {
+    color: #74869a;
+    font-size: 9px;
 }
 
 .thryv-employee-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-width: 0;
+    gap: 8px;
 }
 
 .thryv-employee-avatar,
 .completed-avatar,
 .weekly-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 16px;
-    flex-shrink: 0;
-    display: flex;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #111827 0%, #1f2937 100%) !important;
-    color: #ffffff !important;
-    font-size: 15px;
+    border-radius: 9px;
+    background: linear-gradient(135deg,#111827,#1f2937) !important;
+    color: #fff !important;
+    font-size: 9px;
     font-weight: 900;
-    letter-spacing: 0.02em;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+
+.completed-avatar {
+    background: linear-gradient(135deg,#047857,#10b981) !important;
+}
+
+.weekly-avatar {
+    background: linear-gradient(135deg,#5b21b6,#7c3aed) !important;
 }
 
 .thryv-employee-name {
-    color: #111827;
+    color: #f8fafc;
     font-weight: 800;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
 }
 
 .thryv-muted-cell {
-    color: #94a3b8;
-    font-weight: 700;
+    color: #64748b;
 }
 
 .thryv-code-pill,
 .thryv-stage-pill,
-.thryv-percent-pill {
+.thryv-percent-pill,
+.thryv-ready-to-ship-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -325,25 +757,23 @@
 }
 
 .thryv-code-pill {
-    padding: 8px 12px;
-    background: rgba(0, 100, 82, 0.10);
-    color: #006452;
-    border: 1px solid rgba(0, 100, 82, 0.10);
-    font-size: 12px;
+    padding: 5px 8px;
+    color: #ffd0b8;
+    background: rgba(255,90,19,.08);
+    border: 1px solid rgba(255,90,19,.15);
+    font-size: 9px;
 }
 
     .thryv-code-pill.secondary {
-        background: rgba(17, 17, 17, 0.07);
-        color: #111111;
-        border-color: rgba(17, 17, 17, 0.08);
+        color: #cbd5e1;
+        background: rgba(148,163,184,.08);
+        border-color: rgba(148,163,184,.12);
     }
 
 .thryv-stage-pill {
-    min-width: 130px;
-    padding: 7px 12px;
+    padding: 5px 8px;
     border: 1px solid transparent;
-    font-size: 12px;
-    letter-spacing: 0.02em;
+    font-size: 9px;
 }
 
 .thryv-stage-proofextract {
@@ -382,1491 +812,90 @@
     border-color: #fca5a5;
 }
 
-.completed-stage-pill {
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+.completed-stage-pill::after {
+    content: " ✓";
+    margin-left: 3px;
 }
 
-    .completed-stage-pill::after {
-        content: " ✓";
-        margin-left: 4px;
-        font-weight: 900;
-    }
-
 .thryv-percent-pill {
-    min-width: 82px;
-    padding: 7px 12px;
-    color: #ffffff !important;
-    font-size: 0.85rem;
+    padding: 5px 8px;
+    color: #fff;
+    font-size: 9px;
 }
 
     .thryv-percent-pill.excellent {
         background: #15803d;
-        border: 1px solid rgba(34, 197, 94, 0.45);
     }
 
     .thryv-percent-pill.warning {
         background: #f59e0b;
-        border: 1px solid rgba(245, 158, 11, 0.45);
     }
 
     .thryv-percent-pill.danger {
         background: #dc2626;
-        border: 1px solid rgba(248, 113, 113, 0.55);
+    }
+
+.thryv-ready-to-ship-cell {
+    min-width: 140px;
+}
+
+.thryv-ready-to-ship-badge {
+    gap: 5px;
+    padding: 5px 8px;
+    font-size: 9px;
+}
+
+    .thryv-ready-to-ship-badge.ready {
+        color: #86efac;
+        background: rgba(22,163,74,.14);
+        border: 1px solid rgba(74,222,128,.28);
+    }
+
+    .thryv-ready-to-ship-badge.pending {
+        color: #fde68a;
+        background: rgba(202,138,4,.14);
+        border: 1px solid rgba(250,204,21,.26);
     }
 
 .thryv-download-checklist-btn {
-    min-width: 110px;
-    border: none;
+    min-width: 98px;
+    padding: 7px 9px;
+    border: 0;
     border-radius: 999px;
-    padding: 8px 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
-    color: #ffffff !important;
-    font-size: 12px;
+    background: linear-gradient(135deg,#0f766e,#14b8a6);
+    color: #fff;
+    font-size: 9px;
     font-weight: 900;
-    letter-spacing: 0.02em;
-    text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 8px 18px rgba(20, 184, 166, 0.22);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
-    .thryv-download-checklist-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 24px rgba(20, 184, 166, 0.28);
-        opacity: 0.95;
-    }
-
-    .thryv-download-checklist-btn:disabled {
-        opacity: 0.65;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
+.thryv-paper-btn,
+.thryv-row-action-btn {
+    width: 31px;
+    height: 31px;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+}
 
 .thryv-paper-btn {
-    width: 38px;
-    height: 38px;
-    border: 0;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #ffffff;
-    font-size: 1.05rem;
-    cursor: pointer;
-    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.24);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: linear-gradient(135deg,#5b21b6,#7c3aed);
 }
 
-    .thryv-paper-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+.thryv-row-action-btn {
+    background: rgba(37,99,235,.14);
+    color: #a9cbff;
+}
+
+    .thryv-row-action-btn.completed {
+        background: rgba(16,185,129,.14);
+        color: #7ee4bd;
     }
 
-html.thryv-modal-open,
-body.thryv-modal-open {
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-}
-
-    html.thryv-modal-open .thryv-top-header,
-    html.thryv-modal-open .thryv-sidebar,
-    html.thryv-modal-open .thryv-sidebar-overlay {
-        z-index: 1 !important;
-    }
-
-.weekly-evaluation-modal-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    display: flex !important;
-    align-items: stretch !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    background: rgba(15, 23, 42, 0.76) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-}
-
-.weekly-evaluation-modal {
-    position: relative !important;
-    z-index: 2147483647 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100svh !important;
-    height: 100dvh !important;
-    max-width: none !important;
-    max-height: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    overscroll-behavior: contain !important;
-    touch-action: auto !important;
-    border-radius: 0 !important;
-    background: #f8fafc !important;
-    border: none !important;
-    box-shadow: none !important;
-    scrollbar-width: thin;
-}
-
-.weekly-evaluation-modal-header {
-    position: relative !important;
-    top: auto !important;
-    z-index: 20 !important;
-    flex: 0 0 auto !important;
-    padding-top: calc(18px + env(safe-area-inset-top)) !important;
-    padding-right: calc(18px + env(safe-area-inset-right)) !important;
-    padding-bottom: 18px !important;
-    padding-left: calc(18px + env(safe-area-inset-left)) !important;
-    border-radius: 0 !important;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    background: linear-gradient(135deg, #0f172a, #1e3a8a) !important;
-    color: #ffffff !important;
-}
-
-.weekly-modal-eyebrow {
-    display: inline-flex;
-    margin-bottom: 8px;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 800;
-    opacity: 0.78;
-}
-
-.weekly-evaluation-modal-header h3 {
-    margin: 0;
-    font-size: 1.35rem;
-    font-weight: 900;
-}
-
-.weekly-evaluation-modal-header p {
-    margin: 6px 0 0;
-    color: rgba(255, 255, 255, 0.82);
-}
-
-.weekly-modal-close {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border: 0;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-    font-weight: 900;
-    cursor: pointer;
-}
-
-    .weekly-modal-close:hover {
-        background: rgba(255, 255, 255, 0.22);
-    }
-
-.weekly-evaluation-modal-scroll {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
-    touch-action: pan-y !important;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
-}
-
-.weekly-evaluation-summary-grid,
-.weekly-evaluation-percent-grid,
-.weekly-evaluation-detail-grid {
-    display: grid;
-    gap: 14px;
-    flex-shrink: 0 !important;
-}
-
-.weekly-evaluation-summary-grid {
-    grid-template-columns: repeat(4, minmax(160px, 1fr));
-    padding: 22px 28px 0;
-}
-
-.weekly-evaluation-percent-grid {
-    grid-template-columns: repeat(5, minmax(120px, 1fr));
-    padding: 16px 28px 0;
-}
-
-.weekly-evaluation-detail-grid {
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
-    padding: 22px 28px 28px;
-}
-
-.weekly-summary-card,
-.weekly-percent-mini-card,
-.weekly-detail-card {
-    background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-}
-
-.weekly-summary-card {
-    padding: 16px;
-    border-radius: 20px;
-}
-
-.weekly-percent-mini-card {
-    padding: 14px;
-    border-radius: 18px;
+.thryv-actions-cell {
     text-align: center;
 }
-
-.weekly-detail-card {
-    padding: 18px;
-    border-radius: 22px;
-}
-
-.weekly-summary-card span,
-.weekly-percent-mini-card span {
-    display: block;
-    color: #64748b;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.weekly-summary-card strong,
-.weekly-percent-mini-card strong {
-    display: block;
-    margin-top: 8px;
-    color: #0f172a;
-    font-size: 1rem;
-}
-
-.weekly-summary-card.total {
-    background: linear-gradient(135deg, #eff6ff, #ffffff);
-    border-color: rgba(37, 99, 235, 0.2);
-}
-
-    .weekly-summary-card.total strong {
-        color: #1d4ed8;
-        font-size: 1.25rem;
-    }
-
-.weekly-detail-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-    .weekly-detail-card-header h4 {
-        margin: 0;
-        color: #0f172a;
-        font-size: 1rem;
-        font-weight: 900;
-    }
-
-    .weekly-detail-card-header span {
-        padding: 5px 10px;
-        border-radius: 999px;
-        background: #f1f5f9;
-        color: #475569;
-        font-size: 0.75rem;
-        font-weight: 800;
-    }
-
-.weekly-radio-row {
-    display: grid;
-    grid-template-columns: 22px 1fr auto;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 8px;
-    border-radius: 14px;
-    border: 1px solid transparent;
-    margin-bottom: 7px;
-}
-
-    .weekly-radio-row input {
-        width: 16px;
-        height: 16px;
-        accent-color: #dc2626;
-    }
-
-    .weekly-radio-row span {
-        color: #334155;
-        font-size: 0.88rem;
-        font-weight: 700;
-    }
-
-    .weekly-radio-row small {
-        font-size: 0.72rem;
-        font-weight: 900;
-        text-transform: uppercase;
-    }
-
-    .weekly-radio-row.failed {
-        background: rgba(254, 226, 226, 0.8);
-        border-color: rgba(248, 113, 113, 0.24);
-    }
-
-        .weekly-radio-row.failed small {
-            color: #b91c1c;
-        }
-
-    .weekly-radio-row.ok {
-        background: rgba(240, 253, 244, 0.76);
-        border-color: rgba(34, 197, 94, 0.16);
-    }
-
-        .weekly-radio-row.ok small {
-            color: #15803d;
-        }
-
-html[data-theme="dark"] .thryv-dashboard-header {
-    background: linear-gradient(135deg, #020617, #0f172a);
-    border-color: rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme="dark"] .thryv-hero-stat-card {
-    background: rgba(15, 23, 42, 0.88);
-    border-color: rgba(148, 163, 184, 0.18);
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-    html[data-theme="dark"] .thryv-hero-stat-card span {
-        color: #94a3b8;
-    }
-
-    html[data-theme="dark"] .thryv-hero-stat-card strong {
-        color: #f8fafc;
-    }
-
-html[data-theme="dark"] .thryv-section-card,
-html[data-theme="dark"] .weekly-evaluation-modal,
-html[data-theme="dark"] .weekly-summary-card,
-html[data-theme="dark"] .weekly-detail-card,
-html[data-theme="dark"] .weekly-percent-mini-card {
-    background: #111827 !important;
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
-}
-
-html[data-theme="dark"] .thryv-section-header {
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-    html[data-theme="dark"] .thryv-section-header h3,
-    html[data-theme="dark"] .thryv-employee-name,
-    html[data-theme="dark"] .weekly-detail-card-header h4,
-    html[data-theme="dark"] .weekly-summary-card strong,
-    html[data-theme="dark"] .weekly-percent-mini-card strong {
-        color: #f8fafc;
-    }
-
-    html[data-theme="dark"] .thryv-section-header p,
-    html[data-theme="dark"] .thryv-filter-group label,
-    html[data-theme="dark"] .weekly-summary-card span,
-    html[data-theme="dark"] .weekly-percent-mini-card span {
-        color: #94a3b8;
-    }
-
-html[data-theme="dark"] .thryv-custom-table thead th {
-    background: #1e293b;
-    color: #cbd5e1;
-}
-
-html[data-theme="dark"] .thryv-custom-table tbody td {
-    color: #e2e8f0;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-html[data-theme="dark"] .thryv-custom-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-html[data-theme="dark"] .thryv-filter-select,
-html[data-theme="dark"] .thryv-search-box {
-    background: #0f172a;
-    color: #f8fafc;
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
-    html[data-theme="dark"] .thryv-search-box input {
-        color: #f8fafc;
-    }
-
-html[data-theme="dark"] .thryv-clear-filter-btn {
-    background: rgba(255, 255, 255, 0.10);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-html[data-theme="dark"] .thryv-code-pill {
-    background: rgba(59, 130, 246, 0.12);
-    color: #f8fafc;
-    border-color: rgba(59, 130, 246, 0.25);
-}
-
-    html[data-theme="dark"] .thryv-code-pill.secondary {
-        background: rgba(255, 255, 255, 0.08);
-        color: #f8fafc;
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-
-html[data-theme="dark"] .weekly-evaluation-modal,
-html[data-theme="dark glass"] .weekly-evaluation-modal {
-    background: #111827 !important;
-    color: #e5e7eb !important;
-}
-
-html[data-theme="dark"] .weekly-evaluation-modal-header,
-html[data-theme="dark glass"] .weekly-evaluation-modal-header {
-    background: linear-gradient(135deg, #020617, #0f172a) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-header {
-    background: rgba(255, 255, 255, 0.28);
-    backdrop-filter: blur(34px) saturate(180%);
-    -webkit-backdrop-filter: blur(34px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.10), inset 0 1px 1px rgba(255, 255, 255, 0.8);
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
-    padding: 24px;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.34);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-title {
-    color: #0f172a !important;
-    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.95);
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-subtitle {
-    color: #334155 !important;
-    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85);
-}
-
-html[data-theme="liquid glass"] .thryv-hero-stat-card,
-html[data-theme="liquid glass"] .thryv-section-card,
-html[data-theme="liquid glass"] .weekly-evaluation-modal,
-html[data-theme="liquid glass"] .weekly-summary-card,
-html[data-theme="liquid glass"] .weekly-detail-card,
-html[data-theme="liquid glass"] .weekly-percent-mini-card {
-    background: rgba(255, 255, 255, 0.32) !important;
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.62);
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.86);
-}
-
-html[data-theme="liquid glass"] .weekly-evaluation-modal {
-    background: rgba(255, 255, 255, 0.90) !important;
-    backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
-}
-
-html[data-theme="liquid glass"] .thryv-hero-stat-card span {
-    color: #475569;
-}
-
-html[data-theme="liquid glass"] .thryv-hero-stat-card strong {
-    color: #111827;
-}
-
-html[data-theme="liquid glass"] .thryv-section-header {
-    background: rgba(255, 255, 255, 0.12);
-    border-bottom-color: rgba(255, 255, 255, 0.28);
-}
-
-html[data-theme="liquid glass"] .thryv-filter-select,
-html[data-theme="liquid glass"] .thryv-search-box {
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-color: rgba(255, 255, 255, 0.60);
-}
-
-    html[data-theme="liquid glass"] .thryv-search-box input {
-        color: #111827;
-    }
-
-html[data-theme="liquid glass"] .thryv-custom-table thead th {
-    background: rgba(255, 255, 255, 0.18);
-}
-
-html[data-theme="liquid glass"] .thryv-custom-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.14);
-}
-
-html[data-theme="liquid glass"] .weekly-evaluation-modal-header {
-    background: rgba(15, 23, 42, 0.70) !important;
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-header {
-    background: rgba(2, 6, 23, 0.58);
-    backdrop-filter: blur(30px) saturate(170%);
-    -webkit-backdrop-filter: blur(30px) saturate(170%);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-}
-
-html[data-theme="dark glass"] .thryv-hero-stat-card,
-html[data-theme="dark glass"] .thryv-section-card,
-html[data-theme="dark glass"] .weekly-summary-card,
-html[data-theme="dark glass"] .weekly-detail-card,
-html[data-theme="dark glass"] .weekly-percent-mini-card {
-    background: rgba(15, 23, 42, 0.55) !important;
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.06);
-}
-
-    html[data-theme="dark glass"] .thryv-hero-stat-card span,
-    html[data-theme="dark glass"] .thryv-section-header p,
-    html[data-theme="dark glass"] .thryv-filter-group label,
-    html[data-theme="dark glass"] .weekly-summary-card span,
-    html[data-theme="dark glass"] .weekly-percent-mini-card span {
-        color: #cbd5e1;
-    }
-
-    html[data-theme="dark glass"] .thryv-hero-stat-card strong,
-    html[data-theme="dark glass"] .thryv-section-header h3,
-    html[data-theme="dark glass"] .thryv-employee-name,
-    html[data-theme="dark glass"] .weekly-detail-card-header h4,
-    html[data-theme="dark glass"] .weekly-summary-card strong,
-    html[data-theme="dark glass"] .weekly-percent-mini-card strong {
-        color: #f8fafc;
-    }
-
-html[data-theme="dark glass"] .thryv-section-header {
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme="dark glass"] .thryv-filter-select,
-html[data-theme="dark glass"] .thryv-search-box {
-    background: rgba(15, 23, 42, 0.55);
-    color: #f8fafc;
-    border-color: rgba(255, 255, 255, 0.10);
-}
-
-    html[data-theme="dark glass"] .thryv-search-box input {
-        color: #f8fafc;
-    }
-
-html[data-theme="dark glass"] .thryv-custom-table thead th {
-    background: rgba(255, 255, 255, 0.05);
-    color: #cbd5e1;
-}
-
-html[data-theme="dark glass"] .thryv-custom-table tbody td {
-    color: #e2e8f0;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-html[data-theme="dark glass"] .thryv-custom-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-html[data-theme="dark glass"] .weekly-evaluation-modal-header {
-    background: rgba(2, 6, 23, 0.78) !important;
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-}
-
-html[data-theme="dark glass"] .thryv-clear-filter-btn {
-    background: rgba(255, 255, 255, 0.10);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-html[data-theme="dark glass"] .thryv-code-pill {
-    background: rgba(59, 130, 246, 0.12);
-    color: #f8fafc;
-    border-color: rgba(59, 130, 246, 0.25);
-}
-
-    html[data-theme="dark glass"] .thryv-code-pill.secondary {
-        background: rgba(255, 255, 255, 0.08);
-        color: #f8fafc;
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-
-@media (min-width: 769px) {
-    .weekly-evaluation-modal-backdrop {
-        align-items: center !important;
-        padding: 24px !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: min(1180px, calc(100vw - 48px)) !important;
-        height: min(920px, calc(100dvh - 48px)) !important;
-        max-height: calc(100dvh - 48px) !important;
-        border-radius: 28px !important;
-        border: 1px solid rgba(226, 232, 240, 0.9) !important;
-        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35) !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        border-radius: 28px 28px 0 0 !important;
-        padding: 24px 28px !important;
-    }
-}
-
-@media (max-width: 1280px) {
-    .thryv-dashboard-header {
-        grid-template-columns: 1fr;
-        padding: 30px;
-        gap: 26px;
-        min-height: auto;
-    }
-
-    .thryv-dashboard-hero-stats {
-        grid-template-columns: repeat(3, minmax(150px, 1fr));
-    }
-
-    .thryv-section-header {
-        align-items: flex-start;
-    }
-
-    .thryv-section-actions {
-        justify-content: flex-start;
-    }
-}
-
-@media (max-width: 1024px) {
-    .thryv-dashboard-page {
-        gap: 20px;
-    }
-
-    .thryv-dashboard-header {
-        padding: 26px;
-        border-radius: 22px;
-    }
-
-    .thryv-dashboard-title {
-        font-size: 32px;
-    }
-
-    .thryv-dashboard-subtitle {
-        font-size: 16px;
-        max-width: 100%;
-    }
-
-    .thryv-dashboard-hero-stats {
-        grid-template-columns: repeat(2, minmax(150px, 1fr));
-        gap: 14px;
-    }
-
-    .thryv-hero-stat-card {
-        min-height: 100px;
-        padding: 18px 20px;
-        border-radius: 18px;
-    }
-
-        .thryv-hero-stat-card strong {
-            font-size: 30px;
-            letter-spacing: 2px;
-        }
-
-    .thryv-section-card {
-        border-radius: 22px;
-    }
-
-    .thryv-section-header {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 20px;
-    }
-
-    .thryv-section-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
-        align-items: end;
-    }
-
-    .thryv-filter-group,
-    .thryv-search-box {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .thryv-filter-select,
-    .thryv-clear-filter-btn,
-    .thryv-section-badge,
-    .thryv-search-box {
-        width: 100%;
-        height: 44px;
-    }
-
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: repeat(2, minmax(160px, 1fr));
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(3, minmax(120px, 1fr));
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .thryv-dashboard-page {
-        gap: 16px;
-    }
-
-    .thryv-dashboard-header {
-        padding: 20px;
-        border-radius: 18px;
-        gap: 18px;
-    }
-
-    .thryv-dashboard-hero-content {
-        padding-top: 0;
-    }
-
-    html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
-        padding: 18px;
-        border-radius: 18px;
-    }
-
-    .thryv-dashboard-title {
-        font-size: 26px;
-        line-height: 1.15;
-        letter-spacing: -0.3px;
-    }
-
-    .thryv-dashboard-subtitle {
-        margin-top: 12px;
-        font-size: 14px;
-        line-height: 1.45;
-    }
-
-    .thryv-dashboard-hero-stats {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .thryv-hero-stat-card {
-        min-height: 92px;
-        padding: 16px 18px;
-        border-radius: 16px;
-    }
-
-        .thryv-hero-stat-card span {
-            font-size: 11px;
-            margin-bottom: 9px;
-        }
-
-        .thryv-hero-stat-card strong {
-            font-size: 28px;
-            letter-spacing: 1px;
-        }
-
-    .thryv-section-card {
-        border-radius: 18px;
-    }
-
-    .completed-section-card {
-        margin-top: 18px;
-    }
-
-    .thryv-section-header {
-        padding: 18px 16px;
-        gap: 14px;
-    }
-
-        .thryv-section-header h3 {
-            font-size: 19px;
-            line-height: 1.2;
-        }
-
-        .thryv-section-header p {
-            font-size: 13px;
-            line-height: 1.45;
-        }
-
-    .thryv-section-actions {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .thryv-filter-group {
-        min-width: 0;
-        width: 100%;
-    }
-
-    .thryv-filter-select,
-    .thryv-clear-filter-btn,
-    .thryv-section-badge,
-    .thryv-search-box {
-        width: 100%;
-        min-width: 0;
-        height: 44px;
-        border-radius: 13px;
-    }
-
-    .thryv-section-badge {
-        white-space: normal;
-        text-align: center;
-        line-height: 1.25;
-    }
-
-    .thryv-table-wrapper {
-        overflow: visible;
-        border: none;
-    }
-
-    .thryv-custom-table {
-        width: 100%;
-        min-width: 0 !important;
-        border-collapse: separate;
-        border-spacing: 0 !important;
-    }
-
-        .thryv-custom-table thead {
-            display: none;
-        }
-
-        .thryv-custom-table,
-        .thryv-custom-table tbody,
-        .thryv-custom-table tr,
-        .thryv-custom-table td {
-            display: block;
-            width: 100%;
-        }
-
-            .thryv-custom-table tbody {
-                display: flex;
-                flex-direction: column;
-                gap: 18px;
-                width: 100%;
-            }
-
-                .thryv-custom-table tbody tr {
-                    width: 100%;
-                    margin: 0;
-                    padding: 12px;
-                    border-radius: 18px;
-                    background: #ffffff;
-                    border: 1px solid rgba(226, 232, 240, 0.95);
-                    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
-                    overflow: hidden;
-                }
-
-                    .thryv-custom-table tbody tr:hover {
-                        background: #ffffff;
-                    }
-
-                .thryv-custom-table tbody td {
-                    position: relative;
-                    min-height: 44px;
-                    padding: 12px 10px 12px 44% !important;
-                    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-end;
-                    text-align: right !important;
-                    white-space: normal;
-                    font-size: 13px;
-                }
-
-                    .thryv-custom-table tbody td:last-child {
-                        border-bottom: none;
-                    }
-
-                    .thryv-custom-table tbody td::before {
-                        content: attr(data-label);
-                        position: absolute;
-                        left: 10px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        width: 38%;
-                        color: #64748b;
-                        font-size: 11px;
-                        font-weight: 900;
-                        text-align: left;
-                        text-transform: uppercase;
-                        letter-spacing: 0.04em;
-                        line-height: 1.25;
-                        white-space: normal;
-                    }
-
-                    .thryv-custom-table tbody td.thryv-empty-row {
-                        padding: 24px 12px !important;
-                        text-align: center !important;
-                        display: block;
-                    }
-
-                        .thryv-custom-table tbody td.thryv-empty-row::before {
-                            display: none;
-                            content: none;
-                        }
-
-    .thryv-employee-cell {
-        width: 100%;
-        justify-content: flex-end;
-        text-align: right;
-    }
-
-    .thryv-employee-name {
-        text-align: right;
-        font-size: 13px;
-    }
-
-    .thryv-employee-avatar,
-    .completed-avatar,
-    .weekly-avatar {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        border-radius: 13px;
-        font-size: 13px;
-    }
-
-    .thryv-code-pill,
-    .thryv-stage-pill,
-    .thryv-percent-pill {
-        min-width: 0;
-        max-width: 100%;
-        white-space: normal;
-        text-align: center;
-        line-height: 1.2;
-    }
-
-    .thryv-download-checklist-btn {
-        width: auto;
-        min-width: 120px;
-        max-width: 100%;
-        margin-left: auto;
-    }
-
-    .weekly-evaluation-modal-backdrop {
-        align-items: stretch !important;
-        padding: 0 !important;
-    }
-
-    .weekly-evaluation-modal {
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100svh !important;
-        height: 100dvh !important;
-        border-radius: 0 !important;
-    }
-
-    .weekly-evaluation-modal-header {
-        padding-top: calc(16px + env(safe-area-inset-top)) !important;
-        padding-right: calc(14px + env(safe-area-inset-right)) !important;
-        padding-bottom: 16px !important;
-        padding-left: calc(14px + env(safe-area-inset-left)) !important;
-    }
-
-    .weekly-evaluation-summary-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px 14px 0 !important;
-        gap: 10px;
-    }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        padding: 12px 14px 0 !important;
-        gap: 10px;
-    }
-
-    .weekly-evaluation-detail-grid {
-        grid-template-columns: 1fr !important;
-        padding: 14px !important;
-        gap: 12px;
-    }
-
-    .weekly-summary-card,
-    .weekly-percent-mini-card,
-    .weekly-detail-card {
-        padding: 14px;
-        border-radius: 17px;
-    }
-
-    .weekly-detail-card-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .weekly-radio-row {
-        grid-template-columns: 22px 1fr;
-        gap: 8px;
-    }
-
-        .weekly-radio-row small {
-            grid-column: 2;
-            justify-self: flex-start;
-        }
-
-    html[data-theme="dark"] .thryv-custom-table tbody tr {
-        background: #111827;
-        border-color: rgba(255, 255, 255, 0.10);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
-    }
-
-        html[data-theme="dark"] .thryv-custom-table tbody tr:hover {
-            background: #111827;
-        }
-
-    html[data-theme="dark"] .thryv-custom-table tbody td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-
-        html[data-theme="dark"] .thryv-custom-table tbody td::before {
-            color: #94a3b8;
-        }
-
-    html[data-theme="dark glass"] .thryv-custom-table tbody tr {
-        background: rgba(15, 23, 42, 0.88);
-        border-color: rgba(255, 255, 255, 0.14);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
-    }
-
-        html[data-theme="dark glass"] .thryv-custom-table tbody tr:hover {
-            background: rgba(15, 23, 42, 0.88);
-        }
-
-    html[data-theme="dark glass"] .thryv-custom-table tbody td {
-        color: #e2e8f0;
-        border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-
-        html[data-theme="dark glass"] .thryv-custom-table tbody td::before {
-            color: #cbd5e1;
-        }
-
-    html[data-theme="liquid glass"] .thryv-custom-table tbody tr {
-        background: rgba(255, 255, 255, 0.42);
-        border-color: rgba(255, 255, 255, 0.62);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.75);
-    }
-
-        html[data-theme="liquid glass"] .thryv-custom-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.50);
-        }
-
-    html[data-theme="liquid glass"] .thryv-custom-table tbody td {
-        color: #334155;
-        border-bottom-color: rgba(255, 255, 255, 0.42);
-    }
-
-        html[data-theme="liquid glass"] .thryv-custom-table tbody td::before {
-            color: #475569;
-        }
-}
-
-@media (max-width: 640px) {
-    .weekly-modal-eyebrow {
-        font-size: 0.66rem;
-        letter-spacing: 0.10em;
-        margin-bottom: 6px;
-    }
-
-    .weekly-evaluation-modal-header h3 {
-        font-size: 1.05rem;
-        line-height: 1.22;
-        word-break: break-word;
-    }
-
-    .weekly-evaluation-modal-header p {
-        font-size: 0.82rem;
-        line-height: 1.35;
-        word-break: break-word;
-    }
-
-    .weekly-modal-close {
-        width: 34px;
-        height: 34px;
-        min-width: 34px;
-        border-radius: 11px;
-        font-size: 15px;
-    }
-
-    .weekly-summary-card,
-    .weekly-percent-mini-card,
-    .weekly-detail-card {
-        border-radius: 15px;
-        padding: 13px;
-    }
-
-        .weekly-summary-card span,
-        .weekly-percent-mini-card span {
-            font-size: 0.68rem;
-        }
-
-        .weekly-summary-card strong,
-        .weekly-percent-mini-card strong {
-            font-size: 0.95rem;
-            line-height: 1.25;
-            word-break: break-word;
-        }
-
-        .weekly-summary-card.total strong {
-            font-size: 1.08rem;
-        }
-
-    .weekly-detail-card-header {
-        gap: 8px;
-    }
-
-        .weekly-detail-card-header h4 {
-            font-size: 0.95rem;
-            line-height: 1.25;
-        }
-
-        .weekly-detail-card-header span {
-            font-size: 0.68rem;
-        }
-
-    .weekly-radio-row {
-        grid-template-columns: 20px 1fr;
-        align-items: start;
-        gap: 8px;
-        padding: 9px 8px;
-        margin-bottom: 7px;
-    }
-
-        .weekly-radio-row input {
-            width: 15px;
-            height: 15px;
-            margin-top: 2px;
-        }
-
-        .weekly-radio-row span {
-            font-size: 0.80rem;
-            line-height: 1.3;
-            word-break: break-word;
-        }
-
-        .weekly-radio-row small {
-            grid-column: 2;
-            justify-self: flex-start;
-            font-size: 0.66rem;
-        }
-
-    html[data-theme="dark"] .weekly-evaluation-modal,
-    html[data-theme="dark glass"] .weekly-evaluation-modal {
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    html[data-theme="dark"] .weekly-evaluation-modal-header,
-    html[data-theme="dark glass"] .weekly-evaluation-modal-header {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    }
-
-    html[data-theme="liquid glass"] .weekly-evaluation-modal {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-}
-
-@media (max-width: 520px) {
-    .thryv-dashboard-header {
-        padding: 16px;
-        border-radius: 16px;
-    }
-
-    html[data-theme="liquid glass"] .thryv-dashboard-hero-content {
-        padding: 16px;
-        border-radius: 16px;
-    }
-
-    .thryv-dashboard-title {
-        font-size: 23px;
-    }
-
-    .thryv-dashboard-subtitle {
-        font-size: 13px;
-    }
-
-    .thryv-hero-stat-card {
-        min-height: 86px;
-        padding: 15px 16px;
-    }
-
-        .thryv-hero-stat-card strong {
-            font-size: 25px;
-        }
-
-    .thryv-section-header {
-        padding: 16px 14px;
-    }
-
-        .thryv-section-header h3 {
-            font-size: 17px;
-        }
-
-        .thryv-section-header p {
-            font-size: 12.5px;
-        }
-
-    .thryv-filter-select,
-    .thryv-clear-filter-btn,
-    .thryv-section-badge,
-    .thryv-search-box {
-        height: 42px;
-        font-size: 13px;
-    }
-
-        .thryv-search-box input {
-            font-size: 13px;
-        }
-
-    .thryv-custom-table tbody {
-        gap: 16px;
-    }
-
-        .thryv-custom-table tbody tr {
-            padding: 10px;
-            border-radius: 16px;
-        }
-
-        .thryv-custom-table tbody td {
-            min-height: 42px;
-            padding: 11px 8px 11px 42% !important;
-            font-size: 12.5px;
-        }
-
-            .thryv-custom-table tbody td::before {
-                left: 8px;
-                width: 36%;
-                font-size: 10px;
-            }
-
-    .thryv-employee-cell {
-        gap: 8px;
-    }
-
-    .thryv-employee-avatar,
-    .completed-avatar,
-    .weekly-avatar {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        border-radius: 11px;
-        font-size: 12px;
-    }
-
-    .thryv-code-pill,
-    .thryv-stage-pill,
-    .thryv-percent-pill {
-        padding: 7px 9px;
-        font-size: 10.5px;
-    }
-
-    .thryv-paper-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 11px;
-    }
-
-    .weekly-evaluation-summary-grid,
-    .weekly-evaluation-percent-grid,
-    .weekly-evaluation-detail-grid {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
-    }
-}
-
-@media (max-width: 390px) {
-    .thryv-dashboard-header {
-        padding: 14px;
-    }
-
-    .thryv-dashboard-title {
-        font-size: 21px;
-    }
-
-    .thryv-custom-table tbody td {
-        padding-left: 40% !important;
-    }
-
-        .thryv-custom-table tbody td::before {
-            width: 34%;
-            font-size: 9.5px;
-        }
-
-    .weekly-evaluation-percent-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .weekly-detail-card {
-        padding: 12px;
-    }
-}
-
-.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
-    border-color: rgba(245, 158, 11, 0.34) !important;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.10)), rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 16px 34px rgba(245, 158, 11, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-}
-
-.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
-    border-color: rgba(34, 197, 94, 0.34) !important;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(15, 23, 42, 0.10)), rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 16px 34px rgba(34, 197, 94, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-}
-
-.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
-    color: #fde68a !important;
-    text-shadow: 0 1px 8px rgba(245, 158, 11, 0.22);
-}
-
-.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
-    color: #fbbf24 !important;
-    text-shadow: 0 2px 14px rgba(245, 158, 11, 0.35);
-}
-
-.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
-    color: #bbf7d0 !important;
-    text-shadow: 0 1px 8px rgba(34, 197, 94, 0.22);
-}
-
-.thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
-    color: #4ade80 !important;
-    text-shadow: 0 2px 14px rgba(34, 197, 94, 0.35);
-}
-
-
-html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending,
-html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
-    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 55%, #fef3c7 100%) !important;
-    border-color: #fcd34d !important;
-    box-shadow: 0 16px 34px rgba(180, 83, 9, 0.12) !important;
-}
-
-    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span,
-    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
-        color: #b45309 !important;
-        text-shadow: none !important;
-    }
-
-    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong,
-    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
-        color: #92400e !important;
-        text-shadow: none !important;
-    }
-
-html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed,
-html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
-    background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 55%, #dcfce7 100%) !important;
-    border-color: #86efac !important;
-    box-shadow: 0 16px 34px rgba(21, 128, 61, 0.12) !important;
-}
-
-    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span,
-    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
-        color: #047857 !important;
-        text-shadow: none !important;
-    }
-
-    html[data-theme="light"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong,
-    html:not([data-theme]) .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
-        color: #065f46 !important;
-        text-shadow: none !important;
-    }
-
-
-html[data-theme="dark"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(15, 23, 42, 0.92)) !important;
-    border-color: rgba(251, 191, 36, 0.34) !important;
-}
-
-html[data-theme="dark"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(15, 23, 42, 0.92)) !important;
-    border-color: rgba(74, 222, 128, 0.34) !important;
-}
-
-
-html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
-    background: rgba(255, 251, 235, 0.48) !important;
-    border-color: rgba(245, 158, 11, 0.36) !important;
-}
-
-    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
-        color: #b45309 !important;
-        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
-    }
-
-    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
-        color: #92400e !important;
-        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
-    }
-
-html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
-    background: rgba(236, 253, 245, 0.48) !important;
-    border-color: rgba(34, 197, 94, 0.36) !important;
-}
-
-    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
-        color: #047857 !important;
-        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
-    }
-
-    html[data-theme="liquid glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
-        color: #065f46 !important;
-        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85) !important;
-    }
-
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending {
-    background: rgba(120, 53, 15, 0.30) !important;
-    border-color: rgba(251, 191, 36, 0.34) !important;
-}
-
-    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending span {
-        color: #fde68a !important;
-    }
-
-    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-pending strong {
-        color: #fbbf24 !important;
-    }
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed {
-    background: rgba(20, 83, 45, 0.30) !important;
-    border-color: rgba(74, 222, 128, 0.34) !important;
-}
-
-    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed span {
-        color: #bbf7d0 !important;
-    }
-
-    html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-stat-completed strong {
-        color: #4ade80 !important;
-    }
 
 .thryv-database-cell {
     position: relative;
@@ -1877,174 +906,49 @@ html[data-theme="dark glass"] .thryv-dashboard-page .thryv-hero-stat-card.thryv-
     position: relative;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-width: 58px;
-    padding: 8px 13px;
+    gap: 5px;
+    padding: 5px 8px;
     border-radius: 999px;
-    background: linear-gradient(135deg, rgba(0, 100, 82, 0.12), rgba(20, 184, 166, 0.10));
-    color: #006452;
-    border: 1px solid rgba(0, 100, 82, 0.18);
-    font-size: 12px;
+    color: #bae6fd;
+    background: rgba(14,165,233,.08);
+    border: 1px solid rgba(14,165,233,.16);
+    font-size: 9px;
     font-weight: 900;
-    letter-spacing: 0.04em;
     cursor: help;
-    white-space: nowrap;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
-
-    .thryv-database-pill:hover {
-        transform: translateY(-1px);
-        border-color: rgba(0, 100, 82, 0.34);
-        box-shadow: 0 10px 22px rgba(0, 100, 82, 0.14);
-    }
 
 .thryv-database-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: #006452;
-    box-shadow: 0 0 0 4px rgba(0, 100, 82, 0.12);
-    flex-shrink: 0;
-}
-
-.thryv-database-code {
-    line-height: 1;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #38bdf8;
 }
 
 .thryv-database-pill::before {
     content: attr(data-db-fullname);
     position: absolute;
     left: 50%;
-    bottom: calc(100% + 12px);
-    transform: translateX(-50%) translateY(6px);
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%) translateY(5px);
     min-width: max-content;
     max-width: 220px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    background: #0f172a;
-    color: #ffffff;
+    padding: 8px 10px;
+    border-radius: 9px;
+    background: #020617;
+    color: #fff;
     border: 1px solid #475569;
-    font-size: 12px;
-    font-weight: 900;
-    line-height: 1.25;
-    letter-spacing: 0.02em;
-    text-transform: none;
-    text-align: center;
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    font-size: 9px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     z-index: 100;
-    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    transition: .16s ease;
 }
 
-.thryv-database-pill::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 6px);
-    transform: translateX(-50%) translateY(6px);
-    border-width: 6px 6px 0 6px;
-    border-style: solid;
-    border-color: #0f172a transparent transparent transparent;
-    filter: drop-shadow(0 1px 0 #475569);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    z-index: 101;
-    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-}
-
-.thryv-database-pill:hover::before,
-.thryv-database-pill:hover::after,
-.thryv-database-pill:focus-visible::before,
-.thryv-database-pill:focus-visible::after {
+.thryv-database-pill:hover::before {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
-}
-
-html[data-theme="dark"] .thryv-database-pill,
-html[data-theme="dark glass"] .thryv-database-pill {
-    background: rgba(20, 184, 166, 0.12);
-    color: #ccfbf1;
-    border-color: rgba(45, 212, 191, 0.24);
-}
-
-html[data-theme="dark"] .thryv-database-dot,
-html[data-theme="dark glass"] .thryv-database-dot {
-    background: #5eead4;
-    box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.14);
-}
-
-html[data-theme="liquid glass"] .thryv-database-pill {
-    background: rgba(255, 255, 255, 0.36);
-    color: #065f46;
-    border-color: rgba(0, 100, 82, 0.22);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-}
-
-@media (max-width: 768px) {
-    .thryv-database-pill::before {
-        left: auto;
-        right: 0;
-        transform: translateY(6px);
-    }
-
-    .thryv-database-pill::after {
-        left: auto;
-        right: 18px;
-        transform: translateY(6px);
-    }
-
-    .thryv-database-pill:hover::before,
-    .thryv-database-pill:hover::after,
-    .thryv-database-pill:focus-visible::before,
-    .thryv-database-pill:focus-visible::after {
-        transform: translateY(0);
-    }
-}
-
-html[data-theme="dark"] .thryv-database-pill::before {
-    background: #020617;
-    color: #f8fafc;
-    border-color: #64748b;
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(148, 163, 184, 0.22);
-}
-
-html[data-theme="dark"] .thryv-database-pill::after {
-    border-top-color: #020617;
-    filter: drop-shadow(0 1px 0 #64748b);
-}
-
-html[data-theme="liquid glass"] .thryv-database-pill::before {
-    background: rgba(255, 255, 255, 0.96);
-    color: #0f172a;
-    border-color: rgba(0, 100, 82, 0.55);
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.20), 0 0 0 1px rgba(255, 255, 255, 0.75);
-}
-
-html[data-theme="liquid glass"] .thryv-database-pill::after {
-    border-top-color: rgba(255, 255, 255, 0.96);
-    filter: drop-shadow(0 1px 0 rgba(0, 100, 82, 0.55));
-}
-
-html[data-theme="dark glass"] .thryv-database-pill::before {
-    background: rgba(2, 6, 23, 0.96);
-    color: #f8fafc;
-    border-color: rgba(94, 234, 212, 0.62);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(94, 234, 212, 0.12);
-}
-
-html[data-theme="dark glass"] .thryv-database-pill::after {
-    border-top-color: rgba(2, 6, 23, 0.96);
-    filter: drop-shadow(0 1px 0 rgba(94, 234, 212, 0.62));
 }
 
 .thryv-dashboard-skeleton {
@@ -2053,12 +957,10 @@ html[data-theme="dark glass"] .thryv-database-pill::after {
 }
 
 .thryv-dashboard-skeleton-block {
-    --dashboard-skeleton-base: #e2e8f0;
-    --dashboard-skeleton-highlight: rgba(255, 255, 255, 0.82);
     position: relative;
     overflow: hidden;
-    background: var(--dashboard-skeleton-base);
-    border-radius: 10px;
+    border-radius: 8px;
+    background: rgba(148,163,184,.13);
 }
 
     .thryv-dashboard-skeleton-block::after {
@@ -2066,509 +968,1398 @@ html[data-theme="dark glass"] .thryv-database-pill::after {
         position: absolute;
         inset: 0;
         transform: translateX(-110%);
-        background: linear-gradient( 90deg, transparent 0%, var(--dashboard-skeleton-highlight) 50%, transparent 100% );
-        animation: thryv-dashboard-skeleton-shimmer 1.35s infinite;
+        background: linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+        animation: thryv-shimmer 1.25s infinite;
     }
 
-.thryv-dashboard-skeleton-hero
-.thryv-dashboard-skeleton-block {
-    --dashboard-skeleton-base: rgba(226, 232, 240, 0.20);
-    --dashboard-skeleton-highlight: rgba(255, 255, 255, 0.18);
-}
-
 .thryv-dashboard-skeleton-title {
-    width: min(330px, 78%);
-    height: 42px;
-    margin-top: 8px;
-    border-radius: 12px;
+    width: 260px;
+    max-width: 75%;
+    height: 34px;
 }
 
 .thryv-dashboard-skeleton-subtitle {
-    width: min(520px, 92%);
-    height: 17px;
-    margin-top: 22px;
+    width: 430px;
+    max-width: 90%;
+    height: 13px;
+    margin-top: 14px;
 }
 
     .thryv-dashboard-skeleton-subtitle.short {
-        width: min(380px, 68%);
-        margin-top: 11px;
+        width: 270px;
+        margin-top: 9px;
     }
 
-.thryv-dashboard-skeleton-stat-card {
-    gap: 16px;
+.thryv-dashboard-hero-stats {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.thryv-hero-stat-card {
+    min-height: 94px;
+    padding: 13px;
+    border-radius: 14px;
+    background: rgba(15,23,42,.55);
+    border: 1px solid rgba(148,163,184,.12);
 }
 
 .thryv-dashboard-skeleton-stat-label {
     width: 70%;
-    height: 14px;
+    height: 11px;
 }
 
 .thryv-dashboard-skeleton-stat-value {
-    width: 48%;
-    height: 34px;
-    border-radius: 12px;
+    width: 45%;
+    height: 25px;
+    margin-top: 8px;
 }
 
 .thryv-dashboard-skeleton-section {
-    overflow: hidden;
+    min-height: 132px;
 }
 
 .thryv-dashboard-skeleton-section-copy {
     flex: 1;
-    min-width: 240px;
 }
 
 .thryv-dashboard-skeleton-section-title {
-    width: 230px;
-    max-width: 76%;
-    height: 25px;
+    width: 200px;
+    height: 20px;
 }
 
 .thryv-dashboard-skeleton-section-description {
-    width: 410px;
-    max-width: 90%;
-    height: 14px;
-    margin-top: 12px;
+    width: 360px;
+    max-width: 80%;
+    height: 10px;
+    margin-top: 8px;
 }
 
 .thryv-dashboard-skeleton-actions {
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .thryv-dashboard-skeleton-filter {
-    width: 210px;
-    height: 42px;
-    border-radius: 14px;
+    width: 160px;
+    height: 39px;
 }
 
 .thryv-dashboard-skeleton-badge {
-    width: 100px;
-    height: 42px;
+    width: 80px;
+    height: 39px;
     border-radius: 999px;
 }
 
 .thryv-dashboard-skeleton-table {
     width: 100%;
-    overflow: hidden;
 }
 
 .thryv-dashboard-skeleton-table-head,
 .thryv-dashboard-skeleton-table-row {
     display: grid;
-    grid-template-columns: minmax(170px, 1.45fr) repeat(5, minmax(90px, 1fr)) minmax(80px, 0.7fr);
-    gap: 22px;
+    grid-template-columns: minmax(150px,1.3fr) repeat(5,minmax(80px,1fr)) minmax(70px,.7fr);
+    gap: 16px;
     align-items: center;
+    padding: 11px 13px;
 }
 
 .thryv-dashboard-skeleton-table-head {
-    min-height: 54px;
-    padding: 14px 18px;
-    background: #fafafa;
-    border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+    background: #060e1b;
 }
 
 .thryv-dashboard-skeleton-table-row {
-    min-height: 74px;
-    padding: 15px 18px;
-    border-bottom: 1px solid rgba(17, 17, 17, 0.05);
+    border-top: 1px solid rgba(148,163,184,.07);
 }
 
-.thryv-dashboard-skeleton-column-title {
-    width: 72%;
-    height: 12px;
-    border-radius: 999px;
+.thryv-dashboard-skeleton-column-title,
+.thryv-dashboard-skeleton-cell,
+.thryv-dashboard-skeleton-name {
+    height: 10px;
+}
+
+.thryv-dashboard-skeleton-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
 }
 
 .thryv-dashboard-skeleton-employee {
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-.thryv-dashboard-skeleton-avatar {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 16px;
+    gap: 8px;
 }
 
 .thryv-dashboard-skeleton-name {
-    width: 118px;
-    max-width: calc(100% - 54px);
-    height: 14px;
+    width: 100px;
+}
+
+.thryv-dashboard-skeleton-cell.small {
+    width: 55%;
+}
+
+.thryv-dashboard-skeleton-cell.medium {
+    width: 72%;
+}
+
+.thryv-dashboard-skeleton-cell.large {
+    width: 90%;
+}
+
+.thryv-dashboard-skeleton-cell.action {
+    width: 60px;
+    height: 22px;
     border-radius: 999px;
 }
 
-.thryv-dashboard-skeleton-cell {
-    width: 78%;
-    height: 14px;
-    border-radius: 999px;
-}
-
-    .thryv-dashboard-skeleton-cell.small {
-        width: 54%;
-    }
-
-    .thryv-dashboard-skeleton-cell.medium {
-        width: 72%;
-    }
-
-    .thryv-dashboard-skeleton-cell.large {
-        width: 92%;
-    }
-
-    .thryv-dashboard-skeleton-cell.action {
-        width: 72px;
-        height: 30px;
-        border-radius: 999px;
-    }
-
-html[data-theme="dark"]
-.thryv-dashboard-skeleton-block {
-    --dashboard-skeleton-base: rgba(148, 163, 184, 0.18);
-    --dashboard-skeleton-highlight: rgba(255, 255, 255, 0.09);
-}
-
-html[data-theme="dark"]
-.thryv-dashboard-skeleton-table-head {
-    background: #1e293b;
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme="dark"]
-.thryv-dashboard-skeleton-table-row {
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-html[data-theme="liquid glass"]
-.thryv-dashboard-skeleton-block {
-    --dashboard-skeleton-base: rgba(148, 163, 184, 0.26);
-    --dashboard-skeleton-highlight: rgba(255, 255, 255, 0.58);
-}
-
-html[data-theme="liquid glass"]
-.thryv-dashboard-skeleton-hero
-.thryv-dashboard-skeleton-block {
-    --dashboard-skeleton-base: rgba(71, 85, 105, 0.18);
-    --dashboard-skeleton-highlight: rgba(255, 255, 255, 0.48);
-}
-
-html[data-theme="liquid glass"]
-.thryv-dashboard-skeleton-table-head {
-    background: rgba(255, 255, 255, 0.18);
-    border-bottom-color: rgba(255, 255, 255, 0.30);
-}
-
-html[data-theme="liquid glass"]
-.thryv-dashboard-skeleton-table-row {
-    border-bottom-color: rgba(255, 255, 255, 0.34);
-}
-
-html[data-theme="dark glass"]
-.thryv-dashboard-skeleton-block {
-    --dashboard-skeleton-base: rgba(148, 163, 184, 0.20);
-    --dashboard-skeleton-highlight: rgba(255, 255, 255, 0.10);
-}
-
-html[data-theme="dark glass"]
-.thryv-dashboard-skeleton-table-head {
-    background: rgba(255, 255, 255, 0.05);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme="dark glass"]
-.thryv-dashboard-skeleton-table-row {
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-@media (max-width: 1024px) {
-    .thryv-dashboard-skeleton-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(160px, 1fr));
-    }
-
-    .thryv-dashboard-skeleton-filter,
-    .thryv-dashboard-skeleton-badge {
-        width: 100%;
-    }
-
-    .thryv-dashboard-skeleton-table-head,
-    .thryv-dashboard-skeleton-table-row {
-        gap: 14px;
-    }
-}
-
-@media (max-width: 768px) {
-    .thryv-dashboard-skeleton-title {
-        width: 72%;
-        height: 30px;
-    }
-
-    .thryv-dashboard-skeleton-subtitle {
-        width: 90%;
-        height: 14px;
-    }
-
-        .thryv-dashboard-skeleton-subtitle.short {
-            width: 65%;
-        }
-
-    .thryv-dashboard-skeleton-actions {
-        grid-template-columns: 1fr;
-    }
-
-    .thryv-dashboard-skeleton-table {
-        padding: 16px;
-    }
-
-    .thryv-dashboard-skeleton-table-head {
-        display: none;
-    }
-
-    .thryv-dashboard-skeleton-table-row {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 14px;
-        min-height: 0;
-        margin-bottom: 16px;
-        padding: 16px;
-        border: 1px solid rgba(226, 232, 240, 0.90);
-        border-radius: 18px;
-        background: #ffffff;
-        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
-    }
-
-    .thryv-dashboard-skeleton-employee {
-        width: 100%;
-    }
-
-    .thryv-dashboard-skeleton-cell {
-        width: 100%;
-        height: 13px;
-    }
-
-        .thryv-dashboard-skeleton-cell.small {
-            width: 42%;
-        }
-
-        .thryv-dashboard-skeleton-cell.medium {
-            width: 68%;
-        }
-
-        .thryv-dashboard-skeleton-cell.large {
-            width: 88%;
-        }
-
-        .thryv-dashboard-skeleton-cell.action {
-            width: 115px;
-            height: 32px;
-        }
-
-    html[data-theme="dark"]
-    .thryv-dashboard-skeleton-table-row {
-        background: #111827;
-        border-color: rgba(255, 255, 255, 0.10);
-    }
-
-    html[data-theme="dark glass"]
-    .thryv-dashboard-skeleton-table-row {
-        background: rgba(15, 23, 42, 0.82);
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    html[data-theme="liquid glass"]
-    .thryv-dashboard-skeleton-table-row {
-        background: rgba(255, 255, 255, 0.38);
-        border-color: rgba(255, 255, 255, 0.62);
-    }
-}
-
-@media (max-width: 520px) {
-    .thryv-dashboard-skeleton-table {
-        padding: 12px;
-    }
-
-    .thryv-dashboard-skeleton-table-row {
-        padding: 14px;
-        border-radius: 16px;
-    }
-
-    .thryv-dashboard-skeleton-section-title {
-        width: 68%;
-        height: 21px;
-    }
-
-    .thryv-dashboard-skeleton-section-description {
-        width: 88%;
-        height: 12px;
-    }
-}
-
-@keyframes thryv-dashboard-skeleton-shimmer {
-    100% {
+@keyframes thryv-shimmer {
+    to {
         transform: translateX(110%);
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .thryv-dashboard-skeleton-block::after {
-        animation: none;
-    }
+html.thryv-modal-open,
+body.thryv-modal-open {
+    overflow: hidden !important;
 }
 
-.thryv-sort-header-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.45rem;
-    padding: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    font-weight: inherit;
-    letter-spacing: inherit;
-    text-transform: inherit;
+.weekly-evaluation-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 22px !important;
+    background: rgba(2,6,23,.82) !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.weekly-evaluation-modal {
+    width: min(1160px, calc(100vw - 44px)) !important;
+    height: min(900px, calc(100dvh - 44px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    background: #0b1728 !important;
+    border: 1px solid rgba(148,163,184,.18) !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,.46) !important;
+}
+
+.weekly-evaluation-modal-header {
+    flex: 0 0 auto;
+    padding: 20px 22px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    background: linear-gradient(135deg,#07111f,#0f2744);
+    color: #fff;
+    border-bottom: 1px solid rgba(148,163,184,.14);
+}
+
+.weekly-modal-eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #9dadbf;
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.weekly-evaluation-modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.weekly-evaluation-modal-header p {
+    margin: 5px 0 0;
+    color: #cbd5e1;
+    font-size: 11px;
+}
+
+.weekly-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 9px;
+    background: rgba(255,255,255,.07);
+    color: #fff;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-    .thryv-sort-header-btn:hover {
-        opacity: 0.8;
+.weekly-evaluation-modal-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding-bottom: 22px;
+}
+
+.weekly-evaluation-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 10px;
+    padding: 16px 18px 0;
+}
+
+.weekly-evaluation-percent-grid {
+    display: grid;
+    grid-template-columns: repeat(5,minmax(0,1fr));
+    gap: 10px;
+    padding: 10px 18px 0;
+}
+
+.weekly-evaluation-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+    padding: 16px 18px;
+}
+
+.weekly-summary-card,
+.weekly-percent-mini-card,
+.weekly-detail-card {
+    background: #0f1d31;
+    border: 1px solid rgba(148,163,184,.14);
+    border-radius: 14px;
+}
+
+.weekly-summary-card {
+    padding: 13px;
+}
+
+.weekly-percent-mini-card {
+    padding: 11px;
+    text-align: center;
+}
+
+.weekly-detail-card {
+    padding: 14px;
+}
+
+.weekly-summary-card span,
+.weekly-percent-mini-card span {
+    display: block;
+    color: #94a3b8;
+    font-size: 8px;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.weekly-summary-card strong,
+.weekly-percent-mini-card strong {
+    display: block;
+    margin-top: 5px;
+    color: #f8fafc;
+    font-size: 11px;
+}
+
+.weekly-summary-card.total {
+    background: linear-gradient(135deg,rgba(37,99,235,.12),#0f1d31);
+    border-color: rgba(37,99,235,.24);
+}
+
+.weekly-detail-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+    .weekly-detail-card-header h4 {
+        margin: 0;
+        color: #f8fafc;
+        font-size: 11px;
     }
 
-    .thryv-sort-header-btn:active {
-        transform: translateY(1px);
-    }
-
-    .thryv-sort-header-btn:focus-visible {
-        outline: 2px solid currentColor;
-        outline-offset: 4px;
-        border-radius: 4px;
-    }
-
-.thryv-sort-indicator {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 14px;
-    font-size: 0.7rem;
-    line-height: 1;
-    opacity: 0.8;
-}
-
-.thryv-ready-to-ship-cell {
-    min-width: 150px;
-}
-
-.thryv-ready-to-ship-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 31px;
-    padding: 6px 11px;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 900;
-    line-height: 1.1;
-    white-space: nowrap;
-}
-
-    .thryv-ready-to-ship-badge > span {
-        width: 18px;
-        height: 18px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+    .weekly-detail-card-header span {
+        padding: 3px 7px;
         border-radius: 999px;
+        background: rgba(148,163,184,.08);
+        color: #94a3b8;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+.weekly-radio-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    gap: 7px;
+    align-items: center;
+    padding: 7px;
+    margin-bottom: 5px;
+    border-radius: 9px;
+}
+
+    .weekly-radio-row span {
+        color: #cbd5e1;
+        font-size: 9px;
+    }
+
+    .weekly-radio-row small {
+        font-size: 8px;
+        font-weight: 900;
+    }
+
+    .weekly-radio-row.failed {
+        background: rgba(220,38,38,.08);
+        border: 1px solid rgba(220,38,38,.14);
+    }
+
+        .weekly-radio-row.failed small {
+            color: #fca5a5;
+        }
+
+    .weekly-radio-row.ok {
+        background: rgba(16,185,129,.06);
+        border: 1px solid rgba(16,185,129,.10);
+    }
+
+        .weekly-radio-row.ok small {
+            color: #6ee7b7;
+        }
+
+html[data-theme="light"] .thryv-dashboard-header {
+    background: radial-gradient(circle at 74% 112%,rgba(59,130,246,.14),transparent 34%), radial-gradient(circle at 78% 2%,rgba(255,90,19,.14),transparent 24%), linear-gradient(108deg,#fff 0%,#f7f9fd 57%,#edf3fc 100%);
+    border-color: rgba(100,116,139,.18);
+    box-shadow: 0 18px 42px rgba(15,23,42,.07), inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+html[data-theme="light"] .thryv-dashboard-title,
+html[data-theme="light"] .thryv-dashboard-date-card strong {
+    color: #0f172a;
+}
+
+html[data-theme="light"] .thryv-dashboard-eyebrow,
+html[data-theme="light"] .thryv-dashboard-subtitle,
+html[data-theme="light"] .thryv-dashboard-hero-quote,
+html[data-theme="light"] .thryv-dashboard-date-card span,
+html[data-theme="light"] .thryv-dashboard-date-card small {
+    color: #64748b;
+}
+
+    html[data-theme="light"] .thryv-dashboard-hero-quote strong {
+        color: #334155;
+    }
+
+html[data-theme="light"] .thryv-metric-card {
+    background: linear-gradient(145deg,#fff,#f8fafc);
+    box-shadow: 0 12px 25px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.94);
+}
+
+html[data-theme="light"] .thryv-metric-content span {
+    color: #475569;
+}
+
+html[data-theme="light"] .thryv-metric-content strong {
+    color: #0f172a;
+}
+
+html[data-theme="light"] .thryv-metric-content small {
+    color: #8291a4;
+}
+
+html[data-theme="light"] .thryv-metric-blue {
+    background: linear-gradient(145deg,#fff,#eff6ff);
+}
+
+html[data-theme="light"] .thryv-metric-violet,
+html[data-theme="light"] .thryv-metric-purple {
+    background: linear-gradient(145deg,#fff,#f5f3ff);
+}
+
+html[data-theme="light"] .thryv-metric-cyan {
+    background: linear-gradient(145deg,#fff,#ecfeff);
+}
+
+html[data-theme="light"] .thryv-metric-completed {
+    background: linear-gradient(145deg,#fff,#ecfdf5);
+}
+
+    html[data-theme="light"] .thryv-metric-completed .thryv-metric-content strong {
+        color: #047857;
+    }
+
+html[data-theme="light"] .thryv-metric-pending {
+    background: linear-gradient(145deg,#fff,#fffbeb);
+}
+
+    html[data-theme="light"] .thryv-metric-pending .thryv-metric-content strong {
+        color: #b45309;
+    }
+
+html[data-theme="light"] .thryv-section-card {
+    background: linear-gradient(180deg,#fff,#f8fafc);
+    border-color: rgba(100,116,139,.16);
+}
+
+html[data-theme="light"] .completed-section-card {
+    background: linear-gradient(180deg,#fff,#f2fbf7);
+}
+
+html[data-theme="light"] .weekly-evaluations-section-card {
+    background: linear-gradient(180deg,#fff,#f8f7ff);
+}
+
+html[data-theme="light"] .thryv-section-header {
+    background: rgba(248,250,252,.78);
+}
+
+    html[data-theme="light"] .thryv-section-header h3,
+    html[data-theme="light"] .thryv-employee-name {
+        color: #0f172a;
+    }
+
+    html[data-theme="light"] .thryv-section-header p,
+    html[data-theme="light"] .thryv-filter-group label {
+        color: #64748b;
+    }
+
+html[data-theme="light"] .thryv-filter-select,
+html[data-theme="light"] .thryv-search-box {
+    background: #fff;
+    color: #0f172a;
+    border-color: rgba(100,116,139,.18);
+}
+
+    html[data-theme="light"] .thryv-search-box input {
+        color: #0f172a;
+    }
+
+html[data-theme="light"] .thryv-custom-table thead th {
+    background: #eef2f7;
+    color: #475569;
+}
+
+html[data-theme="light"] .thryv-custom-table tbody td {
+    color: #334155;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-header,
+html[data-theme="liquid glass"] .thryv-metric-card,
+html[data-theme="liquid glass"] .thryv-section-card {
+    backdrop-filter: blur(24px) saturate(175%);
+    -webkit-backdrop-filter: blur(24px) saturate(175%);
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-header {
+    background: linear-gradient(135deg,rgba(255,255,255,.44),rgba(255,255,255,.23));
+    border-color: rgba(255,255,255,.70);
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-title,
+html[data-theme="liquid glass"] .thryv-dashboard-date-card strong {
+    color: #0f172a;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-eyebrow,
+html[data-theme="liquid glass"] .thryv-dashboard-subtitle,
+html[data-theme="liquid glass"] .thryv-dashboard-hero-quote,
+html[data-theme="liquid glass"] .thryv-dashboard-date-card span,
+html[data-theme="liquid glass"] .thryv-dashboard-date-card small {
+    color: #475569;
+}
+
+html[data-theme="liquid glass"] .thryv-metric-card {
+    background: rgba(255,255,255,.40);
+    border-color: rgba(255,255,255,.62);
+}
+
+html[data-theme="liquid glass"] .thryv-metric-content span {
+    color: #475569;
+}
+
+html[data-theme="liquid glass"] .thryv-metric-content strong {
+    color: #0f172a;
+}
+
+html[data-theme="liquid glass"] .thryv-metric-content small {
+    color: #64748b;
+}
+
+html[data-theme="liquid glass"] .thryv-section-card {
+    background: rgba(255,255,255,.34);
+    border-color: rgba(255,255,255,.60);
+}
+
+html[data-theme="liquid glass"] .completed-section-card {
+    background: rgba(236,253,245,.40);
+}
+
+html[data-theme="liquid glass"] .weekly-evaluations-section-card {
+    background: rgba(245,243,255,.42);
+}
+
+html[data-theme="liquid glass"] .thryv-section-header h3,
+html[data-theme="liquid glass"] .thryv-employee-name {
+    color: #0f172a;
+}
+
+html[data-theme="liquid glass"] .thryv-section-header p,
+html[data-theme="liquid glass"] .thryv-filter-group label {
+    color: #475569;
+}
+
+html[data-theme="liquid glass"] .thryv-filter-select,
+html[data-theme="liquid glass"] .thryv-search-box {
+    background: rgba(255,255,255,.42);
+    color: #0f172a;
+    border-color: rgba(255,255,255,.62);
+}
+
+    html[data-theme="liquid glass"] .thryv-search-box input {
+        color: #0f172a;
+    }
+
+html[data-theme="liquid glass"] .thryv-custom-table thead th {
+    background: rgba(255,255,255,.24);
+    color: #475569;
+}
+
+html[data-theme="liquid glass"] .thryv-custom-table tbody td {
+    color: #334155;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-header,
+html[data-theme="dark glass"] .thryv-metric-card,
+html[data-theme="dark glass"] .thryv-section-card {
+    backdrop-filter: blur(24px) saturate(165%);
+    -webkit-backdrop-filter: blur(24px) saturate(165%);
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-header {
+    background: linear-gradient(135deg,rgba(2,6,23,.60),rgba(15,23,42,.44));
+    border-color: rgba(255,255,255,.11);
+}
+
+html[data-theme="dark glass"] .thryv-metric-card {
+    background: rgba(15,23,42,.50);
+    border-color: rgba(255,255,255,.10);
+}
+
+html[data-theme="dark glass"] .thryv-metric-completed {
+    background: rgba(20,83,45,.33);
+}
+
+html[data-theme="dark glass"] .thryv-metric-pending {
+    background: rgba(120,53,15,.33);
+}
+
+html[data-theme="dark glass"] .thryv-section-card {
+    background: rgba(15,23,42,.48);
+    border-color: rgba(255,255,255,.10);
+}
+
+html[data-theme="dark glass"] .completed-section-card {
+    background: rgba(6,78,59,.29);
+}
+
+html[data-theme="dark glass"] .weekly-evaluations-section-card {
+    background: rgba(46,16,101,.29);
+}
+
+html[data-theme="dark glass"] .thryv-filter-select,
+html[data-theme="dark glass"] .thryv-search-box {
+    background: rgba(15,23,42,.52);
+    border-color: rgba(255,255,255,.10);
+}
+
+@media (max-width: 1280px) {
+    .thryv-dashboard-metrics {
+        grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .thryv-dashboard-hero-content {
+        width: 58%;
+    }
+
+    .thryv-dashboard-book-art {
+        left: 38%;
+        width: 47%;
+    }
+
+    .thryv-dashboard-hero-quote {
+        display: none;
+    }
+
+    .thryv-section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .thryv-section-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 680px) {
+    .thryv-dashboard-header {
+        min-height: 175px;
+        padding: 18px 16px;
+    }
+
+    .thryv-dashboard-hero-content {
+        width: 100%;
+    }
+
+    .thryv-dashboard-book-art,
+    .thryv-dashboard-date-card {
+        display: none;
+    }
+
+    .thryv-dashboard-title {
+        font-size: 27px;
+    }
+
+    .thryv-dashboard-subtitle {
         font-size: 12px;
-        font-weight: 950;
     }
 
-    .thryv-ready-to-ship-badge.ready {
-        border-color: #86efac;
-        background: #dcfce7;
-        color: #15803d;
+    .thryv-dashboard-metrics {
+        grid-template-columns: 1fr;
     }
 
-        .thryv-ready-to-ship-badge.ready > span {
-            background: #16a34a;
-            color: #ffffff;
-        }
-
-    .thryv-ready-to-ship-badge.pending {
-        border-color: #fde68a;
-        background: #fef9c3;
-        color: #a16207;
+    .thryv-section-actions {
+        display: grid;
+        grid-template-columns: 1fr;
     }
 
-        .thryv-ready-to-ship-badge.pending > span {
-            background: #ca8a04;
-            color: #ffffff;
-        }
-
-html[data-theme="dark"] .thryv-ready-to-ship-badge.ready {
-    border-color: rgba(74, 222, 128, 0.34);
-    background: rgba(22, 163, 74, 0.16);
-    color: #86efac;
-}
-
-html[data-theme="dark"] .thryv-ready-to-ship-badge.pending {
-    border-color: rgba(250, 204, 21, 0.30);
-    background: rgba(202, 138, 4, 0.15);
-    color: #fde68a;
-}
-
-html[data-theme="liquid glass"] .thryv-ready-to-ship-badge.ready {
-    border-color: rgba(34, 197, 94, 0.34);
-    background: rgba(220, 252, 231, 0.66);
-    color: #15803d;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-html[data-theme="liquid glass"] .thryv-ready-to-ship-badge.pending {
-    border-color: rgba(202, 138, 4, 0.30);
-    background: rgba(254, 249, 195, 0.68);
-    color: #854d0e;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-html[data-theme="dark glass"] .thryv-ready-to-ship-badge.ready {
-    border-color: rgba(74, 222, 128, 0.34);
-    background: rgba(22, 163, 74, 0.18);
-    color: #bbf7d0;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-html[data-theme="dark glass"] .thryv-ready-to-ship-badge.pending {
-    border-color: rgba(250, 204, 21, 0.28);
-    background: rgba(202, 138, 4, 0.17);
-    color: #fef08a;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-@media (max-width: 768px) {
-    .thryv-ready-to-ship-cell {
+    .thryv-filter-group,
+    .thryv-search-box,
+    .thryv-panel-icon-btn,
+    .thryv-view-all-btn {
+        width: 100%;
         min-width: 0;
     }
 
-    .thryv-ready-to-ship-badge {
-        max-width: 100%;
-        white-space: normal;
-        text-align: center;
+    .thryv-custom-table {
+        min-width: 0;
+        display: block;
     }
+
+        .thryv-custom-table thead {
+            display: none;
+        }
+
+        .thryv-custom-table tbody,
+        .thryv-custom-table tr,
+        .thryv-custom-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .thryv-custom-table tbody {
+            padding: 9px;
+        }
+
+            .thryv-custom-table tbody tr {
+                margin-bottom: 9px;
+                padding: 9px;
+                border-radius: 12px;
+                background: rgba(15,23,42,.58);
+                border: 1px solid rgba(148,163,184,.12);
+            }
+
+            .thryv-custom-table tbody td {
+                position: relative;
+                min-height: 38px;
+                padding: 9px 8px 9px 42% !important;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                text-align: right !important;
+                border-bottom: 1px solid rgba(148,163,184,.08);
+            }
+
+                .thryv-custom-table tbody td::before {
+                    content: attr(data-label);
+                    position: absolute;
+                    left: 8px;
+                    width: 36%;
+                    color: #94a3b8;
+                    font-size: 8px;
+                    font-weight: 900;
+                    text-align: left;
+                    text-transform: uppercase;
+                }
+
+    .weekly-evaluation-modal-backdrop {
+        padding: 0 !important;
+        align-items: stretch !important;
+    }
+
+    .weekly-evaluation-modal {
+        width: 100vw !important;
+        height: 100dvh !important;
+        border-radius: 0 !important;
+    }
+
+    .weekly-evaluation-summary-grid,
+    .weekly-evaluation-percent-grid,
+    .weekly-evaluation-detail-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.thryv-dashboard-page .thryv-section-card.assigned-section-card,
+.thryv-dashboard-page .thryv-section-card.completed-section-card,
+.thryv-dashboard-page .thryv-section-card.weekly-evaluations-section-card {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 0 !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    box-shadow: 0 14px 34px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card.assigned-section-card {
+    border: 1px solid rgba(49,108,186,.45) !important;
+    background: radial-gradient(circle at 92% 0%, rgba(46,105,210,.08), transparent 35%), linear-gradient(180deg,#0b1d35 0%,#09182b 100%) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card.completed-section-card {
+    border: 1px solid rgba(12,155,118,.45) !important;
+    background: radial-gradient(circle at 7% 0%, rgba(10,174,126,.10), transparent 31%), linear-gradient(180deg,#08282f 0%,#081b29 100%) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card.weekly-evaluations-section-card {
+    border: 1px solid rgba(102,59,207,.50) !important;
+    background: radial-gradient(circle at 7% 0%, rgba(111,66,225,.12), transparent 32%), linear-gradient(180deg,#17193f 0%,#0c1930 100%) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-header {
+    min-height: 78px !important;
+    padding: 13px 16px 12px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    border-bottom: 0 !important;
+    background: transparent !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-heading {
+    min-width: 285px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-icon {
+    width: 46px !important;
+    height: 46px !important;
+    flex: 0 0 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    color: #fff !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.24) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-icon-assigned {
+    background: linear-gradient(135deg,#0d56dc,#1777ff) !important;
+    box-shadow: 0 8px 20px rgba(23,119,255,.24) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-icon-completed {
+    background: linear-gradient(135deg,#047857,#10c98b) !important;
+    box-shadow: 0 8px 20px rgba(16,185,129,.22) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-icon-weekly {
+    background: linear-gradient(135deg,#5521bb,#854bf0) !important;
+    box-shadow: 0 8px 20px rgba(124,58,237,.23) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-header h3 {
+    margin: 0 !important;
+    color: #f8fafc !important;
+    font-size: 17px !important;
+    line-height: 1.08 !important;
+    font-weight: 800 !important;
+    letter-spacing: -.012em !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-header p {
+    margin: 4px 0 0 !important;
+    color: #93a4b8 !important;
+    font-size: 9.5px !important;
+    line-height: 1.3 !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-section-actions {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 9px !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-filter-group {
+    min-width: 190px !important;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+    .thryv-dashboard-page .thryv-section-card .thryv-filter-group label {
+        padding-left: 2px !important;
+        color: #95a6bb !important;
+        font-size: 8.5px !important;
+        line-height: 1 !important;
+        font-weight: 800 !important;
+    }
+
+.thryv-dashboard-page .thryv-section-card .thryv-filter-select,
+.thryv-dashboard-page .thryv-section-card .thryv-search-box {
+    height: 37px !important;
+    border-radius: 9px !important;
+    border: 1px solid rgba(82,108,145,.34) !important;
+    background: rgba(5,16,31,.76) !important;
+    color: #e2e8f0 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-filter-select {
+    width: 100% !important;
+    padding: 0 11px !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-search-box {
+    min-width: 245px !important;
+    width: 245px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 0 10px !important;
+}
+
+    .thryv-dashboard-page .thryv-section-card .thryv-search-box input {
+        color: #e2e8f0 !important;
+        font-size: 9.5px !important;
+    }
+
+.thryv-dashboard-page .thryv-section-card .thryv-clear-filter-btn {
+    height: 37px !important;
+    padding: 0 11px !important;
+    border-radius: 9px !important;
+    border: 1px solid rgba(148,163,184,.14) !important;
+    background: rgba(255,255,255,.04) !important;
+    color: #cbd5e1 !important;
+    font-size: 9.5px !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-panel-icon-btn {
+    width: 37px !important;
+    height: 37px !important;
+    flex: 0 0 37px !important;
+    border-radius: 9px !important;
+    border: 1px solid rgba(56,113,202,.42) !important;
+    background: rgba(30,78,153,.22) !important;
+    color: #b7d2ff !important;
+    font-size: 17px !important;
+}
+
+    .thryv-dashboard-page .thryv-section-card .thryv-panel-icon-btn.completed {
+        border-color: rgba(16,185,129,.32) !important;
+        background: rgba(16,185,129,.11) !important;
+        color: #81e6bf !important;
+    }
+
+    .thryv-dashboard-page .thryv-section-card .thryv-panel-icon-btn.weekly {
+        border-color: rgba(124,58,237,.34) !important;
+        background: rgba(124,58,237,.12) !important;
+        color: #c9b7ff !important;
+    }
+
+.thryv-dashboard-page .thryv-section-card .thryv-view-all-btn {
+    min-width: 100px !important;
+    height: 37px !important;
+    padding: 0 15px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,.07) !important;
+    color: #fff !important;
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+}
+
+    .thryv-dashboard-page .thryv-section-card .thryv-view-all-btn.assigned {
+        background: linear-gradient(135deg,#d95308,#ff7213) !important;
+        box-shadow: 0 7px 18px rgba(255,90,19,.23) !important;
+    }
+
+    .thryv-dashboard-page .thryv-section-card .thryv-view-all-btn.completed {
+        background: linear-gradient(135deg,#047c5a,#10c98b) !important;
+        box-shadow: 0 7px 18px rgba(16,185,129,.20) !important;
+    }
+
+    .thryv-dashboard-page .thryv-section-card .thryv-view-all-btn.weekly {
+        background: linear-gradient(135deg,#6021ca,#813df0) !important;
+        box-shadow: 0 7px 18px rgba(124,58,237,.22) !important;
+    }
+
+.thryv-dashboard-page .thryv-section-card .thryv-table-wrapper {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 14px 13px !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    border: 1px solid rgba(77,105,143,.30) !important;
+    border-radius: 10px !important;
+    background: rgba(3,12,24,.12) !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-custom-table {
+    width: 100% !important;
+    min-width: 900px !important;
+    border-collapse: collapse !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+    .thryv-dashboard-page .thryv-section-card .thryv-custom-table thead th {
+        padding: 11px 12px !important;
+        background: rgba(5,16,30,.92) !important;
+        border-bottom: 1px solid rgba(89,116,151,.27) !important;
+        color: #cbd5e1 !important;
+        font-size: 8.5px !important;
+        font-weight: 850 !important;
+        text-transform: uppercase !important;
+    }
+
+    .thryv-dashboard-page .thryv-section-card .thryv-custom-table tbody td {
+        padding: 10px 12px !important;
+        color: #dbe5ef !important;
+        border-bottom: 1px solid rgba(88,113,148,.09) !important;
+        font-size: 9.5px !important;
+    }
+
+.thryv-dashboard-page .thryv-section-card .thryv-empty-row {
+    padding: 0 !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-empty-state {
+    min-height: 82px !important;
+    padding: 13px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-empty-icon {
+    width: 29px !important;
+    height: 29px !important;
+    border-radius: 50% !important;
+    font-size: 12px !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-empty-state strong {
+    color: #d4deea !important;
+    font-size: 9.5px !important;
+}
+
+.thryv-dashboard-page .thryv-section-card .thryv-empty-state small {
+    color: #77899e !important;
+    font-size: 8.5px !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-card.assigned-section-card {
+    border-color: rgba(49,108,186,.45) !important;
+    background: radial-gradient(circle at 92% 0%, rgba(46,105,210,.08), transparent 35%), linear-gradient(180deg,rgba(11,29,53,.90),rgba(9,24,43,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-card.completed-section-card {
+    border-color: rgba(12,155,118,.45) !important;
+    background: radial-gradient(circle at 7% 0%, rgba(10,174,126,.10), transparent 31%), linear-gradient(180deg,rgba(8,40,47,.90),rgba(8,27,41,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-card.weekly-evaluations-section-card {
+    border-color: rgba(102,59,207,.50) !important;
+    background: radial-gradient(circle at 7% 0%, rgba(111,66,225,.12), transparent 32%), linear-gradient(180deg,rgba(23,25,63,.90),rgba(12,25,48,.90)) !important;
+}
+
+@media (max-width: 1280px) {
+    .thryv-dashboard-page .thryv-section-card .thryv-section-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .thryv-dashboard-page .thryv-section-card .thryv-section-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+.thryv-dashboard-page .thryv-dashboard-metrics {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.thryv-dashboard-page .thryv-metric-card {
+    position: relative !important;
+    min-width: 0 !important;
+    min-height: 118px !important;
+    padding: 16px 14px !important;
+    display: grid !important;
+    grid-template-columns: 48px minmax(0,1fr) 17px !important;
+    align-items: center !important;
+    gap: 11px !important;
+    overflow: hidden !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(148,163,184,.18) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        pointer-events: none !important;
+        background: linear-gradient(135deg, rgba(255,255,255,.025), transparent 42%) !important;
+    }
+
+    .thryv-dashboard-page .thryv-metric-card::after {
+        content: "›" !important;
+        position: absolute !important;
+        top: 9px !important;
+        right: 10px !important;
+        width: 20px !important;
+        height: 20px !important;
+        display: grid !important;
+        place-items: center !important;
+        border-radius: 50% !important;
+        background: rgba(255,255,255,.045) !important;
+        color: rgba(255,255,255,.60) !important;
+        font-size: 15px !important;
+        line-height: 1 !important;
+        font-weight: 700 !important;
+    }
+
+.thryv-dashboard-page .thryv-metric-icon {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 48px !important;
+    height: 48px !important;
+    flex: 0 0 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    color: #fff !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 18px rgba(0,0,0,.22) !important;
+}
+
+.thryv-dashboard-page .thryv-metric-content {
+    position: relative !important;
+    z-index: 2 !important;
+    min-width: 0 !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-content span {
+        display: block !important;
+        min-height: 24px !important;
+        color: #cbd5e1 !important;
+        font-size: 10px !important;
+        line-height: 1.16 !important;
+        font-weight: 600 !important;
+    }
+
+    .thryv-dashboard-page .thryv-metric-content strong {
+        display: block !important;
+        margin: 3px 0 6px !important;
+        color: #fff !important;
+        font-size: 25px !important;
+        line-height: 1 !important;
+        font-weight: 900 !important;
+        letter-spacing: -.02em !important;
+    }
+
+    .thryv-dashboard-page .thryv-metric-content small {
+        display: block !important;
+        color: #8898aa !important;
+        font-size: 8.5px !important;
+        line-height: 1.15 !important;
+    }
+
+.thryv-dashboard-page .thryv-mini-bars {
+    position: relative !important;
+    z-index: 2 !important;
+    height: 30px !important;
+    align-self: end !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 3px !important;
+}
+
+    .thryv-dashboard-page .thryv-mini-bars i {
+        width: 4px !important;
+        border-radius: 999px !important;
+        background: currentColor !important;
+    }
+
+        .thryv-dashboard-page .thryv-mini-bars i:nth-child(1) {
+            height: 10px !important;
+        }
+
+        .thryv-dashboard-page .thryv-mini-bars i:nth-child(2) {
+            height: 19px !important;
+        }
+
+        .thryv-dashboard-page .thryv-mini-bars i:nth-child(3) {
+            height: 29px !important;
+        }
+
+.thryv-dashboard-page .thryv-metric-card.thryv-metric-blue {
+    color: #2f77ff !important;
+    border-color: rgba(47,119,255,.46) !important;
+    background: radial-gradient(circle at 20% 10%, rgba(47,119,255,.11), transparent 38%), linear-gradient(145deg,#082b62 0%,#07172d 58%,#07111f 100%) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-blue .thryv-metric-icon {
+        background: linear-gradient(135deg,#1153d5,#2f77ff) !important;
+        box-shadow: 0 8px 20px rgba(47,119,255,.25) !important;
+    }
+
+.thryv-dashboard-page .thryv-metric-card.thryv-metric-violet {
+    color: #8f63ff !important;
+    border-color: rgba(124,58,237,.44) !important;
+    background: radial-gradient(circle at 20% 10%, rgba(139,92,246,.11), transparent 38%), linear-gradient(145deg,#33205f 0%,#15172e 58%,#101426 100%) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-violet .thryv-metric-icon {
+        background: linear-gradient(135deg,#6525d2,#996cff) !important;
+        box-shadow: 0 8px 20px rgba(124,58,237,.24) !important;
+    }
+
+.thryv-dashboard-page .thryv-metric-card.thryv-metric-cyan {
+    color: #16b8ff !important;
+    border-color: rgba(14,165,233,.46) !important;
+    background: radial-gradient(circle at 20% 10%, rgba(14,165,233,.11), transparent 38%), linear-gradient(145deg,#064a68 0%,#092239 58%,#071522 100%) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-cyan .thryv-metric-icon {
+        background: linear-gradient(135deg,#03699f,#1ebcff) !important;
+        box-shadow: 0 8px 20px rgba(14,165,233,.23) !important;
+    }
+
+.thryv-dashboard-page .thryv-metric-card.thryv-metric-purple {
+    color: #9169ff !important;
+    border-color: rgba(109,40,217,.46) !important;
+    background: radial-gradient(circle at 20% 10%, rgba(124,58,237,.12), transparent 38%), linear-gradient(145deg,#32215c 0%,#18182f 58%,#111426 100%) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-purple .thryv-metric-icon {
+        background: linear-gradient(135deg,#5720b3,#8958f2) !important;
+        box-shadow: 0 8px 20px rgba(124,58,237,.23) !important;
+    }
+
+.thryv-dashboard-page .thryv-metric-card.thryv-metric-completed {
+    color: #16d98b !important;
+    border-color: rgba(16,185,129,.48) !important;
+    background: radial-gradient(circle at 20% 10%, rgba(16,185,129,.12), transparent 38%), linear-gradient(145deg,#075947 0%,#073b33 58%,#06261f 100%) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-completed .thryv-metric-icon {
+        background: linear-gradient(135deg,#047857,#12c98a) !important;
+        box-shadow: 0 8px 20px rgba(16,185,129,.23) !important;
+    }
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-completed .thryv-metric-content strong {
+        color: #31df9c !important;
+    }
+
+.thryv-dashboard-page .thryv-metric-card.thryv-metric-pending {
+    color: #f8a900 !important;
+    border-color: rgba(245,158,11,.56) !important;
+    background: radial-gradient(circle at 20% 10%, rgba(245,158,11,.12), transparent 38%), linear-gradient(145deg,#6c3d08 0%,#42260a 58%,#281707 100%) !important;
+}
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-pending .thryv-metric-icon {
+        background: linear-gradient(135deg,#b96700,#ffb313) !important;
+        box-shadow: 0 8px 20px rgba(245,158,11,.23) !important;
+    }
+
+    .thryv-dashboard-page .thryv-metric-card.thryv-metric-pending .thryv-metric-content strong {
+        color: #ffbd1f !important;
+    }
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-blue {
+    background: radial-gradient(circle at 20% 10%, rgba(47,119,255,.13), transparent 38%), linear-gradient(145deg,rgba(8,43,98,.88),rgba(7,23,45,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-violet {
+    background: radial-gradient(circle at 20% 10%, rgba(139,92,246,.13), transparent 38%), linear-gradient(145deg,rgba(51,32,95,.88),rgba(21,23,46,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-cyan {
+    background: radial-gradient(circle at 20% 10%, rgba(14,165,233,.13), transparent 38%), linear-gradient(145deg,rgba(6,74,104,.88),rgba(9,34,57,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-purple {
+    background: radial-gradient(circle at 20% 10%, rgba(124,58,237,.13), transparent 38%), linear-gradient(145deg,rgba(50,33,92,.88),rgba(24,24,47,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-completed {
+    background: radial-gradient(circle at 20% 10%, rgba(16,185,129,.13), transparent 38%), linear-gradient(145deg,rgba(7,89,71,.88),rgba(7,59,51,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-pending {
+    background: radial-gradient(circle at 20% 10%, rgba(245,158,11,.13), transparent 38%), linear-gradient(145deg,rgba(108,61,8,.88),rgba(66,38,10,.90)) !important;
+}
+
+@media (max-width: 1280px) {
+    .thryv-dashboard-page .thryv-dashboard-metrics {
+        grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .thryv-dashboard-page .thryv-dashboard-metrics {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.thryv-dashboard-hero-quote {
+    color: #c8d4e2 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+    .thryv-dashboard-hero-quote strong {
+        color: #f8fafc !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, .42);
+    }
+
+.thryv-dashboard-date-card span,
+.thryv-dashboard-date-card small {
+    color: #9fb0c4 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .32);
+}
+
+.thryv-dashboard-date-card strong {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .40);
+}
+
+html[data-theme="light"] .thryv-dashboard-hero-quote {
+    color: #475569 !important;
+    text-shadow: none !important;
+}
+
+    html[data-theme="light"] .thryv-dashboard-hero-quote strong {
+        color: #172033 !important;
+        text-shadow: none !important;
+    }
+
+html[data-theme="light"] .thryv-dashboard-date-card span,
+html[data-theme="light"] .thryv-dashboard-date-card small {
+    color: #64748b !important;
+    text-shadow: none !important;
+}
+
+html[data-theme="light"] .thryv-dashboard-date-card strong {
+    color: #0f172a !important;
+    text-shadow: none !important;
+}
+
+html[data-theme="light"] .thryv-dashboard-date-card {
+    border-left-color: rgba(71, 85, 105, .24) !important;
+}
+
+html[data-theme="dark"] .thryv-dashboard-hero-quote {
+    color: #c8d4e2 !important;
+}
+
+    html[data-theme="dark"] .thryv-dashboard-hero-quote strong {
+        color: #f8fafc !important;
+    }
+
+html[data-theme="dark"] .thryv-dashboard-date-card span,
+html[data-theme="dark"] .thryv-dashboard-date-card small {
+    color: #9fb0c4 !important;
+}
+
+html[data-theme="dark"] .thryv-dashboard-date-card strong {
+    color: #ffffff !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-hero-quote {
+    color: #334155 !important;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, .45) !important;
+}
+
+    html[data-theme="liquid glass"] .thryv-dashboard-hero-quote strong {
+        color: #111827 !important;
+        text-shadow: 0 1px 1px rgba(255, 255, 255, .55) !important;
+    }
+
+html[data-theme="liquid glass"] .thryv-dashboard-date-card span,
+html[data-theme="liquid glass"] .thryv-dashboard-date-card small {
+    color: #475569 !important;
+    text-shadow: none !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-date-card strong {
+    color: #0f172a !important;
+    text-shadow: 0 1px 1px rgba(255,255,255,.35) !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-date-card {
+    border-left-color: rgba(51, 65, 85, .22) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-hero-quote {
+    color: #d8e2ef !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+}
+
+    html[data-theme="dark glass"] .thryv-dashboard-hero-quote strong {
+        color: #ffffff !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,.60) !important;
+    }
+
+html[data-theme="dark glass"] .thryv-dashboard-date-card span,
+html[data-theme="dark glass"] .thryv-dashboard-date-card small {
+    color: #b2c0d0 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,.45) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-date-card strong {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-date-card {
+    border-left-color: rgba(203, 213, 225, .22) !important;
 }
