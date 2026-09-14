@@ -1,11 +1,4 @@
-﻿
-/* ============================================================
-   THRYV DASHBOARD LAYOUT
-   Ajustado para replicar las proporciones de la referencia.
-   Reemplaza completamente DashboardLayout.razor.css
-   ============================================================ */
-
-.thryv-dashboard-layout,
+﻿.thryv-dashboard-layout,
 .thryv-dashboard-layout * {
     box-sizing: border-box;
 }
@@ -24,10 +17,6 @@
     font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background: radial-gradient(circle at 6% 3%, rgba(255, 90, 19, .08), transparent 25%), radial-gradient(circle at 88% 12%, rgba(37, 99, 235, .10), transparent 30%), linear-gradient(135deg, #020812 0%, #06111f 46%, #091a2e 100%);
 }
-
-/* ============================================================
-   SIDEBAR
-   ============================================================ */
 
 .thryv-sidebar {
     position: relative;
@@ -195,7 +184,6 @@
     text-overflow: ellipsis;
 }
 
-/* Orden visual */
 .thryv-sidebar-menu a[href="/dashboard"] {
     order: 1;
 }
@@ -218,20 +206,6 @@
 
 .thryv-sidebar-menu a[href="/reportes-finalizados"] {
     order: 6;
-}
-
-.thryv-sidebar-menu::after {
-    content: "Settings";
-    order: 7;
-    min-height: 47px;
-    padding: 0 14px 0 48px;
-    display: flex;
-    align-items: center;
-    border-radius: 12px;
-    color: #bec9d7;
-    font-size: 13px;
-    font-weight: 600;
-    background: radial-gradient(circle at 25px 50%, transparent 0 6px, #aebdce 6px 7.5px, transparent 7.5px);
 }
 
 .thryv-sidebar-menu a[href="/registro-usuarios"],
@@ -293,10 +267,6 @@
     border-radius: 999px;
     background: linear-gradient(90deg, #ff5a13 0 38%, rgba(148,163,184,.14) 38%);
 }
-
-/* ============================================================
-   MAIN + TOPBAR
-   ============================================================ */
 
 .thryv-main-content {
     flex: 1;
@@ -516,10 +486,6 @@
     display: none;
 }
 
-/* ============================================================
-   THEMES
-   ============================================================ */
-
 html[data-theme="light"] .thryv-dashboard-layout {
     color: #0f172a;
     background: radial-gradient(circle at 0 0,rgba(255,90,19,.08),transparent 24%), radial-gradient(circle at 90% 8%,rgba(37,99,235,.09),transparent 30%), linear-gradient(135deg,#f8fafc,#fff 48%,#edf2f7);
@@ -617,10 +583,6 @@ html[data-theme="dark glass"] .thryv-logout-btn {
 html[data-theme="dark glass"] .thryv-page-content {
     background: transparent;
 }
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 
 @media (max-width: 1180px) {
     .thryv-sidebar {
