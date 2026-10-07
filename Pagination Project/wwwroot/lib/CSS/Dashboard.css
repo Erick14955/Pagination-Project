@@ -19,6 +19,10 @@
     color: #f8fafc;
 }
 
+/* =========================================================
+   HEADER
+   ========================================================= */
+
 .thryv-dashboard-header {
     position: relative;
     min-height: 140px;
@@ -141,15 +145,17 @@
     display: flex;
     flex-direction: column;
     text-align: right;
-    color: #c8d4e2;
+    color: #c8d4e2 !important;
     font-size: 11px;
     font-style: italic;
     line-height: 1.25;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
     .thryv-dashboard-hero-quote strong {
-        color: #edf3fa;
+        color: #f8fafc !important;
         font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0,0,0,.42);
     }
 
 .thryv-dashboard-date-card {
@@ -165,17 +171,19 @@
     .thryv-dashboard-date-card span,
     .thryv-dashboard-date-card small {
         display: block;
-        color: #96a8bc;
+        color: #9fb0c4 !important;
         font-size: 9px;
+        text-shadow: 0 1px 2px rgba(0,0,0,.32);
     }
 
     .thryv-dashboard-date-card strong {
         display: block;
         margin: 7px 0;
-        color: #fff;
+        color: #fff !important;
         font-size: 22px;
         line-height: 1;
-        font-weight: 900;
+        font-weight: 900 !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,.40);
     }
 
     .thryv-dashboard-date-card i {
@@ -187,32 +195,45 @@
         background: var(--orange);
     }
 
+/* =========================================================
+   METRICS
+   ========================================================= */
+
 .thryv-dashboard-metrics {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(6, minmax(0,1fr));
+    gap: 12px;
+    width: 100%;
+    margin: 0;
 }
 
 .thryv-metric-card {
     position: relative;
     min-width: 0;
     min-height: 118px;
-    padding: 15px 14px;
+    padding: 16px 14px;
     display: grid;
-    grid-template-columns: 48px minmax(0,1fr) 16px;
+    grid-template-columns: 48px minmax(0,1fr) 17px;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
     overflow: hidden;
     border-radius: 15px;
     border: 1px solid rgba(148,163,184,.18);
-    background: linear-gradient(145deg, rgba(13,28,49,.98), rgba(7,17,31,.98));
-    box-shadow: 0 14px 28px rgba(2,6,23,.18), inset 0 1px 0 rgba(255,255,255,.03);
+    box-shadow: 0 12px 28px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035);
 }
+
+    .thryv-metric-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,.025), transparent 42%);
+    }
 
     .thryv-metric-card::after {
         content: "›";
         position: absolute;
-        top: 10px;
+        top: 9px;
         right: 10px;
         width: 20px;
         height: 20px;
@@ -220,53 +241,65 @@
         place-items: center;
         border-radius: 50%;
         background: rgba(255,255,255,.045);
-        color: rgba(255,255,255,.58);
+        color: rgba(255,255,255,.60);
         font-size: 15px;
+        line-height: 1;
+        font-weight: 700;
     }
 
 .thryv-metric-icon {
+    position: relative;
+    z-index: 2;
     width: 48px;
     height: 48px;
+    flex: 0 0 48px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     color: #fff;
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 900;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 18px rgba(0,0,0,.20);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 18px rgba(0,0,0,.22);
 }
 
 .thryv-metric-content {
+    position: relative;
+    z-index: 2;
     min-width: 0;
 }
 
     .thryv-metric-content span {
         display: block;
-        min-height: 27px;
-        color: #cbd6e3;
+        min-height: 24px;
+        color: #cbd5e1;
         font-size: 10px;
-        line-height: 1.2;
+        line-height: 1.16;
+        font-weight: 600;
     }
 
     .thryv-metric-content strong {
         display: block;
-        margin: 5px 0;
+        margin: 3px 0 6px;
         color: #fff;
-        font-size: 26px;
+        font-size: 25px;
         line-height: 1;
         font-weight: 900;
+        letter-spacing: -.02em;
     }
 
     .thryv-metric-content small {
         display: block;
-        color: #8292a7;
-        font-size: 9px;
-        line-height: 1.2;
+        color: #8898aa;
+        font-size: 8.5px;
+        line-height: 1.15;
     }
 
 .thryv-mini-bars {
-    height: 33px;
+    position: relative;
+    z-index: 2;
+    height: 30px;
     align-self: end;
     display: flex;
     align-items: flex-end;
@@ -284,57 +317,61 @@
         }
 
         .thryv-mini-bars i:nth-child(2) {
-            height: 20px;
+            height: 19px;
         }
 
         .thryv-mini-bars i:nth-child(3) {
-            height: 30px;
+            height: 29px;
         }
+
+/* =========================================================
+   METRIC COLORS
+   ========================================================= */
 
 .thryv-metric-blue {
     color: #2f77ff;
-    border-color: rgba(47,119,255,.50);
-    background: linear-gradient(145deg,rgba(4,41,107,.92),rgba(7,17,31,.98));
+    border-color: rgba(47,119,255,.46);
+    background: radial-gradient(circle at 20% 10%,rgba(47,119,255,.11),transparent 38%), linear-gradient(145deg,#082b62 0%,#07172d 58%,#07111f 100%);
 }
 
     .thryv-metric-blue .thryv-metric-icon {
-        background: linear-gradient(135deg,#1254d8,#2f77ff);
+        background: linear-gradient(135deg,#1153d5,#2f77ff);
     }
 
 .thryv-metric-violet {
-    color: #8c63ff;
-    border-color: rgba(124,58,237,.47);
-    background: linear-gradient(145deg,rgba(65,37,101,.80),rgba(16,20,45,.98));
+    color: #8f63ff;
+    border-color: rgba(124,58,237,.44);
+    background: radial-gradient(circle at 20% 10%,rgba(139,92,246,.11),transparent 38%), linear-gradient(145deg,#33205f 0%,#15172e 58%,#101426 100%);
 }
 
     .thryv-metric-violet .thryv-metric-icon {
-        background: linear-gradient(135deg,#6d28d9,#9b6cff);
+        background: linear-gradient(135deg,#6525d2,#996cff);
     }
 
 .thryv-metric-cyan {
-    color: #19b9ff;
-    border-color: rgba(14,165,233,.47);
-    background: linear-gradient(145deg,rgba(2,75,109,.76),rgba(7,22,37,.98));
+    color: #16b8ff;
+    border-color: rgba(14,165,233,.46);
+    background: radial-gradient(circle at 20% 10%,rgba(14,165,233,.11),transparent 38%), linear-gradient(145deg,#064a68 0%,#092239 58%,#071522 100%);
 }
 
     .thryv-metric-cyan .thryv-metric-icon {
-        background: linear-gradient(135deg,#0369a1,#1dbbff);
+        background: linear-gradient(135deg,#03699f,#1ebcff);
     }
 
 .thryv-metric-purple {
     color: #9169ff;
-    border-color: rgba(109,40,217,.47);
-    background: linear-gradient(145deg,rgba(55,35,108,.80),rgba(17,20,49,.98));
+    border-color: rgba(109,40,217,.46);
+    background: radial-gradient(circle at 20% 10%,rgba(124,58,237,.12),transparent 38%), linear-gradient(145deg,#32215c 0%,#18182f 58%,#111426 100%);
 }
 
     .thryv-metric-purple .thryv-metric-icon {
-        background: linear-gradient(135deg,#5b21b6,#8b5cf6);
+        background: linear-gradient(135deg,#5720b3,#8958f2);
     }
 
 .thryv-metric-completed {
     color: #16d98b;
-    border-color: rgba(16,185,129,.52);
-    background: linear-gradient(145deg,rgba(4,89,68,.72),rgba(4,39,34,.96));
+    border-color: rgba(16,185,129,.48);
+    background: radial-gradient(circle at 20% 10%,rgba(16,185,129,.12),transparent 38%), linear-gradient(145deg,#075947 0%,#073b33 58%,#06261f 100%);
 }
 
     .thryv-metric-completed .thryv-metric-icon {
@@ -347,66 +384,73 @@
 
 .thryv-metric-pending {
     color: #f8a900;
-    border-color: rgba(245,158,11,.58);
-    background: linear-gradient(145deg,rgba(112,62,8,.72),rgba(42,24,8,.96));
+    border-color: rgba(245,158,11,.56);
+    background: radial-gradient(circle at 20% 10%,rgba(245,158,11,.12),transparent 38%), linear-gradient(145deg,#6c3d08 0%,#42260a 58%,#281707 100%);
 }
 
     .thryv-metric-pending .thryv-metric-icon {
-        background: linear-gradient(135deg,#bd6900,#ffb313);
+        background: linear-gradient(135deg,#b96700,#ffb313);
     }
 
     .thryv-metric-pending .thryv-metric-content strong {
         color: #ffbd1f;
     }
 
+/* =========================================================
+   SECTION CARDS
+   ========================================================= */
+
 .thryv-section-card {
     position: relative;
     width: 100%;
     overflow: hidden;
-    border-radius: 17px;
-    border: 1px solid rgba(65, 113, 183, .40);
-    background: radial-gradient(circle at 100% 0%, rgba(37,99,235,.055), transparent 34%), linear-gradient(180deg, rgba(12,29,51,.98) 0%, rgba(8,22,40,.98) 100%);
-    box-shadow: 0 15px 36px rgba(2,6,23,.22), inset 0 1px 0 rgba(255,255,255,.025);
+    border-radius: 16px;
+    border: 1px solid rgba(65,113,183,.40);
+    background: radial-gradient(circle at 100% 0%,rgba(37,99,235,.055),transparent 34%), linear-gradient(180deg,rgba(12,29,51,.98),rgba(8,22,40,.98));
+    box-shadow: 0 14px 34px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.025);
 }
 
 .assigned-section-card {
-    border-color: rgba(64, 117, 196, .48);
-    background: radial-gradient(circle at 92% 0%, rgba(37,99,235,.09), transparent 34%), linear-gradient(180deg,#0b1c33 0%,#09182b 100%);
+    border-color: rgba(49,108,186,.45);
+    background: radial-gradient(circle at 92% 0%,rgba(46,105,210,.08),transparent 35%), linear-gradient(180deg,#0b1d35 0%,#09182b 100%);
 }
 
 .completed-section-card {
-    border-color: rgba(16,185,129,.42);
-    background: radial-gradient(circle at 7% 0%, rgba(16,185,129,.10), transparent 28%), linear-gradient(180deg,#082a31 0%,#081c2c 100%);
+    border-color: rgba(12,155,118,.45);
+    background: radial-gradient(circle at 7% 0%,rgba(10,174,126,.10),transparent 31%), linear-gradient(180deg,#08282f 0%,#081b29 100%);
 }
 
 .weekly-evaluations-section-card {
-    border-color: rgba(124,58,237,.48);
-    background: radial-gradient(circle at 8% 0%, rgba(124,58,237,.13), transparent 29%), linear-gradient(180deg,#17183e 0%,#0b1930 100%);
+    border-color: rgba(102,59,207,.50);
+    background: radial-gradient(circle at 7% 0%,rgba(111,66,225,.12),transparent 32%), linear-gradient(180deg,#17193f 0%,#0c1930 100%);
 }
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
 
 .thryv-section-header {
     position: relative;
-    min-height: 82px;
-    padding: 14px 16px 12px;
+    min-height: 78px;
+    padding: 13px 16px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 18px;
-    border-bottom: 0;
+    gap: 16px;
     background: transparent;
 }
 
 .thryv-section-heading {
-    min-width: 300px;
+    min-width: 285px;
     display: flex;
     align-items: center;
-    gap: 13px;
+    gap: 12px;
 }
 
 .thryv-section-icon {
-    width: 47px;
-    height: 47px;
-    flex: 0 0 47px;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -415,37 +459,34 @@
     font-size: 19px;
     font-weight: 900;
     border: 1px solid rgba(255,255,255,.08);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 9px 20px rgba(0,0,0,.22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.24);
 }
 
 .thryv-section-icon-assigned {
-    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 36%), linear-gradient(135deg,#0d54d8,#1674ff);
-    box-shadow: 0 9px 22px rgba(22,116,255,.24);
+    background: linear-gradient(135deg,#0d56dc,#1777ff);
 }
 
 .thryv-section-icon-completed {
-    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 36%), linear-gradient(135deg,#047857,#10c98b);
-    box-shadow: 0 9px 22px rgba(16,185,129,.23);
+    background: linear-gradient(135deg,#047857,#10c98b);
 }
 
 .thryv-section-icon-weekly {
-    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 36%), linear-gradient(135deg,#5621bb,#8650f5);
-    box-shadow: 0 9px 22px rgba(124,58,237,.24);
+    background: linear-gradient(135deg,#5521bb,#854bf0);
 }
 
 .thryv-section-header h3 {
     margin: 0;
     color: #f8fafc;
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.08;
     font-weight: 800;
-    letter-spacing: -.015em;
+    letter-spacing: -.012em;
 }
 
 .thryv-section-header p {
-    margin: 5px 0 0;
-    color: #9baabd;
-    font-size: 10px;
+    margin: 4px 0 0;
+    color: #93a4b8;
+    font-size: 9.5px;
     line-height: 1.3;
 }
 
@@ -453,40 +494,44 @@
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 9px;
     flex-wrap: nowrap;
 }
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
 
 .thryv-filter-group {
     min-width: 190px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
 }
 
     .thryv-filter-group label {
         padding-left: 2px;
-        color: #9aa9bc;
-        font-size: 9px;
+        color: #95a6bb;
+        font-size: 8.5px;
         line-height: 1;
         font-weight: 800;
     }
 
 .thryv-filter-select,
 .thryv-search-box {
-    height: 40px;
-    border: 1px solid rgba(93,119,157,.34);
-    border-radius: 10px;
-    background: rgba(4,15,29,.72);
-    color: #e6edf5;
+    height: 37px;
+    border-radius: 9px;
+    border: 1px solid rgba(82,108,145,.34);
+    background: rgba(5,16,31,.76);
+    color: #e2e8f0;
     outline: none;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
 }
 
 .thryv-filter-select {
     width: 100%;
-    padding: 0 12px;
-    font-size: 10px;
+    padding: 0 11px;
+    font-size: 9.5px;
     font-weight: 700;
 }
 
@@ -497,11 +542,12 @@
     }
 
 .thryv-search-box {
-    min-width: 260px;
+    min-width: 245px;
+    width: 245px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 0 11px;
+    gap: 7px;
+    padding: 0 10px;
 }
 
     .thryv-search-box input {
@@ -511,7 +557,7 @@
         outline: 0;
         background: transparent;
         color: #e2e8f0;
-        font-size: 10px;
+        font-size: 9.5px;
     }
 
         .thryv-search-box input::placeholder {
@@ -519,122 +565,114 @@
         }
 
 .thryv-clear-filter-btn {
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid rgba(148,163,184,.16);
-    border-radius: 10px;
+    height: 37px;
+    padding: 0 11px;
+    border-radius: 9px;
+    border: 1px solid rgba(148,163,184,.14);
     background: rgba(255,255,255,.04);
     color: #cbd5e1;
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 800;
     cursor: pointer;
 }
 
 .thryv-panel-icon-btn {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
+    width: 37px;
+    height: 37px;
+    flex: 0 0 37px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 11px;
+    border-radius: 9px;
     border: 1px solid rgba(56,113,202,.42);
-    background: linear-gradient(180deg, rgba(27,83,164,.23), rgba(14,50,107,.20));
+    background: rgba(30,78,153,.22);
     color: #b7d2ff;
     font-size: 17px;
     cursor: pointer;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 
     .thryv-panel-icon-btn.completed {
-        border-color: rgba(16,185,129,.34);
-        background: linear-gradient(180deg,rgba(16,185,129,.13),rgba(5,95,72,.15));
-        color: #8bedc8;
+        border-color: rgba(16,185,129,.32);
+        background: rgba(16,185,129,.11);
+        color: #81e6bf;
     }
 
     .thryv-panel-icon-btn.weekly {
-        border-color: rgba(124,58,237,.36);
-        background: linear-gradient(180deg,rgba(124,58,237,.15),rgba(75,26,160,.16));
-        color: #cfbdff;
+        border-color: rgba(124,58,237,.34);
+        background: rgba(124,58,237,.12);
+        color: #c9b7ff;
     }
 
 .thryv-view-all-btn {
-    height: 40px;
-    min-width: 102px;
+    min-width: 100px;
+    height: 37px;
+    padding: 0 15px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    padding: 0 17px;
-    border: 1px solid rgba(255,255,255,.07);
+    gap: 6px;
     border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.07);
     color: #fff;
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 900;
     white-space: nowrap;
     text-decoration: none;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 18px rgba(0,0,0,.18);
 }
 
     .thryv-view-all-btn.assigned {
-        background: linear-gradient(135deg,#db5709,#ff7415);
-        box-shadow: 0 8px 22px rgba(255,90,19,.24);
+        background: linear-gradient(135deg,#d95308,#ff7213);
     }
 
     .thryv-view-all-btn.completed {
-        background: linear-gradient(135deg,#05805d,#10c98b);
-        box-shadow: 0 8px 22px rgba(16,185,129,.20);
+        background: linear-gradient(135deg,#047c5a,#10c98b);
     }
 
     .thryv-view-all-btn.weekly {
-        background: linear-gradient(135deg,#6323cf,#8243f3);
-        box-shadow: 0 8px 22px rgba(124,58,237,.22);
+        background: linear-gradient(135deg,#6021ca,#813df0);
     }
 
-.thryv-section-card .thryv-table-wrapper {
-    padding: 0 14px 14px;
-}
+/* =========================================================
+   TABLE
+   ========================================================= */
 
-.thryv-table-wrapper {
-    width: 100%;
+.thryv-section-card .thryv-table-wrapper {
+    width: auto;
+    max-width: none;
+    margin: 0 14px 13px;
+    padding: 0;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.thryv-section-card .thryv-table-wrapper {
-    border-radius: 12px;
+    border: 1px solid rgba(77,105,143,.30);
+    border-radius: 10px;
+    background: rgba(3,12,24,.12);
 }
 
 .thryv-custom-table {
     width: 100%;
-    min-width: 980px;
-    border-collapse: separate;
-    border-spacing: 0;
-    overflow: hidden;
-    border: 1px solid rgba(78,105,141,.28);
-    border-radius: 11px;
-    background: rgba(3,12,24,.15);
+    min-width: 900px;
+    border-collapse: collapse;
+    border: 0;
+    background: transparent;
 }
 
     .thryv-custom-table thead th {
-        padding: 12px 13px;
-        background: rgba(5,16,31,.88);
-        color: #cbd6e3;
-        border-bottom: 1px solid rgba(92,117,151,.25);
+        padding: 11px 12px;
+        background: rgba(5,16,30,.92);
+        border-bottom: 1px solid rgba(89,116,151,.27);
+        color: #cbd5e1;
+        font-size: 8.5px;
+        font-weight: 850;
         text-align: left;
         white-space: nowrap;
-        font-size: 9px;
-        font-weight: 850;
-        letter-spacing: .02em;
         text-transform: uppercase;
     }
 
     .thryv-custom-table tbody td {
-        padding: 11px 13px;
-        color: #dce5ef;
-        border-bottom: 1px solid rgba(148,163,184,.07);
+        padding: 10px 12px;
+        color: #dbe5ef;
+        border-bottom: 1px solid rgba(88,113,148,.09);
+        font-size: 9.5px;
         vertical-align: middle;
-        font-size: 10px;
     }
 
     .thryv-custom-table tbody tr:hover {
@@ -655,55 +693,9 @@
     text-transform: uppercase;
 }
 
-.thryv-empty-row {
-    padding: 20px !important;
-    text-align: center !important;
-}
-
-.thryv-empty-state {
-    min-height: 82px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-}
-
-.thryv-empty-icon {
-    width: 31px;
-    height: 31px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: #93c5fd;
-    border: 1px solid rgba(59,130,246,.24);
-    background: rgba(37,99,235,.08);
-    font-size: 12px;
-    font-weight: 900;
-}
-
-    .thryv-empty-icon.completed {
-        color: #6ee7b7;
-        border-color: rgba(16,185,129,.24);
-        background: rgba(16,185,129,.08);
-    }
-
-    .thryv-empty-icon.weekly {
-        color: #c4b5fd;
-        border-color: rgba(124,58,237,.24);
-        background: rgba(124,58,237,.08);
-    }
-
-.thryv-empty-state strong {
-    color: #d5deea;
-    font-size: 10px;
-}
-
-.thryv-empty-state small {
-    color: #74869a;
-    font-size: 9px;
-}
+/* =========================================================
+   TABLE CONTENT
+   ========================================================= */
 
 .thryv-employee-cell {
     display: flex;
@@ -721,24 +713,34 @@
     align-items: center;
     justify-content: center;
     border-radius: 9px;
-    background: linear-gradient(135deg,#111827,#1f2937) !important;
-    color: #fff !important;
+    background: linear-gradient(135deg,#111827,#1f2937);
+    color: #fff;
     font-size: 9px;
     font-weight: 900;
 }
 
 .completed-avatar {
-    background: linear-gradient(135deg,#047857,#10b981) !important;
+    background: linear-gradient(135deg,#047857,#10b981);
 }
 
 .weekly-avatar {
-    background: linear-gradient(135deg,#5b21b6,#7c3aed) !important;
+    background: linear-gradient(135deg,#5b21b6,#7c3aed);
 }
 
-.thryv-employee-name {
+/* PRODUCT NAME — SIEMPRE EN NEGRITA */
+.thryv-employee-name,
+.thryv-product-name,
+.product-name {
     color: #f8fafc;
-    font-weight: 800;
+    font-weight: 900 !important;
 }
+
+    /* Si el nombre del producto usa strong, también se fuerza */
+    .thryv-employee-name strong,
+    .thryv-product-name strong,
+    .product-name strong {
+        font-weight: 900 !important;
+    }
 
 .thryv-muted-cell {
     color: #64748b;
@@ -897,6 +899,10 @@
     text-align: center;
 }
 
+/* =========================================================
+   DATABASE
+   ========================================================= */
+
 .thryv-database-cell {
     position: relative;
     overflow: visible !important;
@@ -951,6 +957,65 @@
     transform: translateX(-50%) translateY(0);
 }
 
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.thryv-empty-row {
+    padding: 0 !important;
+    text-align: center !important;
+}
+
+.thryv-empty-state {
+    min-height: 82px;
+    padding: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.thryv-empty-icon {
+    width: 29px;
+    height: 29px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #93c5fd;
+    border: 1px solid rgba(59,130,246,.24);
+    background: rgba(37,99,235,.08);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+    .thryv-empty-icon.completed {
+        color: #6ee7b7;
+        border-color: rgba(16,185,129,.24);
+        background: rgba(16,185,129,.08);
+    }
+
+    .thryv-empty-icon.weekly {
+        color: #c4b5fd;
+        border-color: rgba(124,58,237,.24);
+        background: rgba(124,58,237,.08);
+    }
+
+.thryv-empty-state strong {
+    color: #d4deea;
+    font-size: 9.5px;
+}
+
+.thryv-empty-state small {
+    color: #77899e;
+    font-size: 8.5px;
+}
+
+/* =========================================================
+   SKELETON
+   ========================================================= */
+
 .thryv-dashboard-skeleton {
     pointer-events: none;
     user-select: none;
@@ -968,7 +1033,7 @@
         position: absolute;
         inset: 0;
         transform: translateX(-110%);
-        background: linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent);
         animation: thryv-shimmer 1.25s infinite;
     }
 
@@ -992,7 +1057,7 @@
 
 .thryv-dashboard-hero-stats {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(6,minmax(0,1fr));
     gap: 10px;
     margin-top: 18px;
 }
@@ -1119,6 +1184,10 @@
     }
 }
 
+/* =========================================================
+   WEEKLY MODAL
+   ========================================================= */
+
 html.thryv-modal-open,
 body.thryv-modal-open {
     overflow: hidden !important;
@@ -1138,8 +1207,8 @@ body.thryv-modal-open {
 }
 
 .weekly-evaluation-modal {
-    width: min(1160px, calc(100vw - 44px)) !important;
-    height: min(900px, calc(100dvh - 44px)) !important;
+    width: min(1160px,calc(100vw - 44px)) !important;
+    height: min(900px,calc(100dvh - 44px)) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -1323,121 +1392,215 @@ body.thryv-modal-open {
             color: #6ee7b7;
         }
 
+/* =========================================================
+   LIGHT THEME
+   ========================================================= */
+
 html[data-theme="light"] .thryv-dashboard-header {
     background: radial-gradient(circle at 74% 112%,rgba(59,130,246,.14),transparent 34%), radial-gradient(circle at 78% 2%,rgba(255,90,19,.14),transparent 24%), linear-gradient(108deg,#fff 0%,#f7f9fd 57%,#edf3fc 100%);
-    border-color: rgba(100,116,139,.18);
+    border-color: rgba(71,85,105,.24);
     box-shadow: 0 18px 42px rgba(15,23,42,.07), inset 0 1px 0 rgba(255,255,255,.95);
 }
 
-html[data-theme="light"] .thryv-dashboard-title,
-html[data-theme="light"] .thryv-dashboard-date-card strong {
-    color: #0f172a;
+html[data-theme="light"] .thryv-dashboard-title {
+    color: #0b1220 !important;
 }
 
-html[data-theme="light"] .thryv-dashboard-eyebrow,
-html[data-theme="light"] .thryv-dashboard-subtitle,
-html[data-theme="light"] .thryv-dashboard-hero-quote,
-html[data-theme="light"] .thryv-dashboard-date-card span,
-html[data-theme="light"] .thryv-dashboard-date-card small {
-    color: #64748b;
+html[data-theme="light"] .thryv-dashboard-eyebrow {
+    color: #1e293b !important;
+}
+
+html[data-theme="light"] .thryv-dashboard-subtitle {
+    color: #1e293b !important;
+}
+
+html[data-theme="light"] .thryv-dashboard-hero-quote {
+    color: #1e293b !important;
+    text-shadow: none !important;
 }
 
     html[data-theme="light"] .thryv-dashboard-hero-quote strong {
-        color: #334155;
+        color: #0b1220 !important;
+        text-shadow: none !important;
+        font-weight: 800 !important;
     }
 
+html[data-theme="light"] .thryv-dashboard-date-card span,
+html[data-theme="light"] .thryv-dashboard-date-card small {
+    color: #334155 !important;
+    text-shadow: none !important;
+}
+
+html[data-theme="light"] .thryv-dashboard-date-card strong {
+    color: #0b1220 !important;
+    text-shadow: none !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="light"] .thryv-dashboard-date-card {
+    border-left-color: rgba(51,65,85,.28) !important;
+}
+
+/* Light metric cards */
+
 html[data-theme="light"] .thryv-metric-card {
-    background: linear-gradient(145deg,#fff,#f8fafc);
     box-shadow: 0 12px 25px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.94);
 }
 
 html[data-theme="light"] .thryv-metric-content span {
-    color: #475569;
+    color: #1e293b !important;
 }
 
 html[data-theme="light"] .thryv-metric-content strong {
-    color: #0f172a;
+    color: #0b1220 !important;
 }
 
 html[data-theme="light"] .thryv-metric-content small {
-    color: #8291a4;
+    color: #334155 !important;
+}
+
+html[data-theme="light"] .thryv-metric-card::after {
+    color: #1e293b !important;
+    background: rgba(15,23,42,.06) !important;
 }
 
 html[data-theme="light"] .thryv-metric-blue {
-    background: linear-gradient(145deg,#fff,#eff6ff);
+    background: radial-gradient(circle at 20% 10%,rgba(47,119,255,.10),transparent 38%), linear-gradient(145deg,#fff,#eff6ff) !important;
 }
 
 html[data-theme="light"] .thryv-metric-violet,
 html[data-theme="light"] .thryv-metric-purple {
-    background: linear-gradient(145deg,#fff,#f5f3ff);
+    background: radial-gradient(circle at 20% 10%,rgba(124,58,237,.08),transparent 38%), linear-gradient(145deg,#fff,#f5f3ff) !important;
 }
 
 html[data-theme="light"] .thryv-metric-cyan {
-    background: linear-gradient(145deg,#fff,#ecfeff);
+    background: radial-gradient(circle at 20% 10%,rgba(14,165,233,.08),transparent 38%), linear-gradient(145deg,#fff,#ecfeff) !important;
 }
 
 html[data-theme="light"] .thryv-metric-completed {
-    background: linear-gradient(145deg,#fff,#ecfdf5);
+    background: radial-gradient(circle at 20% 10%,rgba(16,185,129,.08),transparent 38%), linear-gradient(145deg,#fff,#ecfdf5) !important;
 }
 
     html[data-theme="light"] .thryv-metric-completed .thryv-metric-content strong {
-        color: #047857;
+        color: #047857 !important;
     }
 
 html[data-theme="light"] .thryv-metric-pending {
-    background: linear-gradient(145deg,#fff,#fffbeb);
+    background: radial-gradient(circle at 20% 10%,rgba(245,158,11,.08),transparent 38%), linear-gradient(145deg,#fff,#fffbeb) !important;
 }
 
     html[data-theme="light"] .thryv-metric-pending .thryv-metric-content strong {
-        color: #b45309;
+        color: #a16207 !important;
     }
 
-html[data-theme="light"] .thryv-section-card {
-    background: linear-gradient(180deg,#fff,#f8fafc);
-    border-color: rgba(100,116,139,.16);
+/* Light section cards */
+
+html[data-theme="light"] .thryv-section-card,
+html[data-theme="light"] .assigned-section-card {
+    background: linear-gradient(180deg,#ffffff 0%,#f8fafc 100%) !important;
+    border-color: rgba(71,85,105,.22) !important;
 }
 
 html[data-theme="light"] .completed-section-card {
-    background: linear-gradient(180deg,#fff,#f2fbf7);
+    background: linear-gradient(180deg,#ffffff 0%,#f2fbf7 100%) !important;
+    border-color: rgba(16,185,129,.28) !important;
 }
 
 html[data-theme="light"] .weekly-evaluations-section-card {
-    background: linear-gradient(180deg,#fff,#f8f7ff);
+    background: linear-gradient(180deg,#ffffff 0%,#f8f7ff 100%) !important;
+    border-color: rgba(124,58,237,.27) !important;
 }
 
 html[data-theme="light"] .thryv-section-header {
-    background: rgba(248,250,252,.78);
+    background: rgba(248,250,252,.72) !important;
 }
 
-    html[data-theme="light"] .thryv-section-header h3,
-    html[data-theme="light"] .thryv-employee-name {
-        color: #0f172a;
+    html[data-theme="light"] .thryv-section-header h3 {
+        color: #0b1220 !important;
     }
 
-    html[data-theme="light"] .thryv-section-header p,
-    html[data-theme="light"] .thryv-filter-group label {
-        color: #64748b;
+    html[data-theme="light"] .thryv-section-header p {
+        color: #1e293b !important;
     }
+
+html[data-theme="light"] .thryv-filter-group label {
+    color: #1e293b !important;
+}
+
+/* Light controls */
 
 html[data-theme="light"] .thryv-filter-select,
 html[data-theme="light"] .thryv-search-box {
-    background: #fff;
-    color: #0f172a;
-    border-color: rgba(100,116,139,.18);
+    background: #ffffff !important;
+    color: #0b1220 !important;
+    border-color: rgba(51,65,85,.30) !important;
+    box-shadow: inset 0 1px 2px rgba(15,23,42,.03);
 }
 
     html[data-theme="light"] .thryv-search-box input {
-        color: #0f172a;
+        color: #0b1220 !important;
     }
 
+        html[data-theme="light"] .thryv-search-box input::placeholder {
+            color: #475569 !important;
+        }
+
+html[data-theme="light"] .thryv-clear-filter-btn {
+    color: #1e293b !important;
+    background: rgba(15,23,42,.045) !important;
+    border-color: rgba(51,65,85,.28) !important;
+}
+
+/* Light table */
+
+html[data-theme="light"] .thryv-section-card .thryv-table-wrapper {
+    background: rgba(255,255,255,.65) !important;
+    border-color: rgba(51,65,85,.24) !important;
+}
+
 html[data-theme="light"] .thryv-custom-table thead th {
-    background: #eef2f7;
-    color: #475569;
+    background: #e8edf4 !important;
+    color: #0f172a !important;
+    border-bottom-color: rgba(51,65,85,.24) !important;
 }
 
 html[data-theme="light"] .thryv-custom-table tbody td {
-    color: #334155;
+    color: #1e293b !important;
+    border-bottom-color: rgba(51,65,85,.14) !important;
 }
+
+html[data-theme="light"] .thryv-custom-table tbody tr:hover {
+    background: rgba(37,99,235,.035) !important;
+}
+
+/* Product Name — Light */
+html[data-theme="light"] .thryv-employee-name,
+html[data-theme="light"] .thryv-product-name,
+html[data-theme="light"] .product-name {
+    color: #0b1220 !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="light"] .thryv-muted-cell {
+    color: #334155 !important;
+}
+
+html[data-theme="light"] .thryv-code-pill.secondary {
+    color: #334155 !important;
+    background: rgba(100,116,139,.08) !important;
+}
+
+html[data-theme="light"] .thryv-empty-state strong {
+    color: #1e293b !important;
+}
+
+html[data-theme="light"] .thryv-empty-state small {
+    color: #334155 !important;
+}
+
+/* =========================================================
+   LIQUID GLASS
+   ========================================================= */
 
 html[data-theme="liquid glass"] .thryv-dashboard-header,
 html[data-theme="liquid glass"] .thryv-metric-card,
@@ -1451,78 +1614,216 @@ html[data-theme="liquid glass"] .thryv-dashboard-header {
     border-color: rgba(255,255,255,.70);
 }
 
-html[data-theme="liquid glass"] .thryv-dashboard-title,
-html[data-theme="liquid glass"] .thryv-dashboard-date-card strong {
-    color: #0f172a;
+html[data-theme="liquid glass"] .thryv-dashboard-title {
+    color: #0b1220 !important;
 }
 
-html[data-theme="liquid glass"] .thryv-dashboard-eyebrow,
-html[data-theme="liquid glass"] .thryv-dashboard-subtitle,
-html[data-theme="liquid glass"] .thryv-dashboard-hero-quote,
+html[data-theme="liquid glass"] .thryv-dashboard-eyebrow {
+    color: #0f172a !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-subtitle {
+    color: #1e293b !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-hero-quote {
+    color: #1e293b !important;
+    text-shadow: 0 1px 1px rgba(255,255,255,.45) !important;
+}
+
+    html[data-theme="liquid glass"] .thryv-dashboard-hero-quote strong {
+        color: #0b1220 !important;
+        text-shadow: 0 1px 1px rgba(255,255,255,.55) !important;
+        font-weight: 800 !important;
+    }
+
 html[data-theme="liquid glass"] .thryv-dashboard-date-card span,
 html[data-theme="liquid glass"] .thryv-dashboard-date-card small {
-    color: #475569;
+    color: #334155 !important;
+    text-shadow: none !important;
 }
 
+html[data-theme="liquid glass"] .thryv-dashboard-date-card strong {
+    color: #0b1220 !important;
+    text-shadow: 0 1px 1px rgba(255,255,255,.35) !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-dashboard-date-card {
+    border-left-color: rgba(51,65,85,.25) !important;
+}
+
+/* Liquid metrics */
+
 html[data-theme="liquid glass"] .thryv-metric-card {
-    background: rgba(255,255,255,.40);
-    border-color: rgba(255,255,255,.62);
+    background: rgba(255,255,255,.40) !important;
+    border-color: rgba(255,255,255,.62) !important;
+    box-shadow: 0 12px 28px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.70);
 }
 
 html[data-theme="liquid glass"] .thryv-metric-content span {
-    color: #475569;
+    color: #1e293b !important;
 }
 
 html[data-theme="liquid glass"] .thryv-metric-content strong {
-    color: #0f172a;
+    color: #0b1220 !important;
 }
 
 html[data-theme="liquid glass"] .thryv-metric-content small {
-    color: #64748b;
+    color: #334155 !important;
 }
 
+html[data-theme="liquid glass"] .thryv-metric-card::after {
+    color: #1e293b !important;
+    background: rgba(15,23,42,.07) !important;
+}
+
+html[data-theme="liquid glass"] .thryv-metric-blue,
+html[data-theme="liquid glass"] .thryv-metric-violet,
+html[data-theme="liquid glass"] .thryv-metric-purple,
+html[data-theme="liquid glass"] .thryv-metric-cyan,
+html[data-theme="liquid glass"] .thryv-metric-completed,
+html[data-theme="liquid glass"] .thryv-metric-pending {
+    background: rgba(255,255,255,.42) !important;
+}
+
+/* Liquid sections */
+
 html[data-theme="liquid glass"] .thryv-section-card {
-    background: rgba(255,255,255,.34);
-    border-color: rgba(255,255,255,.60);
+    background: rgba(255,255,255,.34) !important;
+    border-color: rgba(255,255,255,.60) !important;
+    box-shadow: 0 14px 34px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.60);
 }
 
 html[data-theme="liquid glass"] .completed-section-card {
-    background: rgba(236,253,245,.40);
+    background: rgba(236,253,245,.40) !important;
 }
 
 html[data-theme="liquid glass"] .weekly-evaluations-section-card {
-    background: rgba(245,243,255,.42);
+    background: rgba(245,243,255,.42) !important;
 }
 
-html[data-theme="liquid glass"] .thryv-section-header h3,
-html[data-theme="liquid glass"] .thryv-employee-name {
-    color: #0f172a;
+html[data-theme="liquid glass"] .thryv-section-header {
+    background: rgba(255,255,255,.16) !important;
 }
 
-html[data-theme="liquid glass"] .thryv-section-header p,
+    html[data-theme="liquid glass"] .thryv-section-header h3 {
+        color: #0b1220 !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-section-header p {
+        color: #1e293b !important;
+    }
+
 html[data-theme="liquid glass"] .thryv-filter-group label {
-    color: #475569;
+    color: #1e293b !important;
 }
+
+/* Liquid controls */
 
 html[data-theme="liquid glass"] .thryv-filter-select,
 html[data-theme="liquid glass"] .thryv-search-box {
-    background: rgba(255,255,255,.42);
-    color: #0f172a;
-    border-color: rgba(255,255,255,.62);
+    background: rgba(255,255,255,.52) !important;
+    color: #0b1220 !important;
+    border-color: rgba(255,255,255,.72) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 3px 12px rgba(15,23,42,.04);
 }
 
     html[data-theme="liquid glass"] .thryv-search-box input {
-        color: #0f172a;
+        color: #0b1220 !important;
     }
 
+        html[data-theme="liquid glass"] .thryv-search-box input::placeholder {
+            color: #475569 !important;
+        }
+
+html[data-theme="liquid glass"] .thryv-clear-filter-btn {
+    color: #1e293b !important;
+    background: rgba(255,255,255,.42) !important;
+    border-color: rgba(51,65,85,.20) !important;
+}
+
+/* Liquid table */
+
+html[data-theme="liquid glass"] .thryv-section-card .thryv-table-wrapper {
+    background: rgba(255,255,255,.20) !important;
+    border-color: rgba(71,85,105,.24) !important;
+}
+
 html[data-theme="liquid glass"] .thryv-custom-table thead th {
-    background: rgba(255,255,255,.24);
-    color: #475569;
+    background: rgba(255,255,255,.38) !important;
+    color: #0f172a !important;
+    border-bottom-color: rgba(51,65,85,.22) !important;
 }
 
 html[data-theme="liquid glass"] .thryv-custom-table tbody td {
-    color: #334155;
+    color: #1e293b !important;
+    border-bottom-color: rgba(51,65,85,.14) !important;
 }
+
+html[data-theme="liquid glass"] .thryv-custom-table tbody tr:hover {
+    background: rgba(255,255,255,.24) !important;
+}
+
+/* Product Name — Liquid Glass */
+html[data-theme="liquid glass"] .thryv-employee-name,
+html[data-theme="liquid glass"] .thryv-product-name,
+html[data-theme="liquid glass"] .product-name {
+    color: #0b1220 !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-muted-cell {
+    color: #334155 !important;
+}
+
+html[data-theme="liquid glass"] .thryv-code-pill.secondary {
+    color: #334155 !important;
+    background: rgba(71,85,105,.08) !important;
+    border-color: rgba(71,85,105,.14) !important;
+}
+
+html[data-theme="liquid glass"] .thryv-empty-state strong {
+    color: #1e293b !important;
+}
+
+html[data-theme="liquid glass"] .thryv-empty-state small {
+    color: #334155 !important;
+}
+
+/* =========================================================
+   DARK
+   ========================================================= */
+
+html[data-theme="dark"] .thryv-dashboard-hero-quote {
+    color: #c8d4e2 !important;
+}
+
+    html[data-theme="dark"] .thryv-dashboard-hero-quote strong {
+        color: #f8fafc !important;
+    }
+
+html[data-theme="dark"] .thryv-dashboard-date-card span,
+html[data-theme="dark"] .thryv-dashboard-date-card small {
+    color: #9fb0c4 !important;
+}
+
+html[data-theme="dark"] .thryv-dashboard-date-card strong {
+    color: #fff !important;
+    font-weight: 900 !important;
+}
+
+/* Product Name — Dark */
+html[data-theme="dark"] .thryv-employee-name,
+html[data-theme="dark"] .thryv-product-name,
+html[data-theme="dark"] .product-name {
+    color: #f8fafc !important;
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   DARK GLASS
+   ========================================================= */
 
 html[data-theme="dark glass"] .thryv-dashboard-header,
 html[data-theme="dark glass"] .thryv-metric-card,
@@ -1568,9 +1869,72 @@ html[data-theme="dark glass"] .thryv-search-box {
     border-color: rgba(255,255,255,.10);
 }
 
+html[data-theme="dark glass"] .thryv-dashboard-hero-quote {
+    color: #d8e2ef !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+}
+
+    html[data-theme="dark glass"] .thryv-dashboard-hero-quote strong {
+        color: #fff !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,.60) !important;
+    }
+
+html[data-theme="dark glass"] .thryv-dashboard-date-card span,
+html[data-theme="dark glass"] .thryv-dashboard-date-card small {
+    color: #b2c0d0 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,.45) !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-date-card strong {
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="dark glass"] .thryv-dashboard-date-card {
+    border-left-color: rgba(203,213,225,.22) !important;
+}
+
+/* Product Name — Dark Glass */
+html[data-theme="dark glass"] .thryv-employee-name,
+html[data-theme="dark glass"] .thryv-product-name,
+html[data-theme="dark glass"] .product-name {
+    color: #f8fafc !important;
+    font-weight: 900 !important;
+}
+
+html[data-theme="dark glass"] .thryv-metric-card.thryv-metric-blue {
+    background: radial-gradient(circle at 20% 10%,rgba(47,119,255,.13),transparent 38%), linear-gradient(145deg,rgba(8,43,98,.88),rgba(7,23,45,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-metric-card.thryv-metric-violet {
+    background: radial-gradient(circle at 20% 10%,rgba(139,92,246,.13),transparent 38%), linear-gradient(145deg,rgba(51,32,95,.88),rgba(21,23,46,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-metric-card.thryv-metric-cyan {
+    background: radial-gradient(circle at 20% 10%,rgba(14,165,233,.13),transparent 38%), linear-gradient(145deg,rgba(6,74,104,.88),rgba(9,34,57,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-metric-card.thryv-metric-purple {
+    background: radial-gradient(circle at 20% 10%,rgba(124,58,237,.13),transparent 38%), linear-gradient(145deg,rgba(50,33,92,.88),rgba(24,24,47,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-metric-card.thryv-metric-completed {
+    background: radial-gradient(circle at 20% 10%,rgba(16,185,129,.13),transparent 38%), linear-gradient(145deg,rgba(7,89,71,.88),rgba(7,59,51,.90)) !important;
+}
+
+html[data-theme="dark glass"] .thryv-metric-card.thryv-metric-pending {
+    background: radial-gradient(circle at 20% 10%,rgba(245,158,11,.13),transparent 38%), linear-gradient(145deg,rgba(108,61,8,.88),rgba(66,38,10,.90)) !important;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 1280px) {
+
     .thryv-dashboard-metrics {
-        grid-template-columns: repeat(3, minmax(0,1fr));
+        grid-template-columns: repeat(3,minmax(0,1fr)) !important;
     }
 
     .thryv-dashboard-hero-content {
@@ -1586,19 +1950,27 @@ html[data-theme="dark glass"] .thryv-search-box {
         display: none;
     }
 
-    .thryv-section-header {
-        align-items: flex-start;
-        flex-direction: column;
+    .thryv-section-card .thryv-section-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
     }
 
-    .thryv-section-actions {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
+    .thryv-section-card .thryv-section-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+    }
+}
+
+@media (max-width: 760px) {
+
+    .thryv-dashboard-metrics {
+        grid-template-columns: 1fr !important;
     }
 }
 
 @media (max-width: 680px) {
+
     .thryv-dashboard-header {
         min-height: 175px;
         padding: 18px 16px;
@@ -1621,21 +1993,17 @@ html[data-theme="dark glass"] .thryv-search-box {
         font-size: 12px;
     }
 
-    .thryv-dashboard-metrics {
-        grid-template-columns: 1fr;
-    }
-
     .thryv-section-actions {
-        display: grid;
-        grid-template-columns: 1fr;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
     }
 
     .thryv-filter-group,
     .thryv-search-box,
     .thryv-panel-icon-btn,
     .thryv-view-all-btn {
-        width: 100%;
-        min-width: 0;
+        width: 100% !important;
+        min-width: 0 !important;
     }
 
     .thryv-custom-table {
@@ -1682,12 +2050,40 @@ html[data-theme="dark glass"] .thryv-search-box {
                     position: absolute;
                     left: 8px;
                     width: 36%;
-                    color: #94a3b8;
+                    color: #64748b;
                     font-size: 8px;
                     font-weight: 900;
                     text-align: left;
                     text-transform: uppercase;
                 }
+
+    /* Mobile Light — mayor contraste */
+    html[data-theme="light"] .thryv-custom-table tbody tr {
+        background: rgba(255,255,255,.82) !important;
+        border-color: rgba(71,85,105,.20) !important;
+    }
+
+    html[data-theme="light"] .thryv-custom-table tbody td::before {
+        color: #1e293b !important;
+    }
+
+    html[data-theme="light"] .thryv-custom-table tbody td {
+        color: #1e293b !important;
+    }
+
+    /* Mobile Liquid Glass — mayor contraste */
+    html[data-theme="liquid glass"] .thryv-custom-table tbody tr {
+        background: rgba(255,255,255,.34) !important;
+        border-color: rgba(71,85,105,.20) !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-custom-table tbody td::before {
+        color: #1e293b !important;
+    }
+
+    html[data-theme="liquid glass"] .thryv-custom-table tbody td {
+        color: #1e293b !important;
+    }
 
     .weekly-evaluation-modal-backdrop {
         padding: 0 !important;
@@ -1705,661 +2101,4 @@ html[data-theme="dark glass"] .thryv-search-box {
     .weekly-evaluation-detail-grid {
         grid-template-columns: 1fr !important;
     }
-}
-
-.thryv-dashboard-page .thryv-section-card.assigned-section-card,
-.thryv-dashboard-page .thryv-section-card.completed-section-card,
-.thryv-dashboard-page .thryv-section-card.weekly-evaluations-section-card {
-    position: relative !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-top: 0 !important;
-    overflow: hidden !important;
-    border-radius: 16px !important;
-    box-shadow: 0 14px 34px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.025) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card.assigned-section-card {
-    border: 1px solid rgba(49,108,186,.45) !important;
-    background: radial-gradient(circle at 92% 0%, rgba(46,105,210,.08), transparent 35%), linear-gradient(180deg,#0b1d35 0%,#09182b 100%) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card.completed-section-card {
-    border: 1px solid rgba(12,155,118,.45) !important;
-    background: radial-gradient(circle at 7% 0%, rgba(10,174,126,.10), transparent 31%), linear-gradient(180deg,#08282f 0%,#081b29 100%) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card.weekly-evaluations-section-card {
-    border: 1px solid rgba(102,59,207,.50) !important;
-    background: radial-gradient(circle at 7% 0%, rgba(111,66,225,.12), transparent 32%), linear-gradient(180deg,#17193f 0%,#0c1930 100%) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-header {
-    min-height: 78px !important;
-    padding: 13px 16px 12px !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 16px !important;
-    border-bottom: 0 !important;
-    background: transparent !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-heading {
-    min-width: 285px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-icon {
-    width: 46px !important;
-    height: 46px !important;
-    flex: 0 0 46px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    color: #fff !important;
-    font-size: 19px !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-    border: 1px solid rgba(255,255,255,.08) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.24) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-icon-assigned {
-    background: linear-gradient(135deg,#0d56dc,#1777ff) !important;
-    box-shadow: 0 8px 20px rgba(23,119,255,.24) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-icon-completed {
-    background: linear-gradient(135deg,#047857,#10c98b) !important;
-    box-shadow: 0 8px 20px rgba(16,185,129,.22) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-icon-weekly {
-    background: linear-gradient(135deg,#5521bb,#854bf0) !important;
-    box-shadow: 0 8px 20px rgba(124,58,237,.23) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-header h3 {
-    margin: 0 !important;
-    color: #f8fafc !important;
-    font-size: 17px !important;
-    line-height: 1.08 !important;
-    font-weight: 800 !important;
-    letter-spacing: -.012em !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-header p {
-    margin: 4px 0 0 !important;
-    color: #93a4b8 !important;
-    font-size: 9.5px !important;
-    line-height: 1.3 !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-section-actions {
-    display: flex !important;
-    align-items: flex-end !important;
-    justify-content: flex-end !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 9px !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-filter-group {
-    min-width: 190px !important;
-    width: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 4px !important;
-}
-
-    .thryv-dashboard-page .thryv-section-card .thryv-filter-group label {
-        padding-left: 2px !important;
-        color: #95a6bb !important;
-        font-size: 8.5px !important;
-        line-height: 1 !important;
-        font-weight: 800 !important;
-    }
-
-.thryv-dashboard-page .thryv-section-card .thryv-filter-select,
-.thryv-dashboard-page .thryv-section-card .thryv-search-box {
-    height: 37px !important;
-    border-radius: 9px !important;
-    border: 1px solid rgba(82,108,145,.34) !important;
-    background: rgba(5,16,31,.76) !important;
-    color: #e2e8f0 !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.02) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-filter-select {
-    width: 100% !important;
-    padding: 0 11px !important;
-    font-size: 9.5px !important;
-    font-weight: 700 !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-search-box {
-    min-width: 245px !important;
-    width: 245px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 7px !important;
-    padding: 0 10px !important;
-}
-
-    .thryv-dashboard-page .thryv-section-card .thryv-search-box input {
-        color: #e2e8f0 !important;
-        font-size: 9.5px !important;
-    }
-
-.thryv-dashboard-page .thryv-section-card .thryv-clear-filter-btn {
-    height: 37px !important;
-    padding: 0 11px !important;
-    border-radius: 9px !important;
-    border: 1px solid rgba(148,163,184,.14) !important;
-    background: rgba(255,255,255,.04) !important;
-    color: #cbd5e1 !important;
-    font-size: 9.5px !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-panel-icon-btn {
-    width: 37px !important;
-    height: 37px !important;
-    flex: 0 0 37px !important;
-    border-radius: 9px !important;
-    border: 1px solid rgba(56,113,202,.42) !important;
-    background: rgba(30,78,153,.22) !important;
-    color: #b7d2ff !important;
-    font-size: 17px !important;
-}
-
-    .thryv-dashboard-page .thryv-section-card .thryv-panel-icon-btn.completed {
-        border-color: rgba(16,185,129,.32) !important;
-        background: rgba(16,185,129,.11) !important;
-        color: #81e6bf !important;
-    }
-
-    .thryv-dashboard-page .thryv-section-card .thryv-panel-icon-btn.weekly {
-        border-color: rgba(124,58,237,.34) !important;
-        background: rgba(124,58,237,.12) !important;
-        color: #c9b7ff !important;
-    }
-
-.thryv-dashboard-page .thryv-section-card .thryv-view-all-btn {
-    min-width: 100px !important;
-    height: 37px !important;
-    padding: 0 15px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    border-radius: 999px !important;
-    border: 1px solid rgba(255,255,255,.07) !important;
-    color: #fff !important;
-    font-size: 9.5px !important;
-    font-weight: 900 !important;
-    white-space: nowrap !important;
-}
-
-    .thryv-dashboard-page .thryv-section-card .thryv-view-all-btn.assigned {
-        background: linear-gradient(135deg,#d95308,#ff7213) !important;
-        box-shadow: 0 7px 18px rgba(255,90,19,.23) !important;
-    }
-
-    .thryv-dashboard-page .thryv-section-card .thryv-view-all-btn.completed {
-        background: linear-gradient(135deg,#047c5a,#10c98b) !important;
-        box-shadow: 0 7px 18px rgba(16,185,129,.20) !important;
-    }
-
-    .thryv-dashboard-page .thryv-section-card .thryv-view-all-btn.weekly {
-        background: linear-gradient(135deg,#6021ca,#813df0) !important;
-        box-shadow: 0 7px 18px rgba(124,58,237,.22) !important;
-    }
-
-.thryv-dashboard-page .thryv-section-card .thryv-table-wrapper {
-    width: auto !important;
-    max-width: none !important;
-    margin: 0 14px 13px !important;
-    padding: 0 !important;
-    overflow-x: auto !important;
-    border: 1px solid rgba(77,105,143,.30) !important;
-    border-radius: 10px !important;
-    background: rgba(3,12,24,.12) !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-custom-table {
-    width: 100% !important;
-    min-width: 900px !important;
-    border-collapse: collapse !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-}
-
-    .thryv-dashboard-page .thryv-section-card .thryv-custom-table thead th {
-        padding: 11px 12px !important;
-        background: rgba(5,16,30,.92) !important;
-        border-bottom: 1px solid rgba(89,116,151,.27) !important;
-        color: #cbd5e1 !important;
-        font-size: 8.5px !important;
-        font-weight: 850 !important;
-        text-transform: uppercase !important;
-    }
-
-    .thryv-dashboard-page .thryv-section-card .thryv-custom-table tbody td {
-        padding: 10px 12px !important;
-        color: #dbe5ef !important;
-        border-bottom: 1px solid rgba(88,113,148,.09) !important;
-        font-size: 9.5px !important;
-    }
-
-.thryv-dashboard-page .thryv-section-card .thryv-empty-row {
-    padding: 0 !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-empty-state {
-    min-height: 82px !important;
-    padding: 13px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 3px !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-empty-icon {
-    width: 29px !important;
-    height: 29px !important;
-    border-radius: 50% !important;
-    font-size: 12px !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-empty-state strong {
-    color: #d4deea !important;
-    font-size: 9.5px !important;
-}
-
-.thryv-dashboard-page .thryv-section-card .thryv-empty-state small {
-    color: #77899e !important;
-    font-size: 8.5px !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-card.assigned-section-card {
-    border-color: rgba(49,108,186,.45) !important;
-    background: radial-gradient(circle at 92% 0%, rgba(46,105,210,.08), transparent 35%), linear-gradient(180deg,rgba(11,29,53,.90),rgba(9,24,43,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-card.completed-section-card {
-    border-color: rgba(12,155,118,.45) !important;
-    background: radial-gradient(circle at 7% 0%, rgba(10,174,126,.10), transparent 31%), linear-gradient(180deg,rgba(8,40,47,.90),rgba(8,27,41,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-section-card.weekly-evaluations-section-card {
-    border-color: rgba(102,59,207,.50) !important;
-    background: radial-gradient(circle at 7% 0%, rgba(111,66,225,.12), transparent 32%), linear-gradient(180deg,rgba(23,25,63,.90),rgba(12,25,48,.90)) !important;
-}
-
-@media (max-width: 1280px) {
-    .thryv-dashboard-page .thryv-section-card .thryv-section-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-    }
-
-    .thryv-dashboard-page .thryv-section-card .thryv-section-actions {
-        width: 100% !important;
-        justify-content: flex-start !important;
-        flex-wrap: wrap !important;
-    }
-}
-
-.thryv-dashboard-page .thryv-dashboard-metrics {
-    display: grid !important;
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-    gap: 12px !important;
-    width: 100% !important;
-    margin: 0 !important;
-}
-
-.thryv-dashboard-page .thryv-metric-card {
-    position: relative !important;
-    min-width: 0 !important;
-    min-height: 118px !important;
-    padding: 16px 14px !important;
-    display: grid !important;
-    grid-template-columns: 48px minmax(0,1fr) 17px !important;
-    align-items: center !important;
-    gap: 11px !important;
-    overflow: hidden !important;
-    border-radius: 15px !important;
-    border: 1px solid rgba(148,163,184,.18) !important;
-    box-shadow: 0 12px 28px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card::before {
-        content: "" !important;
-        position: absolute !important;
-        inset: 0 !important;
-        pointer-events: none !important;
-        background: linear-gradient(135deg, rgba(255,255,255,.025), transparent 42%) !important;
-    }
-
-    .thryv-dashboard-page .thryv-metric-card::after {
-        content: "›" !important;
-        position: absolute !important;
-        top: 9px !important;
-        right: 10px !important;
-        width: 20px !important;
-        height: 20px !important;
-        display: grid !important;
-        place-items: center !important;
-        border-radius: 50% !important;
-        background: rgba(255,255,255,.045) !important;
-        color: rgba(255,255,255,.60) !important;
-        font-size: 15px !important;
-        line-height: 1 !important;
-        font-weight: 700 !important;
-    }
-
-.thryv-dashboard-page .thryv-metric-icon {
-    position: relative !important;
-    z-index: 2 !important;
-    width: 48px !important;
-    height: 48px !important;
-    flex: 0 0 48px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    color: #fff !important;
-    font-size: 20px !important;
-    font-weight: 900 !important;
-    border: 1px solid rgba(255,255,255,.10) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 18px rgba(0,0,0,.22) !important;
-}
-
-.thryv-dashboard-page .thryv-metric-content {
-    position: relative !important;
-    z-index: 2 !important;
-    min-width: 0 !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-content span {
-        display: block !important;
-        min-height: 24px !important;
-        color: #cbd5e1 !important;
-        font-size: 10px !important;
-        line-height: 1.16 !important;
-        font-weight: 600 !important;
-    }
-
-    .thryv-dashboard-page .thryv-metric-content strong {
-        display: block !important;
-        margin: 3px 0 6px !important;
-        color: #fff !important;
-        font-size: 25px !important;
-        line-height: 1 !important;
-        font-weight: 900 !important;
-        letter-spacing: -.02em !important;
-    }
-
-    .thryv-dashboard-page .thryv-metric-content small {
-        display: block !important;
-        color: #8898aa !important;
-        font-size: 8.5px !important;
-        line-height: 1.15 !important;
-    }
-
-.thryv-dashboard-page .thryv-mini-bars {
-    position: relative !important;
-    z-index: 2 !important;
-    height: 30px !important;
-    align-self: end !important;
-    display: flex !important;
-    align-items: flex-end !important;
-    gap: 3px !important;
-}
-
-    .thryv-dashboard-page .thryv-mini-bars i {
-        width: 4px !important;
-        border-radius: 999px !important;
-        background: currentColor !important;
-    }
-
-        .thryv-dashboard-page .thryv-mini-bars i:nth-child(1) {
-            height: 10px !important;
-        }
-
-        .thryv-dashboard-page .thryv-mini-bars i:nth-child(2) {
-            height: 19px !important;
-        }
-
-        .thryv-dashboard-page .thryv-mini-bars i:nth-child(3) {
-            height: 29px !important;
-        }
-
-.thryv-dashboard-page .thryv-metric-card.thryv-metric-blue {
-    color: #2f77ff !important;
-    border-color: rgba(47,119,255,.46) !important;
-    background: radial-gradient(circle at 20% 10%, rgba(47,119,255,.11), transparent 38%), linear-gradient(145deg,#082b62 0%,#07172d 58%,#07111f 100%) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-blue .thryv-metric-icon {
-        background: linear-gradient(135deg,#1153d5,#2f77ff) !important;
-        box-shadow: 0 8px 20px rgba(47,119,255,.25) !important;
-    }
-
-.thryv-dashboard-page .thryv-metric-card.thryv-metric-violet {
-    color: #8f63ff !important;
-    border-color: rgba(124,58,237,.44) !important;
-    background: radial-gradient(circle at 20% 10%, rgba(139,92,246,.11), transparent 38%), linear-gradient(145deg,#33205f 0%,#15172e 58%,#101426 100%) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-violet .thryv-metric-icon {
-        background: linear-gradient(135deg,#6525d2,#996cff) !important;
-        box-shadow: 0 8px 20px rgba(124,58,237,.24) !important;
-    }
-
-.thryv-dashboard-page .thryv-metric-card.thryv-metric-cyan {
-    color: #16b8ff !important;
-    border-color: rgba(14,165,233,.46) !important;
-    background: radial-gradient(circle at 20% 10%, rgba(14,165,233,.11), transparent 38%), linear-gradient(145deg,#064a68 0%,#092239 58%,#071522 100%) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-cyan .thryv-metric-icon {
-        background: linear-gradient(135deg,#03699f,#1ebcff) !important;
-        box-shadow: 0 8px 20px rgba(14,165,233,.23) !important;
-    }
-
-.thryv-dashboard-page .thryv-metric-card.thryv-metric-purple {
-    color: #9169ff !important;
-    border-color: rgba(109,40,217,.46) !important;
-    background: radial-gradient(circle at 20% 10%, rgba(124,58,237,.12), transparent 38%), linear-gradient(145deg,#32215c 0%,#18182f 58%,#111426 100%) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-purple .thryv-metric-icon {
-        background: linear-gradient(135deg,#5720b3,#8958f2) !important;
-        box-shadow: 0 8px 20px rgba(124,58,237,.23) !important;
-    }
-
-.thryv-dashboard-page .thryv-metric-card.thryv-metric-completed {
-    color: #16d98b !important;
-    border-color: rgba(16,185,129,.48) !important;
-    background: radial-gradient(circle at 20% 10%, rgba(16,185,129,.12), transparent 38%), linear-gradient(145deg,#075947 0%,#073b33 58%,#06261f 100%) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-completed .thryv-metric-icon {
-        background: linear-gradient(135deg,#047857,#12c98a) !important;
-        box-shadow: 0 8px 20px rgba(16,185,129,.23) !important;
-    }
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-completed .thryv-metric-content strong {
-        color: #31df9c !important;
-    }
-
-.thryv-dashboard-page .thryv-metric-card.thryv-metric-pending {
-    color: #f8a900 !important;
-    border-color: rgba(245,158,11,.56) !important;
-    background: radial-gradient(circle at 20% 10%, rgba(245,158,11,.12), transparent 38%), linear-gradient(145deg,#6c3d08 0%,#42260a 58%,#281707 100%) !important;
-}
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-pending .thryv-metric-icon {
-        background: linear-gradient(135deg,#b96700,#ffb313) !important;
-        box-shadow: 0 8px 20px rgba(245,158,11,.23) !important;
-    }
-
-    .thryv-dashboard-page .thryv-metric-card.thryv-metric-pending .thryv-metric-content strong {
-        color: #ffbd1f !important;
-    }
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-blue {
-    background: radial-gradient(circle at 20% 10%, rgba(47,119,255,.13), transparent 38%), linear-gradient(145deg,rgba(8,43,98,.88),rgba(7,23,45,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-violet {
-    background: radial-gradient(circle at 20% 10%, rgba(139,92,246,.13), transparent 38%), linear-gradient(145deg,rgba(51,32,95,.88),rgba(21,23,46,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-cyan {
-    background: radial-gradient(circle at 20% 10%, rgba(14,165,233,.13), transparent 38%), linear-gradient(145deg,rgba(6,74,104,.88),rgba(9,34,57,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-purple {
-    background: radial-gradient(circle at 20% 10%, rgba(124,58,237,.13), transparent 38%), linear-gradient(145deg,rgba(50,33,92,.88),rgba(24,24,47,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-completed {
-    background: radial-gradient(circle at 20% 10%, rgba(16,185,129,.13), transparent 38%), linear-gradient(145deg,rgba(7,89,71,.88),rgba(7,59,51,.90)) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-page .thryv-metric-card.thryv-metric-pending {
-    background: radial-gradient(circle at 20% 10%, rgba(245,158,11,.13), transparent 38%), linear-gradient(145deg,rgba(108,61,8,.88),rgba(66,38,10,.90)) !important;
-}
-
-@media (max-width: 1280px) {
-    .thryv-dashboard-page .thryv-dashboard-metrics {
-        grid-template-columns: repeat(3, minmax(0,1fr)) !important;
-    }
-}
-
-@media (max-width: 760px) {
-    .thryv-dashboard-page .thryv-dashboard-metrics {
-        grid-template-columns: 1fr !important;
-    }
-}
-
-.thryv-dashboard-hero-quote {
-    color: #c8d4e2 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
-}
-
-    .thryv-dashboard-hero-quote strong {
-        color: #f8fafc !important;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, .42);
-    }
-
-.thryv-dashboard-date-card span,
-.thryv-dashboard-date-card small {
-    color: #9fb0c4 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .32);
-}
-
-.thryv-dashboard-date-card strong {
-    color: #ffffff !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, .40);
-}
-
-html[data-theme="light"] .thryv-dashboard-hero-quote {
-    color: #475569 !important;
-    text-shadow: none !important;
-}
-
-    html[data-theme="light"] .thryv-dashboard-hero-quote strong {
-        color: #172033 !important;
-        text-shadow: none !important;
-    }
-
-html[data-theme="light"] .thryv-dashboard-date-card span,
-html[data-theme="light"] .thryv-dashboard-date-card small {
-    color: #64748b !important;
-    text-shadow: none !important;
-}
-
-html[data-theme="light"] .thryv-dashboard-date-card strong {
-    color: #0f172a !important;
-    text-shadow: none !important;
-}
-
-html[data-theme="light"] .thryv-dashboard-date-card {
-    border-left-color: rgba(71, 85, 105, .24) !important;
-}
-
-html[data-theme="dark"] .thryv-dashboard-hero-quote {
-    color: #c8d4e2 !important;
-}
-
-    html[data-theme="dark"] .thryv-dashboard-hero-quote strong {
-        color: #f8fafc !important;
-    }
-
-html[data-theme="dark"] .thryv-dashboard-date-card span,
-html[data-theme="dark"] .thryv-dashboard-date-card small {
-    color: #9fb0c4 !important;
-}
-
-html[data-theme="dark"] .thryv-dashboard-date-card strong {
-    color: #ffffff !important;
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-hero-quote {
-    color: #334155 !important;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, .45) !important;
-}
-
-    html[data-theme="liquid glass"] .thryv-dashboard-hero-quote strong {
-        color: #111827 !important;
-        text-shadow: 0 1px 1px rgba(255, 255, 255, .55) !important;
-    }
-
-html[data-theme="liquid glass"] .thryv-dashboard-date-card span,
-html[data-theme="liquid glass"] .thryv-dashboard-date-card small {
-    color: #475569 !important;
-    text-shadow: none !important;
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-date-card strong {
-    color: #0f172a !important;
-    text-shadow: 0 1px 1px rgba(255,255,255,.35) !important;
-}
-
-html[data-theme="liquid glass"] .thryv-dashboard-date-card {
-    border-left-color: rgba(51, 65, 85, .22) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-hero-quote {
-    color: #d8e2ef !important;
-    text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
-}
-
-    html[data-theme="dark glass"] .thryv-dashboard-hero-quote strong {
-        color: #ffffff !important;
-        text-shadow: 0 1px 3px rgba(0,0,0,.60) !important;
-    }
-
-html[data-theme="dark glass"] .thryv-dashboard-date-card span,
-html[data-theme="dark glass"] .thryv-dashboard-date-card small {
-    color: #b2c0d0 !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,.45) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-date-card strong {
-    color: #ffffff !important;
-    text-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
-}
-
-html[data-theme="dark glass"] .thryv-dashboard-date-card {
-    border-left-color: rgba(203, 213, 225, .22) !important;
 }
