@@ -260,11 +260,11 @@ else
 
                             <textarea rows="8"
                                       placeholder="Example:
-                                                                                    100234, 24001
-                                                                                    100235, 24002
-                                                                                    100236, 24003"
+                                                                                                100234, 24001
+                                                                                                100235, 24002
+                                                                                                100236, 24003"
                                       @bind="TextoMasivo">
-                                                                </textarea>
+                                                                            </textarea>
 
                             <button type="button"
                                     class="btn-dark"
@@ -303,7 +303,7 @@ else
                         <label>Filter by assignment</label>
                         <select @bind="FiltroAssignmentId" @bind:after="AplicarFiltro">
                             <option value="">All assignments</option>
-                            @foreach (var item in Asignaciones)
+                            @foreach (var item in AsignacionesConLateWork)
                             {
                                 <option value="@item.Id">@item.DisplayName</option>
                             }
@@ -774,6 +774,11 @@ else
 
     private List<AssignmentComboItem> Asignaciones { get; set; } = new();
 
+    private IEnumerable<AssignmentComboItem> AsignacionesConLateWork =>
+        Asignaciones
+            .Where(x => LateWorks.Any(lw => lw.AssignmentId == x.Id))
+            .OrderBy(x => x.DisplayName);
+
     private List<LateWorkListItem> LateWorks { get; set; } = new();
 
     private List<LateWorkListItem> LateWorksFiltrados { get; set; } = new();
@@ -1075,6 +1080,88 @@ else
                 CurrentEmployeeId.HasValue &&
                 CurrentEmployeeId.Value != Guid.Empty &&
                 item.EmployeeId == CurrentEmployeeId.Value;
+        }
+
+        // A supervisor/admin with global scope keeps the complete view.
+        // A regular employee only sees Late Work groups in which at least
+        // one assignment belongs to them. If the same Late Work ID + Client ID
+        // is shared by several assignments, all assignments in that shared
+        // group remain visible so the employee can follow the overall progress.
+        if (!Scope.ViewAllEmployeeTypes)
+        {
+            if (!CurrentEmployeeId.HasValue ||
+                CurrentEmployeeId.Value == Guid.Empty)
+            {
+                LateWorks.Clear();
+            }
+            else
+            {
+                var clavesDelUsuario = LateWorks
+                    .Where(x => x.EsAsignacionPropia)
+                    .Select(x => (x.LateWorkId, x.ClientId))
+                    .Distinct()
+                    .ToHashSet();
+
+                LateWorks = LateWorks
+                    .Where(x => clavesDelUsuario.Contains((x.LateWorkId, x.ClientId)))
+                    .ToList();
+            }
+        }
+
+        // Rebuild progress using only groups that are actually visible to this user.
+        ProgresoGlobalLateWork.Clear();
+
+        var clavesFinalesVisibles = LateWorks
+            .Select(x => (x.LateWorkId, x.ClientId))
+            .Distinct()
+            .ToHashSet();
+
+        if (clavesFinalesVisibles.Any())
+        {
+            var lateWorkIdsFinales = clavesFinalesVisibles
+                .Select(x => x.LateWorkId)
+                .Distinct()
+                .ToList();
+
+            var clientIdsFinales = clavesFinalesVisibles
+                .Select(x => x.ClientId)
+                .Distinct()
+                .ToList();
+
+            var progresoFinalRows = await db.LateWorkActivities
+                .AsNoTracking()
+                .Where(x =>
+                    lateWorkIdsFinales.Contains(x.LateWorkId) &&
+                    clientIdsFinales.Contains(x.ClientId) &&
+                    x.Assignment != null &&
+                    !x.Assignment.Finalizado &&
+                    x.Assignment.Libro != null &&
+                    !x.Assignment.Libro.Finalizado)
+                .Select(x => new
+                {
+                    x.LateWorkId,
+                    x.ClientId,
+                    x.Completed
+                })
+                .ToListAsync();
+
+            ProgresoGlobalLateWork = progresoFinalRows
+                .Where(x => clavesFinalesVisibles.Contains((x.LateWorkId, x.ClientId)))
+                .GroupBy(x => new { x.LateWorkId, x.ClientId })
+                .ToDictionary(
+                    g => (g.Key.LateWorkId, g.Key.ClientId),
+                    g => (
+                        Completed: g.Count(x => x.Completed),
+                        Total: g.Count()));
+        }
+
+        // If the selected assignment is no longer available in the visible
+        // Late Work list, reset the assignment filter automatically.
+        if (!string.IsNullOrWhiteSpace(FiltroAssignmentId) &&
+            Guid.TryParse(FiltroAssignmentId, out var filtroAssignmentGuid) &&
+            !LateWorks.Any(x => x.AssignmentId == filtroAssignmentGuid))
+        {
+            FiltroAssignmentId = null;
         }
 
         AplicarFiltro();
